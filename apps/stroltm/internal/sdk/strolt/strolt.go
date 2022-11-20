@@ -7,7 +7,7 @@ import (
 )
 
 type Sdk struct {
-	client *client.SwaggerExampleAPI
+	client *client.StroltAPI
 }
 
 func New(host string) *Sdk {

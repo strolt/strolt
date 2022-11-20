@@ -3,15 +3,15 @@ package api
 import (
 	"net/http"
 
-	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
 	"github.com/strolt/strolt/apps/stroltm/internal/ui"
 )
 
 // @title           Strolt Manager API
 // @version         1.0
 // @BasePath  /
-// @securityDefinitions.basic  BasicAuth
+// @securityDefinitions.basic  BasicAuth.
 func Start() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

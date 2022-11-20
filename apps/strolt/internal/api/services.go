@@ -55,7 +55,7 @@ type servicesResponse struct {
 func servicesHandler() http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(middleware.Compress(5))
+	r.Use(middleware.Compress(5)) //nolint:gomnd
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		c := config.Get()

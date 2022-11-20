@@ -58,31 +58,30 @@ import (
 // 		cancel()
 // 	}
 
-// 	<-idleConnectionsClosed
-// }
+//		<-idleConnectionsClosed
+//	}
 
-// nolint
 func Serve(ctx context.Context, cancel func()) {
 	// The HTTP Server
-	server := &http.Server{Addr: "0.0.0.0:3333", Handler: service()}
+	server := &http.Server{Addr: "0.0.0.0:3333", Handler: service()} //nolint
 
 	// Server run context
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
 
-	go func() {
+	go func() { //nolint
 		// fmt.Println("Serve go func...")
 
 		<-ctx.Done()
 		// fmt.Println("Serve go func <-ctx.Done()")
 
 		// Shutdown signal with grace period of 30 seconds
-		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second) //nolint:gomnd
+		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second) //nolint
 
 		go func() {
 			// fmt.Println("Serve go func + go func")
 			<-shutdownCtx.Done()
 			// fmt.Println("Serve go func + go func", <-shutdownCtx.Done())
-			if shutdownCtx.Err() == context.DeadlineExceeded {
+			if shutdownCtx.Err() == context.DeadlineExceeded { //nolint
 				log.Fatal("graceful shutdown timed out.. forcing exit.")
 			}
 		}()
@@ -106,13 +105,13 @@ func Serve(ctx context.Context, cancel func()) {
 	// Wait for server context to be stopped
 	<-serverCtx.Done()
 	// fmt.Println("<-serverCtx.Done()")
-}
+} //nolint
 
 // @title           Strolt API
 // @version         1.0
 // @BasePath  /
 // @securityDefinitions.basic  BasicAuth
-// nolint
+
 func service() http.Handler {
 	r := chi.NewRouter()
 
@@ -120,7 +119,7 @@ func service() http.Handler {
 	r.Use(middleware.Logger)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("sup"))
+		w.Write([]byte("sup")) //nolint
 	})
 
 	r.Mount("/metrics", promhttp.Handler())
@@ -149,7 +148,7 @@ func service() http.Handler {
 		// up to the developer, as some code blocks are preemptable, and others are not.
 		time.Sleep(5 * time.Second) //nolint:gomnd
 
-		w.Write([]byte(fmt.Sprintf("all done.\n")))
+		w.Write([]byte(fmt.Sprintf("all done.\n"))) //nolint
 	})
 
 	docgen.PrintRoutes(r)
