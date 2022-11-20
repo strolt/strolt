@@ -49,11 +49,11 @@ jobs:
         run: |
           echo ${GITHUB_PACKAGE_TOKEN} | docker login ghcr.io -u ${USERNAME} --password-stdin
 
-      # - name: Login to Docker Hub
-      #   env:
-      #     DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
-      #   run: |
-      #     echo ${DOCKER_HUB_TOKEN} | docker login -u strolt --password-stdin
+      - name: Login to Docker Hub
+        env:
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+        run: |
+          echo ${DOCKER_HUB_TOKEN} | docker login -u strolt --password-stdin
 
       - name: deploy tagged (latest) to ghcr.io and dockerhub
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -67,7 +67,6 @@ jobs:
               --build-arg GITHUB_SHA=${GITHUB_SHA} --build-arg GIT_BRANCH=${ref} --build-arg GITHUB_REF=${GITHUB_REF} \
               --platform linux/amd64,linux/arm/v7,linux/arm64 \
               -t ghcr.io/strolt/strolt:${ref} -t ghcr.io/strolt/strolt:latest \
+              -t strolt/strolt:${ref} -t strolt/strolt:latest \
               -f apps/strolt/docker/Dockerfile \
               ./apps/strolt
-              #  \
-              # -t strolt/strolt:${ref} -t strolt/strolt:latest .
