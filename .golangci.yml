@@ -1,0 +1,59 @@
+run:
+  go: "1.19.2"
+
+linters:
+  enable-all: true
+  disable:
+    - wrapcheck
+    - structcheck
+    - golint
+    - nosnakecase
+    - exhaustivestruct
+    - scopelint
+    - maligned
+    - deadcode
+    - ifshort
+    - varcheck
+    - interfacer
+    - rowserrcheck
+    - sqlclosecheck
+    - wastedassign
+    - varnamelen
+    - tagliatelle
+    - paralleltest
+    - gci
+    - cyclop
+    - gocyclo
+    - gocognit
+    - gofumpt
+    - nestif
+    - lll
+    - funlen
+    - gochecknoglobals
+    - interfacebloat
+    - exhaustruct
+    - godox
+    - goerr113
+    - testpackage
+    - dupl
+
+linters-settings:
+  ireturn:
+    allow:
+      - anon
+      - error
+      - empty
+      - stdlib
+      - DriverDestinationInterface
+      - DriverNotificationInterface
+      - DriverSourceInterface
+  gosec:
+    excludes:
+      - G204
+  gomnd:
+    ignored-numbers:
+      - "0o700"
+    ignored-functions:
+      - ParseInt
+  nlreturn:
+    block-size: 2

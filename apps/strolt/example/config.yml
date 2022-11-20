@@ -1,0 +1,35 @@
+watchChanges: true # app will stop if config or secret files will changed
+
+name: strolt
+
+tasks:
+  task_local:
+    source: source_local
+    destinations:
+      - destination_local
+    notifications:
+      - notification_slack
+    schedule:
+      backup: "*/1 * * * *"
+      forget: "*/1 * * * *"
+      prune: "*/1 * * * *"
+
+sources:
+  source_local:
+    driver: local # [local, mongodb, mysql, postgresql]
+    config:
+      path: "./example/source"
+
+destinations:
+  destination_local:
+    driver: local # [local, restic]
+    config:
+      path: "./example/destination"
+
+# notifications:
+#   slack:
+#     driver: slack # [slack, telegram]
+
+
+extendConfig:
+  - ./notifications.yml

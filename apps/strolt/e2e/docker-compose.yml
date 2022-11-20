@@ -1,0 +1,90 @@
+services:
+  minio:
+    image: minio/minio:RELEASE.2022-08-13T21-54-44Z
+    command: server --address 0.0.0.0:9000 --console-address 0.0.0.0:9001 /data
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - minio:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    networks:
+      - strolt
+
+  postgres:
+    image: postgres:13.2-alpine
+    environment:
+      TZ: UTC
+      POSTGRES_DB: strolt
+      POSTGRES_PASSWORD: strolt
+      POSTGRES_USER: strolt
+    ports:
+      - 9002:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - strolt
+
+  mongo:
+    image: mongo:4.4.15
+    volumes:
+        - mongo:/data/db
+    ports:
+      - 9003:27017
+    environment:
+      - PUID=1000
+      - PGID=1000
+    networks:
+      - strolt
+
+  strolt:
+    image: strolt/strolt:e2e
+    volumes:
+      - ./strolt.yml:/app/strolt/config.yml:ro
+      - ./.strolt:/app/strolt/.strolt:ro
+      - ./.temp/input:/e2e/input
+    networks:
+      - strolt
+
+  mariadb:
+    image: mariadb:10.8.3
+    environment:
+      TZ: UTC
+      MYSQL_DATABASE: strolt
+      MYSQL_USER: strolt
+      MYSQL_PASSWORD: strolt
+      MYSQL_ROOT_PASSWORD: strolt
+    ports:
+      - 9004:3306
+    volumes:
+      - mariadb:/var/lib/mysql
+    networks:
+      - strolt
+
+  mysql:
+    image: mysql:8.0.30
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    environment:
+      TZ: UTC
+      MYSQL_DATABASE: strolt
+      MYSQL_USER: strolt
+      MYSQL_PASSWORD: strolt
+      MYSQL_ROOT_PASSWORD: strolt
+    ports:
+      - 9005:3306
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - strolt
+
+networks:
+  strolt:
+
+volumes:
+  minio:
+  postgres:
+  mongo:
+  mariadb:
+  mysql:

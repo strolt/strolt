@@ -1,0 +1,59 @@
+services:
+  e2e:
+    pg-t:
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: t
+      destinations:
+        restic-pg-t:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-pg-t"
+    pg-d:
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: d
+      destinations:
+        restic-pg-d:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-pg-d"
+    pg-c:
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: c
+      destinations:
+        restic-pg-c:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-pg-c"
+    pg-p:
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: p
+      destinations:
+        restic-pg-p:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-pg-p"
+

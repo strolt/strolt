@@ -1,0 +1,12 @@
+definitions:
+  destinations:
+    restic_base:
+      driver: restic
+      config:
+        keep:
+          last: 3
+      env:
+        RESTIC_PASSWORD: "{{.RESTIC_PASSWORD}}"
+        RESTIC_REPOSITORY: "s3:http://minio:9000/restic-local"
+        AWS_ACCESS_KEY_ID: "{{.RESTIC_AWS_ACCESS_KEY_ID}}"
+        AWS_SECRET_ACCESS_KEY: "{{.RESTIC_AWS_SECRET_ACCESS_KEY}}"

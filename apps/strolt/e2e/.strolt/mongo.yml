@@ -1,0 +1,13 @@
+services:
+  e2e:
+    mongo:
+      source:
+        driver: mongodb
+        config:
+          host: mongo
+          database: strolt
+      destinations:
+        restic-mongo:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-mongo"

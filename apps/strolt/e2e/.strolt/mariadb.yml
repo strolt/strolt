@@ -1,0 +1,15 @@
+services:
+  e2e:
+    mariadb:
+      source:
+        driver: mysql
+        config:
+          host: mariadb
+          database: "{{.MYSQL_MARIADB_DATABASE}}"
+          username: "{{.MYSQL_MARIADB_USER}}"
+          password: "{{.MYSQL_MARIADB_PASSWORD}}"
+      destinations:
+        restic-mariadb:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-mariadb"

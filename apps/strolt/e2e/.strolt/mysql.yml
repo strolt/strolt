@@ -1,0 +1,15 @@
+services:
+  e2e:
+    mysql:
+      source:
+        driver: mysql
+        config:
+          host: mysql
+          database: "{{.MYSQL_DATABASE}}"
+          username: "{{.MYSQL_USER}}"
+          password: "{{.MYSQL_PASSWORD}}"
+      destinations:
+        restic-mysql:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-mysql"

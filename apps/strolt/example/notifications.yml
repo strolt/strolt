@@ -1,0 +1,9 @@
+notifications:
+  notification_slack:
+    driver: slack
+    config:
+      teamId: "{{.NOTIFICATIONS_SLACK_TEAM_ID}}"
+      botId: "{{.NOTIFICATIONS_SLACK_BOT_ID}}"
+      hookId: "{{.NOTIFICATIONS_SLACK_HOOK_ID}}"
+
+secretsFile: ./notifications.secrets.yml

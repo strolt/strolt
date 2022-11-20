@@ -1,0 +1,17 @@
+name: strolt-e2e
+
+timezone: UTC
+
+extends:
+  secrets:
+    - .strolt/secrets.yml
+  configs:
+    - .strolt/base.yml
+
+    - .strolt/local.yml
+    - .strolt/prune.yml
+
+    - .strolt/pg.yml
+    - .strolt/mongo.yml
+    - .strolt/mysql.yml
+    - .strolt/mariadb.yml
