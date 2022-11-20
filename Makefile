@@ -37,17 +37,25 @@ swagger: swagger-strolt swagger-generate-client swagger-strolt-manager
 
 .PHONY: lint-strolt
 lint-strolt: .install-linter
-	cd ./apps/strolt && $(GOLANGCI_LINT) run ./... --config=${PROJECT_DIR}/.golangci.yml
+	cd ./apps/strolt && $(GOLANGCI_LINT) run ./...
 
 .PHONY: lint-fast-strolt
 lint-fast-strolt: .install-linter
-	cd ./apps/strolt && $(GOLANGCI_LINT) run ./... --fast --config=${PROJECT_DIR}/.golangci.yml
+	cd ./apps/strolt && $(GOLANGCI_LINT) run ./... --fast
+
+.PHONY: lint-stroltm
+lint-stroltm: .install-linter
+	cd ./apps/stroltm && $(GOLANGCI_LINT) run ./...
+
+.PHONY: lint-fast-stroltm
+lint-fast-stroltm: .install-linter
+	cd ./apps/stroltm && $(GOLANGCI_LINT) run ./... --fast
 
 .PHONY: lint
-lint: lint-strolt
+lint: lint-strolt lint-stroltm
 
 .PHONY: lint-fast
-lint-fast: lint-fast-strolt
+lint-fast: lint-fast-strolt lint-fast-stroltm
 
 .PHONY: test
 test:
