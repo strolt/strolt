@@ -1,5 +1,5 @@
 # Mysql (mariadb-dump, mariadb-import, mysqldump, mysqlimport)
-apk add --no-cache mysql-client
+apk add --no-cache mysql-client=10.6.11-r0
 
 rm /usr/bin/mariadb-access
 rm /usr/bin/mariadb-admin

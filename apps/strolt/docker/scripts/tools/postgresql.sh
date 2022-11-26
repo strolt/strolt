@@ -1,5 +1,5 @@
 # Postgresql (psql, pg_dump, pg_restore)
-apk add --no-cache postgresql14-client
+apk add --no-cache postgresql15-client=15.1-r0
 
 rm /usr/bin/clusterdb
 rm /usr/bin/createdb

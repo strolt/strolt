@@ -1,4 +1,4 @@
-FROM alpine:edge AS base
+FROM alpine:3.17.0 AS base
 WORKDIR /app/strolt
 COPY ./docker/scripts scripts
 RUN sh ./scripts/install.sh && rm -rf ./scripts
