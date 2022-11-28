@@ -1,0 +1,22 @@
+{
+  "title": {
+    "message": "Strolt",
+    "description": "The title in the navbar"
+  },
+  "item.label.Docs": {
+    "message": "Docs",
+    "description": "Navbar item with label Docs"
+  },
+  "item.label.API/Strolt": {
+    "message": "API/Strolt",
+    "description": "Navbar item with label API/Strolt"
+  },
+  "item.label.API/Stroltm": {
+    "message": "API/Stroltm",
+    "description": "Navbar item with label API/Stroltm"
+  },
+  "item.label.GitHub": {
+    "message": "GitHub",
+    "description": "Navbar item with label GitHub"
+  }
+}

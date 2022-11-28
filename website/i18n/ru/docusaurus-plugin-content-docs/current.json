@@ -1,0 +1,54 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Tutorial - Basics": {
+    "message": "Tutorial - Basics",
+    "description": "The label for category Tutorial - Basics in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Tutorial - Basics.link.generated-index.description": {
+    "message": "5 minutes to learn the most important Docusaurus concepts.",
+    "description": "The generated-index page description for category Tutorial - Basics in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Tutorial - Extras": {
+    "message": "Tutorial - Extras",
+    "description": "The label for category Tutorial - Extras in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.strolt": {
+    "message": "strolt",
+    "description": "The label for category strolt in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Configuration": {
+    "message": "Configuration",
+    "description": "The label for category Configuration in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Drivers": {
+    "message": "Drivers",
+    "description": "The label for category Drivers in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Source": {
+    "message": "Source",
+    "description": "The label for category Source in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Source.link.generated-index.description": {
+    "message": "5 minutes to learn the most important Docusaurus concepts.",
+    "description": "The generated-index page description for category Source in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Destination": {
+    "message": "Destination",
+    "description": "The label for category Destination in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Destination.link.generated-index.description": {
+    "message": "5 minutes to learn the most important Docusaurus concepts.",
+    "description": "The generated-index page description for category Destination in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Notification": {
+    "message": "Notification",
+    "description": "The label for category Notification in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Notification.link.generated-index.description": {
+    "message": "5 minutes to learn the most important Docusaurus concepts.",
+    "description": "The generated-index page description for category Notification in sidebar tutorialSidebar"
+  }
+}

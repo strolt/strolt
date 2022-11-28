@@ -56,7 +56,7 @@ type Definitions struct {
 type Config struct {
 	TimeZone            string             `yaml:"timezone,omitempty"`
 	timeLocation        *time.Location     `json:"-" yaml:"-"`
-	DisableWatchChanges bool               `yaml:"disableWatchChanges,omitempty"`
+	DisableWatchChanges bool               `yaml:"disableWatchChanges,omitempty"` // TODO: move to ENV
 	Services            map[string]Service `yaml:"services"`
 	Tags                []string           `yaml:"tags,omitempty"`
 	Secrets             Secrets            `yaml:"secrets,omitempty"`
@@ -68,7 +68,7 @@ var (
 	config        = Config{}
 	fileList      = []string{}
 	initialConfig = Config{
-		timeLocation: time.UTC,
-		TimeZone:     time.UTC.String(),
+		timeLocation: time.Local,
+		TimeZone:     time.Local.String(),
 	}
 )
