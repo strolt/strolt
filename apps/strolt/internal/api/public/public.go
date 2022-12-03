@@ -42,6 +42,7 @@ func (s *Public) prometheusMetrics(r chi.Router) {
 // debug godoc
 // @Tags         public
 // @Id           getDebug
+// @Description  Available only if env `STROLT_DEBUG=true`
 // @Summary      Go debug info
 // @Success      200  {string}  string.
 // @Router       /debug [get].

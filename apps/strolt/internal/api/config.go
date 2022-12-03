@@ -49,7 +49,6 @@ type ConfigServiceTaskNotification struct {
 // getConfig godoc
 // @Id					 getConfig
 // @Summary      Show config
-// @Description  get config
 // @Security BasicAuth
 // @success 200 {object} Config
 // @Router       /api/v1/config [get].
