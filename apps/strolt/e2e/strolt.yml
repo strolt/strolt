@@ -12,8 +12,8 @@ extends:
   configs:
     - .strolt/base.yml
 
-    # - .strolt/local.yml
-    # - .strolt/prune.yml
+    - .strolt/local.yml
+    - .strolt/prune.yml
 
     - .strolt/pg.yml
     - .strolt/mongo.yml

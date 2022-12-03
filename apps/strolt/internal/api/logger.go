@@ -21,6 +21,11 @@ type StructuredLogger struct {
 func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry { //nolint:ireturn
 	entry := &StructuredLoggerEntry{Fields: logger.Fields{}}
 
+	username, _, ok := r.BasicAuth()
+	if ok {
+		entry.Fields["username"] = username
+	}
+
 	if reqID := middleware.GetReqID(r.Context()); reqID != "" {
 		entry.Fields["req_id"] = reqID
 	}
