@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
@@ -32,14 +30,14 @@ var backupCmd = &cobra.Command{
 			log.Error(err)
 			return
 		}
-		log.Info(fmt.Sprintf("selected service: %s", serviceName))
+		log.Infof("selected service: %s", serviceName)
 
 		taskName, err := getTaskName(cmd, serviceName)
 		if err != nil {
 			log.Error(err)
 			return
 		}
-		log.Info(fmt.Sprintf("selected task: %s", taskName))
+		log.Infof("selected task: %s", taskName)
 
 		if !isSkipConfirmation && !isConfirm() {
 			return

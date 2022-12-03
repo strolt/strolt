@@ -60,12 +60,12 @@ func Run(ctx ctx.Context) {
 	go func() {
 		<-ctx.Done()
 
-		log.Info("stop schedule manager...")
+		log.Debug("stop schedule manager...")
 
 		ctxCron := cr.Stop()
 		<-ctxCron.Done()
 
-		log.Info("schedule manager stopped")
+		log.Debug("schedule manager stopped")
 	}()
 
 	for serviceName, service := range c.Services {

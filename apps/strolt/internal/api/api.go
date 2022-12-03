@@ -21,51 +21,80 @@ func Serve(ctx context.Context, cancel func()) {
 
 	addr := fmt.Sprintf("%s:%d", env.Host(), env.Port())
 
-	log.Info("API server started on:", addr)
+	log.Infof("api server started on: %s", addr)
 
 	server := &http.Server{Addr: addr, Handler: service()} //nolint
 
-	// Server run context
-	serverCtx, serverStopCtx := context.WithCancel(context.Background())
+	shutdown := func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
 
-	go func() { //nolint
-		// fmt.Println("Serve go func...")
-
-		<-ctx.Done()
-		// fmt.Println("Serve go func <-ctx.Done()")
-
-		// Shutdown signal with grace period of 30 seconds
-		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second) //nolint
-
-		go func() {
-			// fmt.Println("Serve go func + go func")
-			<-shutdownCtx.Done()
-			// fmt.Println("Serve go func + go func", <-shutdownCtx.Done())
-			if shutdownCtx.Err() == context.DeadlineExceeded { //nolint
-				log.Error("graceful shutdown timed out.. forcing exit.")
+		if server != nil {
+			if err := server.Shutdown(ctx); err != nil {
+				log.Debugf("api shutdown error, %s", err)
 			}
-		}()
 
-		// fmt.Println("Trigger graceful shutdown")
-		// Trigger graceful shutdown
-		err := server.Shutdown(shutdownCtx)
-		if err != nil {
-			log.Error(err)
+			log.Debug("shutdown api server completed")
 		}
-		// fmt.Println("serverStopCtx")
-		serverStopCtx()
-	}()
-
-	// Run the server
-	err := server.ListenAndServe()
-	if err != nil && err != http.ErrServerClosed {
-		log.Error(err)
 	}
 
-	// Wait for server context to be stopped
-	<-serverCtx.Done()
+	defer shutdown()
+
+	// serverCtx, serverStopCtx := context.WithCancel(context.Background())
+
+	// go func() { //nolint
+	// 	// fmt.Println("Serve go func...")
+
+	// 	<-ctx.Done()
+	// 	// fmt.Println("Serve go func <-ctx.Done()")
+
+	// 	// Shutdown signal with grace period of 30 seconds
+	// 	shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second) //nolint
+
+	// 	go func() {
+	// 		// fmt.Println("Serve go func + go func")
+	// 		<-shutdownCtx.Done()
+	// 		// fmt.Println("Serve go func + go func", <-shutdownCtx.Done())
+	// 		if shutdownCtx.Err() == context.DeadlineExceeded { //nolint
+	// 			log.Error("graceful shutdown timed out.. forcing exit.")
+	// 		}
+	// 	}()
+
+	// 	// fmt.Println("Trigger graceful shutdown")
+	// 	// Trigger graceful shutdown
+	// 	err := server.Shutdown(shutdownCtx)
+	// 	if err != nil {
+	// 		log.Error(err)
+	// 	}
+	// 	// fmt.Println("serverStopCtx")
+	// 	serverStopCtx()
+	// }()
+
+	// // Run the server
+
+	// // Wait for server context to be stopped
+	// <-serverCtx.Done()
 	// fmt.Println("<-serverCtx.Done()")
-} //nolint
+
+	done := make(chan bool)
+
+	go func() {
+		<-ctx.Done()
+
+		log.Debug("stop api server...")
+		done <- true
+	}()
+
+	go func() {
+		err := server.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
+			log.Error(err)
+		}
+	}()
+
+	<-done
+	log.Debug("api server was stopped")
+}
 
 // @title           Strolt API
 // @version         1.0

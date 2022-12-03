@@ -2,8 +2,6 @@ package strolt
 
 import (
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client"
-	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client/operations"
-	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client/services"
 )
 
 type Sdk struct {
@@ -19,16 +17,16 @@ func New(host string) *Sdk {
 	}
 }
 
-func (sdk *Sdk) GetConfig() (*operations.GetAPIConfigOK, error) {
-	params := operations.NewGetAPIConfigParams()
-	return sdk.client.Operations.GetAPIConfig(params)
-}
+// func (sdk *Sdk) GetConfig() (*operations.GetAPIConfigOK, error) {
+// 	params := operations.NewGetAPIConfigParams()
+// 	return sdk.client.Operations.GetAPIConfig(params)
+// }
 
-func (sdk *Sdk) GetPrune(serviceName, taskName, destinationName string) (*services.GetAPIServicesServiceNameTasksTaskNameDestinationsDestinationNamePruneOK, error) {
-	params := services.NewGetAPIServicesServiceNameTasksTaskNameDestinationsDestinationNamePruneParams()
-	params.SetServiceName(serviceName)
-	params.SetTaskName(taskName)
-	params.SetDestinationName(destinationName)
+// func (sdk *Sdk) GetPrune(serviceName, taskName, destinationName string) (*services.GetAPIServicesServiceNameTasksTaskNameDestinationsDestinationNamePruneOK, error) {
+// 	params := services.NewGetAPIServicesServiceNameTasksTaskNameDestinationsDestinationNamePruneParams()
+// 	params.SetServiceName(serviceName)
+// 	params.SetTaskName(taskName)
+// 	params.SetDestinationName(destinationName)
 
-	return sdk.client.Services.GetAPIServicesServiceNameTasksTaskNameDestinationsDestinationNamePrune(params)
-}
+// 	return sdk.client.Services.GetAPIServicesServiceNameTasksTaskNameDestinationsDestinationNamePrune(params)
+// }

@@ -49,12 +49,12 @@ func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, ela
 	logger.New().WithFields(l.Fields).WithFields(logger.Fields{
 		"resp_status": status, "resp_bytes_length": bytes,
 		"resp_elapsed_ms": float64(elapsed.Nanoseconds()) / 1000000.0, //nolint:gomnd
-	}).Info("API")
+	}).Info("api")
 }
 
 func (l *StructuredLoggerEntry) Panic(v interface{}, stack []byte) {
 	logger.New().WithFields(l.Fields).WithFields(logger.Fields{
 		"stack": string(stack),
 		"panic": fmt.Sprintf("%+v", v),
-	}).Error("API")
+	}).Error("api")
 }

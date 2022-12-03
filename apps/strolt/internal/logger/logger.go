@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"fmt"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -46,7 +48,11 @@ func New() *Logger {
 }
 
 func (l *Logger) WithFields(fields Fields) *Logger {
-	newFields := l.fields
+	newFields := Fields{}
+
+	for key, value := range l.fields {
+		newFields[key] = value
+	}
 
 	for key, value := range fields {
 		newFields[key] = value
@@ -84,18 +90,34 @@ func (l *Logger) getLogger() *logrus.Entry {
 	return logger
 }
 
-func (l *Logger) Info(args ...interface{}) {
-	l.getLogger().Info(args...)
+func (l *Logger) Info(arg interface{}) {
+	l.getLogger().Info(arg)
 }
 
-func (l *Logger) Error(args ...interface{}) {
-	l.getLogger().Error(args...)
+func (l *Logger) Infof(format string, a ...any) {
+	l.Info(fmt.Sprintf(format, a...))
 }
 
-func (l *Logger) Debug(args ...interface{}) {
-	l.getLogger().Debug(args...)
+func (l *Logger) Error(arg interface{}) {
+	l.getLogger().Error(arg)
 }
 
-func (l *Logger) Warn(args ...interface{}) {
-	l.getLogger().Warn(args...)
+func (l *Logger) Errorf(format string, a ...any) {
+	l.Error(fmt.Sprintf(format, a...))
+}
+
+func (l *Logger) Debug(arg interface{}) {
+	l.getLogger().Debug(arg)
+}
+
+func (l *Logger) Debugf(format string, a ...any) {
+	l.Debug(fmt.Sprintf(format, a...))
+}
+
+func (l *Logger) Warn(arg interface{}) {
+	l.getLogger().Warn(arg)
+}
+
+func (l *Logger) Warnf(format string, a ...any) {
+	l.Warn(fmt.Sprintf(format, a...))
 }

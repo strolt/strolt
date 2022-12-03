@@ -12,6 +12,7 @@ type config struct {
 	Host       string     `env:"STROLT_HOST" envDefault:"0.0.0.0"`
 	Port       int        `env:"STROLT_PORT" envDefault:"8080"`
 	GlobalTags globalTags `env:"STROLT_GLOBAL_TAGS"`
+	IsDebug    bool       `env:"STROLT_DEBUG"`
 }
 
 type globalTags []string
@@ -33,6 +34,10 @@ func Scan() {
 		logger.New().Error(err)
 		os.Exit(1)
 	}
+
+	if resultConfig.IsDebug {
+		logger.SetLogLevel(logger.LogLevelDebug)
+	}
 }
 
 func Port() int {
@@ -45,4 +50,8 @@ func Host() string {
 
 func GlobalTags() []string {
 	return resultConfig.GlobalTags
+}
+
+func IsDebug() bool {
+	return resultConfig.IsDebug
 }

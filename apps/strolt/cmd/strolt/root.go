@@ -22,17 +22,12 @@ const (
 )
 
 var (
-	isDebugFlag        = false
 	isJSONFlag         = false
 	isSkipConfirmation = false
 	configPathFlag     = ""
 )
 
 func initConfig() {
-	if isDebugFlag {
-		logger.SetLogLevel(logger.LogLevelDebug)
-	}
-
 	if isJSONFlag {
 		logger.SetLogFormat(logger.LogFormatJSON)
 	}
@@ -53,7 +48,6 @@ func initConfig() {
 //nolint:gochecknoinits
 func init() {
 	env.Scan()
-	rootCmd.PersistentFlags().BoolVar(&isDebugFlag, "debug", false, "enable debug log level")
 	rootCmd.PersistentFlags().BoolVar(&isJSONFlag, "json", false, "set output mode to JSON")
 	// cobra.OnInitialize(initConfig)
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
@@ -120,7 +114,7 @@ var rootCmd = &cobra.Command{
 			// Watch system exit code
 			go func() {
 				oscall := <-c
-				log.Info(fmt.Sprintf("system call: %+v", oscall))
+				log.Debugf("system call: %+v", oscall)
 				cancel()
 			}()
 		}
