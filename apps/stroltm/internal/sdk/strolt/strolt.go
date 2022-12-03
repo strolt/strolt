@@ -61,3 +61,7 @@ func (sdk *Sdk) Prune(serviceName, taskName, destinationName string) (*services.
 func (sdk *Sdk) Ping() (*public.PingOK, error) {
 	return sdk.client.Public.Ping(nil)
 }
+
+func (sdk *Sdk) GetMetrics() (*operations.GetStroltMetricsOK, error) {
+	return sdk.client.Operations.GetStroltMetrics(nil, sdk.authInfo)
+}
