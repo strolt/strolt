@@ -12,6 +12,15 @@ func (c *Config) replaceSecrets() error {
 		return err
 	}
 
+	{
+		api, err := c.API.replaceSecrets(c.Secrets)
+		if err != nil {
+			return err
+		}
+
+		c.API = api
+	}
+
 	for serviceName, service := range c.Services {
 		for taskName, task := range service {
 			sourceWithSecrets, err := task.Source.replaceSecrets(c.Secrets)
@@ -109,6 +118,7 @@ func (destination DriverDestinationConfig) replaceSecrets(secrets Secrets) (Driv
 
 	return destination, nil
 }
+
 func (source DriverSourceConfig) replaceSecrets(secrets Secrets) (DriverSourceConfig, error) {
 	{
 		configYaml, err := yaml.Marshal(source.Config)
@@ -159,4 +169,26 @@ func (source DriverSourceConfig) replaceSecrets(secrets Secrets) (DriverSourceCo
 	}
 
 	return source, nil
+}
+
+func (api API) replaceSecrets(secrets Secrets) (API, error) {
+	users := map[string]string{}
+
+	for username, password := range api.Users {
+		t, err := template.New("api/users").Option("missingkey=error").Parse(password)
+		if err != nil {
+			return API{}, err
+		}
+
+		var tpl bytes.Buffer
+		if err := t.Execute(&tpl, secrets); err != nil {
+			return API{}, err
+		}
+
+		users[username] = tpl.String()
+	}
+
+	return API{
+		Users: users,
+	}, nil
 }

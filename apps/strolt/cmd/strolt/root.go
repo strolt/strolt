@@ -87,7 +87,7 @@ var rootCmd = &cobra.Command{
 			// Api server
 			wg.Add(1)
 			go func() {
-				api.Serve(ctx, cancel)
+				api.New().Run(ctx, cancel)
 				wg.Done()
 			}()
 		}

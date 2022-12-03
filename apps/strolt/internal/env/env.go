@@ -9,10 +9,11 @@ import (
 )
 
 type config struct {
-	Host       string     `env:"STROLT_HOST" envDefault:"0.0.0.0"`
-	Port       int        `env:"STROLT_PORT" envDefault:"8080"`
-	GlobalTags globalTags `env:"STROLT_GLOBAL_TAGS"`
-	IsDebug    bool       `env:"STROLT_DEBUG"`
+	Host                 string     `env:"STROLT_HOST" envDefault:"0.0.0.0"`
+	Port                 int        `env:"STROLT_PORT" envDefault:"8080"`
+	GlobalTags           globalTags `env:"STROLT_GLOBAL_TAGS"`
+	IsDebug              bool       `env:"STROLT_DEBUG"`
+	IsWatchFilesDisabled bool       `env:"STROLT_DISABLE_WATCH_FILES_CHANGED"`
 }
 
 type globalTags []string
@@ -54,4 +55,8 @@ func GlobalTags() []string {
 
 func IsDebug() bool {
 	return resultConfig.IsDebug
+}
+
+func IsWatchFilesDisabled() bool {
+	return resultConfig.IsWatchFilesDisabled
 }

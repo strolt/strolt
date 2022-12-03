@@ -1,5 +1,5 @@
 FROM alpine:3.17.0 AS base
-WORKDIR /app/strolt
+WORKDIR /strolt
 COPY ./docker/scripts scripts
 RUN sh ./scripts/install.sh && rm -rf ./scripts
 
@@ -15,16 +15,19 @@ COPY ./internal ./internal
 RUN go build -o strolt -ldflags "-X github.com/strolt/strolt/apps/strolt/internal/ldflags.version=${version} -s -w"
 
 FROM base
-
 ARG GITHUB_SHA
 
 LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
-      org.opencontainers.image.description="strolt backup engine" \
+      org.opencontainers.image.description="Strolt backup engine" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/strolt/strolt.git" \
-      org.opencontainers.image.title="strolt" \
+      org.opencontainers.image.title="Strolt" \
       org.opencontainers.image.revision="${GITHUB_SHA}"
 
-COPY --from=builder /go/src/strolt/strolt/strolt/strolt ./
-ENTRYPOINT ["/app/strolt/strolt"]
+COPY --from=builder /go/src/strolt/strolt/strolt/strolt ./bin/strolt
+
+ENTRYPOINT ["/strolt/bin/strolt", "--config", "/strolt/config"]
+
+HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost:8080/api/v1/ping || exit 1
+
 CMD ["--json"]

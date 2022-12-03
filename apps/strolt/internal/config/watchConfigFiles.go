@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/strolt/strolt/apps/strolt/internal/env"
 	"github.com/strolt/strolt/apps/strolt/internal/logger"
 
 	"github.com/fsnotify/fsnotify"
 )
 
 func WatchConfigChanges(ctx context.Context, cancel func()) {
-	if config.DisableWatchChanges {
+	if env.IsWatchFilesDisabled() {
 		return
 	}
 

@@ -1,4 +1,4 @@
-package destinations
+package services
 
 import (
 	"fmt"
@@ -12,6 +12,65 @@ import (
 
 	"github.com/go-chi/chi/v5"
 )
+
+// getSnapshots godoc
+// @Id					 getSnapshots
+// @Summary      Get snapshots
+// @Tags         services
+// @Security BasicAuth
+// @Param   serviceName         path    string     true        "Service name"
+// @Param   taskName            path    string     true        "Task name"
+// @Param   destinationName     path    string     true        "Destination name"
+// @success 200 {object} getSnapshotsResult
+// @success 500 {object} apiu.ResultError
+// @Router       /api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots [get].
+func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
+	serviceName := chi.URLParam(r, "serviceName")
+	taskName := chi.URLParam(r, "taskName")
+	destinationName := chi.URLParam(r, "destinationName")
+
+	taskOperation := task.ControllerOperation{
+		ServiceName:     serviceName,
+		TaskName:        taskName,
+		DestinationName: destinationName,
+	}
+
+	if taskOperation.IsWorking() {
+		cacheItem, err := getSnapshotsFromCache(serviceName, taskName, destinationName)
+		if err == nil {
+			apiu.RenderJSON200(w, r, getSnapshotsResult{
+				Data:        cacheItem.SnapshotList,
+				LastUpdated: cacheItem.LastUpdated,
+			})
+
+			return
+		}
+
+		apiu.RenderJSON500(w, r, apiu.ResultError{Error: apiu.ErrTaskAlreadyWorking.Error()})
+
+		return
+	}
+
+	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
+	if err != nil {
+		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		return
+	}
+	defer t.Close()
+
+	snapshotList, err := t.GetSnapshotList(destinationName)
+	if err != nil {
+		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		return
+	}
+
+	cacheItem := addSnapshotsToCache(serviceName, taskName, destinationName, snapshotList)
+
+	apiu.RenderJSON200(w, r, getSnapshotsResult{
+		Data:        cacheItem.SnapshotList,
+		LastUpdated: cacheItem.LastUpdated,
+	})
+}
 
 type getSnapshotsResult struct {
 	Data        task.SnapshotList `json:"data"`
@@ -83,64 +142,4 @@ func addSnapshotsToCache(serviceName string, taskName string, destinationName st
 	snapshotsCache.Unlock()
 
 	return snapshotsItem
-}
-
-// hGetSnapshots godoc
-// @Id					 getSnapshots
-// @Summary      Get snapshots
-// @Tags         services
-// @Accept       json
-// @Produce      json
-// @Param   serviceName         path    string     true        "Service name"
-// @Param   taskName            path    string     true        "Task name"
-// @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} getSnapshotsResult
-// @success 500 {object} apiu.ResultError
-// @Router       /api/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots [get].
-func getSnapshots(w http.ResponseWriter, r *http.Request) {
-	serviceName := chi.URLParam(r, "serviceName")
-	taskName := chi.URLParam(r, "taskName")
-	destinationName := chi.URLParam(r, "destinationName")
-
-	taskOperation := task.ControllerOperation{
-		ServiceName:     serviceName,
-		TaskName:        taskName,
-		DestinationName: destinationName,
-	}
-
-	if taskOperation.IsWorking() {
-		cacheItem, err := getSnapshotsFromCache(serviceName, taskName, destinationName)
-		if err == nil {
-			apiu.RenderJSON200(w, r, getSnapshotsResult{
-				Data:        cacheItem.SnapshotList,
-				LastUpdated: cacheItem.LastUpdated,
-			})
-
-			return
-		}
-
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: apiu.ErrTaskAlreadyWorking.Error()})
-
-		return
-	}
-
-	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
-	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
-		return
-	}
-	defer t.Close()
-
-	snapshotList, err := t.GetSnapshotList(destinationName)
-	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
-		return
-	}
-
-	cacheItem := addSnapshotsToCache(serviceName, taskName, destinationName, snapshotList)
-
-	apiu.RenderJSON200(w, r, getSnapshotsResult{
-		Data:        cacheItem.SnapshotList,
-		LastUpdated: cacheItem.LastUpdated,
-	})
 }

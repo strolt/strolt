@@ -1,4 +1,4 @@
-package tasks
+package services
 
 import (
 	"net/http"
@@ -11,18 +11,17 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// postBackup godoc
-// @Id					 createBackup
+// backup godoc
+// @Id					 backup
 // @Summary      Start backup
 // @Tags         services
-// @Accept       json
-// @Produce      json
-// @Param   serviceName  path    string     true        "Service name"
-// @Param   taskName     path    string     true        "Task name"
+// @Security BasicAuth
+// @Param   serviceName         path    string     true        "Service name"
+// @Param   taskName            path    string     true        "Task name"
 // @success 200 {object} apiu.ResultSuccess
 // @success 500 {object} apiu.ResultError
-// @Router       /api/services/{serviceName}/tasks/{taskName}/backup [post].
-func postBackup(w http.ResponseWriter, r *http.Request) {
+// @Router       /api/v1/services/{serviceName}/tasks/{taskName}/backup [post].
+func (s *Services) backup(w http.ResponseWriter, r *http.Request) {
 	log := logger.New()
 
 	serviceName := chi.URLParam(r, "serviceName")

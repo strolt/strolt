@@ -14,6 +14,14 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	loadedAt time.Time
+)
+
+func GetLoadedAt() time.Time {
+	return loadedAt
+}
+
 type FileInfo struct {
 	Config Config
 
@@ -220,6 +228,8 @@ func Load(pathname string) error {
 	// 	data, _ := yaml.Marshal(config)
 	// 	os.WriteFile("result.config.yml", data, 0o700)
 	// }
+
+	loadedAt = time.Now()
 
 	return nil
 }

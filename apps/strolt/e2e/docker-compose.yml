@@ -42,8 +42,8 @@ services:
   strolt:
     image: strolt/strolt:e2e
     volumes:
-      - ./strolt.yml:/app/strolt/config.yml:ro
-      - ./.strolt:/app/strolt/.strolt:ro
+      - ./strolt.yml:/strolt/config.yml:ro
+      - ./.strolt:/strolt/.strolt:ro
       - ./.temp/input:/e2e/input
     networks:
       - strolt

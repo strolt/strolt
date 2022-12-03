@@ -30,7 +30,7 @@ services:
     ports:
       - 3333:3333
     volumes:
-      - ./strolt.yml:/app/strolt/config.yml:ro
+      - ./strolt.yml:/strolt/config.yml:ro
     networks:
       - strolt
 

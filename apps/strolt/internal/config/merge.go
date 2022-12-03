@@ -25,7 +25,6 @@ func (fi *FileInfo) merge() (*Config, error) {
 		override.TimeZone = timezone
 		override.timeLocation = timeLocation
 
-		override.DisableWatchChanges = mergeDisableWatchChanges(base.DisableWatchChanges, override.DisableWatchChanges)
 		override.Tags = mergeTags(base.Tags, override.Tags)
 
 		override.Secrets = mergeSecretsForConfig(base.Secrets, baseFi.ExtendedSecretsList, override.Secrets, overrideFi.ExtendedSecretsList)
@@ -58,14 +57,6 @@ func mergeTimeZone(base string, override string) (string, *time.Location, error)
 	timezone, err := time.LoadLocation(zone)
 
 	return zone, timezone, err
-}
-
-func mergeDisableWatchChanges(base bool, override bool) bool {
-	if override {
-		return override
-	}
-
-	return base
 }
 
 func uniqueStringSlice(stringSlice []string) []string {

@@ -2,20 +2,31 @@ package public
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/strolt/strolt/apps/strolt/internal/api/apiu"
+	"github.com/strolt/strolt/apps/strolt/internal/config"
+	"github.com/strolt/strolt/apps/strolt/internal/env"
 )
 
-func Router(r chi.Router) {
-	r.Route("/", func(r chi.Router) {
-		prometheusMetrics(r)
-		debug(r)
+type Public struct {
+}
 
-		r.Get("/ping", getPing)
-	})
+func New() *Public {
+	return &Public{}
+}
+
+func (s *Public) Router(r chi.Router) {
+	r.Get("/api/v1/ping", s.ping)
+
+	s.prometheusMetrics(r)
+
+	if env.IsDebug() {
+		s.debug(r)
+	}
 }
 
 // prometheusMetrics godoc
@@ -24,7 +35,7 @@ func Router(r chi.Router) {
 // @Summary      Prometheus metrics
 // @Success      200  {string}  string.
 // @Router       /metrics [get].
-func prometheusMetrics(r chi.Router) {
+func (s *Public) prometheusMetrics(r chi.Router) {
 	r.Mount("/metrics", promhttp.Handler())
 }
 
@@ -34,20 +45,23 @@ func prometheusMetrics(r chi.Router) {
 // @Summary      Go debug info
 // @Success      200  {string}  string.
 // @Router       /debug [get].
-func debug(r chi.Router) {
+func (s *Public) debug(r chi.Router) {
 	r.Mount("/debug", middleware.Profiler())
 }
 
 type getPingResponse struct {
-	Data string `json:"data"`
+	Data           string `json:"data"`
+	ConfigLoadedAt string `json:"configLoadedAt"`
 }
 
-// getPing godoc
+// ping godoc
 // @Tags         public
-// @Id           getPing
-// @Summary      Get ping
+// @Id           ping
+// @Summary      Ping
 // @success 200 {object} getPingResponse
-// @Router       /ping [get].
-func getPing(w http.ResponseWriter, r *http.Request) {
-	apiu.RenderJSON200(w, r, getPingResponse{Data: "pong"})
+// @Router       /api/v1/ping [get].
+func (s *Public) ping(w http.ResponseWriter, r *http.Request) {
+	apiu.RenderJSON200(w, r, getPingResponse{
+		Data:           "pong",
+		ConfigLoadedAt: config.GetLoadedAt().Format(time.RFC3339)})
 }

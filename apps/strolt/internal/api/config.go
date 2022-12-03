@@ -6,6 +6,7 @@ import (
 
 	"github.com/strolt/strolt/apps/strolt/internal/api/apiu"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
+	"github.com/strolt/strolt/apps/strolt/internal/env"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 )
 
@@ -49,10 +50,9 @@ type ConfigServiceTaskNotification struct {
 // @Id					 getConfig
 // @Summary      Show config
 // @Description  get config
-// @Accept       json
-// @Produce      json
+// @Security BasicAuth
 // @success 200 {object} Config
-// @Router       /api/config [get].
+// @Router       /api/v1/config [get].
 func getConfig(w http.ResponseWriter, r *http.Request) {
 	c := config.Get()
 
@@ -116,7 +116,7 @@ func getConfig(w http.ResponseWriter, r *http.Request) {
 
 	apiu.RenderJSON200(w, r, Config{
 		TimeZone:            c.TimeZone,
-		DisableWatchChanges: c.DisableWatchChanges,
+		DisableWatchChanges: env.IsWatchFilesDisabled(),
 		Tags:                tags,
 		Services:            services,
 	})

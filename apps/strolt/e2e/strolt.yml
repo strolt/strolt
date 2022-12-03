@@ -1,5 +1,9 @@
 name: strolt-e2e
 
+api:
+  users:
+    admin: "{{.API_ADMIN_PASSWORD}}"
+
 timezone: UTC
 
 extends:
@@ -8,8 +12,8 @@ extends:
   configs:
     - .strolt/base.yml
 
-    # - .strolt/local.yml
-    # - .strolt/prune.yml
+    - .strolt/local.yml
+    - .strolt/prune.yml
 
     - .strolt/pg.yml
     - .strolt/mongo.yml

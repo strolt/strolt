@@ -20,8 +20,6 @@ type StructuredLogger struct {
 func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry { //nolint:ireturn
 	entry := &StructuredLoggerEntry{Fields: logger.Fields{}}
 
-	entry.Fields["ts"] = time.Now().UTC().Format(time.RFC1123)
-
 	if reqID := middleware.GetReqID(r.Context()); reqID != "" {
 		entry.Fields["req_id"] = reqID
 	}
