@@ -10,4 +10,4 @@ export const config = new Configuration({ basePath });
 
 const commonParams: any = [config, basePath, axiosInstance];
 
-export const services = new _api.ServicesApi(...commonParams)
+export const instances = new _api.InstancesApi(...commonParams)

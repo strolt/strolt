@@ -9,6 +9,7 @@ import (
 
 	"github.com/strolt/strolt/apps/strolt/internal/api"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
+	"github.com/strolt/strolt/apps/strolt/internal/env"
 	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/schedule"
 	"github.com/strolt/strolt/apps/strolt/internal/util/dir"
@@ -51,6 +52,7 @@ func initConfig() {
 
 //nolint:gochecknoinits
 func init() {
+	env.Scan()
 	rootCmd.PersistentFlags().BoolVar(&isDebugFlag, "debug", false, "enable debug log level")
 	rootCmd.PersistentFlags().BoolVar(&isJSONFlag, "json", false, "set output mode to JSON")
 	// cobra.OnInitialize(initConfig)
@@ -88,7 +90,7 @@ var rootCmd = &cobra.Command{
 		signal.Notify(c, os.Interrupt)
 
 		{
-			// Monitoring server
+			// Api server
 			wg.Add(1)
 			go func() {
 				api.Serve(ctx, cancel)

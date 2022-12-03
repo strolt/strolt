@@ -3,67 +3,27 @@ package api
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
+	"github.com/strolt/strolt/apps/strolt/internal/api/public"
 	"github.com/strolt/strolt/apps/strolt/internal/api/services"
+	"github.com/strolt/strolt/apps/strolt/internal/env"
+	"github.com/strolt/strolt/apps/strolt/internal/logger"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/docgen"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-// func Serve(ctx context.Context, cancel func()) {
-
-// 	r := chi.NewRouter()
-// 	// r.Use(middleware.Logger)
-// 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-// 		w.Write([]byte("welcome"))
-// 	})
-
-// 	host := os.Getenv("STROLT_HOST")
-// 	if host == "" {
-// 		host = "0.0.0.0"
-// 	}
-
-// 	port := os.Getenv("STROLT_PORT")
-// 	if port == "" {
-// 		port = "8080"
-// 	}
-
-// 	// httpServer := http.Server{ //nolint
-// 	// 	Addr: fmt.Sprintf("%s:%s", host, port),
-// 	// }
-
-// 	// log.Printf("api server started on: %v", httpServer.Addr)
-
-// 	http.Handle("/metrics", promhttp.Handler())
-
-// 	idleConnectionsClosed := make(chan struct{})
-
-// 	go func() {
-// 		<-ctx.Done()
-
-// 		// if err := httpServer.Shutdown(context.Background()); err != nil { //nolint
-// 		// 	log.Printf("api server shutdown error: %v", err)
-// 		// }
-
-// 		close(idleConnectionsClosed)
-// 	}()
-
-// 	if err := http.ListenAndServe(":3000", r); errors.Is(err, http.ErrServerClosed) {
-// 		log.Fatalf("api server ListenAndServe error: %v", err)
-// 		cancel()
-// 	}
-
-//		<-idleConnectionsClosed
-//	}
-
 func Serve(ctx context.Context, cancel func()) {
-	// The HTTP Server
-	server := &http.Server{Addr: "0.0.0.0:3333", Handler: service()} //nolint
+	log := logger.New()
+
+	addr := fmt.Sprintf("%s:%d", env.Host(), env.Port())
+
+	log.Info("API server started on:", addr)
+
+	server := &http.Server{Addr: addr, Handler: service()} //nolint
 
 	// Server run context
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
@@ -82,7 +42,7 @@ func Serve(ctx context.Context, cancel func()) {
 			<-shutdownCtx.Done()
 			// fmt.Println("Serve go func + go func", <-shutdownCtx.Done())
 			if shutdownCtx.Err() == context.DeadlineExceeded { //nolint
-				log.Fatal("graceful shutdown timed out.. forcing exit.")
+				log.Error("graceful shutdown timed out.. forcing exit.")
 			}
 		}()
 
@@ -90,7 +50,7 @@ func Serve(ctx context.Context, cancel func()) {
 		// Trigger graceful shutdown
 		err := server.Shutdown(shutdownCtx)
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
 		}
 		// fmt.Println("serverStopCtx")
 		serverStopCtx()
@@ -99,7 +59,7 @@ func Serve(ctx context.Context, cancel func()) {
 	// Run the server
 	err := server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
-		log.Fatal(err)
+		log.Error(err)
 	}
 
 	// Wait for server context to be stopped
@@ -116,15 +76,14 @@ func service() http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
-	r.Use(middleware.Logger)
+	// r.Use(middleware.Logger)
+	r.Use(Logger())
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("sup")) //nolint
 	})
 
-	r.Mount("/metrics", promhttp.Handler())
 	// r.Mount("/swagger", httpSwagger.WrapHandler)
-	r.Mount("/debug", middleware.Profiler())
 
 	r.Mount("/service", servicesHandler())
 
@@ -132,6 +91,8 @@ func service() http.Handler {
 		r.Get("/config", getConfig)
 		services.Router(r)
 	})
+
+	public.Router(r)
 	// r.Get("/api/services/status", services.GetStatus)
 	// r.Post("/api/services/{serviceName}/tasks/{taskName}/backup", services.PostBackup)
 	// r.Get("/api/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots", services.GetSnapshots)

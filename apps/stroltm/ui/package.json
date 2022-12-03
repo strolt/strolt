@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "gen:api": "yarn run openapi-generator-cli generate -i ../../../.swagger/strolt/swagger.json -g typescript-axios -o ./src/api/generated"
+    "gen:api": "yarn run openapi-generator-cli generate -i ../../../.swagger/stroltm/swagger.json -g typescript-axios -o ./src/api/generated"
   },
   "dependencies": {
     "axios": "^1.1.3",

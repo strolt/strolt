@@ -59,7 +59,7 @@ lint-fast: lint-fast-strolt lint-fast-stroltm
 
 .PHONY: test
 test:
-	go test ./apps/strolt/...
+	cd ./apps/strolt && go test $$(go list ./... | grep -v /e2e)
 
 .PHONY: coverage
 coverage:

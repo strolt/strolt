@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/briandowns/spinner v1.19.0
+	github.com/caarlos0/env/v6 v6.10.1
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-chi/chi v1.5.4

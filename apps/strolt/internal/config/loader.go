@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/strolt/strolt/apps/strolt/internal/env"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 
 	"gopkg.in/yaml.v3"
@@ -168,7 +169,9 @@ func load(pathname string) (loaded, error) {
 			Config: getCliConfig(),
 		},
 		FileInfo{
-			Config: getEnvConfig(),
+			Config: Config{
+				Tags: env.GlobalTags(),
+			},
 		})
 
 	c, err := fi.merge()

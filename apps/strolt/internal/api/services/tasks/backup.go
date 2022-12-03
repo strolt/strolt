@@ -12,6 +12,7 @@ import (
 )
 
 // postBackup godoc
+// @Id					 createBackup
 // @Summary      Start backup
 // @Tags         services
 // @Accept       json

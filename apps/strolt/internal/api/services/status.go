@@ -12,6 +12,7 @@ type getStatusResult struct {
 }
 
 // getStatus godoc
+// @Id					 getStatus
 // @Summary      Get task statuses
 // @Tags         services
 // @Accept       json

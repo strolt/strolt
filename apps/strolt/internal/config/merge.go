@@ -35,6 +35,11 @@ func (fi *FileInfo) merge() (*Config, error) {
 			return base, errors.Wrapf(err, "cannot merge definitions from %s", overrideFi.ConfigPathname)
 		}
 
+		override.API, err = mergeAPI(base.API, override.API)
+		if err != nil {
+			return base, errors.Wrapf(err, "cannot merge api from %s", overrideFi.ConfigPathname)
+		}
+
 		override.Services, err = mergeServices(base.Services, override.Services)
 		if err != nil {
 			return base, errors.Wrapf(err, "cannot merge services from %s", overrideFi.ConfigPathname)
@@ -230,4 +235,15 @@ func mergeDestinationExtendsConfig(base interface{}, extends interface{}) (inter
 	}
 
 	return _base["data"], nil
+}
+
+func mergeAPI(base API, override API) (API, error) {
+	api := base
+
+	err := mergo.Merge(&api, override, mergo.WithOverride)
+	if err != nil {
+		return API{}, err
+	}
+
+	return api, nil
 }

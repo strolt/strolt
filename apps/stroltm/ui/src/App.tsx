@@ -1,30 +1,49 @@
-import { useState } from 'react'
-import c from "./App.module.scss"
+import { useEffect, useState } from "react";
+import * as api from "./api";
+import { InstancesGetListResult } from "./api/generated";
 
 function App() {
-  const [count, setCount] = useState(0)
+	const [state, setState] = useState<undefined | InstancesGetListResult>(
+		undefined
+	);
+	const [count, setCount] = useState(0);
 
-  return (
-    <div >
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className={c.logo} alt="Vite logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className={c.card}>
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className={c.read_the_docs}>
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+	useEffect(() => {
+		api.instances.apiInstancesGet().then((data) => {
+			setState(data.data);
+		});
+	}, []);
+
+	return (
+		<div>
+			{state?.data?.map((el) => {
+				return (
+					<>
+						<div>URL: {el.url}</div>
+
+						{Object.entries(el.operations?.services || {}).map(
+							([key, value]) => {
+								return (
+									<>
+										<div>Service: {key}</div>
+										<div>
+											{Object.entries(value).map(([key1, value1]) => (
+												<>
+													<div>Task: {key1}</div>
+												</>
+											))}
+										</div>
+									</>
+								);
+							}
+						)}
+
+						<pre>{JSON.stringify(el, null, 2)}</pre>
+					</>
+				);
+			})}
+		</div>
+	);
 }
 
-export default App
+export default App;

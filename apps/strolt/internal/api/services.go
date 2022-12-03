@@ -44,14 +44,6 @@ type servicesResponse struct {
 	Services map[string]servicesResponseService `json:"services"`
 }
 
-// ShowAccount godoc
-// @Summary      Show an account
-// @Description  get string by ID
-// @Tags         accounts
-// @Accept       json
-// @Produce      json
-// @success 200 {object} servicesResponse "desc"
-// @Router       /metrics [get].
 func servicesHandler() http.Handler {
 	r := chi.NewRouter()
 

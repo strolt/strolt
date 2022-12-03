@@ -62,6 +62,16 @@ type Config struct {
 	Secrets             Secrets            `yaml:"secrets,omitempty"`
 	Extends             Extends            `yaml:"extends,omitempty"`
 	Definitions         Definitions        `yaml:"definitions,omitempty"`
+	API                 API                `yaml:"api,omitempty"`
+}
+
+type API struct {
+	Access []APIAccessItem `yaml:"access,omitempty"`
+}
+
+type APIAccessItem struct {
+	Username string `yaml:"username"`
+	Token    string `yaml:"token"`
 }
 
 var (

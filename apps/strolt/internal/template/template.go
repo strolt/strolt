@@ -1,7 +1,6 @@
 package template
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -133,14 +132,14 @@ func New(driver string, ctx context.Context) Template {
 		}
 	}
 
-	{
-		// TODO: remove this
-		data, err := json.Marshal(ctx)
-		if err != nil {
-			t.Body += fmt.Sprintf("\n\nerror json.Marshal: %s", err.Error())
-		}
-		t.Body += fmt.Sprintf("\n\nctx: %s", string(data))
-	}
+	// {
+	// 	// TODO: remove this
+	// 	data, err := json.Marshal(ctx)
+	// 	if err != nil {
+	// 		t.Body += fmt.Sprintf("\n\nerror json.Marshal: %s", err.Error())
+	// 	}
+	// 	t.Body += fmt.Sprintf("\n\nctx: %s", string(data))
+	// }
 
 	return t
 }

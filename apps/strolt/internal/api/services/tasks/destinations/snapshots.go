@@ -86,6 +86,7 @@ func addSnapshotsToCache(serviceName string, taskName string, destinationName st
 }
 
 // hGetSnapshots godoc
+// @Id					 getSnapshots
 // @Summary      Get snapshots
 // @Tags         services
 // @Accept       json

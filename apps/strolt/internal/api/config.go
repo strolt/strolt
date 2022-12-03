@@ -46,6 +46,7 @@ type ConfigServiceTaskNotification struct {
 }
 
 // getConfig godoc
+// @Id					 getConfig
 // @Summary      Show config
 // @Description  get config
 // @Accept       json

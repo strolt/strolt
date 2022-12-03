@@ -59,20 +59,27 @@ func (l *Logger) WithFields(fields Fields) *Logger {
 }
 
 func (l *Logger) WithField(field string, value interface{}) *Logger {
-	return l.WithFields(Fields{field: value})
+	fields := Fields{}
+	fields[field] = value
+
+	return l.WithFields(fields)
 }
 
 func (l *Logger) getLogger() *logrus.Entry {
 	l.setLogLevel()
 	l.setFormat()
 
-	fields := globalFields
+	fields := Fields{}
+
+	for field, value := range globalFields {
+		fields[field] = value
+	}
 
 	for field, value := range l.fields {
 		fields[field] = value
 	}
 
-	logger := l.logger.WithFields(logrus.Fields(globalFields))
+	logger := l.logger.WithFields(logrus.Fields(fields))
 
 	return logger
 }

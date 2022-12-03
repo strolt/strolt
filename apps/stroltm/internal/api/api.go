@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	"github.com/strolt/strolt/apps/stroltm/internal/api/instances"
 	"github.com/strolt/strolt/apps/stroltm/internal/ui"
 )
 
@@ -17,8 +18,8 @@ func Start() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Compress(5)) //nolint:gomnd
 
-	r.Get("/api", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("api welcome")) //nolint
+	r.Route("/api", func(r chi.Router) {
+		instances.Router(r)
 	})
 
 	r.Route("/", ui.Router)

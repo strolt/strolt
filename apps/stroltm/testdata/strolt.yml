@@ -1,0 +1,33 @@
+name: stroltm
+
+timezone: UTC
+
+services:
+  e2e:
+    pg-t:
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: strotl
+          username: strotl
+          password: strotl
+          format: t
+      destinations:
+        restic-pg-t:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-pg-t"
+
+definitions:
+  destinations:
+    restic_base:
+      driver: restic
+      config:
+        keep:
+          last: 3
+      env:
+        RESTIC_PASSWORD: strolt
+        RESTIC_REPOSITORY: s3:http://minio:9000/restic-pg-t
+        AWS_ACCESS_KEY_ID: minioadmin
+        AWS_SECRET_ACCESS_KEY: minioadmin

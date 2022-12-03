@@ -15,6 +15,7 @@ type getPruneResult struct {
 }
 
 // getPrune godoc
+// @Id					 getPrune
 // @Summary      Get snapshots for prune
 // @Tags         services
 // @Accept       json
@@ -30,6 +31,7 @@ func getPrune(w http.ResponseWriter, r *http.Request) {
 }
 
 // postPrune godoc
+// @Id					 prune
 // @Summary      Prune snapshots
 // @Tags         services
 // @Accept       json
