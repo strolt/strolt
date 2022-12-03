@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/apps/strolt/internal/metrics"
 )
 
 func Logger() func(next http.Handler) http.Handler {
@@ -44,6 +45,7 @@ type StructuredLoggerEntry struct {
 }
 
 func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
+	metrics.APIHandlerRequestsInc(status)
 	logger.New().WithFields(l.Fields).WithFields(logger.Fields{
 		"resp_status": status, "resp_bytes_length": bytes,
 		"resp_elapsed_ms": float64(elapsed.Nanoseconds()) / 1000000.0, //nolint:gomnd

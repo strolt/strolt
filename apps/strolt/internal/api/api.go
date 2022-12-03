@@ -101,7 +101,7 @@ func (api *API) handler() http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.BasicAuth("api", config.Get().API.Users))
 
-		r.Get("/config", getConfig)
+		r.Get("/api/v1/config", getConfig)
 		services.New().Router(r)
 	})
 

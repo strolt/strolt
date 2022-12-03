@@ -11,6 +11,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/env"
 	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/apps/strolt/internal/metrics"
 	"github.com/strolt/strolt/apps/strolt/internal/schedule"
 	"github.com/strolt/strolt/apps/strolt/internal/util/dir"
 
@@ -47,7 +48,6 @@ func initConfig() {
 
 //nolint:gochecknoinits
 func init() {
-	env.Scan()
 	rootCmd.PersistentFlags().BoolVar(&isJSONFlag, "json", false, "set output mode to JSON")
 	// cobra.OnInitialize(initConfig)
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
@@ -70,6 +70,9 @@ var rootCmd = &cobra.Command{
                 love by spf13 and friends in Go.
                 Complete documentation is available at http://hugo.spf13.com`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		env.Scan()
+		metrics.Init()
+
 		parseCliFlags()
 
 		initConfig()

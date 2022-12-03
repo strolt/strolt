@@ -27,6 +27,7 @@ func backup(serviceName string, taskName string) {
 			log.Error(err)
 			scheduleSourceError(t, err)
 			scheduleError(t, fmt.Errorf("source: %w", err))
+			t.UpdateMetricsAfterTaskFinish()
 
 			return
 		}
@@ -64,4 +65,6 @@ func backup(serviceName string, taskName string) {
 	} else {
 		scheduleError(t, fmt.Errorf("destination: %s", strings.Join(destinationErrors, ", ")))
 	}
+
+	t.UpdateMetricsAfterTaskFinish()
 }

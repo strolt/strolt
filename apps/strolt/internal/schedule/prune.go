@@ -44,4 +44,6 @@ func prune(serviceName string, taskName string) {
 	} else {
 		scheduleError(t, fmt.Errorf("destination: %s", strings.Join(destinationErrors, ", ")))
 	}
+
+	t.UpdateMetricsAfterTaskFinish()
 }

@@ -6,6 +6,8 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
+	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/apps/strolt/internal/metrics"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 )
 
@@ -106,4 +108,32 @@ func New(serviceName string, taskName string, trigger sctxt.TriggerType, operati
 			Schedule: c.Schedule.Prune,
 		},
 	}, nil
+}
+
+func (t *Task) UpdateMetricsAfterTaskFinish() {
+	log := logger.New()
+
+	if t.Context.OpertationType == sctxt.OpTypeBackup {
+		if t.Context.Event == sctxt.EvOperationError {
+			metrics.Operations().BackupError()
+			log.Warn("updateMetrics: backup error")
+		}
+
+		if t.Context.Event == sctxt.EvOperationStop {
+			log.Warn("updateMetrics: backup success")
+			metrics.Operations().BackupSuccess()
+		}
+	}
+
+	if t.Context.OpertationType == sctxt.OpTypePrune {
+		if t.Context.Event == sctxt.EvOperationError {
+			metrics.Operations().PruneError()
+			log.Warn("updateMetrics: prune error")
+		}
+
+		if t.Context.Event == sctxt.EvOperationStop {
+			log.Warn("updateMetrics: prune success")
+			metrics.Operations().PruneSuccess()
+		}
+	}
 }
