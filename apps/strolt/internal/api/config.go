@@ -7,7 +7,6 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/api/apiu"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/env"
-	"github.com/strolt/strolt/apps/strolt/internal/metrics"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 )
 
@@ -54,7 +53,6 @@ type ConfigServiceTaskNotification struct {
 // @success 200 {object} Config
 // @Router       /api/v1/config [get].
 func (api *API) getConfig(w http.ResponseWriter, r *http.Request) {
-	metrics.Operations().BackupError()
 	c := config.Get()
 
 	tags := []string{}
