@@ -7,7 +7,6 @@ require (
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-chi/docgen v1.2.0
 	github.com/go-chi/render v1.0.1

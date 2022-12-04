@@ -79,6 +79,7 @@ func (api *API) Run(ctx context.Context, cancel func()) {
 		err := api.httpServer.ListenAndServe()
 		if err != nil {
 			api.log.Warnf("http server terminated, %s", err)
+			cancel()
 		}
 	}()
 
@@ -95,6 +96,7 @@ func (api *API) handler() http.Handler {
 	r.Use(middleware.RequestID)
 	// r.Use(middleware.Logger)
 	r.Use(Logger())
+	r.Use(middleware.Compress(5)) //nolint:gomnd
 
 	public.New().Router(r)
 

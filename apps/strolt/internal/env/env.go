@@ -14,6 +14,7 @@ type config struct {
 	GlobalTags           globalTags `env:"STROLT_GLOBAL_TAGS"`
 	IsDebug              bool       `env:"STROLT_DEBUG"`
 	IsWatchFilesDisabled bool       `env:"STROLT_DISABLE_WATCH_FILES_CHANGED"`
+	PathData             string     `env:"STROLT_PATH_DATA"`
 }
 
 type globalTags []string
@@ -59,4 +60,8 @@ func IsDebug() bool {
 
 func IsWatchFilesDisabled() bool {
 	return resultConfig.IsWatchFilesDisabled
+}
+
+func PathData() string {
+	return resultConfig.PathData
 }

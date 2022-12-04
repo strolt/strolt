@@ -16,6 +16,7 @@ RUN go build -o strolt -ldflags "-X github.com/strolt/strolt/apps/strolt/interna
 
 FROM base
 ARG GITHUB_SHA
+ENV STROLT_PATH_DATA=/strolt
 
 LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
       org.opencontainers.image.description="Strolt backup engine" \
@@ -26,7 +27,7 @@ LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
 
 COPY --from=builder /go/src/strolt/strolt/strolt/strolt ./bin/strolt
 
-ENTRYPOINT ["/strolt/bin/strolt", "--config", "/strolt/config"]
+ENTRYPOINT ["/strolt/bin/strolt", "--config", "/strolt/config.yml"]
 
 HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost:8080/api/v1/ping || exit 1
 

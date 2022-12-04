@@ -73,7 +73,7 @@ func prune(w http.ResponseWriter, r *http.Request, idDryRun bool) {
 		return
 	}
 
-	apiu.RenderJSON500(w, r, getPruneResult{
+	apiu.RenderJSON200(w, r, getPruneResult{
 		Data: snapshotList,
 	})
 }

@@ -42,9 +42,10 @@ func (s *Services) backup(w http.ResponseWriter, r *http.Request) {
 		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
 		return
 	}
-	defer t.Close()
 
 	go func() {
+		defer t.Close()
+
 		if err = t.BackupSourceToWorkDir(); err != nil {
 			log.Error(err)
 			apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
