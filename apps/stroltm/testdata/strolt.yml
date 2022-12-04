@@ -2,6 +2,10 @@ name: stroltm
 
 timezone: UTC
 
+api:
+  users:
+    admin: admin
+
 services:
   e2e:
     pg-t:
@@ -9,15 +13,44 @@ services:
         driver: pg
         config:
           host: postgres
-          database: strotl
-          username: strotl
-          password: strotl
+          database: strolt
+          username: strolt
+          password: strolt
           format: t
       destinations:
         restic-pg-t:
           extends: restic_base
           env:
-            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-pg-t"
+            RESTIC_REPOSITORY: "s3:http://minio:9000/e2e/restic-pg-t"
+  e2e2:
+    pg-t:
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: strolt
+          username: strolt
+          password: strolt
+          format: t
+      destinations:
+        restic-pg-t:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/e2e2/restic-pg-t"
+    pg-t2:
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: strolt
+          username: strolt
+          password: strolt
+          format: t
+      destinations:
+        restic-pg-t:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/e2e2/restic-pg-t2"
 
 definitions:
   destinations:

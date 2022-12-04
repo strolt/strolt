@@ -1,55 +1,61 @@
 package main
 
 import (
-	"log"
+	"context"
+	"os"
+	"os/signal"
+	"sync"
 
 	"github.com/strolt/strolt/apps/stroltm/internal/api"
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
+	"github.com/strolt/strolt/apps/stroltm/internal/env"
+	"github.com/strolt/strolt/apps/stroltm/internal/logger"
+	"github.com/strolt/strolt/apps/stroltm/internal/manager"
 )
 
 func main() {
+	env.Scan()
+
+	log := logger.New()
+
 	if err := config.Scan(); err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
-	log.Println(config.Get())
+	log.Info(config.Get())
 
-	log.Println("smanager")
+	ctx, cancel := context.WithCancel(context.Background())
 
-	// {
-	// 	s := time.Now()
-	// 	config, err := strolt.New("127.0.0.1:3333").GetConfig()
-	// 	if err != nil {
-	// 		log.Println(err)
-	// 		return
-	// 	}
-	// 	log.Println(time.Since(s))
+	wg := sync.WaitGroup{}
 
-	// 	{
-	// 		data, err := json.Marshal(config)
-	// 		if err != nil {
-	// 			log.Println(err)
-	// 		}
-	// 		log.Println(string(data))
-	// 	}
-	// }
+	c := make(chan os.Signal, 1)
+	defer close(c)
 
-	// {
-	// 	config, err := strolt.New("127.0.0.1:3333").GetPrune("e2e", "local", "restic-local1")
-	// 	if err != nil {
-	// 		log.Println(err)
-	// 		return
-	// 	}
+	signal.Notify(c, os.Interrupt)
 
-	// 	{
-	// 		data, err := json.Marshal(config)
-	// 		if err != nil {
-	// 			log.Println(err)
-	// 		}
-	// 		log.Println(string(data))
-	// 	}
-	// }
+	{ // Api server
+		wg.Add(1)
+		go func() {
+			api.New().Run(ctx, cancel)
+			wg.Done()
+		}()
+	}
 
-	api.Start()
+	{ // Manager
+		wg.Add(1)
+		go func() {
+			manager.New().Watch(ctx, cancel)
+			wg.Done()
+		}()
+	}
+
+	// Watch system exit code
+	go func() {
+		oscall := <-c
+		log.Debugf("system call: %+v", oscall)
+		cancel()
+	}()
+
+	wg.Wait()
 }

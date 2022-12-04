@@ -29,31 +29,36 @@ func (sdk *Sdk) GetConfig() (*operations.GetConfigOK, error) {
 }
 
 func (sdk *Sdk) GetSnapshots(serviceName, taskName, destinationName string) (*services.GetSnapshotsOK, error) {
-	params := &services.GetSnapshotsParams{
-		TaskName:        taskName,
-		ServiceName:     serviceName,
-		DestinationName: destinationName,
-	}
+	params := services.NewGetSnapshotsParams()
+	params.TaskName = taskName
+	params.ServiceName = serviceName
+	params.DestinationName = destinationName
 
 	return sdk.client.Services.GetSnapshots(params, sdk.authInfo)
 }
 
+func (sdk *Sdk) Backup(serviceName, taskName string) (*services.BackupOK, error) {
+	params := services.NewBackupParams()
+	params.ServiceName = serviceName
+	params.TaskName = taskName
+
+	return sdk.client.Services.Backup(params, sdk.authInfo)
+}
+
 func (sdk *Sdk) GetSnapshotsForPrune(serviceName, taskName, destinationName string) (*services.GetSnapshotsForPruneOK, error) {
-	params := &services.GetSnapshotsForPruneParams{
-		TaskName:        taskName,
-		ServiceName:     serviceName,
-		DestinationName: destinationName,
-	}
+	params := services.NewGetSnapshotsForPruneParams()
+	params.TaskName = taskName
+	params.ServiceName = serviceName
+	params.DestinationName = destinationName
 
 	return sdk.client.Services.GetSnapshotsForPrune(params, sdk.authInfo)
 }
 
 func (sdk *Sdk) Prune(serviceName, taskName, destinationName string) (*services.PruneOK, error) {
-	params := &services.PruneParams{
-		TaskName:        taskName,
-		ServiceName:     serviceName,
-		DestinationName: destinationName,
-	}
+	params := services.NewPruneParams()
+	params.TaskName = taskName
+	params.ServiceName = serviceName
+	params.DestinationName = destinationName
 
 	return sdk.client.Services.Prune(params, sdk.authInfo)
 }

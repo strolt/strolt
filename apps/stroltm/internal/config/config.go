@@ -7,12 +7,17 @@ import (
 )
 
 type Config struct {
-	Instances []Instance `yaml:"instances"`
+	Strolt Strolt `yaml:"strolt"`
+}
+
+type Strolt struct {
+	Instances map[string]Instance `yaml:"instances"`
 }
 
 type Instance struct {
-	URL   string `yaml:"url"`
-	Token string `yaml:"token"`
+	URL      string `yaml:"url"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 var config Config

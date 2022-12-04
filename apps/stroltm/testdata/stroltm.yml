@@ -1,3 +1,10 @@
-instances:
-  - url: 127.0.0.1:3333
-    token: token
+strolt:
+  instances:
+    test:
+      url: 127.0.0.1:8081
+      username: admin
+      password: admin
+    test1:
+      url: 127.0.0.1:8081
+      username: admin
+      password: admin
