@@ -7,7 +7,16 @@ import (
 )
 
 type Config struct {
+	API    API    `yaml:"api"`
 	Strolt Strolt `yaml:"strolt"`
+}
+
+type API struct {
+	Users map[string]User `yaml:"users"`
+}
+
+type User struct {
+	Password string `yaml:"password"`
 }
 
 type Strolt struct {
@@ -37,4 +46,14 @@ func Scan() error {
 
 func Get() Config {
 	return config
+}
+
+func GetUsers() map[string]string {
+	users := map[string]string{}
+
+	for username, user := range Get().API.Users {
+		users[username] = user.Password
+	}
+
+	return users
 }

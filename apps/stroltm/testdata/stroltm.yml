@@ -1,3 +1,8 @@
+api:
+  users:
+    admin:
+      password: admin
+
 strolt:
   instances:
     test:

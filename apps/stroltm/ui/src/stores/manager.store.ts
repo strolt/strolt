@@ -1,8 +1,9 @@
 import { AxiosResponse } from "axios";
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, reaction, runInAction } from "mobx";
 import * as api from "../api";
 import * as apiGenerated from "../api/generated";
 import { fromPromise, IPromiseBasedObservable } from "mobx-utils";
+import { authStore } from "./auth.store";
 
 export class ManagerStore {
 	constructor() {
@@ -169,5 +170,12 @@ export class ManagerStore {
 
 export const managerStore = new ManagerStore();
 
-managerStore.fetchInstances();
-setInterval(() => managerStore.fetchInstances(), 5000);
+reaction(
+	() => authStore.isAuthorized,
+	(isAuthorized) => {
+		if (isAuthorized) {
+			managerStore.fetchInstances();
+			setInterval(() => managerStore.fetchInstances(), 5000);
+		}
+	}
+);

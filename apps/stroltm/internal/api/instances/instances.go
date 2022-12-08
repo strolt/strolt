@@ -10,7 +10,7 @@ import (
 )
 
 func Router(r chi.Router) {
-	r.Route("/instances", func(r chi.Router) {
+	r.Route("/api/v1/instances", func(r chi.Router) {
 		r.Get("/", getList)
 	})
 }

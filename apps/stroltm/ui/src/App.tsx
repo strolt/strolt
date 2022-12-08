@@ -2,11 +2,19 @@ import { useEffect } from "react";
 import { observer, useStores } from "./stores";
 
 const App = observer(() => {
-	const { managerStore } = useStores();
+	
+	const { managerStore, authStore } = useStores();
 
 	// useEffect(() => {
 	// 	managerStore.fetchInstances();
 	// }, []);
+
+	if (!authStore.isAuthorized){
+		return <div>
+			NOT AUTHORIZED
+			<button onClick={()=>authStore.setCredentials("admin","admin")}>Login</button>
+		</div>
+	}
 
 	return (
 		<div>

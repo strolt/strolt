@@ -6,12 +6,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/didip/tollbooth/v7"
+	"github.com/didip/tollbooth_chi"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/docgen"
 	"github.com/strolt/strolt/apps/stroltm/internal/api/instances"
 	"github.com/strolt/strolt/apps/stroltm/internal/api/managerh"
 	"github.com/strolt/strolt/apps/stroltm/internal/api/public"
+	"github.com/strolt/strolt/apps/stroltm/internal/config"
 	"github.com/strolt/strolt/apps/stroltm/internal/env"
 	"github.com/strolt/strolt/apps/stroltm/internal/logger"
 	"github.com/strolt/strolt/apps/stroltm/internal/ui"
@@ -100,22 +103,30 @@ func (api *API) handler() http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Compress(5)) //nolint:gomnd
 
-	public.New().Router(r)
-	managerh.New().Router(r)
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.Timeout(5 * time.Second))                      //nolint:gomnd
+		r.Use(tollbooth_chi.LimitHandler(tollbooth.NewLimiter(1, nil))) //nolint:gomnd
 
-	r.Route("/api/v1", func(r chi.Router) {
-		instances.Router(r)
+		r.Post("/api/v1/auth/validate", api.authValidate)
 	})
 
-	r.Route("/", ui.Router)
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.Timeout(time.Minute))                           //nolint:gomnd
+		r.Use(tollbooth_chi.LimitHandler(tollbooth.NewLimiter(10, nil))) //nolint:gomnd
 
-	// r.Group(func(r chi.Router) {
-	// 	r.Use(middleware.BasicAuth("api", config.Get().API.Users))
+		public.New().Router(r)
 
-	// 	r.Get("/api/v1/config", api.getConfig)
-	// 	r.Get("/api/v1/metrics", api.getStroltMetrics)
-	// 	services.New().Router(r)
-	// })
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.BasicAuth("api", config.GetUsers()))
+
+			managerh.New().Router(r)
+			instances.Router(r)
+		})
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Route("/", ui.Router)
+	})
 
 	if env.IsDebug() {
 		docgen.PrintRoutes(r)
