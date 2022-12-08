@@ -24,7 +24,7 @@ jobs:
 
       - name: generate swagger
         run: |
-          make swagger-strolt && make swagger-generate-client
+          make .swagger-strolt && make .swagger-strolt-manager-generate-client
 
       - name: golangci-lint (strolt)
         uses: golangci/golangci-lint-action@v3

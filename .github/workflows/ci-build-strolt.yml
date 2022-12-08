@@ -18,6 +18,7 @@ on:
 
 jobs:
   build-images:
+    needs: [ci-lint]
     name: Build Docker images
     runs-on: ubuntu-latest
 
