@@ -7,8 +7,10 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "gen:api": "yarn run openapi-generator-cli generate -i ../../../.swagger/stroltm/swagger.json -g typescript-axios -o ./src/api/generated",
-    "format": "prettier --plugin @trivago/prettier-plugin-sort-imports --write \"**/*.{ts,tsx,md}\""
+    "gen-api": "yarn run openapi-generator-cli generate -i ../../../.swagger/stroltm/swagger.json -g typescript-axios -o ./src/api/generated",
+    "format": "prettier --plugin @trivago/prettier-plugin-sort-imports --write",
+    "format:all": "prettier --plugin @trivago/prettier-plugin-sort-imports --write \"**/*.{ts,tsx,md}\"",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "antd": "^5.0.5",

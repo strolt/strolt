@@ -104,14 +104,14 @@ func (api *API) handler() http.Handler {
 	r.Use(middleware.Compress(5)) //nolint:gomnd
 
 	r.Group(func(r chi.Router) {
-		r.Use(middleware.Timeout(5 * time.Second))                      //nolint:gomnd
-		r.Use(tollbooth_chi.LimitHandler(tollbooth.NewLimiter(1, nil))) //nolint:gomnd
+		r.Use(middleware.Timeout(5 * time.Second)) //nolint:gomnd
+		r.Use(tollbooth_chi.LimitHandler(tollbooth.NewLimiter(1, nil)))
 
 		r.Post("/api/v1/auth/validate", api.authValidate)
 	})
 
 	r.Group(func(r chi.Router) {
-		r.Use(middleware.Timeout(time.Minute))                           //nolint:gomnd
+		r.Use(middleware.Timeout(time.Minute))
 		r.Use(tollbooth_chi.LimitHandler(tollbooth.NewLimiter(10, nil))) //nolint:gomnd
 
 		public.New().Router(r)
