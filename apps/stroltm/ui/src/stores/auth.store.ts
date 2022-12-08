@@ -1,52 +1,59 @@
+import { AxiosResponse } from "axios";
 import { makeAutoObservable } from "mobx";
 
 import { fromPromise, IPromiseBasedObservable } from "mobx-utils";
+
 import * as api from "../api";
 import * as apiGenerated from "../api/generated";
 import * as env from "../env";
-import { AxiosResponse } from "axios";
 
 const setApiAuthorization = (username: string, password: string) => {
-	api.axiosInstance.defaults.auth = {
-		username,
-		password,
-	};
+  api.axiosInstance.defaults.auth = {
+    username,
+    password,
+  };
 };
 
 export class AuthStore {
-	constructor() {
-		makeAutoObservable(this);
-	}
+  constructor() {
+    makeAutoObservable(this);
+  }
 
-	requestValidateStatus: IPromiseBasedObservable<
-		AxiosResponse<apiGenerated.ApiuResultSuccess, any>
-	> | null = null;
+  requestValidateStatus: IPromiseBasedObservable<
+    AxiosResponse<apiGenerated.ApiuResultSuccess, any>
+  > | null = null;
 
-	isAuthorized = false;
+  isAuthorized = false;
 
-	username = "";
-	password = "";
+  username = "";
+  password = "";
 
-	async setCredentials(username: string, password: string) {
-		this.requestValidateStatus = fromPromise(
-			api.auth.validate({
-				username,
-				password,
-			})
-		);
-		await this.requestValidateStatus;
+  async login(username: string, password: string) {
+    this.requestValidateStatus = fromPromise(
+      api.auth.validate({
+        username,
+        password,
+      }),
+    );
+    await this.requestValidateStatus;
 
-		this.username = username;
-		this.password = password;
-		this.isAuthorized = true;
-		setApiAuthorization(username, password);
-	}
+    this.username = username;
+    this.password = password;
+    this.isAuthorized = true;
+    setApiAuthorization(username, password);
+  }
+
+  logout() {
+    this.username = "";
+    this.password = "";
+    this.isAuthorized = false;
+  }
 }
 
 export const authStore = new AuthStore();
 
 if (env.isDevelopment) {
-	document.addEventListener("DOMContentLoaded", () => {
-		authStore.setCredentials("admin", "admin");
-	});
+  document.addEventListener("DOMContentLoaded", () => {
+    authStore.login("admin", "admin");
+  });
 }

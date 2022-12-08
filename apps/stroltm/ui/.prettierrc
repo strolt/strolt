@@ -1,0 +1,26 @@
+{
+  "arrowParens": "always",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "useTabs": false,
+  "endOfLine": "auto",
+  "importOrder": [
+    "^react$",
+    "^react(.*)$",
+    "^antd",
+    "(components)",
+    "^api",
+    "(stores)",
+    "hooks",
+    "utils(.*)",
+    "(.json)$",
+    "(svg|png|jpg|jpeg)$",
+    "(.css)$",
+    "(.scss)$",
+    "^[../]",
+    "^[./]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderParserPlugins": ["legacy-decorator", "typescript", "jsx", "decorators-legacy"]
+}
