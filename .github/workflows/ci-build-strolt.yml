@@ -1,25 +1,20 @@
 name: build-strolt
 
-# on:
-#   push:
-#     branches:
-#     tags:
-#     paths:
-#       - ".github/workflows/ci-build-strolt.yml"
-#       - "apps/strolt/**"
-#       - ".dockerignore"
-#       - "!**.md"
-#   pull_request:
-#     paths:
-#       - ".github/workflows/ci-build-strolt.yml"
-#       - "apps/strolt/**"
-#       - ".dockerignore"
-#       - "!**.md"
 on:
-  workflow_run:
-    workflows: ["lint"]
-    types:
-      - completed
+  push:
+    branches:
+    tags:
+    paths:
+      - ".github/workflows/ci-build-strolt.yml"
+      - "apps/strolt/**"
+      - ".dockerignore"
+      - "!**.md"
+  pull_request:
+    paths:
+      - ".github/workflows/ci-build-strolt.yml"
+      - "apps/strolt/**"
+      - ".dockerignore"
+      - "!**.md"
 
 jobs:
   build-images:
@@ -27,13 +22,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # - name: Wait for lint to succeed
-      #   uses: lewagon/wait-on-check-action@v1.2.0
-      #   with:
-      #     ref: ${{ github.ref }}
-      #     check-name: 'lint'
-      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
-      #     wait-interval: 10
+      - name: Wait for lint to succeed
+        uses: lewagon/wait-on-check-action@v1.2.0
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'lint'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
 
       - uses: actions/checkout@v3
 
