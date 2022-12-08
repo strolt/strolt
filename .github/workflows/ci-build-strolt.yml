@@ -22,14 +22,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Wait for lint to succeed
-        uses: lewagon/wait-on-check-action@v1.2.0
-        with:
-          ref: ${{ github.ref }}
-          check-name: 'lint'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-
       - uses: actions/checkout@v3
 
       - name: set up QEMU
