@@ -88,7 +88,8 @@ const Task: FC<TaskProps> = observer(({ task, instanceName, serviceName, taskNam
           {Object.entries(task.destinations || {}).map(([destinationName, destination]) => {
             return (
               <li key={destinationName}>
-                {destinationName}: <b>{destination.driver}</b>{" "}
+                {destinationName}: <b>{destination.driver}</b>
+                {" | "}
                 <Link
                   to="instances.instanceId.serviceId.taskId.destinationId.snapshotList"
                   params={{
@@ -99,6 +100,18 @@ const Task: FC<TaskProps> = observer(({ task, instanceName, serviceName, taskNam
                   }}
                 >
                   Snapshots
+                </Link>
+                {" | "}
+                <Link
+                  to="instances.instanceId.serviceId.taskId.destinationId.prune"
+                  params={{
+                    instanceId: instanceName,
+                    serviceId: serviceName,
+                    taskId: taskName,
+                    destinationId: destinationName,
+                  }}
+                >
+                  Prune
                 </Link>
               </li>
             );

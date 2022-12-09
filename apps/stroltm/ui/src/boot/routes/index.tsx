@@ -16,6 +16,7 @@ const r = (c: ConstantsRouteType, element: ReactNode) => ({
 const instances = [
   r("instances.main", <pages.lk.InstanceList />),
   r("instances.instanceId.serviceId.taskId.destinationId.snapshotList", <pages.lk.SnapshotList />),
+  r("instances.instanceId.serviceId.taskId.destinationId.prune", <pages.lk.Prune />),
 ];
 
 const auth = [r("auth.login", <pages.auth.Login />)];

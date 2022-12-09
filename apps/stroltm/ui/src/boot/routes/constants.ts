@@ -10,6 +10,9 @@ const _instances = {
   "instances.instanceId.serviceId.taskId.destinationId.snapshotList": instances(
     "/:instanceId/:serviceId/:taskId/:destinationId/snapshots",
   ),
+  "instances.instanceId.serviceId.taskId.destinationId.prune": instances(
+    "/:instanceId/:serviceId/:taskId/:destinationId/prune",
+  ),
 };
 
 const auth = rPrefix("/auth");
