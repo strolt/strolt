@@ -35,6 +35,7 @@ type getInstancesResultItem struct {
 	Config              *models.APIConfig `json:"config"`
 	IsOnline            bool              `json:"isOnline"`
 	LatestSuccessPingAt string            `json:"latestSuccessPingAt"`
+	Version             string            `json:"version"`
 }
 
 // getInstances godoc
@@ -55,6 +56,7 @@ func (s *ManagerHandlers) getInstances(w http.ResponseWriter, r *http.Request) {
 			Config:              instance.Config,
 			IsOnline:            instance.IsOnline,
 			LatestSuccessPingAt: instance.Watch.LatestSuccessPingAt.Format(time.RFC3339),
+			Version:             instance.Info.Version,
 		}
 	}
 

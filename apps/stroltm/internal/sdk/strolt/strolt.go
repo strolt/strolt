@@ -4,6 +4,7 @@ import (
 	"github.com/go-openapi/runtime"
 	runtimeClient "github.com/go-openapi/runtime/client"
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client"
+	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client/info"
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client/operations"
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client/public"
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client/services"
@@ -69,4 +70,8 @@ func (sdk *Sdk) Ping() (*public.PingOK, error) {
 
 func (sdk *Sdk) GetMetrics() (*operations.GetStroltMetricsOK, error) {
 	return sdk.client.Operations.GetStroltMetrics(nil, sdk.authInfo)
+}
+
+func (sdk *Sdk) GetInfo() (*info.GetInfoOK, error) {
+	return sdk.client.Info.GetInfo(nil, sdk.authInfo)
 }

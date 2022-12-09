@@ -36,12 +36,6 @@ func (m *Manager) Watch(ctx context.Context, cancel func()) {
 }
 
 func (s *Strolt) isPingAllowed() bool {
-	s.Lock()
-	if s.Watch == nil {
-		s.Watch = &WatchItem{}
-	}
-	s.Unlock()
-
 	return !s.Watch.IsPingInProcess
 }
 
@@ -57,14 +51,51 @@ func (s *Strolt) updateConfig() {
 	s.Unlock()
 }
 
+func (s *Strolt) updateInfo() {
+	result, err := s.sdk.GetInfo()
+	if err != nil || result.Payload == nil {
+		return
+	}
+
+	s.Lock()
+	s.Info.Version = result.Payload.Version
+	s.Unlock()
+}
+
+func (s *Strolt) setIsOnline(isOnline bool) {
+	if !s.IsOnline && isOnline {
+		s.updateInfo()
+	}
+
+	s.Lock()
+	s.IsOnline = isOnline
+	s.Unlock()
+}
+
+func (s *Strolt) setLatestSuccessPingAt(at time.Time) {
+	s.Lock()
+	s.Watch.LatestSuccessPingAt = at
+	s.Unlock()
+}
+
+func (s *Strolt) setIsPingInProcess(isProcess bool) {
+	s.Lock()
+	s.Watch.IsPingInProcess = isProcess
+	s.Unlock()
+}
+
+func (s *Strolt) setLatestPingAt(at time.Time) {
+	s.Lock()
+	s.Watch.LatestPingAt = at
+	s.Unlock()
+}
+
 func (s *Strolt) ping() {
 	pingAt := time.Now()
 	isError := false
 
-	s.Lock()
-	s.Watch.IsPingInProcess = true
-	s.Watch.LatestPingAt = pingAt
-	s.Unlock()
+	s.setIsPingInProcess(true)
+	s.setLatestPingAt(pingAt)
 
 	result, err := s.sdk.Ping()
 	if err != nil {
@@ -85,16 +116,14 @@ func (s *Strolt) ping() {
 		}
 	}
 
-	s.Lock()
 	if isError {
-		s.IsOnline = false
+		s.setIsOnline(false)
 	} else {
-		s.Watch.LatestSuccessPingAt = pingAt
-		s.IsOnline = true
+		s.setLatestSuccessPingAt(pingAt)
+		s.setIsOnline(true)
 	}
 
-	s.Watch.IsPingInProcess = false
-	s.Unlock()
+	s.setIsPingInProcess(false)
 }
 
 func (m *Manager) pingInstances() {

@@ -65,7 +65,7 @@ DOCKER_IMAGE   ?= strolt/strolt
 DOCKER_E2E_REF := $(DOCKER_IMAGE):e2e
 
 .e2e-strolt:
-	docker build -f ./docker/strolt/Dockerfile --build-arg STROLT_VERSION=e2e -t $(DOCKER_E2E_REF) ./
+	docker build -f ./docker/strolt/Dockerfile --build-arg version=e2e -t $(DOCKER_E2E_REF) ./
 	cd ./apps/strolt && GOFLAGS="-count=1" go test ./e2e
 
 .PHONY: e2e

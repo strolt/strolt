@@ -181,7 +181,7 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
     <div style={{ minWidth: "25rem" }}>
       <Card
         size="small"
-        title={`instance: [${instance.instanceName}] (${instance.config?.timezone})`}
+        title={`instance: [${instance.instanceName}] {version: ${instance.version}} (${instance.config?.timezone})`}
         extra={
           instance.isOnline ? <Tag color="success">Online</Tag> : <Tag color="error">Offline</Tag>
         }

@@ -21,6 +21,7 @@ type Strolt struct {
 	Password     string
 
 	Watch          *WatchItem
+	Info           *InfoItem
 	ConfigLoadedAt time.Time
 	IsOnline       bool
 	sdk            *strolt.Sdk
@@ -38,6 +39,10 @@ type WatchItem struct {
 	IsPingInProcess     bool
 }
 
+type InfoItem struct {
+	Version string
+}
+
 var (
 	manager = &Manager{
 		Strolt: map[string]*Strolt{},
@@ -49,6 +54,8 @@ func New() *Manager {
 
 	for instanceName, instance := range configInstances {
 		manager.Strolt[instanceName] = &Strolt{
+			Watch:        &WatchItem{},
+			Info:         &InfoItem{},
 			InstanceName: instanceName,
 			URL:          instance.URL,
 			Username:     instance.Username,

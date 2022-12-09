@@ -10,6 +10,8 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/api/services"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/env"
+	"github.com/strolt/strolt/apps/strolt/internal/ldflags"
+	"github.com/strolt/strolt/shared/apiu"
 	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/go-chi/chi/v5"
@@ -105,6 +107,7 @@ func (api *API) handler() http.Handler {
 
 		r.Get("/api/v1/config", api.getConfig)
 		r.Get("/api/v1/metrics", api.getStroltMetrics)
+		r.Get("/api/v1/info", api.getInfo)
 		services.New().Router(r)
 	})
 
@@ -113,4 +116,21 @@ func (api *API) handler() http.Handler {
 	}
 
 	return r
+}
+
+type getInfoResponse struct {
+	Version string `json:"version"`
+}
+
+// getInfo godoc
+// @Id					 getInfo
+// @Summary      Get info
+// @Tags         info
+// @Security BasicAuth
+// @success 200 {object} getInfoResponse
+// @Router       /api/v1/info [get].
+func (api *API) getInfo(w http.ResponseWriter, r *http.Request) {
+	apiu.RenderJSON200(w, r, getInfoResponse{
+		Version: ldflags.GetVersion(),
+	})
 }
