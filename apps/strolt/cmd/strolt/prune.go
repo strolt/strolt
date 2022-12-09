@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/spf13/cobra"
 )

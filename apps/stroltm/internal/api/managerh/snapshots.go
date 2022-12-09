@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/strolt/strolt/apps/stroltm/internal/api/apiu"
 	"github.com/strolt/strolt/apps/stroltm/internal/manager"
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt"
+	"github.com/strolt/strolt/shared/apiu"
 )
 
 func getSDK(instanceName string) (*strolt.Sdk, error) {
@@ -41,18 +41,18 @@ func (s *ManagerHandlers) getSnapshots(w http.ResponseWriter, r *http.Request) {
 
 	sdk, err := getSDK(instanceName)
 	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 
 	result, err := sdk.GetSnapshots(serviceName, taskName, destinationName)
 	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 
 	if result == nil || result.Payload == nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: "response is empty"})
+		apiu.RenderJSON500(w, r, fmt.Errorf("response is empty"))
 		return
 	}
 

@@ -3,9 +3,9 @@ package services
 import (
 	"net/http"
 
-	"github.com/strolt/strolt/apps/strolt/internal/api/apiu"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
+	"github.com/strolt/strolt/shared/apiu"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -56,20 +56,20 @@ func prune(w http.ResponseWriter, r *http.Request, idDryRun bool) {
 	}
 
 	if taskOperation.IsWorking() {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: apiu.ErrTaskAlreadyWorking.Error()})
+		apiu.RenderJSON500(w, r, apiu.ErrTaskAlreadyWorking)
 		return
 	}
 
 	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
 	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 	defer t.Close()
 
 	snapshotList, err := t.DestinationPrune(destinationName, idDryRun)
 	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 

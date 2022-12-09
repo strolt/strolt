@@ -36,6 +36,7 @@ repos:
         types: [text]
         files: ^apps/strolt
         types_or: [go]
+        require_serial: true
       - id: strolt/test
         name: strolt/test
         entry: make .test-strolt
@@ -54,6 +55,7 @@ repos:
         types: [text]
         files: ^apps/stroltm
         types_or: [go]
+        require_serial: true
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0

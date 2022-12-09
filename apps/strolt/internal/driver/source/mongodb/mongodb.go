@@ -1,7 +1,7 @@
 package mongodb
 
 import (
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 type MongoDB struct {

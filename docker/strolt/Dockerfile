@@ -1,17 +1,18 @@
 FROM alpine:3.17.0 AS base
 WORKDIR /strolt
-COPY ./docker/scripts scripts
+COPY ./docker/strolt/scripts scripts
 RUN sh ./scripts/install.sh && rm -rf ./scripts
 
 FROM golang:1.19.0-alpine3.16@sha256:70df3b8f9f099da7f60f0b32480015165e3d0b51bfacf9e255b59f3dd6bd2828 AS builder
 ARG version
-WORKDIR /go/src/strolt/strolt/strolt
-COPY ./go.mod .
-COPY ./go.sum .
+WORKDIR /go/src/github.com/strolt/strolt/apps/strolt
+COPY ./apps/strolt/go.mod .
+COPY ./apps/strolt/go.sum .
+COPY ./shared /go/src/github.com/strolt/strolt/shared
 RUN go mod download
-COPY ./main.go .
-COPY ./cmd ./cmd
-COPY ./internal ./internal
+COPY ./apps/strolt/main.go .
+COPY ./apps/strolt/cmd ./cmd
+COPY ./apps/strolt/internal ./internal
 RUN go build -o strolt -ldflags "-X github.com/strolt/strolt/apps/strolt/internal/ldflags.version=${version} -s -w"
 
 FROM base
@@ -25,7 +26,7 @@ LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
       org.opencontainers.image.title="Strolt" \
       org.opencontainers.image.revision="${GITHUB_SHA}"
 
-COPY --from=builder /go/src/strolt/strolt/strolt/strolt ./bin/strolt
+COPY --from=builder /go/src/github.com/strolt/strolt/apps/strolt/strolt ./bin/strolt
 
 ENTRYPOINT ["/strolt/bin/strolt", "--config", "/strolt/config.yml"]
 

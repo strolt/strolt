@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"github.com/strolt/strolt/apps/strolt/internal/api/apiu"
 	"github.com/strolt/strolt/apps/strolt/internal/metrics"
+	"github.com/strolt/strolt/shared/apiu"
 )
 
 type getStroltMetricsResponse struct {

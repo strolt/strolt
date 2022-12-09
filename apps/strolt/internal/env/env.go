@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/caarlos0/env/v6"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 type config struct {

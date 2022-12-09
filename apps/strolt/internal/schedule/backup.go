@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 func backup(serviceName string, taskName string) {

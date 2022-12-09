@@ -3,10 +3,10 @@ package services
 import (
 	"net/http"
 
-	"github.com/strolt/strolt/apps/strolt/internal/api/apiu"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
+	"github.com/strolt/strolt/shared/apiu"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -33,13 +33,13 @@ func (s *Services) backup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if taskOperation.IsWorking() {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: apiu.ErrTaskAlreadyWorking.Error()})
+		apiu.RenderJSON500(w, r, apiu.ErrTaskAlreadyWorking)
 		return
 	}
 
 	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
 	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 
@@ -48,7 +48,7 @@ func (s *Services) backup(w http.ResponseWriter, r *http.Request) {
 
 		if err = t.BackupSourceToWorkDir(); err != nil {
 			log.Error(err)
-			apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+			apiu.RenderJSON500(w, r, err)
 
 			return
 		}

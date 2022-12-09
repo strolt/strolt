@@ -10,7 +10,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/google/uuid"
 	"github.com/otiai10/copy"

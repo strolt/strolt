@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/apps/strolt/internal/util"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"

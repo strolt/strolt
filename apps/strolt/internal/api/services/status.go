@@ -3,8 +3,8 @@ package services
 import (
 	"net/http"
 
-	"github.com/strolt/strolt/apps/strolt/internal/api/apiu"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
+	"github.com/strolt/strolt/shared/apiu"
 )
 
 type getStatusResult struct {

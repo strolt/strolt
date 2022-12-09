@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/strolt/strolt/apps/stroltm/internal/api/apiu"
 	"github.com/strolt/strolt/apps/stroltm/internal/manager"
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/models"
+	"github.com/strolt/strolt/shared/apiu"
 )
 
 type ManagerHandlers struct {

@@ -39,8 +39,8 @@ jobs:
         run: |
           docker buildx build \
               --platform linux/amd64 \
-              -f apps/strolt/docker/Dockerfile\
-              ./apps/strolt
+              -f ./docker/strolt/Dockerfile\
+              ./
 
       - name: Login to Github
         env:
@@ -68,5 +68,5 @@ jobs:
               --platform linux/amd64,linux/arm/v7,linux/arm64 \
               -t ghcr.io/strolt/strolt:${ref} -t ghcr.io/strolt/strolt:latest \
               -t strolt/strolt:${ref} -t strolt/strolt:latest \
-              -f apps/strolt/docker/Dockerfile \
-              ./apps/strolt
+              -f ./docker/strolt/Dockerfile\
+              ./

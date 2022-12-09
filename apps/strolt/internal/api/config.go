@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/strolt/strolt/apps/strolt/internal/api/apiu"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/env"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
+	"github.com/strolt/strolt/shared/apiu"
 )
 
 type Config struct {
@@ -69,9 +69,7 @@ func (api *API) getConfig(w http.ResponseWriter, r *http.Request) {
 			for _, notificationName := range task.Notifications {
 				notificationDefinition, ok := c.Definitions.Notifications[notificationName]
 				if !ok {
-					apiu.RenderJSON500(w, r, apiu.ResultError{
-						Error: fmt.Sprintf("not found notification definition '%s'", notificationName),
-					})
+					apiu.RenderJSON500(w, r, fmt.Errorf("not found notification definition '%s'", notificationName))
 
 					return
 				}

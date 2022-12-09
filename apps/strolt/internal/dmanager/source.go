@@ -8,7 +8,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/driver/source/mongodb"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/source/mysql"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/source/pg"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 type Source string

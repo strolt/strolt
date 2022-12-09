@@ -57,3 +57,5 @@ linters-settings:
       - ParseInt
   nlreturn:
     block-size: 2
+  gomoddirectives:
+    replace-local: true

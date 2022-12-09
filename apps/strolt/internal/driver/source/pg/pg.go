@@ -1,7 +1,7 @@
 package pg
 
 import (
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 const FileNamePrefix = "strolt_driver_pg"

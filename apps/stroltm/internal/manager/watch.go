@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/strolt/strolt/apps/stroltm/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 func (m *Manager) Watch(ctx context.Context, cancel func()) {

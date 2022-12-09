@@ -1,10 +1,11 @@
 package managerh
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/strolt/strolt/apps/stroltm/internal/api/apiu"
+	"github.com/strolt/strolt/shared/apiu"
 )
 
 // getSnapshotsForPrune godoc
@@ -27,7 +28,7 @@ func (s *ManagerHandlers) getSnapshotsForPrune(w http.ResponseWriter, r *http.Re
 
 	sdk, err := getSDK(instanceName)
 	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 
@@ -37,17 +38,17 @@ func (s *ManagerHandlers) getSnapshotsForPrune(w http.ResponseWriter, r *http.Re
 		// fmt.Println("IsServerError", result.IsServerError())
 		// fmt.Println("IsClientError", result.IsClientError())
 		// fmt.Println("result.Payload", result.Payload)
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 
 	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 
 	if result == nil || result.Payload == nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: "response is empty"})
+		apiu.RenderJSON500(w, r, fmt.Errorf("response is empty"))
 		return
 	}
 
@@ -74,18 +75,18 @@ func (s *ManagerHandlers) prune(w http.ResponseWriter, r *http.Request) {
 
 	sdk, err := getSDK(instanceName)
 	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 
 	result, err := sdk.Prune(serviceName, taskName, destinationName)
 	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 
 	if result == nil || result.Payload == nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: "response is empty"})
+		apiu.RenderJSON500(w, r, fmt.Errorf("response is empty"))
 		return
 	}
 

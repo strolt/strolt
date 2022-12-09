@@ -6,9 +6,9 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/metrics"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 type Operation struct {

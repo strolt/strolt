@@ -10,10 +10,10 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/api"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/env"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/metrics"
 	"github.com/strolt/strolt/apps/strolt/internal/schedule"
 	"github.com/strolt/strolt/apps/strolt/internal/util/dir"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/spf13/cobra"
 )

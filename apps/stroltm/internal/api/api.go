@@ -16,8 +16,8 @@ import (
 	"github.com/strolt/strolt/apps/stroltm/internal/api/public"
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
 	"github.com/strolt/strolt/apps/stroltm/internal/env"
-	"github.com/strolt/strolt/apps/stroltm/internal/logger"
 	"github.com/strolt/strolt/apps/stroltm/internal/ui"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 type API struct {

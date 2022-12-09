@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/metrics"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 func Logger() func(next http.Handler) http.Handler {

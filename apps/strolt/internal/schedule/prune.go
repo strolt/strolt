@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 func prune(serviceName string, taskName string) {

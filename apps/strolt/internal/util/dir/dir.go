@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/env"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 type Directory struct {

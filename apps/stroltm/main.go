@@ -9,8 +9,8 @@ import (
 	"github.com/strolt/strolt/apps/stroltm/internal/api"
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
 	"github.com/strolt/strolt/apps/stroltm/internal/env"
-	"github.com/strolt/strolt/apps/stroltm/internal/logger"
 	"github.com/strolt/strolt/apps/stroltm/internal/manager"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 func main() {

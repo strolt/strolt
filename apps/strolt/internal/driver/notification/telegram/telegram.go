@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 
 	"gopkg.in/yaml.v3"
 )

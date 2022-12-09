@@ -6,8 +6,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/strolt/strolt/apps/stroltm/internal/api/apiu"
 	"github.com/strolt/strolt/apps/stroltm/internal/env"
+	"github.com/strolt/strolt/shared/apiu"
 )
 
 type Public struct {

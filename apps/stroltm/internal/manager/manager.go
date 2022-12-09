@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
-	"github.com/strolt/strolt/apps/stroltm/internal/logger"
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt"
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/models"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 type Manager struct {
@@ -52,7 +52,7 @@ func New() *Manager {
 			InstanceName: instanceName,
 			URL:          instance.URL,
 			Username:     instance.Username,
-			Password:     instance.Password,
+			Password:     instance.Password, //pragma: allowlist secret
 			sdk:          strolt.New(instance.URL, instance.Username, instance.Password),
 			log:          logger.New().WithField("instanceName", instanceName),
 			Mutex:        &sync.Mutex{},

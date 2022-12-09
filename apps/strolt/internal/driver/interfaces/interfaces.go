@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 // type TemplateParams struct {

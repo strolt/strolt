@@ -25,10 +25,10 @@ coverage:
 	go install github.com/swaggo/swag/cmd/swag@v1.8.7
 
 .swagger-strolt: .install-swag
-	cd ./apps/strolt && swag init -g ./internal/api/api.go --output $(PROJECT_DIR)/.swagger/strolt
+	cd ./apps/strolt && swag init -g ./internal/api/api.go --parseDependency --output $(PROJECT_DIR)/.swagger/strolt
 
 .swagger-strolt-manager: .install-swag
-	cd ./apps/stroltm && swag init -g ./internal/api/api.go --output $(PROJECT_DIR)/.swagger/stroltm
+	cd ./apps/stroltm && swag init -g ./internal/api/api.go --parseDependency --output $(PROJECT_DIR)/.swagger/stroltm
 
 .swagger-strolt-manager-generate-client: .install-swagger-client
 	rm -rf ./apps/stroltm/internal/sdk/strolt/generated/client && rm -rf ./apps/stroltm/internal/sdk/strolt/generated/models
@@ -65,7 +65,7 @@ DOCKER_IMAGE   ?= strolt/strolt
 DOCKER_E2E_REF := $(DOCKER_IMAGE):e2e
 
 .e2e-strolt:
-	docker build -f ./apps/strolt/docker/Dockerfile --build-arg STROLT_VERSION=e2e -t $(DOCKER_E2E_REF) ./apps/strolt
+	docker build -f ./docker/strolt/Dockerfile --build-arg STROLT_VERSION=e2e -t $(DOCKER_E2E_REF) ./
 	cd ./apps/strolt && GOFLAGS="-count=1" go test ./e2e
 
 .PHONY: e2e

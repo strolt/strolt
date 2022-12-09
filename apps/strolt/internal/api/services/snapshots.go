@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/strolt/strolt/apps/strolt/internal/api/apiu"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
+	"github.com/strolt/strolt/shared/apiu"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -46,21 +46,21 @@ func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: apiu.ErrTaskAlreadyWorking.Error()})
+		apiu.RenderJSON500(w, r, apiu.ErrTaskAlreadyWorking)
 
 		return
 	}
 
 	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
 	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 	defer t.Close()
 
 	snapshotList, err := t.GetSnapshotList(destinationName)
 	if err != nil {
-		apiu.RenderJSON500(w, r, apiu.ResultError{Error: err.Error()})
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 
