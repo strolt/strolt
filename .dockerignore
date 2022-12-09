@@ -8,5 +8,4 @@ website/
 .gitignore
 .editorconfig
 *.md
-Makefile
 **/node_modules
