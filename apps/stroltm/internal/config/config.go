@@ -31,8 +31,8 @@ type Instance struct {
 
 var config Config
 
-func Scan() error {
-	data, err := os.ReadFile("./testdata/stroltm.yml")
+func Load(pathname string) error {
+	data, err := os.ReadFile(pathname)
 	if err != nil {
 		return err
 	}

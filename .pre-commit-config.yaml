@@ -56,6 +56,13 @@ repos:
         files: ^apps/stroltm
         types_or: [go]
         require_serial: true
+      - id: stroltm/test
+        name: stroltm/test
+        entry: make .test-stroltm
+        language: system
+        types: [text]
+        files: ^apps/stroltm
+        types_or: [go]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0

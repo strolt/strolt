@@ -14,6 +14,7 @@ require (
 	github.com/go-openapi/swag v0.22.3
 	github.com/go-openapi/validate v0.22.0
 	github.com/prometheus/client_golang v1.14.0
+	github.com/spf13/cobra v1.6.1
 	github.com/strolt/strolt/shared v0.0.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -33,6 +34,7 @@ require (
 	github.com/go-openapi/spec v0.20.7 // indirect
 	github.com/go-pkgz/expirable-cache v1.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
@@ -43,6 +45,7 @@ require (
 	github.com/prometheus/common v0.38.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	go.mongodb.org/mongo-driver v1.11.1 // indirect
 	go.opentelemetry.io/otel v1.11.2 // indirect
 	go.opentelemetry.io/otel/trace v1.11.2 // indirect

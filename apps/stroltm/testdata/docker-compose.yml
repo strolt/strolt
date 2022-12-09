@@ -62,8 +62,7 @@ services:
   #   environment:
   #     - STROLTM_DEBUG=true
   #   volumes:
-  #     # - ./stroltm.yml:/stroltm/config.yml:ro
-  #     - ./stroltm.yml:/stroltm/testdata/stroltm.yml # TODO: remove this
+  #     - ./stroltm.yml:/stroltm/config.yml:ro
   #   networks:
   #     - strolt
 

@@ -21,6 +21,7 @@ COPY ./apps/stroltm/go.sum .
 COPY ./shared /go/src/github.com/strolt/strolt/shared
 RUN go mod download
 COPY ./apps/stroltm/main.go .
+COPY ./apps/stroltm/cmd ./cmd
 COPY ./apps/stroltm/internal ./internal
 COPY --from=ui-builder /app/dist ./internal/ui/build/dist
 RUN go build -o stroltm -ldflags "-X github.com/strolt/strolt/apps/stroltm/internal/ldflags.version=${version} -s -w"
@@ -37,11 +38,7 @@ LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
 
 COPY --from=builder /go/src/github.com/strolt/strolt/apps/stroltm/stroltm ./bin/stroltm
 
-# ENTRYPOINT ["/stroltm/bin/stroltm", "--config", "/stroltm/config.yml"]
-
-# TODO: REMOVE THIS
 ENTRYPOINT ["/stroltm/bin/stroltm", "--config", "/stroltm/config.yml"]
-# TODO: REMOVE THIS
 
 HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost:8080/api/v1/ping || exit 1
 

@@ -57,8 +57,11 @@ lint: .lint-strolt .lint-stroltm .lint-stroltm-ui
 .test-strolt:
 	cd ./apps/strolt && go test $$(go list ./... | grep -v /e2e)
 
+.test-stroltm:
+	cd ./apps/stroltm && go test ./...
+
 .PHONY: test
-test: .test-strolt
+test: .test-strolt .test-stroltm
 
 ##### DOCKER #####
 .PHONY: docker-strolt
