@@ -60,12 +60,20 @@ lint: .lint-strolt .lint-stroltm .lint-stroltm-ui
 .PHONY: test
 test: .test-strolt
 
-##### E2E TEST #####
-DOCKER_IMAGE   ?= strolt/strolt
-DOCKER_E2E_REF := $(DOCKER_IMAGE):e2e
+##### DOCKER #####
+.PHONY: docker-strolt
+docker-strolt:
+	docker build -f ./docker/strolt/Dockerfile --build-arg version=development -t strolt/strolt:development ./
 
-.e2e-strolt:
-	docker build -f ./docker/strolt/Dockerfile --build-arg version=e2e -t $(DOCKER_E2E_REF) ./
+.PHONY: docker-stroltm
+docker-stroltm:
+	docker build -f ./docker/stroltm/Dockerfile --build-arg version=development -t strolt/stroltm:development ./
+
+.PHONY: docker
+docker: docker-strolt
+
+##### E2E TEST #####
+.e2e-strolt: docker-strolt
 	cd ./apps/strolt && GOFLAGS="-count=1" go test ./e2e
 
 .PHONY: e2e
