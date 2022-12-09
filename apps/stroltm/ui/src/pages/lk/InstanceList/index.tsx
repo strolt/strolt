@@ -1,6 +1,6 @@
 import { FC, useEffect } from "react";
 
-import { Button, Card, Popconfirm, Tag, Typography } from "antd";
+import { Button, Card, message, Popconfirm, Tag, Typography } from "antd";
 
 import { DebugJSON, Link } from "components";
 
@@ -35,12 +35,22 @@ const BackupButton: FC<BackupButtonProps> = observer(({ instanceName, serviceNam
 const BackupAll: FC = observer(() => {
   const { managerStore } = useStores();
 
+  useEffect(() => {
+    return () => managerStore.resetBackupAll();
+  }, []);
+
+  const handleClick = async () => {
+    const data = await managerStore.backupAll();
+    message.info(`Success started: ${data.successStarted?.length}`);
+    message.error(`Error started: ${data.errorStarted?.length}`);
+  };
+
   return (
-    <Popconfirm title="Are you sure?" onConfirm={() => managerStore.backupAll()}>
+    <Popconfirm title="Are you sure?" onConfirm={handleClick}>
       <Button
         type="primary"
         style={{ marginBottom: "1rem" }}
-        loading={managerStore.isBackupAllLoading}
+        loading={managerStore.backupAllStatus?.state === "pending"}
         danger
       >
         Backup ALL
@@ -124,7 +134,7 @@ const Task: FC<TaskProps> = observer(({ task, instanceName, serviceName, taskNam
         {task.notifications?.length ? (
           <ul>
             {task.notifications.map((notification) => (
-              <li>
+              <li key={notification.name}>
                 {notification.name} (<b>{notification.driver}</b>):{" "}
                 {notification.events?.map((eventName) => (
                   <Tag key={eventName}>{eventName}</Tag>

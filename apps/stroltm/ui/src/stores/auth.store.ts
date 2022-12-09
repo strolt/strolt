@@ -1,5 +1,5 @@
 import { AxiosResponse } from "axios";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 
 import { fromPromise, IPromiseBasedObservable } from "mobx-utils";
 
@@ -39,7 +39,10 @@ export class AuthStore {
 
     this.username = username;
     this.password = password;
-    this.isAuthorized = true;
+
+    runInAction(() => {
+      this.isAuthorized = true;
+    });
     setApiAuthorization(username, password);
   }
 

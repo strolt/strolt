@@ -23,6 +23,7 @@ func (s *ManagerHandlers) Router(r chi.Router) {
 	r.Get("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots", s.getSnapshots)
 	r.Get("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune/snapshots", s.getSnapshotsForPrune)
 	r.Post("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune", s.prune)
+	r.Post("/api/v1/manager/instances/backup-all", s.backupAll)
 }
 
 type getInstancesResult struct {

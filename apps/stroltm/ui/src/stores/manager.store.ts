@@ -17,8 +17,6 @@ export class ManagerStore {
     this.isAutoUpdateInstancesEnabled = status;
   }
 
-  isBackupAllLoading = false;
-
   instances: apiGenerated.ManagerhGetInstancesResultItem[] = [];
   instancesStatus: IPromiseBasedObservable<
     AxiosResponse<apiGenerated.ManagerhGetInstancesResult, any>
@@ -45,34 +43,18 @@ export class ManagerStore {
     this.instances = [];
   }
 
+  backupAllStatus: IPromiseBasedObservable<
+    AxiosResponse<apiGenerated.ManagerhBackupAllResponse, any>
+  > | null = null;
   async backupAll() {
-    const jobs: Array<{
-      instanceName: string;
-      serviceName: string;
-      taskName: string;
-    }> = [];
+    this.backupAllStatus = fromPromise(api.manager.backupAll());
 
-    this.instances.forEach((instance) => {
-      Object.entries(instance.config?.services || {}).forEach(([serviceName, service]) => {
-        Object.entries(service).forEach(([taskName]) => {
-          if (instance.instanceName) {
-            jobs.push({
-              instanceName: instance.instanceName,
-              serviceName,
-              taskName,
-            });
-          }
-        });
-      });
-    });
+    const { data } = await this.backupAllStatus;
 
-    this.isBackupAllLoading = true;
-
-    await Promise.all(
-      jobs.map((el) => this.backup(el.instanceName, el.serviceName, el.taskName).catch(() => null)),
-    );
-
-    this.isBackupAllLoading = false;
+    return data;
+  }
+  resetBackupAll() {
+    this.backupAllStatus = null;
   }
 
   backupStatusMapKey(instanceName: string, serviceName: string, taskName: string) {
