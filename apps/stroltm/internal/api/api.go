@@ -11,7 +11,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/docgen"
-	"github.com/strolt/strolt/apps/stroltm/internal/api/instances"
 	"github.com/strolt/strolt/apps/stroltm/internal/api/managerh"
 	"github.com/strolt/strolt/apps/stroltm/internal/api/public"
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
@@ -120,7 +119,6 @@ func (api *API) handler() http.Handler {
 			r.Use(middleware.BasicAuth("api", config.GetUsers()))
 
 			managerh.New().Router(r)
-			instances.Router(r)
 		})
 	})
 
