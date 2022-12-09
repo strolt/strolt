@@ -2,7 +2,7 @@ import { FC, useEffect } from "react";
 
 import { Button, Card, Popconfirm, Tag, Typography } from "antd";
 
-import { DebugJSON } from "components";
+import { DebugJSON, Link } from "components";
 
 import { ManagerhGetInstancesResultItem, ModelsAPIConfigServiceTask } from "api/generated";
 
@@ -88,7 +88,18 @@ const Task: FC<TaskProps> = observer(({ task, instanceName, serviceName, taskNam
           {Object.entries(task.destinations || {}).map(([destinationName, destination]) => {
             return (
               <li key={destinationName}>
-                {destinationName}: <b>{destination.driver}</b>
+                {destinationName}: <b>{destination.driver}</b>{" "}
+                <Link
+                  to="instances.instanceId.serviceId.taskId.destinationId.snapshotList"
+                  params={{
+                    instanceId: instanceName,
+                    serviceId: serviceName,
+                    taskId: taskName,
+                    destinationId: destinationName,
+                  }}
+                >
+                  Snapshots
+                </Link>
               </li>
             );
           })}
@@ -112,12 +123,6 @@ const Task: FC<TaskProps> = observer(({ task, instanceName, serviceName, taskNam
           <b>-</b>
         )}
       </div>
-
-      <Button.Group>
-        <Button size="small" type="primary">
-          Snapshots
-        </Button>
-      </Button.Group>
     </Card>
   );
 });

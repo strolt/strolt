@@ -13,7 +13,11 @@ const r = (c: ConstantsRouteType, element: ReactNode) => ({
   element,
 });
 
-const instances = [r("instances.main", <pages.lk.InstanceList />)];
+const instances = [
+  r("instances.main", <pages.lk.InstanceList />),
+  r("instances.instanceId.serviceId.taskId.destinationId.snapshotList", <pages.lk.SnapshotList />),
+];
+
 const auth = [r("auth.login", <pages.auth.Login />)];
 
 const routesLayoutLk = {
@@ -33,6 +37,11 @@ export const routes = (isAuthorized: boolean): RouteObject[] => {
     return [
       routesLayoutLk,
       {
+        path: toPath("main"),
+        index: true,
+        element: <Navigate replace to={toNavigate("instances.main")} />,
+      },
+      {
         path: "*",
         element: <Navigate replace to={toNavigate("instances.main")} />,
       },
@@ -41,6 +50,11 @@ export const routes = (isAuthorized: boolean): RouteObject[] => {
 
   return [
     routesLayoutAuth,
+    {
+      path: toPath("main"),
+      index: true,
+      element: <Navigate replace to={toNavigate("auth.login")} />,
+    },
     {
       path: "*",
       element: <Navigate replace to={toNavigate("auth.login")} />,

@@ -7,7 +7,9 @@ const rLk = (prefix: string) => rPrefix("/lk" + prefix);
 const instances = rLk("/instances");
 const _instances = {
   "instances.main": instances(),
-  "instances.id": instances("/:instanceId"),
+  "instances.instanceId.serviceId.taskId.destinationId.snapshotList": instances(
+    "/:instanceId/:serviceId/:taskId/:destinationId/snapshots",
+  ),
 };
 
 const auth = rPrefix("/auth");
