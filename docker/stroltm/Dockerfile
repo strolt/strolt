@@ -5,7 +5,7 @@ FROM node:18.12.1-alpine3.16 as ui-base
 RUN apk add --no-cache openjdk17=17.0.5_p8-r0
 
 FROM golang:1.19.0-alpine3.16@sha256:70df3b8f9f099da7f60f0b32480015165e3d0b51bfacf9e255b59f3dd6bd2828 AS swagger-base
-RUN apk add --no-cache make=4.3-r0
+RUN apk add --no-cache make=4.3-r0 curl=7.83.1-r4
 
 FROM ui-base as ui-deps
 WORKDIR /github.com/strolt/strolt/apps/stroltm/ui

@@ -73,7 +73,7 @@ docker-stroltm:
 	docker build -f ./docker/stroltm/Dockerfile --build-arg version=development -t strolt/stroltm:development ./
 
 .PHONY: docker
-docker: docker-strolt
+docker: docker-strolt docker-stroltm
 
 ##### E2E TEST #####
 .e2e-strolt: docker-strolt
