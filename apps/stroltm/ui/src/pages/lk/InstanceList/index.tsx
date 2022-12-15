@@ -123,6 +123,18 @@ const Task: FC<TaskProps> = observer(({ task, instanceName, serviceName, taskNam
                 >
                   Prune
                 </Link>
+                {" | "}
+                <Link
+                  to="instances.instanceId.serviceId.taskId.destinationId.stats"
+                  params={{
+                    instanceId: instanceName,
+                    serviceId: serviceName,
+                    taskId: taskName,
+                    destinationId: destinationName,
+                  }}
+                >
+                  Stats
+                </Link>
               </li>
             );
           })}

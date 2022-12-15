@@ -176,6 +176,33 @@ export class ManagerStore {
     this.pruneStatus = null;
     this.prune = null;
   }
+
+  stats: apiGenerated.ModelsServicesGetStatsResult | null = null;
+  statsStatus: IPromiseBasedObservable<
+    AxiosResponse<apiGenerated.ModelsServicesGetStatsResult, any>
+  > | null = null;
+  async fetchStats(
+    instanceName: string,
+    serviceName: string,
+    taskName: string,
+    destinationName: string,
+  ) {
+    this.statsStatus = fromPromise(
+      api.manager.getStats(instanceName, serviceName, taskName, destinationName),
+    );
+
+    const { data } = await this.statsStatus;
+
+    runInAction(() => {
+      this.stats = data;
+    });
+
+    return data;
+  }
+  resetStats() {
+    this.statsStatus = null;
+    this.stats = null;
+  }
 }
 
 export const managerStore = new ManagerStore();

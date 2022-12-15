@@ -21,6 +21,12 @@ type Snapshot struct {
 	Paths   []string  `json:"paths,omitempty"`
 }
 
+type Stats struct {
+	TotalSize      uint64 `json:"totalSize"`
+	TotalFileCount uint64 `json:"totalFileCount"`
+	SnapshotsCount int    `json:"snapshotsCount"`
+}
+
 func (s *Snapshot) GetID() string {
 	if s.ShortID != "" {
 		return s.ShortID
@@ -50,7 +56,7 @@ type DriverDestinationInterface interface {
 	Backup(ctx context.Context) (sctxt.BackupOutput, error)
 	Restore(ctx context.Context, snapshotName string) error
 	Prune(ctx context.Context, isDryRun bool) ([]Snapshot, error)
-	Stats() error
+	Stats() (Stats, error)
 	Snapshots() ([]Snapshot, error)
 	BinaryVersion() ([]DriverBinaryVersion, error)
 	Init() error

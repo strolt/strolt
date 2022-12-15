@@ -135,9 +135,9 @@ func (i *Local) Prune(ctx context.Context, isDryRun bool) ([]interfaces.Snapshot
 	return []interfaces.Snapshot{}, nil
 }
 
-func (i *Local) Stats() error {
+func (i *Local) Stats() (interfaces.Stats, error) {
 	i.logger.Debug("stats")
-	return nil
+	return interfaces.Stats{}, nil
 }
 
 func (i *Local) Snapshots() ([]interfaces.Snapshot, error) {

@@ -68,11 +68,6 @@ func (i *Restic) SetLogger(logger *logger.Logger) {
 	i.logger = logger
 }
 
-func (i *Restic) Stats() error {
-	i.logger.Debug("stats")
-	return nil
-}
-
 func startCmd(cmd *exec.Cmd) ([]byte, error) {
 	output, err := cmd.CombinedOutput()
 

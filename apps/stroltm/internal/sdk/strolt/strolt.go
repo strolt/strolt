@@ -75,3 +75,12 @@ func (sdk *Sdk) GetMetrics() (*operations.GetStroltMetricsOK, error) {
 func (sdk *Sdk) GetInfo() (*info.GetInfoOK, error) {
 	return sdk.client.Info.GetInfo(nil, sdk.authInfo)
 }
+
+func (sdk *Sdk) GetStats(serviceName, taskName, destinationName string) (*services.GetStatsOK, error) {
+	params := services.NewGetStatsParams()
+	params.TaskName = taskName
+	params.ServiceName = serviceName
+	params.DestinationName = destinationName
+
+	return sdk.client.Services.GetStats(params, sdk.authInfo)
+}

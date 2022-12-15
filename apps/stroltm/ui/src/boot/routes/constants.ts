@@ -13,6 +13,9 @@ const _instances = {
   "instances.instanceId.serviceId.taskId.destinationId.prune": instances(
     "/:instanceId/:serviceId/:taskId/:destinationId/prune",
   ),
+  "instances.instanceId.serviceId.taskId.destinationId.stats": instances(
+    "/:instanceId/:serviceId/:taskId/:destinationId/stats",
+  ),
 };
 
 const auth = rPrefix("/auth");
