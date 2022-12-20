@@ -1,8 +1,8 @@
 FROM alpine:3.17.0 AS base
 WORKDIR /stroltm
 
-FROM node:18.12.1-alpine3.16 as ui-base
-RUN apk add --no-cache openjdk17=17.0.5_p8-r0
+FROM node:18.12.1-bullseye@sha256:5a73d75604f30ec5cc9ed44f2b9fad3beeedc3211a62a8b7ef86b0bfe10ee29b as ui-base
+RUN apt-get update && apt-get -y install openjdk-11-jre=11.0.16+8-1~deb11u1 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 FROM golang:1.19.0-alpine3.16@sha256:70df3b8f9f099da7f60f0b32480015165e3d0b51bfacf9e255b59f3dd6bd2828 AS swagger-base
 RUN apk add --no-cache make=4.3-r0 curl=7.83.1-r4

@@ -122,5 +122,5 @@ jobs:
               --platform linux/amd64,linux/arm/v7,linux/arm64 \
               -t ghcr.io/strolt/stroltm:${ref} -t ghcr.io/strolt/stroltm:latest \
               -t strolt/stroltm:${ref} -t strolt/stroltm:latest \
-              -f ./docker/stroltm/Dockerfile\
+              -f ./docker/stroltm/Dockerfile \
               ./
