@@ -60,14 +60,14 @@ func prune(w http.ResponseWriter, r *http.Request, idDryRun bool) {
 		return
 	}
 
-	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
+	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypePrune)
 	if err != nil {
 		apiu.RenderJSON500(w, r, err)
 		return
 	}
 	defer t.Close()
 
-	snapshotList, err := t.DestinationPrune(destinationName, idDryRun)
+	snapshotList, err := t.Prune(destinationName, idDryRun)
 	if err != nil {
 		apiu.RenderJSON500(w, r, err)
 		return

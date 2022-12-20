@@ -54,7 +54,7 @@ func TestNew(t *testing.T) {
 				OpertationType: sctxt.OpTypeBackup,
 			})
 
-			header := fmt.Sprintf("%s[] [%s] - %s", "", taskName, sctxt.OpTypeBackup)
+			header := fmt.Sprintf("%s [] [%s] - %s", emojies["slack"].TriggerManual, taskName, sctxt.OpTypeBackup)
 			assert.Equal(t, header, tmpl.Header)
 		})
 

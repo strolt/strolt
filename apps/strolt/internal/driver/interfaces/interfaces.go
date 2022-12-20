@@ -3,6 +3,7 @@ package interfaces
 import (
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/shared/logger"
@@ -25,6 +26,18 @@ type Stats struct {
 	TotalSize      uint64 `json:"totalSize"`
 	TotalFileCount uint64 `json:"totalFileCount"`
 	SnapshotsCount int    `json:"snapshotsCount"`
+}
+
+type FormattedStats struct {
+	Stats
+	TotalSizeFormatted string `json:"totalSizeFormatted"`
+}
+
+func (s *Stats) Convert() FormattedStats {
+	return FormattedStats{
+		Stats:              *s,
+		TotalSizeFormatted: humanize.Bytes(s.TotalSize),
+	}
 }
 
 func (s *Snapshot) GetID() string {

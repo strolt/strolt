@@ -50,20 +50,8 @@ var backupCmd = &cobra.Command{
 		}
 		defer t.Close()
 
-		log.Info("backup source")
-		if err = t.BackupSourceToWorkDir(); err != nil {
+		if err := t.Backup(); err != nil {
 			log.Error(err)
-			return
-		}
-
-		for destinationName := range t.TaskConfig.Destinations {
-			log := log.WithField(destinationName, destinationName)
-			log.Info("backup destination")
-			_, err := t.BackupWorkDirToDestination(destinationName)
-
-			if err != nil {
-				log.Error(err)
-			}
 		}
 	},
 }

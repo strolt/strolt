@@ -51,6 +51,8 @@ func (i *Restic) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 		args = append(args, "--tag", fmt.Sprintf("%s=%s", ldflags.GetBinaryName(), ldflags.GetVersion()))
 	}
 
+	args = append(args, "--tag", fmt.Sprintf("stroltStartedAt=%d", ctx.Operation.Time.Start.Unix()))
+
 	args = append(args, i.getBackupFlags()...)
 	args = append(args, ".")
 

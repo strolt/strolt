@@ -60,7 +60,7 @@ var pruneCmd = &cobra.Command{
 
 		log.Info("prune...")
 
-		_, err = t.DestinationPrune(destinationName, false)
+		_, err = t.Prune(destinationName, false)
 		if err != nil {
 			log.Error(err)
 			return

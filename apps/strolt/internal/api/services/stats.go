@@ -57,5 +57,5 @@ func (s *Services) getStats(w http.ResponseWriter, r *http.Request) {
 }
 
 type getStatsResult struct {
-	Data interfaces.Stats `json:"data"`
+	Data interfaces.FormattedStats `json:"data"`
 }

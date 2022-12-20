@@ -147,7 +147,7 @@ func (c *Config) setDefaults() error {
 
 	for notificationName, notification := range c.Definitions.Notifications {
 		if len(notification.Events) == 0 {
-			notification.Events = []sctxt.EventType{sctxt.EvOperationStart, sctxt.EvOperationError}
+			notification.Events = []sctxt.EventType{sctxt.EvOperationStop, sctxt.EvOperationError}
 		}
 
 		c.Definitions.Notifications[notificationName] = notification

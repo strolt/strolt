@@ -22,8 +22,6 @@ import (
 // @success 500 {object} apiu.ResultError
 // @Router       /api/v1/services/{serviceName}/tasks/{taskName}/backup [post].
 func (s *Services) backup(w http.ResponseWriter, r *http.Request) {
-	log := logger.New()
-
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")
 
@@ -46,23 +44,35 @@ func (s *Services) backup(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer t.Close()
 
-		if err = t.BackupSourceToWorkDir(); err != nil {
-			log.Error(err)
-			apiu.RenderJSON500(w, r, err)
-
-			return
-		}
-
-		for destinationName := range t.TaskConfig.Destinations {
-			log := log.WithField(destinationName, destinationName)
-			log.Info("backup destination")
-
-			_, err := t.BackupWorkDirToDestination(destinationName)
-			if err != nil {
-				log.Error(err)
-			}
+		if err := t.Backup(); err != nil {
+			logger.New().Error(err)
 		}
 	}()
+
+	// go func() {
+	// 	defer t.Close()
+
+	// 	if err = t.BackupSourceToWorkDir(); err != nil {
+	// 		log.Error(err)
+	// 		apiu.RenderJSON500(w, r, err)
+
+	// 		return
+	// 	}
+
+	// 	for destinationName := range t.TaskConfig.Destinations {
+	// 		log := log.WithField(destinationName, destinationName)
+	// 		log.Info("backup destination")
+
+	// 		// log.Debug("Backup source to destination sleep started...")
+	// 		// time.Sleep(time.Minute * 1)
+	// 		// log.Debug("Backup source to destination sleep finished...")
+
+	// 		_, err := t.BackupWorkDirToDestination(destinationName)
+	// 		if err != nil {
+	// 			log.Error(err)
+	// 		}
+	// 	}
+	// }()
 
 	apiu.RenderJSON200(w, r, apiu.ResultSuccess{Data: "success started"})
 }

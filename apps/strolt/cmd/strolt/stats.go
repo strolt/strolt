@@ -82,7 +82,7 @@ var statsCmd = &cobra.Command{
 	},
 }
 
-func printStatsJSON(stats interfaces.Stats) {
+func printStatsJSON(stats interfaces.FormattedStats) {
 	j, err := json.Marshal(stats)
 	if err != nil {
 		os.Exit(1)
@@ -91,8 +91,8 @@ func printStatsJSON(stats interfaces.Stats) {
 	fmt.Println(string(j)) //nolint:forbidigo
 }
 
-func printStatsText(stats interfaces.Stats) {
-	fmt.Printf("Total size: %d\n", stats.TotalSize)            //nolint:forbidigo
+func printStatsText(stats interfaces.FormattedStats) {
+	fmt.Printf("Total size: %s\n", stats.TotalSizeFormatted)   //nolint:forbidigo
 	fmt.Printf("Total file count: %d\n", stats.TotalFileCount) //nolint:forbidigo
 	fmt.Printf("Snapshots count: %d\n", stats.SnapshotsCount)  //nolint:forbidigo
 }

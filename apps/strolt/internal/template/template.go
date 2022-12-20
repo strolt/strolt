@@ -21,6 +21,7 @@ type Template struct {
 type Emoji struct {
 	TriggerHook     string
 	TriggerSchedule string
+	TriggerManual   string
 	Error           string
 }
 
@@ -28,12 +29,14 @@ var emojies = map[string]Emoji{
 	"slack": {
 		TriggerHook:     ":hook:",
 		TriggerSchedule: ":timer_clock:",
+		TriggerManual:   ":bust_in_silhouette:",
 		Error:           ":red_circle:",
 	},
 	"telegram": {
-		TriggerHook:     "&#129693;",
-		TriggerSchedule: "&#9202;",
-		Error:           "&#128308;",
+		TriggerHook:     "🪝",
+		TriggerSchedule: "⏰",
+		TriggerManual:   "👤",
+		Error:           "🔴",
 	},
 }
 
@@ -51,8 +54,7 @@ func getTriggerEmoji(driver string, trigger sctxt.TriggerType) string {
 		return emoji.TriggerSchedule + " "
 
 	case sctxt.TManual:
-	default:
-		return ""
+		return emoji.TriggerManual + " "
 	}
 
 	return ""
@@ -96,39 +98,39 @@ func New(driver string, ctx context.Context) Template {
 		t.Body += fmt.Sprintf("\n\n[destination] %s:", destinationName)
 
 		if destination.BackupOutput.SnapshotID != "" {
-			t.Body += fmt.Sprintf("\nsnapshot_id: %s", destination.BackupOutput.SnapshotID)
+			t.Body += fmt.Sprintf("\n    snapshot_id: %s", destination.BackupOutput.SnapshotID)
 		}
 
 		if destination.BackupOutput.FilesNew != 0 {
-			t.Body += fmt.Sprintf("\nfiles_new: %s", humanize.Comma(int64(destination.BackupOutput.FilesNew)))
+			t.Body += fmt.Sprintf("\n    files_new: %s", humanize.Comma(int64(destination.BackupOutput.FilesNew)))
 		}
 
 		if destination.BackupOutput.FilesChanged != 0 {
-			t.Body += fmt.Sprintf("\nfiles_changed: %s", humanize.Comma(int64(destination.BackupOutput.FilesChanged)))
+			t.Body += fmt.Sprintf("\n    files_changed: %s", humanize.Comma(int64(destination.BackupOutput.FilesChanged)))
 		}
 
 		if destination.BackupOutput.FilesUnmodified != 0 {
-			t.Body += fmt.Sprintf("\nfiles_unmodified: %s", humanize.Comma(int64(destination.BackupOutput.FilesUnmodified)))
+			t.Body += fmt.Sprintf("\n    files_unmodified: %s", humanize.Comma(int64(destination.BackupOutput.FilesUnmodified)))
 		}
 
 		if destination.BackupOutput.DirsNew != 0 {
-			t.Body += fmt.Sprintf("\ndirs_new: %s", humanize.Comma(int64(destination.BackupOutput.DirsNew)))
+			t.Body += fmt.Sprintf("\n    dirs_new: %s", humanize.Comma(int64(destination.BackupOutput.DirsNew)))
 		}
 
 		if destination.BackupOutput.DirsChanged != 0 {
-			t.Body += fmt.Sprintf("\ndirs_changed: %s", humanize.Comma(int64(destination.BackupOutput.DirsChanged)))
+			t.Body += fmt.Sprintf("\n    dirs_changed: %s", humanize.Comma(int64(destination.BackupOutput.DirsChanged)))
 		}
 
 		if destination.BackupOutput.DirsUnmodified != 0 {
-			t.Body += fmt.Sprintf("\ndirs_unmodified: %s", humanize.Comma(int64(destination.BackupOutput.DirsUnmodified)))
+			t.Body += fmt.Sprintf("\n    dirs_unmodified: %s", humanize.Comma(int64(destination.BackupOutput.DirsUnmodified)))
 		}
 
 		if destination.BackupOutput.TotalFilesProcessed != 0 {
-			t.Body += fmt.Sprintf("\ntotal_files_processed: %s", humanize.Comma(int64(destination.BackupOutput.TotalFilesProcessed)))
+			t.Body += fmt.Sprintf("\n    total_files_processed: %s", humanize.Comma(int64(destination.BackupOutput.TotalFilesProcessed)))
 		}
 
 		if destination.BackupOutput.TotalBytesProcessed != 0 {
-			t.Body += fmt.Sprintf("\ntotal_size_processed: %s", humanize.Bytes(destination.BackupOutput.TotalBytesProcessed))
+			t.Body += fmt.Sprintf("\n    total_size_processed: %s", humanize.Bytes(destination.BackupOutput.TotalBytesProcessed))
 		}
 	}
 

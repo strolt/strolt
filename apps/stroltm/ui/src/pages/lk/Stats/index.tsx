@@ -8,8 +8,6 @@ import { DebugJSON } from "components";
 
 import { observer, useStores } from "stores";
 
-import * as utils from "utils";
-
 const Stats = observer(() => {
   const { managerStore } = useStores();
   const params = useParams<{
@@ -47,7 +45,7 @@ const Stats = observer(() => {
         <Spin size="large" />
       ) : (
         <>
-          <p>Total Size: {utils.formatBytes(managerStore.stats?.data?.totalSize || 0)}</p>
+          <p>Total Size: {managerStore.stats?.data?.totalSizeFormatted}</p>
 
           <p>Total File Count: {managerStore.stats?.data?.totalFileCount}</p>
 

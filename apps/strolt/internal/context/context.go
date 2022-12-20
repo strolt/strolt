@@ -16,10 +16,13 @@ type Time struct {
 }
 
 type Operation struct {
-	BackupOutput sctxt.BackupOutput `json:"backupOutput"`
-
 	Time  Time   `json:"time"`
 	Error string `json:"errorMessage"`
+}
+
+type DestinationOperation struct {
+	Operation
+	BackupOutput sctxt.BackupOutput `json:"backupOutput"`
 }
 
 type Context struct {
@@ -28,10 +31,10 @@ type Context struct {
 	TaskName       string              `json:"taskName"`
 	OpertationType sctxt.OperationType `json:"opertationType"`
 
-	Event       sctxt.EventType      `json:"event"`
-	Operation   Operation            `json:"operation"`
-	Source      Operation            `json:"source"`
-	Destination map[string]Operation `json:"destination"`
+	Event       sctxt.EventType                 `json:"event"`
+	Operation   Operation                       `json:"operation"`
+	Source      Operation                       `json:"source"`
+	Destination map[string]DestinationOperation `json:"destination"`
 
 	WorkDir      string `json:"workDir"`
 	IsWorkDirTmp bool   `json:"isWorkDirTmp"`
@@ -85,7 +88,8 @@ func New(trigger sctxt.TriggerType, serviceName string, taskName string, opertat
 		ServiceName:    serviceName,
 		TaskName:       taskName,
 		OpertationType: opertationType,
-		Destination:    make(map[string]Operation),
+		Destination:    make(map[string]DestinationOperation),
+		Event:          sctxt.EvOperationStart,
 
 		SourceLocalPath: sourceLocalPath,
 	}
