@@ -1,5 +1,5 @@
 # MongoDB (mongodump, mongorestore)
-apk add --no-cache mongodb-tools=4.2.14-r13
+apk --update add --no-cache mongodb-tools=4.2.14-r14
 
 rm /usr/bin/bsondump
 rm /usr/bin/mongoexport

@@ -1,4 +1,4 @@
-apk add --no-cache curl=7.86.0-r1
+apk --update add --no-cache curl=7.86.0-r1
 
 ls /usr/bin > initial_usr_bin_list
 ls /usr/local/bin > initial_usr_local_bin_list
