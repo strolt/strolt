@@ -1,0 +1,82 @@
+repos:
+  - repo: local
+    hooks:
+      - id: swagger
+        name: swagger
+        entry: make swagger
+        files: ^apps/stroltm?/internal/api
+        language: system
+        types_or: [go]
+
+  # stroltm/ui
+  - repo: local
+    hooks:
+      - id: stroltm/ui/prettier
+        name: stroltm/ui/prettier
+        entry: prettier --write --list-different --ignore-unknown
+        args: [--plugin, "@trivago/prettier-plugin-sort-imports", --config, ./apps/stroltm/ui/.prettierrc, --write]
+        language: node
+        types: [text]
+        files: ^apps/stroltm/ui
+        types_or: [javascript, jsx, ts, tsx, css, json]
+        additional_dependencies: [prettier@2.8.1, "@trivago/prettier-plugin-sort-imports@4.0.0"]
+      - id: stroltm/ui/typescript
+        name: stroltm/ui/typescript
+        entry: make .lint-stroltm-ui
+        language: system
+        always_run: true
+
+  # strolt
+  - repo: local
+    hooks:
+      - id: strolt/lint
+        name: strolt/lint
+        entry: make .lint-strolt
+        language: system
+        types: [text]
+        files: ^apps/strolt
+        types_or: [go]
+        require_serial: true
+      - id: strolt/test
+        name: strolt/test
+        entry: make .test-strolt
+        language: system
+        types: [text]
+        files: ^apps/strolt
+        types_or: [go]
+
+  # stroltm
+  - repo: local
+    hooks:
+      - id: stroltm/lint
+        name: stroltm/lint
+        entry: make .lint-stroltm
+        language: system
+        types: [text]
+        files: ^apps/stroltm
+        types_or: [go]
+        require_serial: true
+      - id: stroltm/test
+        name: stroltm/test
+        entry: make .test-stroltm
+        language: system
+        types: [text]
+        files: ^apps/stroltm
+        types_or: [go]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: end-of-file-fixer
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint

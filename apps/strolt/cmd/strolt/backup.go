@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/spf13/cobra"
 )
@@ -32,14 +30,14 @@ var backupCmd = &cobra.Command{
 			log.Error(err)
 			return
 		}
-		log.Info(fmt.Sprintf("selected service: %s", serviceName))
+		log.Infof("selected service: %s", serviceName)
 
 		taskName, err := getTaskName(cmd, serviceName)
 		if err != nil {
 			log.Error(err)
 			return
 		}
-		log.Info(fmt.Sprintf("selected task: %s", taskName))
+		log.Infof("selected task: %s", taskName)
 
 		if !isSkipConfirmation && !isConfirm() {
 			return
@@ -52,20 +50,8 @@ var backupCmd = &cobra.Command{
 		}
 		defer t.Close()
 
-		log.Info("backup source")
-		if err = t.BackupSourceToWorkDir(); err != nil {
+		if err := t.Backup(); err != nil {
 			log.Error(err)
-			return
-		}
-
-		for destinationName := range t.TaskConfig.Destinations {
-			log := log.WithField(destinationName, destinationName)
-			log.Info("backup destination")
-			_, err := t.BackupWorkDirToDestination(destinationName)
-
-			if err != nil {
-				log.Error(err)
-			}
 		}
 	},
 }

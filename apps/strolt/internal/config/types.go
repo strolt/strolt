@@ -54,14 +54,18 @@ type Definitions struct {
 }
 
 type Config struct {
-	TimeZone            string             `yaml:"timezone,omitempty"`
-	timeLocation        *time.Location     `json:"-" yaml:"-"`
-	DisableWatchChanges bool               `yaml:"disableWatchChanges,omitempty"` // TODO: move to ENV
-	Services            map[string]Service `yaml:"services"`
-	Tags                []string           `yaml:"tags,omitempty"`
-	Secrets             Secrets            `yaml:"secrets,omitempty"`
-	Extends             Extends            `yaml:"extends,omitempty"`
-	Definitions         Definitions        `yaml:"definitions,omitempty"`
+	TimeZone     string             `yaml:"timezone,omitempty"`
+	timeLocation *time.Location     `json:"-" yaml:"-"`
+	Services     map[string]Service `yaml:"services"`
+	Tags         []string           `yaml:"tags,omitempty"`
+	Secrets      Secrets            `yaml:"secrets,omitempty"`
+	Extends      Extends            `yaml:"extends,omitempty"`
+	Definitions  Definitions        `yaml:"definitions,omitempty"`
+	API          API                `yaml:"api,omitempty"`
+}
+
+type API struct {
+	Users map[string]string `yaml:"users,omitempty"`
 }
 
 var (

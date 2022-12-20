@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 
 	"gopkg.in/yaml.v3"
 )
@@ -66,11 +66,6 @@ func (i *Restic) SetEnv(env interface{}) error {
 
 func (i *Restic) SetLogger(logger *logger.Logger) {
 	i.logger = logger
-}
-
-func (i *Restic) Stats() error {
-	i.logger.Debug("stats")
-	return nil
 }
 
 func startCmd(cmd *exec.Cmd) ([]byte, error) {

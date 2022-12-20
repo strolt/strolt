@@ -3,9 +3,10 @@ package interfaces
 import (
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/strolt/strolt/apps/strolt/internal/context"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 // type TemplateParams struct {
@@ -19,6 +20,24 @@ type Snapshot struct {
 	ShortID string    `json:"shortId,omitempty"`
 	Tags    []string  `json:"tags,omitempty"`
 	Paths   []string  `json:"paths,omitempty"`
+}
+
+type Stats struct {
+	TotalSize      uint64 `json:"totalSize"`
+	TotalFileCount uint64 `json:"totalFileCount"`
+	SnapshotsCount int    `json:"snapshotsCount"`
+}
+
+type FormattedStats struct {
+	Stats
+	TotalSizeFormatted string `json:"totalSizeFormatted"`
+}
+
+func (s *Stats) Convert() FormattedStats {
+	return FormattedStats{
+		Stats:              *s,
+		TotalSizeFormatted: humanize.Bytes(s.TotalSize),
+	}
 }
 
 func (s *Snapshot) GetID() string {
@@ -50,7 +69,7 @@ type DriverDestinationInterface interface {
 	Backup(ctx context.Context) (sctxt.BackupOutput, error)
 	Restore(ctx context.Context, snapshotName string) error
 	Prune(ctx context.Context, isDryRun bool) ([]Snapshot, error)
-	Stats() error
+	Stats() (Stats, error)
 	Snapshots() ([]Snapshot, error)
 	BinaryVersion() ([]DriverBinaryVersion, error)
 	Init() error

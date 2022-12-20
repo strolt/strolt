@@ -8,10 +8,19 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/strolt/strolt/apps/strolt/internal/env"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 
 	"gopkg.in/yaml.v3"
 )
+
+var (
+	loadedAt time.Time
+)
+
+func GetLoadedAt() time.Time {
+	return loadedAt
+}
 
 type FileInfo struct {
 	Config Config
@@ -138,7 +147,7 @@ func (c *Config) setDefaults() error {
 
 	for notificationName, notification := range c.Definitions.Notifications {
 		if len(notification.Events) == 0 {
-			notification.Events = []sctxt.EventType{sctxt.EvOperationStart, sctxt.EvOperationError}
+			notification.Events = []sctxt.EventType{sctxt.EvOperationStop, sctxt.EvOperationError}
 		}
 
 		c.Definitions.Notifications[notificationName] = notification
@@ -168,7 +177,9 @@ func load(pathname string) (loaded, error) {
 			Config: getCliConfig(),
 		},
 		FileInfo{
-			Config: getEnvConfig(),
+			Config: Config{
+				Tags: env.GlobalTags(),
+			},
 		})
 
 	c, err := fi.merge()
@@ -217,6 +228,8 @@ func Load(pathname string) error {
 	// 	data, _ := yaml.Marshal(config)
 	// 	os.WriteFile("result.config.yml", data, 0o700)
 	// }
+
+	loadedAt = time.Now()
 
 	return nil
 }

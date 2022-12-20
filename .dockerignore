@@ -3,10 +3,9 @@
 changelog/
 doc/
 # docker/
-
+website/
 # Files
 .gitignore
 .editorconfig
-.golangci.yml
 *.md
-Makefile
+**/node_modules

@@ -1,5 +1,9 @@
 name: strolt-e2e
 
+api:
+  users:
+    admin: "{{.API_ADMIN_PASSWORD}}"
+
 timezone: UTC
 
 extends:

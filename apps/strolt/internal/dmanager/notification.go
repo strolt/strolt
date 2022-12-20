@@ -7,7 +7,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/driver/notification/console"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/notification/slack"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/notification/telegram"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 type Notification string

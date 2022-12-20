@@ -1,0 +1,91 @@
+name: stroltm
+
+timezone: UTC
+
+api:
+  users:
+    admin: admin
+
+tags:
+  - tag_from_root_config
+
+services:
+  e2e:
+    pg-t:
+      tags:
+        - tag_from_task_config
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: strolt
+          username: strolt
+          password: strolt #pragma: allowlist secret
+          format: t
+      destinations:
+        restic-pg-t:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/e2e/restic-pg-t"
+      notifications:
+        - terminal
+  e2e2:
+    pg-t:
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: strolt
+          username: strolt
+          password: strolt #pragma: allowlist secret
+          format: t
+      destinations:
+        restic-pg-t:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/e2e2/restic-pg-t"
+      notifications:
+        - terminal
+    pg-t2:
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: strolt
+          username: strolt
+          password: strolt #pragma: allowlist secret
+          format: t
+      destinations:
+        restic-pg-t:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/e2e2/restic-pg-t2"
+      notifications:
+        - terminal
+
+definitions:
+  destinations:
+    restic_base:
+      driver: restic
+      config:
+        keep:
+          last: 3
+      env:
+        RESTIC_PASSWORD: strolt #pragma: allowlist secret
+        RESTIC_REPOSITORY: s3:http://minio:9000/restic-pg-t
+        AWS_ACCESS_KEY_ID: minioadmin
+        AWS_SECRET_ACCESS_KEY: minioadmin #pragma: allowlist secret
+
+  notifications:
+    terminal:
+      driver: console
+      events:
+        - OPERATION_START
+        - OPERATION_STOP
+        - OPERATION_ERROR
+        - SOURCE_START
+        - SOURCE_STOP
+        - SOURCE_ERROR
+        - DESTINATION_START
+        - DESTINATION_STOP
+        - DESTINATION_ERROR

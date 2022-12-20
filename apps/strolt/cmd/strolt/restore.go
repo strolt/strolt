@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/apps/strolt/internal/util"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -88,28 +88,28 @@ var restoreCmd = &cobra.Command{
 			log.Error(err)
 			return
 		}
-		log.Info(fmt.Sprintf("selected service: %s", serviceName))
+		log.Infof("selected service: %s", serviceName)
 
 		taskName, err := getTaskName(cmd, serviceName)
 		if err != nil {
 			log.Error(err)
 			return
 		}
-		log.Info(fmt.Sprintf("selected task: %s", taskName))
+		log.Infof("selected task: %s", taskName)
 
 		destinationName, err := getDestinationName(cmd, serviceName, taskName)
 		if err != nil {
 			log.Error(err)
 			return
 		}
-		log.Info(fmt.Sprintf("selected destination: %s", destinationName))
+		log.Infof("selected destination: %s", destinationName)
 
 		snapshotName, err := restoreGetSnapshotName(cmd, serviceName, taskName, destinationName)
 		if err != nil {
 			log.Error(err)
 			return
 		}
-		log.Info(fmt.Sprintf("selected snapshot: %s", snapshotName))
+		log.Infof("selected snapshot: %s", snapshotName)
 
 		if !isSkipConfirmation && !isConfirm() {
 			return

@@ -17,8 +17,8 @@ on:
       - "!**.md"
 
 jobs:
-  build-images:
-    name: Build Docker images
+  strolt-build-images:
+    name: Build Strolt Docker images
     runs-on: ubuntu-latest
 
     steps:
@@ -39,8 +39,8 @@ jobs:
         run: |
           docker buildx build \
               --platform linux/amd64 \
-              -f apps/strolt/docker/Dockerfile\
-              ./apps/strolt
+              -f ./docker/strolt/Dockerfile\
+              ./
 
       - name: Login to Github
         env:
@@ -68,5 +68,59 @@ jobs:
               --platform linux/amd64,linux/arm/v7,linux/arm64 \
               -t ghcr.io/strolt/strolt:${ref} -t ghcr.io/strolt/strolt:latest \
               -t strolt/strolt:${ref} -t strolt/strolt:latest \
-              -f apps/strolt/docker/Dockerfile \
-              ./apps/strolt
+              -f ./docker/strolt/Dockerfile\
+              ./
+
+  stroltm-build-images:
+    name: Build Stroltm Docker images
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+
+      - name: build docker image without pushing (only outside main)
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: |
+          docker buildx build \
+              --platform linux/amd64 \
+              -f ./docker/stroltm/Dockerfile\
+              ./
+
+      - name: Login to Github
+        env:
+          GITHUB_PACKAGE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USERNAME: ${{ github.actor }}
+        run: |
+          echo ${GITHUB_PACKAGE_TOKEN} | docker login ghcr.io -u ${USERNAME} --password-stdin
+
+      - name: Login to Docker Hub
+        env:
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+        run: |
+          echo ${DOCKER_HUB_TOKEN} | docker login -u strolt --password-stdin
+
+      - name: deploy tagged (latest) to ghcr.io and dockerhub
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF: ${{ github.ref }}
+        run: |
+          ref=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD) && version="${ref}"-$(git log -1 --format=%h) && echo "version=$version" && \
+          docker buildx build --push \
+              --build-arg version=${version} \
+              --build-arg GITHUB_SHA=${GITHUB_SHA} --build-arg GIT_BRANCH=${ref} --build-arg GITHUB_REF=${GITHUB_REF} \
+              --platform linux/amd64,linux/arm/v7,linux/arm64 \
+              -t ghcr.io/strolt/stroltm:${ref} -t ghcr.io/strolt/stroltm:latest \
+              -t strolt/stroltm:${ref} -t strolt/stroltm:latest \
+              -f ./docker/stroltm/Dockerfile\
+              ./

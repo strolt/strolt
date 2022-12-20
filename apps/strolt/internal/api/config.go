@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/strolt/strolt/apps/strolt/internal/api/apiu"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
+	"github.com/strolt/strolt/apps/strolt/internal/env"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
+	"github.com/strolt/strolt/shared/apiu"
 )
 
 type Config struct {
@@ -46,13 +47,12 @@ type ConfigServiceTaskNotification struct {
 }
 
 // getConfig godoc
+// @Id					 getConfig
 // @Summary      Show config
-// @Description  get config
-// @Accept       json
-// @Produce      json
+// @Security BasicAuth
 // @success 200 {object} Config
-// @Router       /api/config [get].
-func getConfig(w http.ResponseWriter, r *http.Request) {
+// @Router       /api/v1/config [get].
+func (api *API) getConfig(w http.ResponseWriter, r *http.Request) {
 	c := config.Get()
 
 	tags := []string{}
@@ -69,9 +69,7 @@ func getConfig(w http.ResponseWriter, r *http.Request) {
 			for _, notificationName := range task.Notifications {
 				notificationDefinition, ok := c.Definitions.Notifications[notificationName]
 				if !ok {
-					apiu.RenderJSON500(w, r, apiu.ResultError{
-						Error: fmt.Sprintf("not found notification definition '%s'", notificationName),
-					})
+					apiu.RenderJSON500(w, r, fmt.Errorf("not found notification definition '%s'", notificationName))
 
 					return
 				}
@@ -115,7 +113,7 @@ func getConfig(w http.ResponseWriter, r *http.Request) {
 
 	apiu.RenderJSON200(w, r, Config{
 		TimeZone:            c.TimeZone,
-		DisableWatchChanges: c.DisableWatchChanges,
+		DisableWatchChanges: env.IsWatchFilesDisabled(),
 		Tags:                tags,
 		Services:            services,
 	})

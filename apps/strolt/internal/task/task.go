@@ -1,12 +1,16 @@
 package task
 
 import (
+	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
+	"github.com/strolt/strolt/apps/strolt/internal/metrics"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 type Operation struct {
@@ -23,11 +27,14 @@ type Task struct {
 	ServiceName string
 	TaskName    string
 
-	Backup Operation
-	Forget Operation
-	Prune  Operation
+	OperationBackup Operation
+	OperationPrune  Operation
 
-	TaskConfig config.TaskConfig
+	TaskConfig              config.TaskConfig
+	log                     *logger.Logger
+	isNotificationsDisabled bool
+
+	*sync.Mutex
 }
 
 //nolint:revive
@@ -39,8 +46,22 @@ const (
 	Prune  TaskOperation = "PRUNE"
 )
 
-func (t Task) Close() error {
+func (t *Task) Close() error {
 	return t.Context.Close()
+}
+
+func (t *Task) Clone() (Task, error) {
+	data, err := json.Marshal(t)
+	if err != nil {
+		return Task{}, err
+	}
+
+	var tClone Task
+	if err := json.Unmarshal(data, &tClone); err != nil {
+		return Task{}, err
+	}
+
+	return tClone, nil
 }
 
 func New(serviceName string, taskName string, trigger sctxt.TriggerType, operationType sctxt.OperationType) (*Task, error) {
@@ -98,12 +119,42 @@ func New(serviceName string, taskName string, trigger sctxt.TriggerType, operati
 		TaskName:    taskName,
 		TaskConfig:  c,
 
-		Backup: Operation{
+		OperationBackup: Operation{
 			Schedule: c.Schedule.Backup,
 		},
+		log: logger.New().WithField("serviceName", serviceName).WithField("taskName", taskName).WithField("trigger", sctxt.TSchedule),
 
-		Prune: Operation{
+		OperationPrune: Operation{
 			Schedule: c.Schedule.Prune,
 		},
+		Mutex: &sync.Mutex{},
 	}, nil
+}
+
+func (t *Task) UpdateMetricsAfterTaskFinish() {
+	log := logger.New()
+
+	if t.Context.OpertationType == sctxt.OpTypeBackup {
+		if t.Context.Event == sctxt.EvOperationError {
+			metrics.Operations().BackupError()
+			log.Warn("updateMetrics: backup error")
+		}
+
+		if t.Context.Event == sctxt.EvOperationStop {
+			log.Warn("updateMetrics: backup success")
+			metrics.Operations().BackupSuccess()
+		}
+	}
+
+	if t.Context.OpertationType == sctxt.OpTypePrune {
+		if t.Context.Event == sctxt.EvOperationError {
+			metrics.Operations().PruneError()
+			log.Warn("updateMetrics: prune error")
+		}
+
+		if t.Context.Event == sctxt.EvOperationStop {
+			log.Warn("updateMetrics: prune success")
+			metrics.Operations().PruneSuccess()
+		}
+	}
 }

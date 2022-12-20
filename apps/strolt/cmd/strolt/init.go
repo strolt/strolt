@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/spf13/cobra"
 )

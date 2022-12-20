@@ -4,4 +4,4 @@ build:
 
 .PHONY: run
 run:
-	go build -ldflags "-X github.com/strolt/strolt/apps/stroltm/internal/ui.mode=proxy" && ./stroltm
+	go build -ldflags "-X github.com/strolt/strolt/apps/stroltm/internal/ui.mode=proxy" && STROLTM_DEBUG=true STROLTM_PORT=8090 ./stroltm --config=./testdata/stroltm.yml

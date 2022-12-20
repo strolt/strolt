@@ -25,7 +25,6 @@ func (fi *FileInfo) merge() (*Config, error) {
 		override.TimeZone = timezone
 		override.timeLocation = timeLocation
 
-		override.DisableWatchChanges = mergeDisableWatchChanges(base.DisableWatchChanges, override.DisableWatchChanges)
 		override.Tags = mergeTags(base.Tags, override.Tags)
 
 		override.Secrets = mergeSecretsForConfig(base.Secrets, baseFi.ExtendedSecretsList, override.Secrets, overrideFi.ExtendedSecretsList)
@@ -33,6 +32,11 @@ func (fi *FileInfo) merge() (*Config, error) {
 		override.Definitions, err = mergeDefinitions(base.Definitions, override.Definitions)
 		if err != nil {
 			return base, errors.Wrapf(err, "cannot merge definitions from %s", overrideFi.ConfigPathname)
+		}
+
+		override.API, err = mergeAPI(base.API, override.API)
+		if err != nil {
+			return base, errors.Wrapf(err, "cannot merge api from %s", overrideFi.ConfigPathname)
 		}
 
 		override.Services, err = mergeServices(base.Services, override.Services)
@@ -53,14 +57,6 @@ func mergeTimeZone(base string, override string) (string, *time.Location, error)
 	timezone, err := time.LoadLocation(zone)
 
 	return zone, timezone, err
-}
-
-func mergeDisableWatchChanges(base bool, override bool) bool {
-	if override {
-		return override
-	}
-
-	return base
 }
 
 func uniqueStringSlice(stringSlice []string) []string {
@@ -230,4 +226,15 @@ func mergeDestinationExtendsConfig(base interface{}, extends interface{}) (inter
 	}
 
 	return _base["data"], nil
+}
+
+func mergeAPI(base API, override API) (API, error) {
+	api := base
+
+	err := mergo.Merge(&api, override, mergo.WithOverride)
+	if err != nil {
+		return API{}, err
+	}
+
+	return api, nil
 }

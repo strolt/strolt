@@ -57,7 +57,7 @@ func strolt(args ...string) error {
 }
 
 func stroltWithResponse(args ...string) ([]byte, error) {
-	cmd := exec.Command("docker", "exec", "strolt-e2e", "/bin/sh", "-c", fmt.Sprintf("/app/strolt/strolt %s", strings.Join(args, " ")))
+	cmd := exec.Command("docker", "exec", "strolt-e2e", "/bin/sh", "-c", fmt.Sprintf("/strolt/bin/strolt %s", strings.Join(args, " ")))
 	fmt.Println(cmd.String()) //nolint:forbidigo
 
 	return cmd.CombinedOutput()

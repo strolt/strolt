@@ -6,7 +6,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/driver/destination/local"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/destination/restic"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 type Destination string

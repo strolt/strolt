@@ -9,7 +9,7 @@ services:
       - minio:/data
     environment:
       MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin #pragma: allowlist secret
     networks:
       - strolt
 
@@ -18,7 +18,7 @@ services:
     environment:
       TZ: UTC
       POSTGRES_DB: strolt
-      POSTGRES_PASSWORD: strolt
+      POSTGRES_PASSWORD: strolt #pragma: allowlist secret
       POSTGRES_USER: strolt
     ports:
       - 9002:5432
@@ -40,10 +40,10 @@ services:
       - strolt
 
   strolt:
-    image: strolt/strolt:e2e
+    image: strolt/strolt:development
     volumes:
-      - ./strolt.yml:/app/strolt/config.yml:ro
-      - ./.strolt:/app/strolt/.strolt:ro
+      - ./strolt.yml:/strolt/config.yml:ro
+      - ./.strolt:/strolt/.strolt:ro
       - ./.temp/input:/e2e/input
     networks:
       - strolt
@@ -54,8 +54,8 @@ services:
       TZ: UTC
       MYSQL_DATABASE: strolt
       MYSQL_USER: strolt
-      MYSQL_PASSWORD: strolt
-      MYSQL_ROOT_PASSWORD: strolt
+      MYSQL_PASSWORD: strolt #pragma: allowlist secret
+      MYSQL_ROOT_PASSWORD: strolt #pragma: allowlist secret
     ports:
       - 9004:3306
     volumes:
@@ -70,8 +70,8 @@ services:
       TZ: UTC
       MYSQL_DATABASE: strolt
       MYSQL_USER: strolt
-      MYSQL_PASSWORD: strolt
-      MYSQL_ROOT_PASSWORD: strolt
+      MYSQL_PASSWORD: strolt #pragma: allowlist secret
+      MYSQL_ROOT_PASSWORD: strolt #pragma: allowlist secret
     ports:
       - 9005:3306
     volumes:

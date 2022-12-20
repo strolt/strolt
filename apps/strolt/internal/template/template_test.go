@@ -54,7 +54,7 @@ func TestNew(t *testing.T) {
 				OpertationType: sctxt.OpTypeBackup,
 			})
 
-			header := fmt.Sprintf("%s[] [%s] - %s", "", taskName, sctxt.OpTypeBackup)
+			header := fmt.Sprintf("%s [] [%s] - %s", emojies["slack"].TriggerManual, taskName, sctxt.OpTypeBackup)
 			assert.Equal(t, header, tmpl.Header)
 		})
 
@@ -89,7 +89,7 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, header, tmpl.Header)
 
 		body := fmt.Sprintf(`Event: %s`, sctxt.EvOperationStart)
-		body += fmt.Sprintf("\\nStart: %s", startTime)
+		body += fmt.Sprintf("\nStart: %s", startTime.Format(time.RFC3339))
 		assert.Equal(t, body, tmpl.Body)
 	})
 
@@ -110,9 +110,9 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, header, tmpl.Header)
 
 		body := fmt.Sprintf(`Event: %s`, sctxt.EvOperationStart)
-		body += fmt.Sprintf("\\nStart: %s", startTime)
-		body += fmt.Sprintf("\\nStop: %s", stopTime)
-		body += fmt.Sprintf("\\nDuration: %s", stopTime.Sub(startTime))
+		body += fmt.Sprintf("\nStart: %s", startTime.Format(time.RFC3339))
+		body += fmt.Sprintf("\nStop: %s", stopTime.Format(time.RFC3339))
+		body += fmt.Sprintf("\nDuration: %s", stopTime.Sub(startTime))
 
 		assert.Equal(t, body, tmpl.Body)
 	})
@@ -136,10 +136,10 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, header, tmpl.Header)
 
 		body := fmt.Sprintf(`Event: %s`, sctxt.EvOperationError)
-		body += fmt.Sprintf("\\nStart: %s", startTime)
-		body += fmt.Sprintf("\\nStop: %s", stopTime)
-		body += fmt.Sprintf("\\nDuration: %s", stopTime.Sub(startTime))
-		body += fmt.Sprintf("\\n\\nError: %s", err)
+		body += fmt.Sprintf("\nStart: %s", startTime.Format(time.RFC3339))
+		body += fmt.Sprintf("\nStop: %s", stopTime.Format(time.RFC3339))
+		body += fmt.Sprintf("\nDuration: %s", stopTime.Sub(startTime))
+		body += fmt.Sprintf("\n\nError: %s", err)
 
 		assert.Equal(t, body, tmpl.Body)
 	})

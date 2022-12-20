@@ -6,7 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/apps/strolt/internal/env"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 type Directory struct {
@@ -40,9 +41,22 @@ func (d *Directory) SetName(name string) {
 }
 
 func getBasePath(isTemp bool) (string, error) {
-	path, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		return "", err
+	path := ""
+
+	if env.PathData() != "" {
+		p, err := filepath.Abs(env.PathData())
+		if err != nil {
+			return "", err
+		}
+
+		path = p
+	} else {
+		p, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		if err != nil {
+			return "", err
+		}
+
+		path = p
 	}
 
 	parts := []string{path, prefix}

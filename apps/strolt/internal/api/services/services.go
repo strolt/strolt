@@ -1,17 +1,22 @@
 package services
 
 import (
-	"github.com/strolt/strolt/apps/strolt/internal/api/services/tasks"
-
 	"github.com/go-chi/chi/v5"
 )
 
-func Router(r chi.Router) {
-	r.Route("/services", func(r chi.Router) {
-		r.Get("/status", getStatus)
+type Services struct {
+}
 
-		r.Route("/{serviceName}", func(r chi.Router) {
-			tasks.Router(r)
-		})
-	})
+func New() *Services {
+	return &Services{}
+}
+
+func (s *Services) Router(r chi.Router) {
+	r.Get("/api/v1/services/status", s.getStatus)
+
+	r.Post("/api/v1/services/{serviceName}/tasks/{taskName}/backup", s.backup)
+	r.Get("/api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots", s.getSnapshots)
+	r.Get("/api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots/prune", s.getSnapshotsForPrune)
+	r.Post("/api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune", s.prune)
+	r.Get("/api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats", s.getStats)
 }

@@ -3,157 +3,134 @@ package api
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
+	"github.com/strolt/strolt/apps/strolt/internal/api/public"
 	"github.com/strolt/strolt/apps/strolt/internal/api/services"
+	"github.com/strolt/strolt/apps/strolt/internal/config"
+	"github.com/strolt/strolt/apps/strolt/internal/env"
+	"github.com/strolt/strolt/apps/strolt/internal/ldflags"
+	"github.com/strolt/strolt/shared/apiu"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/docgen"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-// func Serve(ctx context.Context, cancel func()) {
+type API struct {
+	addr       string
+	httpServer *http.Server
+	log        *logger.Logger
+}
 
-// 	r := chi.NewRouter()
-// 	// r.Use(middleware.Logger)
-// 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-// 		w.Write([]byte("welcome"))
-// 	})
+func New() *API {
+	addr := fmt.Sprintf("%s:%d", env.Host(), env.Port())
 
-// 	host := os.Getenv("STROLT_HOST")
-// 	if host == "" {
-// 		host = "0.0.0.0"
-// 	}
-
-// 	port := os.Getenv("STROLT_PORT")
-// 	if port == "" {
-// 		port = "8080"
-// 	}
-
-// 	// httpServer := http.Server{ //nolint
-// 	// 	Addr: fmt.Sprintf("%s:%s", host, port),
-// 	// }
-
-// 	// log.Printf("api server started on: %v", httpServer.Addr)
-
-// 	http.Handle("/metrics", promhttp.Handler())
-
-// 	idleConnectionsClosed := make(chan struct{})
-
-// 	go func() {
-// 		<-ctx.Done()
-
-// 		// if err := httpServer.Shutdown(context.Background()); err != nil { //nolint
-// 		// 	log.Printf("api server shutdown error: %v", err)
-// 		// }
-
-// 		close(idleConnectionsClosed)
-// 	}()
-
-// 	if err := http.ListenAndServe(":3000", r); errors.Is(err, http.ErrServerClosed) {
-// 		log.Fatalf("api server ListenAndServe error: %v", err)
-// 		cancel()
-// 	}
-
-//		<-idleConnectionsClosed
-//	}
-
-func Serve(ctx context.Context, cancel func()) {
-	// The HTTP Server
-	server := &http.Server{Addr: "0.0.0.0:3333", Handler: service()} //nolint
-
-	// Server run context
-	serverCtx, serverStopCtx := context.WithCancel(context.Background())
-
-	go func() { //nolint
-		// fmt.Println("Serve go func...")
-
-		<-ctx.Done()
-		// fmt.Println("Serve go func <-ctx.Done()")
-
-		// Shutdown signal with grace period of 30 seconds
-		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second) //nolint
-
-		go func() {
-			// fmt.Println("Serve go func + go func")
-			<-shutdownCtx.Done()
-			// fmt.Println("Serve go func + go func", <-shutdownCtx.Done())
-			if shutdownCtx.Err() == context.DeadlineExceeded { //nolint
-				log.Fatal("graceful shutdown timed out.. forcing exit.")
-			}
-		}()
-
-		// fmt.Println("Trigger graceful shutdown")
-		// Trigger graceful shutdown
-		err := server.Shutdown(shutdownCtx)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// fmt.Println("serverStopCtx")
-		serverStopCtx()
-	}()
-
-	// Run the server
-	err := server.ListenAndServe()
-	if err != nil && err != http.ErrServerClosed {
-		log.Fatal(err)
+	api := API{
+		addr:       addr,
+		httpServer: &http.Server{}, //nolint
+		log:        logger.New(),
 	}
 
-	// Wait for server context to be stopped
-	<-serverCtx.Done()
-	// fmt.Println("<-serverCtx.Done()")
-} //nolint
+	api.httpServer = api.makeHTTPServer()
 
-// @title           Strolt API
+	return &api
+}
+
+// Shutdown api http server.
+func (api *API) Shutdown() {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	if api.httpServer != nil {
+		if err := api.httpServer.Shutdown(ctx); err != nil {
+			api.log.Debugf("api shutdown error, %s", err)
+		}
+
+		api.log.Debug("shutdown api server completed")
+	}
+}
+
+func (api *API) makeHTTPServer() *http.Server {
+	return &http.Server{
+		Addr:              api.addr,
+		Handler:           api.handler(),
+		ReadHeaderTimeout: 5 * time.Second,   //nolint:gomnd
+		WriteTimeout:      120 * time.Second, //nolint:gomnd
+		IdleTimeout:       30 * time.Second,  //nolint:gomnd
+	}
+}
+
+// Run the lister and request's router, activate api server.
+func (api *API) Run(ctx context.Context, cancel func()) {
+	done := make(chan bool)
+
+	go func() {
+		<-ctx.Done()
+
+		api.log.Debug("stop api server...")
+		api.Shutdown() //nolint:contextcheck
+		done <- true
+	}()
+
+	go func() {
+		api.log.Infof("api server started on: %s", api.addr)
+
+		err := api.httpServer.ListenAndServe()
+		if err != nil {
+			api.log.Warnf("http server terminated, %s", err)
+			cancel()
+		}
+	}()
+
+	<-done
+	api.log.Debug("api server was stopped")
+}
+
 // @version         1.0
-// @BasePath  /
 // @securityDefinitions.basic  BasicAuth
-
-func service() http.Handler {
+// @title           Strolt API.
+func (api *API) handler() http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
-	r.Use(middleware.Logger)
+	// r.Use(middleware.Logger)
+	r.Use(Logger())
+	r.Use(middleware.Compress(5)) //nolint:gomnd
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("sup")) //nolint
+	public.New().Router(r)
+
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.BasicAuth("api", config.Get().API.Users))
+
+		r.Get("/api/v1/config", api.getConfig)
+		r.Get("/api/v1/metrics", api.getStroltMetrics)
+		r.Get("/api/v1/info", api.getInfo)
+		services.New().Router(r)
 	})
 
-	r.Mount("/metrics", promhttp.Handler())
-	// r.Mount("/swagger", httpSwagger.WrapHandler)
-	r.Mount("/debug", middleware.Profiler())
-
-	r.Mount("/service", servicesHandler())
-
-	r.Route("/api", func(r chi.Router) {
-		r.Get("/config", getConfig)
-		services.Router(r)
-	})
-	// r.Get("/api/services/status", services.GetStatus)
-	// r.Post("/api/services/{serviceName}/tasks/{taskName}/backup", services.PostBackup)
-	// r.Get("/api/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots", services.GetSnapshots)
-	// r.Get("/api/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune", services.GetPrune)
-	// r.Post("/api/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune", services.PostPrune)
-
-	r.Get("/slow", func(w http.ResponseWriter, r *http.Request) {
-		// Simulates some hard work.
-		//
-		// We want this handler to complete successfully during a shutdown signal,
-		// so consider the work here as some background routine to fetch a long running
-		// search query to find as many results as possible, but, instead we cut it short
-		// and respond with what we have so far. How a shutdown is handled is entirely
-		// up to the developer, as some code blocks are preemptable, and others are not.
-		time.Sleep(5 * time.Second) //nolint:gomnd
-
-		w.Write([]byte(fmt.Sprintf("all done.\n"))) //nolint
-	})
-
-	docgen.PrintRoutes(r)
-	// os.WriteFile("docs.md", []byte(docgen.MarkdownRoutesDoc(r, docgen.MarkdownOpts{})), 0o755)
-	// os.WriteFile("docs.json", []byte(docgen.JSONRoutesDoc(r)), 0o755)
+	if env.IsDebug() {
+		docgen.PrintRoutes(r)
+	}
 
 	return r
+}
+
+type getInfoResponse struct {
+	Version string `json:"version"`
+}
+
+// getInfo godoc
+// @Id					 getInfo
+// @Summary      Get info
+// @Tags         info
+// @Security BasicAuth
+// @success 200 {object} getInfoResponse
+// @Router       /api/v1/info [get].
+func (api *API) getInfo(w http.ResponseWriter, r *http.Request) {
+	apiu.RenderJSON200(w, r, getInfoResponse{
+		Version: ldflags.GetVersion(),
+	})
 }

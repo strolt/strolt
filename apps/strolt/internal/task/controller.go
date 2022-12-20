@@ -19,6 +19,8 @@ const (
 	COPruneDestination ControllerOperationType = "PRUNE_DESTINATION"
 
 	COFetchSnapshots ControllerOperationType = "FETCH_SNAPSHOTS"
+
+	COFetchStats ControllerOperationType = "FETCH_STATS"
 )
 
 type controller struct {

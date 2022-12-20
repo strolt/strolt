@@ -35,6 +35,8 @@ func (i *Restic) Snapshots() ([]interfaces.Snapshot, error) {
 
 	output, err := startCmd(cmd)
 
+	i.logger.Debug(string(output))
+
 	if err != nil {
 		i.logger.Error(err)
 		return nil, err

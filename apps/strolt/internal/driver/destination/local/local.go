@@ -10,7 +10,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/google/uuid"
 	"github.com/otiai10/copy"
@@ -135,9 +135,9 @@ func (i *Local) Prune(ctx context.Context, isDryRun bool) ([]interfaces.Snapshot
 	return []interfaces.Snapshot{}, nil
 }
 
-func (i *Local) Stats() error {
+func (i *Local) Stats() (interfaces.Stats, error) {
 	i.logger.Debug("stats")
-	return nil
+	return interfaces.Stats{}, nil
 }
 
 func (i *Local) Snapshots() ([]interfaces.Snapshot, error) {

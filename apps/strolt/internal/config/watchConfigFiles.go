@@ -3,15 +3,15 @@ package config
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/apps/strolt/internal/env"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/fsnotify/fsnotify"
 )
 
 func WatchConfigChanges(ctx context.Context, cancel func()) {
-	if config.DisableWatchChanges {
+	if env.IsWatchFilesDisabled() {
 		return
 	}
 
@@ -35,7 +35,7 @@ func WatchConfigChanges(ctx context.Context, cancel func()) {
 	go func() {
 		<-ctx.Done()
 
-		log.Info("stop watch for config file changes")
+		log.Debug("stop watch for config file changes...")
 		done <- true
 	}()
 
@@ -47,7 +47,7 @@ func WatchConfigChanges(ctx context.Context, cancel func()) {
 					return
 				}
 
-				log.Info(fmt.Sprintf("file '%s' changed", event.Name))
+				log.Infof("file '%s' changed", event.Name)
 				cancel()
 
 			case err, ok := <-watcher.Errors:
@@ -55,7 +55,7 @@ func WatchConfigChanges(ctx context.Context, cancel func()) {
 					return
 				}
 
-				log.Error(fmt.Sprintf("config file watcher: %s", err))
+				log.Errorf("config file watcher: %s", err)
 			}
 		}
 	}()
@@ -67,5 +67,5 @@ func WatchConfigChanges(ctx context.Context, cancel func()) {
 	}
 
 	<-done
-	log.Info("watch for config file changes stopped")
+	log.Debug("watch for config file changes stopped")
 }

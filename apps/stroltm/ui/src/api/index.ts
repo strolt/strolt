@@ -1,4 +1,5 @@
 import axios from "axios";
+
 import * as _api from "./generated/api";
 import { Configuration } from "./generated/configuration";
 
@@ -10,4 +11,5 @@ export const config = new Configuration({ basePath });
 
 const commonParams: any = [config, basePath, axiosInstance];
 
-export const services = new _api.ServicesApi(...commonParams)
+export const manager = new _api.ManagerApi(...commonParams);
+export const auth = new _api.AuthApi(...commonParams);

@@ -3,7 +3,7 @@ package mysql
 import (
 	"fmt"
 
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 const FileNamePrefix = "strolt_driver_mysql"

@@ -134,9 +134,9 @@ services:
     environment:
       - STROLT_GLOBAL_TAGS=postgres:13.2-alpine
     volumes:
-      - ./strolt.yml:/app/strolt/config.yml:ro
-      - ./strolt.secrets.yml:/app/strolt/strolt.secrets.yml:ro
-      - ./strolt.base.yml:/app/strolt/strolt.base.yml:ro
+      - ./strolt.yml:/strolt/config.yml:ro
+      - ./strolt.secrets.yml:/strolt/strolt.secrets.yml:ro
+      - ./strolt.base.yml:/strolt/strolt.base.yml:ro
     networks:
       - strolt_network
 

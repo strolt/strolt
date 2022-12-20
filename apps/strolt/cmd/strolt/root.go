@@ -9,9 +9,11 @@ import (
 
 	"github.com/strolt/strolt/apps/strolt/internal/api"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
-	"github.com/strolt/strolt/apps/strolt/internal/logger"
+	"github.com/strolt/strolt/apps/strolt/internal/env"
+	"github.com/strolt/strolt/apps/strolt/internal/metrics"
 	"github.com/strolt/strolt/apps/strolt/internal/schedule"
 	"github.com/strolt/strolt/apps/strolt/internal/util/dir"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/spf13/cobra"
 )
@@ -21,17 +23,12 @@ const (
 )
 
 var (
-	isDebugFlag        = false
 	isJSONFlag         = false
 	isSkipConfirmation = false
 	configPathFlag     = ""
 )
 
 func initConfig() {
-	if isDebugFlag {
-		logger.SetLogLevel(logger.LogLevelDebug)
-	}
-
 	if isJSONFlag {
 		logger.SetLogFormat(logger.LogFormatJSON)
 	}
@@ -51,7 +48,6 @@ func initConfig() {
 
 //nolint:gochecknoinits
 func init() {
-	rootCmd.PersistentFlags().BoolVar(&isDebugFlag, "debug", false, "enable debug log level")
 	rootCmd.PersistentFlags().BoolVar(&isJSONFlag, "json", false, "set output mode to JSON")
 	// cobra.OnInitialize(initConfig)
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
@@ -74,6 +70,9 @@ var rootCmd = &cobra.Command{
                 love by spf13 and friends in Go.
                 Complete documentation is available at http://hugo.spf13.com`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		env.Scan()
+		metrics.Init()
+
 		parseCliFlags()
 
 		initConfig()
@@ -88,10 +87,10 @@ var rootCmd = &cobra.Command{
 		signal.Notify(c, os.Interrupt)
 
 		{
-			// Monitoring server
+			// Api server
 			wg.Add(1)
 			go func() {
-				api.Serve(ctx, cancel)
+				api.New().Run(ctx, cancel)
 				wg.Done()
 			}()
 		}
@@ -118,7 +117,7 @@ var rootCmd = &cobra.Command{
 			// Watch system exit code
 			go func() {
 				oscall := <-c
-				log.Info(fmt.Sprintf("system call: %+v", oscall))
+				log.Debugf("system call: %+v", oscall)
 				cancel()
 			}()
 		}
