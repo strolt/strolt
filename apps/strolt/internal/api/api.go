@@ -97,7 +97,7 @@ func (api *API) handler() http.Handler {
 
 	r.Use(middleware.RequestID)
 	// r.Use(middleware.Logger)
-	r.Use(Logger())
+	r.Use(apiu.Logger())
 	r.Use(middleware.Compress(5)) //nolint:gomnd
 
 	public.New().Router(r)

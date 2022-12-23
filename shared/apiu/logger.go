@@ -1,4 +1,4 @@
-package api
+package apiu
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/strolt/strolt/apps/strolt/internal/metrics"
 	"github.com/strolt/strolt/shared/logger"
 )
 
@@ -50,7 +49,6 @@ type StructuredLoggerEntry struct {
 }
 
 func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
-	metrics.APIHandlerRequestsInc(status)
 	logger.New().WithFields(l.Fields).WithFields(logger.Fields{
 		"resp_status": status, "resp_bytes_length": bytes,
 		"resp_elapsed_ms": float64(elapsed.Nanoseconds()) / 1000000.0, //nolint:gomnd

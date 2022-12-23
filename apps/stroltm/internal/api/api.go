@@ -16,6 +16,7 @@ import (
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
 	"github.com/strolt/strolt/apps/stroltm/internal/env"
 	"github.com/strolt/strolt/apps/stroltm/internal/ui"
+	"github.com/strolt/strolt/shared/apiu"
 	"github.com/strolt/strolt/shared/logger"
 )
 
@@ -97,9 +98,7 @@ func (api *API) handler() http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
-	// r.Use(middleware.Logger)
-
-	r.Use(middleware.Logger)
+	r.Use(apiu.Logger())
 	r.Use(middleware.Compress(5)) //nolint:gomnd
 
 	r.Group(func(r chi.Router) {
