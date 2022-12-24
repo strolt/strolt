@@ -32,7 +32,10 @@ func (l *Logger) setFormat() {
 	}
 
 	if logFormat == LogFormatText {
-		l.logger.SetFormatter(&logrus.TextFormatter{})
+		l.logger.SetFormatter(&logrus.TextFormatter{
+			DisableTimestamp:       true,
+			DisableLevelTruncation: true,
+		})
 	}
 }
 
@@ -120,4 +123,12 @@ func (l *Logger) Warn(arg interface{}) {
 
 func (l *Logger) Warnf(format string, a ...any) {
 	l.Warn(fmt.Sprintf(format, a...))
+}
+
+func (l *Logger) Fatal(arg interface{}) {
+	l.getLogger().Fatal(arg)
+}
+
+func (l *Logger) Fatalf(format string, a ...any) {
+	l.Fatal(fmt.Sprintf(format, a...))
 }

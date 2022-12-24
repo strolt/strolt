@@ -68,19 +68,22 @@ func printDriverVersions() {
 		}
 	}
 
-	fmt.Println("")                                                   //nolint:forbidigo
-	fmt.Println("used binaries:")                                     //nolint:forbidigo
-	fmt.Println(strings.Join(excludeDuplicateVersion(&versions), "")) //nolint:forbidigo
+	binList := excludeDuplicateVersion(&versions)
+
+	if len(binList) == 0 {
+		Print("binaries not installed")
+	} else {
+		Print("used binaries:")
+		Print(strings.Join(binList, ""))
+	}
 }
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print version information",
-	Long:  `All software has versions. This is Strolt's`,
+	Short: "Print version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("strolt %s compiled with %v on %v/%v\n", ldflags.GetVersion(), runtime.Version(), runtime.GOOS, runtime.GOARCH) //nolint:forbidigo
+		Printf("strolt %s compiled with %v on %v/%v\n", ldflags.GetVersion(), runtime.Version(), runtime.GOOS, runtime.GOARCH)
 
-		initConfig()
 		printDriverVersions()
 	},
 }

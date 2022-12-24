@@ -1,7 +1,6 @@
 package env
 
 import (
-	"os"
 	"strings"
 
 	"github.com/caarlos0/env/v6"
@@ -33,8 +32,7 @@ var resultConfig config
 
 func Scan() {
 	if err := env.Parse(&resultConfig); err != nil {
-		logger.New().Error(err)
-		os.Exit(1)
+		logger.New().Fatal(err)
 	}
 
 	if resultConfig.IsDebug {

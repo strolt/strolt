@@ -1,9 +1,8 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/strolt/strolt/apps/strolt/internal/config"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/spf13/cobra"
 )
@@ -15,10 +14,9 @@ func init() {
 
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Print merged config",
-	Long:  `All software has versions. This is Strolt's`,
+	Short: "Print result config",
 	Run: func(cmd *cobra.Command, args []string) {
 		initConfig()
-		fmt.Println(config.Yaml()) //nolint:forbidigo
+		logger.New().Infof(config.Yaml())
 	},
 }

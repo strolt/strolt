@@ -34,8 +34,7 @@ func initConfig() {
 	}
 
 	if err := config.Load(configPathFlag); err != nil {
-		logger.New().Error(err)
-		os.Exit(1)
+		logger.New().Fatal(err)
 	}
 }
 
@@ -99,7 +98,6 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		logger.New().Error(err)
-		os.Exit(1)
+		logger.New().Fatal(err)
 	}
 }

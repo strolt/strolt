@@ -10,9 +10,9 @@ var (
 
 //nolint:gochecknoinits
 func init() {
-	rootCmd.PersistentFlags().StringArrayVar(&cliConfig.Tags, "config.tags", []string{}, "global destination tags")
+	rootCmd.PersistentFlags().StringSliceVar(&cliConfig.Tags, "tag", []string{}, "set global tag. Example: (--tag tag_one --tag tag_two)")
 }
 
-func parseCliFlags() {
+func scanCliFlags() {
 	config.SetCliConfig(&cliConfig)
 }

@@ -33,4 +33,4 @@ ENTRYPOINT ["/strolt/bin/strolt", "--config", "/strolt/config.yml"]
 
 HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost:8080/api/v1/ping || exit 1
 
-CMD ["--json"]
+CMD ["start", "--json"]
