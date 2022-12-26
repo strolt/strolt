@@ -25,7 +25,16 @@ const BackupButton: FC<BackupButtonProps> = observer(({ instanceName, serviceNam
       title="Are you sure?"
       onConfirm={() => managerStore.backup(instanceName, serviceName, taskName)}
     >
-      <Button loading={status?.state === "pending"} size="small" danger>
+      <Button
+        loading={
+          status?.state === "pending" ||
+          managerStore.taskStatusMap.get(
+            managerStore.getTaskStatusMapKey(instanceName, serviceName, taskName),
+          )?.isRunning
+        }
+        size="small"
+        danger
+      >
         Backup
       </Button>
     </Popconfirm>

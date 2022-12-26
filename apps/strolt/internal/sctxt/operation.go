@@ -7,4 +7,5 @@ const (
 	OpTypePrune     OperationType = "PRUNE"
 	OpTypeRestore   OperationType = "RESTORE"
 	OpTypeSnapshots OperationType = "SNAPSHOTS"
+	OpTypeStats     OperationType = "STATS"
 )

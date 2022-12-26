@@ -84,3 +84,7 @@ func (sdk *Sdk) GetStats(serviceName, taskName, destinationName string) (*servic
 
 	return sdk.client.Services.GetStats(params, sdk.authInfo)
 }
+
+func (sdk *Sdk) GetStatus() (*services.GetStatusOK, error) {
+	return sdk.client.Services.GetStatus(nil, sdk.authInfo)
+}

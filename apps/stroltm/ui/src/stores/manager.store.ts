@@ -30,6 +30,21 @@ export class ManagerStore {
       (a.instanceName || "").localeCompare(b.instanceName || ""),
     );
 
+    data.data?.forEach((instance) => {
+      instance.status?.tasks?.forEach((taskStatus) => {
+        if (instance.instanceName && taskStatus.serviceName && taskStatus.taskName) {
+          this.taskStatusMap.set(
+            this.getTaskStatusMapKey(
+              instance.instanceName,
+              taskStatus.serviceName,
+              taskStatus.taskName,
+            ),
+            taskStatus,
+          );
+        }
+      });
+    });
+
     runInAction(() => {
       this.instances = sortedInstances;
     });
@@ -49,6 +64,18 @@ export class ManagerStore {
   async backupAll() {
     this.backupAllStatus = fromPromise(api.manager.backupAll());
 
+    runInAction(() => {
+      this.instances.forEach((instance) => {
+        Object.entries(instance.config?.services || {}).forEach(([serviceName, service]) => {
+          Object.entries(service || {}).forEach(([taskName]) => {
+            if (instance.instanceName) {
+              this.taskStatusMapStart(instance.instanceName, serviceName, taskName);
+            }
+          });
+        });
+      });
+    });
+
     const { data } = await this.backupAllStatus;
 
     return data;
@@ -67,6 +94,10 @@ export class ManagerStore {
   >();
   async backup(instanceName: string, serviceName: string, taskName: string) {
     const request = fromPromise(api.manager.backup(instanceName, serviceName, taskName));
+
+    runInAction(() => {
+      this.taskStatusMapStart(instanceName, serviceName, taskName);
+    });
 
     this.backupStatusMap.set(this.backupStatusMapKey(instanceName, serviceName, taskName), request);
 
@@ -91,6 +122,9 @@ export class ManagerStore {
     this.snapshotsStatus = fromPromise(
       api.manager.getSnapshots(instanceName, serviceName, taskName, destinationName),
     );
+    runInAction(() => {
+      this.taskStatusMapStart(instanceName, serviceName, taskName);
+    });
 
     const { data } = await this.snapshotsStatus;
 
@@ -124,6 +158,9 @@ export class ManagerStore {
     this.snapshotsForPruneStatus = fromPromise(
       api.manager.getSnapshotsForPrune(instanceName, serviceName, taskName, destinationName),
     );
+    runInAction(() => {
+      this.taskStatusMapStart(instanceName, serviceName, taskName);
+    });
 
     const { data } = await this.snapshotsForPruneStatus;
 
@@ -158,6 +195,10 @@ export class ManagerStore {
       api.manager.prune(instanceName, serviceName, taskName, destinationName),
     );
 
+    runInAction(() => {
+      this.taskStatusMapStart(instanceName, serviceName, taskName);
+    });
+
     const { data } = await this.pruneStatus;
 
     const sortedSnapshots = (data.data || []).sort((a, b) => {
@@ -190,6 +231,9 @@ export class ManagerStore {
     this.statsStatus = fromPromise(
       api.manager.getStats(instanceName, serviceName, taskName, destinationName),
     );
+    runInAction(() => {
+      this.taskStatusMapStart(instanceName, serviceName, taskName);
+    });
 
     const { data } = await this.statsStatus;
 
@@ -202,6 +246,29 @@ export class ManagerStore {
   resetStats() {
     this.statsStatus = null;
     this.stats = null;
+  }
+
+  taskStatusMap = new Map<string, apiGenerated.ModelsTaskManagerTaskItem>();
+
+  getTaskStatusMapKey(instanceName?: string, serviceName?: string, taskName?: string) {
+    return [instanceName, serviceName, taskName].join("_");
+  }
+
+  taskStatusMapStart(instanceName: string, serviceName: string, taskName: string) {
+    const key = this.getTaskStatusMapKey(instanceName, serviceName, taskName);
+
+    let task = this.taskStatusMap.get(key);
+    if (task) {
+      task.isRunning = true;
+    } else {
+      task = {
+        serviceName,
+        taskName,
+        isRunning: true,
+      };
+    }
+
+    this.taskStatusMap.set(key, task);
   }
 }
 

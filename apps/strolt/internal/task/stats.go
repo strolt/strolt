@@ -5,20 +5,14 @@ import (
 
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
+	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 )
 
 func (t Task) GetStats(destinationName string) (interfaces.FormattedStats, error) {
-	operation := ControllerOperation{
-		ServiceName:     t.ServiceName,
-		TaskName:        t.TaskName,
-		DestinationName: destinationName,
-		Operation:       COFetchStats,
-	}
-
-	if err := operation.Start(); err != nil {
+	if err := t.managerStart(sctxt.OpTypeStats); err != nil {
 		return interfaces.FormattedStats{}, err
 	}
-	defer operation.Stop()
+	defer t.managerStop()
 
 	destination, ok := t.TaskConfig.Destinations[destinationName]
 	if !ok {

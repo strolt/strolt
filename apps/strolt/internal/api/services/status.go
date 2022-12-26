@@ -8,7 +8,7 @@ import (
 )
 
 type getStatusResult struct {
-	Data []task.ControllerOperation `json:"data"`
+	Data task.ManagerStatus `json:"data"`
 }
 
 // getStatus godoc
@@ -19,5 +19,5 @@ type getStatusResult struct {
 // @success 200 {object} getStatusResult
 // @Router       /api/v1/services/status [get].
 func (s *Services) getStatus(w http.ResponseWriter, r *http.Request) {
-	apiu.RenderJSON200(w, r, getStatusResult{Data: task.GetOperations()})
+	apiu.RenderJSON200(w, r, getStatusResult{Data: task.GetManagerStatus()})
 }

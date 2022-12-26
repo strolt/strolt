@@ -10,18 +10,6 @@ import (
 )
 
 func (t *Task) prune(destinationName string, isDryRun bool) ([]interfaces.Snapshot, error) {
-	operation := ControllerOperation{
-		ServiceName:     t.ServiceName,
-		TaskName:        t.TaskName,
-		DestinationName: destinationName,
-		Operation:       COPruneDestination,
-	}
-
-	if err := operation.Start(); err != nil {
-		return []interfaces.Snapshot{}, err
-	}
-	defer operation.Stop()
-
 	destination, ok := t.TaskConfig.Destinations[destinationName]
 	if !ok {
 		return []interfaces.Snapshot{}, fmt.Errorf("destination not exits")
@@ -36,6 +24,11 @@ func (t *Task) prune(destinationName string, isDryRun bool) ([]interfaces.Snapsh
 }
 
 func (t *Task) Prune(destinationName string, isDryRun bool) ([]interfaces.Snapshot, error) {
+	if err := t.managerStart(sctxt.OpTypePrune); err != nil {
+		return []interfaces.Snapshot{}, err
+	}
+	defer t.managerStop()
+
 	if isDryRun {
 		t.isNotificationsDisabled = true
 	}

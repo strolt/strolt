@@ -25,19 +25,14 @@ func (s *Services) backup(w http.ResponseWriter, r *http.Request) {
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")
 
-	taskOperation := task.ControllerOperation{
-		ServiceName: serviceName,
-		TaskName:    taskName,
-	}
-
-	if taskOperation.IsWorking() {
-		apiu.RenderJSON500(w, r, apiu.ErrTaskAlreadyWorking)
-		return
-	}
-
 	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
 	if err != nil {
 		apiu.RenderJSON500(w, r, err)
+		return
+	}
+
+	if t.IsRunning() {
+		apiu.RenderJSON500(w, r, apiu.ErrTaskAlreadyWorking)
 		return
 	}
 

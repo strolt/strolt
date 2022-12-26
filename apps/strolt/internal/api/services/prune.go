@@ -49,23 +49,17 @@ func prune(w http.ResponseWriter, r *http.Request, idDryRun bool) {
 	taskName := chi.URLParam(r, "taskName")
 	destinationName := chi.URLParam(r, "destinationName")
 
-	taskOperation := task.ControllerOperation{
-		ServiceName:     serviceName,
-		TaskName:        taskName,
-		DestinationName: destinationName,
-	}
-
-	if taskOperation.IsWorking() {
-		apiu.RenderJSON500(w, r, apiu.ErrTaskAlreadyWorking)
-		return
-	}
-
 	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypePrune)
 	if err != nil {
 		apiu.RenderJSON500(w, r, err)
 		return
 	}
 	defer t.Close()
+
+	if t.IsRunning() {
+		apiu.RenderJSON500(w, r, apiu.ErrTaskAlreadyWorking)
+		return
+	}
 
 	snapshotList, err := t.Prune(destinationName, idDryRun)
 	if err != nil {
