@@ -94,7 +94,9 @@ export class ManagerStore {
     this.backupStatusMap.clear();
   }
 
-  snapshots: apiGenerated.ModelsServicesGetSnapshotsResult | null = null;
+  snapshots: apiGenerated.ModelsServicesGetSnapshotsResult = {
+    items: [],
+  };
   snapshotsStatus: IPromiseBasedObservable<
     AxiosResponse<apiGenerated.ModelsServicesGetSnapshotsResult, any>
   > | null = null;
@@ -113,21 +115,17 @@ export class ManagerStore {
 
     const { data } = await this.snapshotsStatus;
 
-    const sortedSnapshots = (data.data || []).sort((a, b) => {
-      return new Date(b.time || "").getTime() - new Date(a.time || "").getTime();
-    });
-
-    data.data = sortedSnapshots;
-
     runInAction(() => {
-      this.snapshots = data;
+      this.snapshots.items = (data.items || []).sort((a, b) => {
+        return new Date(b.time || "").getTime() - new Date(a.time || "").getTime();
+      });
     });
 
     return data;
   }
   resetSnapshots() {
     this.snapshotsForPrune = null;
-    this.snapshots = null;
+    this.snapshots = { items: [] };
   }
 
   snapshotsForPrune: apiGenerated.ModelsServicesGetPruneResult | null = null;

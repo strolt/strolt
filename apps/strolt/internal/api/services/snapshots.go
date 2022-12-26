@@ -2,7 +2,6 @@ package services
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
@@ -47,12 +46,10 @@ func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
 	}
 
 	apiu.RenderJSON200(w, r, getSnapshotsResult{
-		Data:        snapshotList,
-		LastUpdated: time.Now(),
+		Items: snapshotList,
 	})
 }
 
 type getSnapshotsResult struct {
-	Data        task.SnapshotList `json:"data"`
-	LastUpdated time.Time         `json:"lastUpdated"`
+	Items task.SnapshotList `json:"items"`
 }

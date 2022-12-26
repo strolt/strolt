@@ -78,7 +78,7 @@ const SnapshotList = observer(() => {
       </Typography.Title>
 
       <Table
-        dataSource={managerStore.snapshots?.data}
+        dataSource={managerStore.snapshots?.items}
         columns={columns}
         loading={managerStore.snapshotsStatus?.state === "pending"}
         rowKey="id"
@@ -106,12 +106,12 @@ const SnapshotList = observer(() => {
             }
           },
         }}
-        footer={() => <b>Total: {managerStore.snapshots?.data?.length || 0}</b>}
+        footer={() => <b>Total: {managerStore.snapshots?.items?.length || 0}</b>}
       />
 
       <br />
 
-      <DebugJSON data={managerStore.snapshots?.data} />
+      <DebugJSON data={managerStore.snapshots || {}} />
     </div>
   );
 });
