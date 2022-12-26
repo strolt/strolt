@@ -27,8 +27,8 @@ services:
           extends: restic_base
           env:
             RESTIC_REPOSITORY: "s3:http://minio:9000/e2e/restic-pg-t"
-      notifications:
-        - terminal
+      # notifications:
+      #   - terminal
   e2e2:
     pg-t:
       source:

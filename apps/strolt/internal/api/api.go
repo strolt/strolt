@@ -10,13 +10,11 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/api/services"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/env"
-	"github.com/strolt/strolt/apps/strolt/internal/ldflags"
 	"github.com/strolt/strolt/shared/apiu"
 	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/docgen"
 )
 
 type API struct {
@@ -96,9 +94,11 @@ func (api *API) handler() http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
-	// r.Use(middleware.Logger)
-	r.Use(apiu.Logger())
 	r.Use(middleware.Compress(5)) //nolint:gomnd
+
+	if env.IsAPILogEnabled() {
+		r.Use(apiu.Logger())
+	}
 
 	public.New().Router(r)
 
@@ -111,26 +111,5 @@ func (api *API) handler() http.Handler {
 		services.New().Router(r)
 	})
 
-	if env.IsDebug() {
-		docgen.PrintRoutes(r)
-	}
-
 	return r
-}
-
-type getInfoResponse struct {
-	Version string `json:"version"`
-}
-
-// getInfo godoc
-// @Id					 getInfo
-// @Summary      Get info
-// @Tags         info
-// @Security BasicAuth
-// @success 200 {object} getInfoResponse
-// @Router       /api/v1/info [get].
-func (api *API) getInfo(w http.ResponseWriter, r *http.Request) {
-	apiu.RenderJSON200(w, r, getInfoResponse{
-		Version: ldflags.GetVersion(),
-	})
 }

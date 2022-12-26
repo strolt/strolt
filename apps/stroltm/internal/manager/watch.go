@@ -108,13 +108,13 @@ func (s *Strolt) ping() {
 	s.setIsPingInProcess(true)
 	s.setLatestPingAt(pingAt)
 
-	result, err := s.sdk.Ping()
+	result, err := s.sdk.GetInfo()
 	if err != nil {
 		s.log.Debugf("ping error: %s", err)
 
 		isError = true
 	} else {
-		rConfigLoadedAt, err := time.Parse(time.RFC3339, result.Payload.ConfigLoadedAt)
+		rConfigLoadedAt, err := time.Parse(time.RFC3339, result.Payload.UpdateConfigAt)
 		if err != nil {
 			s.log.Debugf("ping error: %s", err)
 			isError = true
@@ -127,7 +127,7 @@ func (s *Strolt) ping() {
 		}
 
 		{
-			timeFromRequest, err := time.Parse(time.RFC3339, result.Payload.TaskManagerUpdatedAt)
+			timeFromRequest, err := time.Parse(time.RFC3339, result.Payload.TaskStatusUpdatedAt)
 			if err == nil && timeFromRequest.Unix() > s.Watch.LatestSuccessUpdateStatusAt.Unix() {
 				s.Watch.LatestSuccessUpdateStatusAt = timeFromRequest
 				s.updateStatus()

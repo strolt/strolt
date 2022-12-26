@@ -10,7 +10,6 @@ import (
 	"github.com/didip/tollbooth_chi"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/docgen"
 	"github.com/strolt/strolt/apps/stroltm/internal/api/managerh"
 	"github.com/strolt/strolt/apps/stroltm/internal/api/public"
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
@@ -98,8 +97,11 @@ func (api *API) handler() http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
-	r.Use(apiu.Logger())
 	r.Use(middleware.Compress(5)) //nolint:gomnd
+
+	if env.IsAPILogEnabled() {
+		r.Use(apiu.Logger())
+	}
 
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.Timeout(5 * time.Second)) //nolint:gomnd
@@ -124,10 +126,6 @@ func (api *API) handler() http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Route("/", ui.Router)
 	})
-
-	if env.IsDebug() {
-		docgen.PrintRoutes(r)
-	}
 
 	return r
 }
