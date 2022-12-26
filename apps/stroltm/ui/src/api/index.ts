@@ -1,9 +1,25 @@
 import axios from "axios";
 
+import { message } from "antd";
+
 import * as _api from "./generated/api";
 import { Configuration } from "./generated/configuration";
 
 export const axiosInstance = axios.create();
+
+axiosInstance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error?.response?.data?.error) {
+      message.error(error?.response?.data?.error);
+    } else {
+      message.error(error.message);
+    }
+    return error;
+  },
+);
 
 const basePath = window.location.origin;
 
