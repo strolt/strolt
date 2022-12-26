@@ -106,7 +106,6 @@ func (api *API) handler() http.Handler {
 		r.Use(middleware.BasicAuth("api", config.Get().API.Users))
 
 		r.Get("/api/v1/config", api.getConfig)
-		r.Get("/api/v1/metrics", api.getStroltMetrics)
 		r.Get("/api/v1/info", api.getInfo)
 		services.New().Router(r)
 	})

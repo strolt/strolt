@@ -23,7 +23,6 @@ func (s *ManagerHandlers) Router(r chi.Router) {
 	r.Post("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune", s.prune)
 	r.Get("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats", s.getStats)
 	r.Post("/api/v1/manager/instances/backup-all", s.backupAll)
-	r.Get("/api/v1/manager/instances/status", s.getStatus)
 }
 
 // getInstances godoc

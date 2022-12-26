@@ -3,7 +3,6 @@ package task
 import (
 	"encoding/json"
 	"fmt"
-	"sync"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/context"
@@ -33,8 +32,6 @@ type Task struct {
 	TaskConfig              config.TaskConfig
 	log                     *logger.Logger
 	isNotificationsDisabled bool
-
-	*sync.Mutex
 }
 
 //nolint:revive
@@ -127,7 +124,6 @@ func New(serviceName string, taskName string, trigger sctxt.TriggerType, operati
 		OperationPrune: Operation{
 			Schedule: c.Schedule.Prune,
 		},
-		Mutex: &sync.Mutex{},
 	}, nil
 }
 

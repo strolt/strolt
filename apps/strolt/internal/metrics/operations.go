@@ -1,8 +1,6 @@
 package metrics
 
 import (
-	"sync"
-
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -24,24 +22,6 @@ func (m *Metrics) registerOperations() {
 
 type Oper struct{}
 
-type OperationsData struct {
-	BackupSuccessCount int `json:"backupSuccess"`
-	BackupErrorCount   int `json:"backupError"`
-	PruneSuccessCount  int `json:"pruneSuccess"`
-	PruneErrorCount    int `json:"pruneError"`
-}
-
-type operDataMutex struct {
-	BackupSuccessCount int `json:"backupSuccess"`
-	BackupErrorCount   int `json:"backupError"`
-	PruneSuccessCount  int `json:"pruneSuccess"`
-	PruneErrorCount    int `json:"pruneError"`
-
-	sync.Mutex
-}
-
-var operData = &operDataMutex{}
-
 func Operations() *Oper {
 	return &Oper{}
 }
@@ -51,15 +31,6 @@ func (o *Oper) BackupSuccess() {
 		"type":      "success",
 		"operation": "backup",
 	}).Inc()
-
-	operData.Lock()
-	defer operData.Unlock()
-
-	operData.BackupSuccessCount++
-
-	if operData.PruneErrorCount < 0 {
-		operData.PruneErrorCount = 0
-	}
 }
 
 func (o *Oper) BackupError() {
@@ -67,15 +38,6 @@ func (o *Oper) BackupError() {
 		"type":      "error",
 		"operation": "backup",
 	}).Inc()
-
-	operData.Lock()
-	defer operData.Unlock()
-
-	operData.BackupErrorCount++
-
-	if operData.PruneErrorCount < 0 {
-		operData.PruneErrorCount = 0
-	}
 }
 
 func (o *Oper) PruneSuccess() {
@@ -83,15 +45,6 @@ func (o *Oper) PruneSuccess() {
 		"type":      "success",
 		"operation": "prune",
 	}).Inc()
-
-	operData.Lock()
-	defer operData.Unlock()
-
-	operData.PruneSuccessCount++
-
-	if operData.PruneErrorCount < 0 {
-		operData.PruneErrorCount = 0
-	}
 }
 
 func (o *Oper) PruneError() {
@@ -99,24 +52,4 @@ func (o *Oper) PruneError() {
 		"type":      "error",
 		"operation": "prune",
 	}).Inc()
-
-	operData.Lock()
-	defer operData.Unlock()
-
-	operData.PruneErrorCount++
-
-	if operData.PruneErrorCount < 0 {
-		operData.PruneErrorCount = 0
-	}
-}
-
-func (o *Oper) Get() OperationsData {
-	data := OperationsData{
-		BackupSuccessCount: operData.BackupSuccessCount,
-		BackupErrorCount:   operData.BackupErrorCount,
-		PruneSuccessCount:  operData.PruneSuccessCount,
-		PruneErrorCount:    operData.PruneErrorCount,
-	}
-
-	return data
 }

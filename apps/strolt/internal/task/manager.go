@@ -108,6 +108,9 @@ func (t *Task) IsRunning() bool {
 }
 
 func GetLastChangedManager() time.Time {
+	managerVar.RLock()
+	defer managerVar.RUnlock()
+
 	return managerVar.LastChangedAt
 }
 
@@ -115,13 +118,13 @@ func GetManagerStatus() ManagerStatus {
 	status := ManagerStatus{}
 	list := []ManagerTaskItem{}
 
-	managerVar.Lock()
+	managerVar.RLock()
 	status.LastChangedAt = managerVar.LastChangedAt.Format(time.RFC3339)
 
 	for _, taskItem := range managerVar.Tasks {
 		list = append(list, taskItem)
 	}
-	managerVar.Unlock()
+	managerVar.RUnlock()
 
 	status.Tasks = list
 

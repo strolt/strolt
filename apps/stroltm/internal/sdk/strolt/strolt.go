@@ -103,10 +103,6 @@ func (sdk *SDK) Prune(serviceName, taskName, destinationName string) (*services.
 	return result, err
 }
 
-func (sdk *SDK) GetMetrics() (*operations.GetStroltMetricsOK, error) {
-	return sdk.client.Operations.GetStroltMetrics(nil, sdk.authInfo)
-}
-
 func (sdk *SDK) GetInfo() (*info.GetInfoOK, error) {
 	return sdk.client.Info.GetInfo(nil, sdk.authInfo)
 }
