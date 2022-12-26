@@ -12,11 +12,6 @@ export class ManagerStore {
     makeAutoObservable(this);
   }
 
-  isAutoUpdateInstancesEnabled = false;
-  setIsAutoUpdateInstancesEnabled(status: boolean) {
-    this.isAutoUpdateInstancesEnabled = status;
-  }
-
   instances: apiGenerated.ManagerhGetInstancesResultItem[] = [];
   instancesStatus: IPromiseBasedObservable<
     AxiosResponse<apiGenerated.ManagerhGetInstancesResult, any>

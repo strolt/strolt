@@ -28,9 +28,7 @@ export class InfoStore {
       const newUpdatedAt = new Date(data.updatedAt || "");
 
       if (newUpdatedAt.getTime() != this.updatedAt.getTime()) {
-        if (managerStore.isAutoUpdateInstancesEnabled) {
-          managerStore.fetchInstances();
-        }
+        managerStore.fetchInstances();
       }
 
       this.latestVersion = data.latestVersion || "";

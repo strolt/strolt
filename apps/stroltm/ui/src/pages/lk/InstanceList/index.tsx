@@ -251,15 +251,6 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
 const InstanceList = observer(() => {
   const { managerStore } = useStores();
 
-  useEffect(() => {
-    managerStore.setIsAutoUpdateInstancesEnabled(true);
-    return () => {
-      managerStore.setIsAutoUpdateInstancesEnabled(false);
-      // managerStore.resetBackup();
-      // managerStore.resetInstances();
-    };
-  }, []);
-
   return (
     <div>
       <Typography.Title>Instances:</Typography.Title>
