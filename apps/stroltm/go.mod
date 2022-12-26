@@ -7,7 +7,6 @@ require (
 	github.com/didip/tollbooth/v7 v7.0.1
 	github.com/didip/tollbooth_chi v0.0.0-20220719025231-d662a7f6928f
 	github.com/go-chi/chi/v5 v5.0.8
-	github.com/go-chi/docgen v1.2.0
 	github.com/go-openapi/errors v0.20.3
 	github.com/go-openapi/runtime v0.25.0
 	github.com/go-openapi/strfmt v0.21.3
