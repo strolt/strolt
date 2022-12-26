@@ -4,7 +4,7 @@ import { Button, Card, message, Popconfirm, Tag, Typography } from "antd";
 
 import { DebugJSON, LatestVersionLink, Link } from "components";
 
-import { ManagerhGetInstancesResultItem, ModelsAPIConfigServiceTask } from "api/generated";
+import { ManagerPreparedInstance, ModelsAPIConfigServiceTask } from "api/generated";
 
 import { observer, useStores } from "stores";
 
@@ -195,12 +195,12 @@ const Service: FC<ServiceProps> = observer(({ service, serviceName, instanceName
 });
 
 export interface InstanceProps {
-  instance: ManagerhGetInstancesResultItem;
+  instance: ManagerPreparedInstance;
 }
 const Instance: FC<InstanceProps> = observer(({ instance }) => {
   const { infoStore } = useStores();
 
-  const instanceInfo = infoStore.map.get(instance.instanceName || "");
+  const instanceInfo = infoStore.map.get(instance.name || "");
 
   return (
     <div style={{ minWidth: "25rem" }}>
@@ -208,7 +208,7 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
         size="small"
         title={
           <>
-            instance: [{instance.instanceName}] version: {instanceInfo?.version}{" "}
+            instance: [{instance.name}] version: {instanceInfo?.version}{" "}
             <LatestVersionLink version={instanceInfo?.version} /> ({instance.config?.timezone})
           </>
         }
@@ -236,7 +236,7 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
 
               <Service
                 key={serviceName}
-                instanceName={instance.instanceName || ""}
+                instanceName={instance.name || ""}
                 serviceName={serviceName}
                 service={service}
               />
@@ -257,7 +257,7 @@ const InstanceList = observer(() => {
       <BackupAll />
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
         {managerStore.instances.map((instance) => {
-          return <Instance key={instance.instanceName} instance={instance} />;
+          return <Instance key={instance.name} instance={instance} />;
         })}
       </div>
 

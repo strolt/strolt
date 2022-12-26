@@ -1,4 +1,4 @@
-package manager2
+package manager
 
 import (
 	"time"

@@ -1,9 +1,7 @@
 package services
 
 import (
-	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
@@ -22,6 +20,7 @@ import (
 // @Param   taskName            path    string     true        "Task name"
 // @Param   destinationName     path    string     true        "Destination name"
 // @success 200 {object} getSnapshotsResult
+// @success 400 {object} apiu.ResultError
 // @success 500 {object} apiu.ResultError
 // @Router       /api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots [get].
 func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
@@ -29,26 +28,15 @@ func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
 	taskName := chi.URLParam(r, "taskName")
 	destinationName := chi.URLParam(r, "destinationName")
 
-	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
+	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeSnapshots)
 	if err != nil {
-		apiu.RenderJSON500(w, r, err)
+		apiu.RenderJSON400(w, r, err)
 		return
 	}
 	defer t.Close()
 
 	if t.IsRunning() {
-		cacheItem, err := getSnapshotsFromCache(serviceName, taskName, destinationName)
-		if err == nil {
-			apiu.RenderJSON200(w, r, getSnapshotsResult{
-				Data:        cacheItem.SnapshotList,
-				LastUpdated: cacheItem.LastUpdated,
-			})
-
-			return
-		}
-
-		apiu.RenderJSON500(w, r, apiu.ErrTaskAlreadyWorking)
-
+		apiu.RenderJSON400(w, r, apiu.ErrTaskAlreadyWorking)
 		return
 	}
 
@@ -58,82 +46,13 @@ func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cacheItem := addSnapshotsToCache(serviceName, taskName, destinationName, snapshotList)
-
 	apiu.RenderJSON200(w, r, getSnapshotsResult{
-		Data:        cacheItem.SnapshotList,
-		LastUpdated: cacheItem.LastUpdated,
+		Data:        snapshotList,
+		LastUpdated: time.Now(),
 	})
 }
 
 type getSnapshotsResult struct {
 	Data        task.SnapshotList `json:"data"`
 	LastUpdated time.Time         `json:"lastUpdated"`
-}
-
-type getSnapshotsCache struct {
-	sync.Mutex
-	List []getSnapshotsCacheItem
-}
-
-type getSnapshotsCacheItem struct {
-	ServiceName     string
-	TaskName        string
-	DestinationName string
-	SnapshotList    task.SnapshotList
-	LastUpdated     time.Time
-}
-
-var snapshotsCache = getSnapshotsCache{}
-
-func getSnapshotsFromCache(serviceName string, taskName string, destinationName string) (getSnapshotsCacheItem, error) {
-	if snapshotsCache.List == nil {
-		return getSnapshotsCacheItem{}, fmt.Errorf("cache is empty")
-	}
-
-	for _, item := range snapshotsCache.List {
-		if item.ServiceName == serviceName &&
-			item.TaskName == taskName &&
-			item.DestinationName == destinationName {
-			return item, nil
-		}
-	}
-
-	return getSnapshotsCacheItem{}, nil
-}
-
-func addSnapshotsToCache(serviceName string, taskName string, destinationName string, snapshotList task.SnapshotList) getSnapshotsCacheItem {
-	snapshotsCache.Lock()
-
-	snapshotsItem := getSnapshotsCacheItem{
-		ServiceName:     serviceName,
-		TaskName:        taskName,
-		DestinationName: destinationName,
-		SnapshotList:    snapshotList,
-		LastUpdated:     time.Now(),
-	}
-
-	isExistsInCache := false
-	existsIndex := 0
-
-	for i, item := range snapshotsCache.List {
-		if item.ServiceName == snapshotsItem.ServiceName &&
-			item.TaskName == snapshotsItem.TaskName &&
-			item.DestinationName == snapshotsItem.DestinationName {
-			isExistsInCache = true
-			existsIndex = i
-
-			break
-		}
-	}
-
-	if isExistsInCache {
-		snapshotsCache.List[existsIndex] = snapshotsItem
-	} else {
-		snapshotsCache.List = append(snapshotsCache.List, snapshotsItem)
-	}
-
-	snapshotsCache.Unlock()
-
-	return snapshotsItem
 }

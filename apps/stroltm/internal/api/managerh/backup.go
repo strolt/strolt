@@ -71,11 +71,11 @@ type backupAllStatusItem struct {
 func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 	items := []backupAllStatusItem{}
 
-	for _, instance := range manager.GetStroltInstances() {
+	for _, instance := range manager.GetPreparedInstances() {
 		for serviceName, service := range instance.Config.Services {
 			for taskName := range service {
 				items = append(items, backupAllStatusItem{
-					InstanceName: instance.InstanceName,
+					InstanceName: instance.Name,
 					ServiceName:  serviceName,
 					TaskName:     taskName,
 				})
