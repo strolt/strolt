@@ -61,7 +61,7 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REF: ${{ github.ref }}
         run: |
-          ref=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD) && version="${ref}"-$(git log -1 --format=%h) && echo "version=$version" && \
+          ref=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD) && version="${ref}" && echo "version=$version" && \
           docker buildx build --push \
               --build-arg version=${version} \
               --build-arg GITHUB_SHA=${GITHUB_SHA} --build-arg GIT_BRANCH=${ref} --build-arg GITHUB_REF=${GITHUB_REF} \
@@ -115,7 +115,7 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REF: ${{ github.ref }}
         run: |
-          ref=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD) && version="${ref}"-$(git log -1 --format=%h) && echo "version=$version" && \
+          ref=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD) && version="${ref}" && echo "version=$version" && \
           docker buildx build --push \
               --build-arg version=${version} \
               --build-arg GITHUB_SHA=${GITHUB_SHA} --build-arg GIT_BRANCH=${ref} --build-arg GITHUB_REF=${GITHUB_REF} \
