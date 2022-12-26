@@ -40,10 +40,8 @@ func backup(instanceName, serviceName, taskName string) error {
 		return fmt.Errorf("instance not exists")
 	}
 
-	result, err := sdk.Backup(serviceName, taskName)
-
-	if err != nil || result == nil || result.Payload == nil {
-		return fmt.Errorf("start backup is error")
+	if _, err := sdk.Backup(serviceName, taskName); err != nil {
+		return err
 	}
 
 	return nil

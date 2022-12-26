@@ -29,7 +29,7 @@ func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
 
 	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeSnapshots)
 	if err != nil {
-		apiu.RenderJSON400(w, r, err)
+		apiu.RenderJSON500(w, r, err)
 		return
 	}
 	defer t.Close()

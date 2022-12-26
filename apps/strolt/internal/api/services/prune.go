@@ -57,7 +57,7 @@ func prune(w http.ResponseWriter, r *http.Request, idDryRun bool) {
 	defer t.Close()
 
 	if t.IsRunning() {
-		apiu.RenderJSON500(w, r, apiu.ErrTaskAlreadyWorking)
+		apiu.RenderJSON400(w, r, apiu.ErrTaskAlreadyWorking)
 		return
 	}
 

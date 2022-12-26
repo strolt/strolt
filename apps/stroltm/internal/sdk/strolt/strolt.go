@@ -1,6 +1,8 @@
 package strolt
 
 import (
+	"fmt"
+
 	"github.com/go-openapi/runtime"
 	runtimeClient "github.com/go-openapi/runtime/client"
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client"
@@ -34,7 +36,18 @@ func (sdk *SDK) GetSnapshots(serviceName, taskName, destinationName string) (*se
 	params.ServiceName = serviceName
 	params.DestinationName = destinationName
 
-	return sdk.client.Services.GetSnapshots(params, sdk.authInfo)
+	result, err := sdk.client.Services.GetSnapshots(params, sdk.authInfo)
+
+	if err != nil {
+		switch errResponse := err.(type) { //nolint:errorlint
+		case *services.GetSnapshotsBadRequest:
+			return result, fmt.Errorf(errResponse.Payload.Error)
+		case *services.GetSnapshotsForPruneInternalServerError:
+			return result, fmt.Errorf(errResponse.Payload.Error)
+		}
+	}
+
+	return result, err
 }
 
 func (sdk *SDK) Backup(serviceName, taskName string) (*services.BackupOK, error) {
@@ -42,7 +55,16 @@ func (sdk *SDK) Backup(serviceName, taskName string) (*services.BackupOK, error)
 	params.ServiceName = serviceName
 	params.TaskName = taskName
 
-	return sdk.client.Services.Backup(params, sdk.authInfo)
+	result, err := sdk.client.Services.Backup(params, sdk.authInfo)
+
+	if err != nil {
+		switch errResponse := err.(type) { //nolint:gocritic,errorlint
+		case *services.BackupInternalServerError:
+			return result, fmt.Errorf(errResponse.Payload.Error)
+		}
+	}
+
+	return result, err
 }
 
 func (sdk *SDK) GetSnapshotsForPrune(serviceName, taskName, destinationName string) (*services.GetSnapshotsForPruneOK, error) {
@@ -51,7 +73,16 @@ func (sdk *SDK) GetSnapshotsForPrune(serviceName, taskName, destinationName stri
 	params.ServiceName = serviceName
 	params.DestinationName = destinationName
 
-	return sdk.client.Services.GetSnapshotsForPrune(params, sdk.authInfo)
+	result, err := sdk.client.Services.GetSnapshotsForPrune(params, sdk.authInfo)
+
+	if err != nil {
+		switch errResponse := err.(type) { //nolint:gocritic,errorlint
+		case *services.GetSnapshotsForPruneInternalServerError:
+			return result, fmt.Errorf(errResponse.Payload.Error)
+		}
+	}
+
+	return result, err
 }
 
 func (sdk *SDK) Prune(serviceName, taskName, destinationName string) (*services.PruneOK, error) {
@@ -60,7 +91,16 @@ func (sdk *SDK) Prune(serviceName, taskName, destinationName string) (*services.
 	params.ServiceName = serviceName
 	params.DestinationName = destinationName
 
-	return sdk.client.Services.Prune(params, sdk.authInfo)
+	result, err := sdk.client.Services.Prune(params, sdk.authInfo)
+
+	if err != nil {
+		switch errResponse := err.(type) { //nolint:gocritic,errorlint
+		case *services.PruneInternalServerError:
+			return result, fmt.Errorf(errResponse.Payload.Error)
+		}
+	}
+
+	return result, err
 }
 
 func (sdk *SDK) GetMetrics() (*operations.GetStroltMetricsOK, error) {
@@ -77,7 +117,16 @@ func (sdk *SDK) GetStats(serviceName, taskName, destinationName string) (*servic
 	params.ServiceName = serviceName
 	params.DestinationName = destinationName
 
-	return sdk.client.Services.GetStats(params, sdk.authInfo)
+	result, err := sdk.client.Services.GetStats(params, sdk.authInfo)
+
+	if err != nil {
+		switch errResponse := err.(type) { //nolint:gocritic,errorlint
+		case *services.GetStatsInternalServerError:
+			return result, fmt.Errorf(errResponse.Payload.Error)
+		}
+	}
+
+	return result, err
 }
 
 func (sdk *SDK) GetStatus() (*services.GetStatusOK, error) {

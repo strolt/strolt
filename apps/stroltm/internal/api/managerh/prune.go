@@ -34,15 +34,6 @@ func (s *ManagerHandlers) getSnapshotsForPrune(w http.ResponseWriter, r *http.Re
 
 	result, err := sdk.GetSnapshotsForPrune(serviceName, taskName, destinationName)
 	if err != nil {
-		// fmt.Println("err", err)
-		// fmt.Println("IsServerError", result.IsServerError())
-		// fmt.Println("IsClientError", result.IsClientError())
-		// fmt.Println("result.Payload", result.Payload)
-		apiu.RenderJSON500(w, r, err)
-		return
-	}
-
-	if err != nil {
 		apiu.RenderJSON500(w, r, err)
 		return
 	}
