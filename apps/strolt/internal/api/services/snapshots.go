@@ -29,13 +29,14 @@ func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
 	taskName := chi.URLParam(r, "taskName")
 	destinationName := chi.URLParam(r, "destinationName")
 
-	taskOperation := task.ControllerOperation{
-		ServiceName:     serviceName,
-		TaskName:        taskName,
-		DestinationName: destinationName,
+	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
+	if err != nil {
+		apiu.RenderJSON500(w, r, err)
+		return
 	}
+	defer t.Close()
 
-	if taskOperation.IsWorking() {
+	if t.IsRunning() {
 		cacheItem, err := getSnapshotsFromCache(serviceName, taskName, destinationName)
 		if err == nil {
 			apiu.RenderJSON200(w, r, getSnapshotsResult{
@@ -50,13 +51,6 @@ func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-
-	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
-	if err != nil {
-		apiu.RenderJSON500(w, r, err)
-		return
-	}
-	defer t.Close()
 
 	snapshotList, err := t.GetSnapshotList(destinationName)
 	if err != nil {

@@ -25,6 +25,7 @@ type Strolt struct {
 	ConfigLoadedAt time.Time
 	IsOnline       bool
 	sdk            *strolt.Sdk
+	Status         *models.TaskManagerStatus
 
 	Config *models.APIConfig
 
@@ -34,9 +35,11 @@ type Strolt struct {
 }
 
 type WatchItem struct {
-	LatestPingAt        time.Time
-	LatestSuccessPingAt time.Time
-	IsPingInProcess     bool
+	LatestPingAt                time.Time
+	LatestSuccessPingAt         time.Time
+	IsPingInProcess             bool
+	LatestSuccessUpdateStatusAt time.Time
+	IsUpdateStatusInProcess     bool
 }
 
 type InfoItem struct {

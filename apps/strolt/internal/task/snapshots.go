@@ -6,22 +6,16 @@ import (
 
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
+	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 )
 
 type SnapshotList []interfaces.Snapshot
 
 func (t Task) GetSnapshotList(destinationName string) (SnapshotList, error) {
-	operation := ControllerOperation{
-		ServiceName:     t.ServiceName,
-		TaskName:        t.TaskName,
-		DestinationName: destinationName,
-		Operation:       COFetchSnapshots,
+	if err := t.managerStart(sctxt.OpTypeSnapshots); err != nil {
+		return nil, err
 	}
-
-	if err := operation.Start(); err != nil {
-		return []interfaces.Snapshot{}, err
-	}
-	defer operation.Stop()
+	defer t.managerStop()
 
 	destination, ok := t.TaskConfig.Destinations[destinationName]
 	if !ok {

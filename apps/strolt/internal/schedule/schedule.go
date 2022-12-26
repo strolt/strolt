@@ -2,7 +2,6 @@ package schedule
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
@@ -14,34 +13,11 @@ import (
 	ctx "context"
 )
 
-//nolint:revive
-type ScheduleManager struct {
-	sync.Mutex
-	m map[string]bool
-}
-
-var scheduleManager = ScheduleManager{
-	m: make(map[string]bool),
-}
-
 func start(serviceName string, taskName string, operation sctxt.OperationType) func() {
 	return func() {
 		log := logger.New().WithField("taskName", taskName).WithField("operation", operation)
-		if scheduleManager.m[taskName] {
-			log.Warn("skip start operation for task")
-			return
-		}
 
 		log.Info("started")
-		scheduleManager.Lock()
-		scheduleManager.m[taskName] = true
-		scheduleManager.Unlock()
-
-		defer func() {
-			scheduleManager.Lock()
-			scheduleManager.m[taskName] = false
-			scheduleManager.Unlock()
-		}()
 
 		if operation == sctxt.OpTypeBackup {
 			backup(serviceName, taskName)
@@ -75,10 +51,6 @@ func Run(ctx ctx.Context) {
 		for taskName, task := range service {
 			taskName, task := taskName, task
 			log := log.WithField("taskName", taskName)
-
-			scheduleManager.Lock()
-			scheduleManager.m[taskName] = false
-			scheduleManager.Unlock()
 
 			if task.Schedule.Backup != "" {
 				if _, err := cr.AddFunc(task.Schedule.Backup, start(serviceName, taskName, sctxt.OpTypeBackup)); err != nil {

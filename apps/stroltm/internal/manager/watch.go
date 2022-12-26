@@ -62,6 +62,17 @@ func (s *Strolt) updateInfo() {
 	s.Unlock()
 }
 
+func (s *Strolt) updateStatus() {
+	result, err := s.sdk.GetStatus()
+	if err != nil || result.Payload == nil {
+		return
+	}
+
+	s.Lock()
+	s.Status = result.Payload.Data
+	s.Unlock()
+}
+
 func (s *Strolt) setIsOnline(isOnline bool) {
 	if !s.IsOnline && isOnline {
 		s.updateInfo()
@@ -113,6 +124,14 @@ func (s *Strolt) ping() {
 			s.Unlock()
 
 			go s.updateConfig()
+		}
+
+		{
+			timeFromRequest, err := time.Parse(time.RFC3339, result.Payload.TaskManagerUpdatedAt)
+			if err == nil && timeFromRequest.Unix() > s.Watch.LatestSuccessUpdateStatusAt.Unix() {
+				s.Watch.LatestSuccessUpdateStatusAt = timeFromRequest
+				s.updateStatus()
+			}
 		}
 	}
 
