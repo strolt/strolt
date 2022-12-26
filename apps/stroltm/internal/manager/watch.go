@@ -114,7 +114,7 @@ func (s *Strolt) ping() {
 
 		isError = true
 	} else {
-		rConfigLoadedAt, err := time.Parse(time.RFC3339, result.Payload.UpdateConfigAt)
+		rConfigLoadedAt, err := time.Parse(time.RFC3339, result.Payload.ConfigUpdatedAt)
 		if err != nil {
 			s.log.Debugf("ping error: %s", err)
 			isError = true

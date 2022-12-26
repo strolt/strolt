@@ -2,7 +2,7 @@ import { FC, useEffect } from "react";
 
 import { Button, Card, message, Popconfirm, Tag, Typography } from "antd";
 
-import { DebugJSON, Link } from "components";
+import { DebugJSON, LatestVersionLink, Link } from "components";
 
 import { ManagerhGetInstancesResultItem, ModelsAPIConfigServiceTask } from "api/generated";
 
@@ -198,15 +198,30 @@ export interface InstanceProps {
   instance: ManagerhGetInstancesResultItem;
 }
 const Instance: FC<InstanceProps> = observer(({ instance }) => {
+  const { infoStore } = useStores();
+
+  const instanceInfo = infoStore.map.get(instance.instanceName || "");
+
   return (
     <div style={{ minWidth: "25rem" }}>
       <Card
         size="small"
-        title={`instance: [${instance.instanceName}] {version: ${instance.version}} (${instance.config?.timezone})`}
+        title={
+          <>
+            instance: [{instance.instanceName}] version: {instanceInfo?.version}{" "}
+            <LatestVersionLink version={instanceInfo?.version} /> ({instance.config?.timezone})
+          </>
+        }
         extra={
-          instance.isOnline ? <Tag color="success">Online</Tag> : <Tag color="error">Offline</Tag>
+          instanceInfo?.isOnline ? (
+            <Tag color="success">Online</Tag>
+          ) : (
+            <Tag color="error">Offline</Tag>
+          )
         }
       >
+        <DebugJSON data={instanceInfo || {}} />
+
         {Object.entries(instance.config?.services || {}).map(([serviceName, service]) => {
           return (
             <>

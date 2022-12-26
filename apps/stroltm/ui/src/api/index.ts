@@ -13,3 +13,4 @@ const commonParams: any = [config, basePath, axiosInstance];
 
 export const manager = new _api.ManagerApi(...commonParams);
 export const auth = new _api.AuthApi(...commonParams);
+export const global = new _api.GlobalApi(...commonParams);

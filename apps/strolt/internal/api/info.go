@@ -14,7 +14,7 @@ var startedAt = time.Now().Format(time.RFC3339)
 type getInfoResponse struct {
 	Version               string `json:"version"`
 	StartedAt             string `json:"startedAt"`
-	UpdateConfigAt        string `json:"updateConfigAt"`
+	ConfigUpdatedAt       string `json:"configUpdatedAt"`
 	TaskStatusesUpdatedAt string `json:"taskStatusUpdatedAt"`
 }
 
@@ -29,7 +29,7 @@ func (api *API) getInfo(w http.ResponseWriter, r *http.Request) {
 	apiu.RenderJSON200(w, r, getInfoResponse{
 		Version:               ldflags.GetVersion(),
 		StartedAt:             startedAt,
-		UpdateConfigAt:        startedAt,
+		ConfigUpdatedAt:       startedAt,
 		TaskStatusesUpdatedAt: task.GetLastChangedManager().Format(time.RFC3339),
 	})
 }

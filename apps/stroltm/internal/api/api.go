@@ -120,6 +120,7 @@ func (api *API) handler() http.Handler {
 			r.Use(middleware.BasicAuth("api", config.GetUsers()))
 
 			managerh.New().Router(r)
+			r.Get("/api/v1/info", api.getInfo)
 		})
 	})
 

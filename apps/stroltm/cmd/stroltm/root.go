@@ -12,6 +12,7 @@ import (
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
 	"github.com/strolt/strolt/apps/stroltm/internal/env"
 	"github.com/strolt/strolt/apps/stroltm/internal/manager"
+	"github.com/strolt/strolt/apps/stroltm/internal/manager2"
 	"github.com/strolt/strolt/shared/logger"
 )
 
@@ -81,6 +82,14 @@ var rootCmd = &cobra.Command{
 			wg.Add(1)
 			go func() {
 				manager.New().Watch(ctx, cancel)
+				wg.Done()
+			}()
+		}
+
+		{ // Manager
+			wg.Add(1)
+			go func() {
+				manager2.Init().Watch(ctx, cancel)
 				wg.Done()
 			}()
 		}

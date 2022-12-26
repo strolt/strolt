@@ -273,21 +273,3 @@ export class ManagerStore {
 }
 
 export const managerStore = new ManagerStore();
-
-{
-  let intervalId: null | NodeJS.Timer = null;
-  reaction(
-    () => ({
-      isAuthorized: authStore.isAuthorized,
-      isAutoUpdateInstancesEnabled: managerStore.isAutoUpdateInstancesEnabled,
-    }),
-    ({ isAuthorized, isAutoUpdateInstancesEnabled }) => {
-      if (isAuthorized && isAutoUpdateInstancesEnabled) {
-        managerStore.fetchInstances();
-        intervalId = setInterval(() => managerStore.fetchInstances(), 5000);
-      } else if (intervalId) {
-        clearInterval(intervalId);
-      }
-    },
-  );
-}
