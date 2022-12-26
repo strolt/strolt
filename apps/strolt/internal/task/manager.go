@@ -11,7 +11,7 @@ import (
 type manager struct {
 	Tasks         map[string]ManagerTaskItem
 	LastChangedAt time.Time
-	*sync.Mutex
+	*sync.RWMutex
 }
 
 type ManagerTaskItem struct {
@@ -32,7 +32,7 @@ type ManagerStatus struct {
 var managerVar = manager{
 	Tasks:         map[string]ManagerTaskItem{},
 	LastChangedAt: time.Now(),
-	Mutex:         &sync.Mutex{},
+	RWMutex:       &sync.RWMutex{},
 }
 
 func (t *Task) managerStart(operation sctxt.OperationType) error {
@@ -94,10 +94,10 @@ func (t *Task) managerStop() {
 }
 
 func (t *Task) IsRunning() bool {
-	taskKey := t.mangerGetKeyForTask()
+	managerVar.RLock()
+	defer managerVar.RUnlock()
 
-	managerVar.Lock()
-	defer managerVar.Unlock()
+	taskKey := t.mangerGetKeyForTask()
 
 	taskItem, ok := managerVar.Tasks[taskKey]
 	if !ok {
@@ -108,6 +108,9 @@ func (t *Task) IsRunning() bool {
 }
 
 func GetLastChangedManager() time.Time {
+	managerVar.RLock()
+	defer managerVar.RUnlock()
+
 	return managerVar.LastChangedAt
 }
 
@@ -115,13 +118,13 @@ func GetManagerStatus() ManagerStatus {
 	status := ManagerStatus{}
 	list := []ManagerTaskItem{}
 
-	managerVar.Lock()
+	managerVar.RLock()
 	status.LastChangedAt = managerVar.LastChangedAt.Format(time.RFC3339)
 
 	for _, taskItem := range managerVar.Tasks {
 		list = append(list, taskItem)
 	}
-	managerVar.Unlock()
+	managerVar.RUnlock()
 
 	status.Tasks = list
 
@@ -129,10 +132,10 @@ func GetManagerStatus() ManagerStatus {
 }
 
 func (t *Task) managerCreateErrorIsRunning() error {
-	taskKey := t.mangerGetKeyForTask()
+	managerVar.RLock()
+	defer managerVar.RUnlock()
 
-	managerVar.Lock()
-	defer managerVar.Unlock()
+	taskKey := t.mangerGetKeyForTask()
 
 	taskItem, ok := managerVar.Tasks[taskKey]
 	if !ok {
@@ -143,11 +146,5 @@ func (t *Task) managerCreateErrorIsRunning() error {
 }
 
 func (t *Task) mangerGetKeyForTask() string {
-	managerVar.Lock()
-
-	key := fmt.Sprintf("key___s_%s___t_%s", t.Context.ServiceName, t.Context.TaskName)
-
-	managerVar.Unlock()
-
-	return key
+	return fmt.Sprintf("key___s_%s___t_%s", t.Context.ServiceName, t.Context.TaskName)
 }

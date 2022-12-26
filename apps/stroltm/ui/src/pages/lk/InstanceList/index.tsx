@@ -2,9 +2,9 @@ import { FC, useEffect } from "react";
 
 import { Button, Card, message, Popconfirm, Tag, Typography } from "antd";
 
-import { DebugJSON, Link } from "components";
+import { DebugJSON, LatestVersionLink, Link } from "components";
 
-import { ManagerhGetInstancesResultItem, ModelsAPIConfigServiceTask } from "api/generated";
+import { ManagerPreparedInstance, ModelsAPIConfigServiceTask } from "api/generated";
 
 import { observer, useStores } from "stores";
 
@@ -195,18 +195,33 @@ const Service: FC<ServiceProps> = observer(({ service, serviceName, instanceName
 });
 
 export interface InstanceProps {
-  instance: ManagerhGetInstancesResultItem;
+  instance: ManagerPreparedInstance;
 }
 const Instance: FC<InstanceProps> = observer(({ instance }) => {
+  const { infoStore } = useStores();
+
+  const instanceInfo = infoStore.map.get(instance.name || "");
+
   return (
     <div style={{ minWidth: "25rem" }}>
       <Card
         size="small"
-        title={`instance: [${instance.instanceName}] {version: ${instance.version}} (${instance.config?.timezone})`}
+        title={
+          <>
+            instance: [{instance.name}] version: {instanceInfo?.version}{" "}
+            <LatestVersionLink version={instanceInfo?.version} /> ({instance.config?.timezone})
+          </>
+        }
         extra={
-          instance.isOnline ? <Tag color="success">Online</Tag> : <Tag color="error">Offline</Tag>
+          instanceInfo?.isOnline ? (
+            <Tag color="success">Online</Tag>
+          ) : (
+            <Tag color="error">Offline</Tag>
+          )
         }
       >
+        <DebugJSON data={instanceInfo || {}} />
+
         {Object.entries(instance.config?.services || {}).map(([serviceName, service]) => {
           return (
             <>
@@ -221,7 +236,7 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
 
               <Service
                 key={serviceName}
-                instanceName={instance.instanceName || ""}
+                instanceName={instance.name || ""}
                 serviceName={serviceName}
                 service={service}
               />
@@ -236,22 +251,13 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
 const InstanceList = observer(() => {
   const { managerStore } = useStores();
 
-  useEffect(() => {
-    managerStore.setIsAutoUpdateInstancesEnabled(true);
-    return () => {
-      managerStore.setIsAutoUpdateInstancesEnabled(false);
-      // managerStore.resetBackup();
-      // managerStore.resetInstances();
-    };
-  }, []);
-
   return (
     <div>
       <Typography.Title>Instances:</Typography.Title>
       <BackupAll />
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
         {managerStore.instances.map((instance) => {
-          return <Instance key={instance.instanceName} instance={instance} />;
+          return <Instance key={instance.name} instance={instance} />;
         })}
       </div>
 

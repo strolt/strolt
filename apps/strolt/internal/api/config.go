@@ -70,7 +70,6 @@ func (api *API) getConfig(w http.ResponseWriter, r *http.Request) {
 				notificationDefinition, ok := c.Definitions.Notifications[notificationName]
 				if !ok {
 					apiu.RenderJSON500(w, r, fmt.Errorf("not found notification definition '%s'", notificationName))
-
 					return
 				}
 

@@ -2,14 +2,11 @@ package public
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/env"
-	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/shared/apiu"
 )
 
@@ -43,7 +40,7 @@ func (s *Public) prometheusMetrics(r chi.Router) {
 // debug godoc
 // @Tags         public
 // @Id           getDebug
-// @Description  Available only if env `STROLT_DEBUG=true`
+// @Description  Available only if env `STROLT_LOG_LEVEL=DEBUG` or `STROLT_LOG_LEVEL=TRACE`
 // @Summary      Go debug info
 // @Success      200  {string}  string.
 // @Router       /debug [get].
@@ -52,9 +49,7 @@ func (s *Public) debug(r chi.Router) {
 }
 
 type getPingResponse struct {
-	Data                 string `json:"data"`
-	ConfigLoadedAt       string `json:"configLoadedAt"`
-	TaskManagerUpdatedAt string `json:"taskManagerUpdatedAt"`
+	Data string `json:"data"`
 }
 
 // ping godoc
@@ -65,8 +60,6 @@ type getPingResponse struct {
 // @Router       /api/v1/ping [get].
 func (s *Public) ping(w http.ResponseWriter, r *http.Request) {
 	apiu.RenderJSON200(w, r, getPingResponse{
-		Data:                 "pong",
-		ConfigLoadedAt:       config.GetLoadedAt().Format(time.RFC3339),
-		TaskManagerUpdatedAt: task.GetLastChangedManager().Format(time.RFC3339),
+		Data: "pong",
 	})
 }

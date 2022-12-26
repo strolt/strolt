@@ -51,19 +51,15 @@ func (t *Task) sendNotifications() {
 }
 
 func (t *Task) eventOperationStart() {
-	t.Lock()
 	t.Context.Event = sctxt.EvOperationStart
 	t.Context.Operation.Time.Start = time.Now()
-	t.Unlock()
 
 	t.sendNotifications()
 }
 
 func (t *Task) eventOperationStop() {
-	t.Lock()
 	t.Context.Event = sctxt.EvOperationStop
 	t.Context.Operation.Time.Stop = time.Now()
-	t.Unlock()
 
 	t.UpdateMetricsAfterTaskFinish()
 
@@ -71,11 +67,9 @@ func (t *Task) eventOperationStop() {
 }
 
 func (t *Task) eventOperationError(err error) {
-	t.Lock()
 	t.Context.Event = sctxt.EvOperationError
 	t.Context.Operation.Time.Stop = time.Now()
 	t.Context.Operation.Error = err.Error()
-	t.Unlock()
 
 	t.UpdateMetricsAfterTaskFinish()
 
@@ -83,35 +77,28 @@ func (t *Task) eventOperationError(err error) {
 }
 
 func (t *Task) eventSourceStart() {
-	t.Lock()
 	t.Context.Event = sctxt.EvSourceStart
 	t.Context.Source.Time.Start = time.Now()
-	t.Unlock()
 
 	t.sendNotifications()
 }
 
 func (t *Task) eventSourceError(err error) {
-	t.Lock()
 	t.Context.Event = sctxt.EvSourceError
 	t.Context.Source.Error = err.Error()
 	t.Context.Source.Time.Stop = time.Now()
-	t.Unlock()
 
 	t.sendNotifications()
 }
 
 func (t *Task) eventSourceStop() {
-	t.Lock()
 	t.Context.Event = sctxt.EvSourceStop
 	t.Context.Source.Time.Stop = time.Now()
-	t.Unlock()
 
 	t.sendNotifications()
 }
 
 func (t *Task) eventDestinationStart(destinationName string) {
-	t.Lock()
 	operation, ok := t.Context.Destination[destinationName]
 
 	if !ok {
@@ -122,13 +109,11 @@ func (t *Task) eventDestinationStart(destinationName string) {
 
 	t.Context.Event = sctxt.EvDestinationStart
 	t.Context.Destination[destinationName] = operation
-	t.Unlock()
 
 	t.sendNotifications()
 }
 
 func (t *Task) eventDestinationError(destinationName string, err error) {
-	t.Lock()
 	operation, ok := t.Context.Destination[destinationName]
 
 	if !ok {
@@ -140,13 +125,11 @@ func (t *Task) eventDestinationError(destinationName string, err error) {
 
 	t.Context.Event = sctxt.EvDestinationError
 	t.Context.Destination[destinationName] = operation
-	t.Unlock()
 
 	t.sendNotifications()
 }
 
 func (t *Task) eventDestinationStop(destinationName string, output sctxt.BackupOutput) {
-	t.Lock()
 	operation, ok := t.Context.Destination[destinationName]
 
 	if !ok {
@@ -158,7 +141,6 @@ func (t *Task) eventDestinationStop(destinationName string, output sctxt.BackupO
 
 	t.Context.Event = sctxt.EvDestinationStop
 	t.Context.Destination[destinationName] = operation
-	t.Unlock()
 
 	t.sendNotifications()
 }

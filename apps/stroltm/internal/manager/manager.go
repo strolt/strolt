@@ -11,27 +11,49 @@ import (
 )
 
 type Manager struct {
-	Strolt map[string]*Strolt
+	Instances map[string]*Instance
+	sync.RWMutex
 }
 
-type Strolt struct {
-	InstanceName string
-	URL          string
-	Username     string
-	Password     string
+var (
+	manager = &Manager{
+		Instances: map[string]*Instance{},
+	}
+)
 
-	Watch          *WatchItem
-	Info           *InfoItem
-	ConfigLoadedAt time.Time
-	IsOnline       bool
-	sdk            *strolt.Sdk
-	Status         *models.TaskManagerStatus
+type Instance struct {
+	Name     string
+	URL      string
+	Username string
+	Password string
 
-	Config *models.APIConfig
+	Watch    WatchItem
+	Info     *models.APIGetInfoResponse
+	Online   bool
+	sdk      *strolt.SDK
+	IsOnline bool
+
+	TaskStatus TaskStatus
+
+	Config Config
 
 	log *logger.Logger
 
-	*sync.Mutex
+	*sync.RWMutex
+}
+
+type Config struct {
+	IsInitialized     bool
+	UpdateRequestedAt time.Time
+	UpdatedAt         time.Time
+	Data              *models.APIConfig
+}
+
+type TaskStatus struct {
+	IsInitialized     bool
+	UpdateRequestedAt time.Time
+	UpdatedAt         time.Time
+	Data              *models.TaskManagerStatus
 }
 
 type WatchItem struct {
@@ -42,30 +64,21 @@ type WatchItem struct {
 	IsUpdateStatusInProcess     bool
 }
 
-type InfoItem struct {
-	Version string
-}
-
-var (
-	manager = &Manager{
-		Strolt: map[string]*Strolt{},
-	}
-)
-
-func New() *Manager {
+func Init() *Manager {
 	configInstances := config.Get().Strolt.Instances
 
 	for instanceName, instance := range configInstances {
-		manager.Strolt[instanceName] = &Strolt{
-			Watch:        &WatchItem{},
-			Info:         &InfoItem{},
-			InstanceName: instanceName,
-			URL:          instance.URL,
-			Username:     instance.Username,
-			Password:     instance.Password, //pragma: allowlist secret
-			sdk:          strolt.New(instance.URL, instance.Username, instance.Password),
-			log:          logger.New().WithField("instanceName", instanceName),
-			Mutex:        &sync.Mutex{},
+		manager.Instances[instanceName] = &Instance{
+			Name:       instanceName,
+			URL:        instance.URL,
+			Username:   instance.Username,
+			Password:   instance.Password, //pragma: allowlist secret
+			Watch:      WatchItem{},
+			sdk:        strolt.New(instance.URL, instance.Username, instance.Password),
+			log:        logger.New().WithField("instanceName", instanceName),
+			RWMutex:    &sync.RWMutex{},
+			Config:     Config{},
+			TaskStatus: TaskStatus{},
 		}
 	}
 
@@ -74,23 +87,42 @@ func New() *Manager {
 	return manager
 }
 
-func GetStroltInstances() []Strolt {
-	list := make([]Strolt, len(manager.Strolt))
+func GetSDKByInstanceName(instanceName string) (*strolt.SDK, bool) {
+	instance, ok := manager.Instances[instanceName]
+	if !ok {
+		return nil, ok
+	}
+
+	return instance.sdk, ok
+}
+
+type PreparedInstance struct {
+	Name       string                    `json:"name"`
+	Config     *models.APIConfig         `json:"config"`
+	TaskStatus *models.TaskManagerStatus `json:"taskStatus"`
+	IsOnline   bool                      `json:"isOnline"`
+}
+
+func GetPreparedInstances() []PreparedInstance {
+	manager.RLock()
+	list := make([]PreparedInstance, len(manager.Instances))
+
 	i := 0
 
-	for _, instance := range manager.Strolt {
-		list[i] = *instance
+	for _, instance := range manager.Instances {
+		instance.RLock()
+		list[i] = PreparedInstance{
+			Name:       instance.Name,
+			Config:     instance.Config.Data,
+			TaskStatus: instance.TaskStatus.Data,
+			IsOnline:   instance.IsOnline,
+		}
+		instance.RUnlock()
+
 		i++
 	}
 
+	manager.RUnlock()
+
 	return list
-}
-
-func GetStroltInstanceByInstanceName(instanceName string) (Strolt, bool) {
-	instance, ok := manager.Strolt[instanceName]
-	if !ok {
-		return Strolt{}, ok
-	}
-
-	return *instance, ok
 }

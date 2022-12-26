@@ -19,7 +19,8 @@ func (l *Logger) setLogLevel() {
 	switch logLevel {
 	case LogLevelDebug:
 		l.logger.SetLevel(logrus.DebugLevel)
-
+	case LogLevelTrace:
+		l.logger.SetLevel(logrus.TraceLevel)
 	case LogLevelInfo:
 	default:
 		l.logger.SetLevel(logrus.InfoLevel)
@@ -130,5 +131,13 @@ func (l *Logger) Fatal(arg interface{}) {
 }
 
 func (l *Logger) Fatalf(format string, a ...any) {
+	l.Fatal(fmt.Sprintf(format, a...))
+}
+
+func (l *Logger) Trace(arg interface{}) {
+	l.getLogger().Trace(arg)
+}
+
+func (l *Logger) Tracef(format string, a ...any) {
 	l.Fatal(fmt.Sprintf(format, a...))
 }

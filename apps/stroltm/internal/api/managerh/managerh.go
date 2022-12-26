@@ -2,11 +2,9 @@ package managerh
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/strolt/strolt/apps/stroltm/internal/manager"
-	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/models"
 	"github.com/strolt/strolt/shared/apiu"
 )
 
@@ -25,21 +23,6 @@ func (s *ManagerHandlers) Router(r chi.Router) {
 	r.Post("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune", s.prune)
 	r.Get("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats", s.getStats)
 	r.Post("/api/v1/manager/instances/backup-all", s.backupAll)
-	r.Get("/api/v1/manager/instances/status", s.getStatus)
-}
-
-type getInstancesResult struct {
-	Items              []getInstancesResultItem `json:"data"`
-	LatestUpdateStatus string                   `json:"latestUpdateStatus"`
-}
-
-type getInstancesResultItem struct {
-	InstanceName        string                    `json:"instanceName"`
-	Config              *models.APIConfig         `json:"config"`
-	IsOnline            bool                      `json:"isOnline"`
-	LatestSuccessPingAt string                    `json:"latestSuccessPingAt"`
-	Version             string                    `json:"version"`
-	Status              *models.TaskManagerStatus `json:"status"`
 }
 
 // getInstances godoc
@@ -47,26 +30,10 @@ type getInstancesResultItem struct {
 // @Summary      Get Instances
 // @Tags         manager
 // @Security BasicAuth
-// @success 200 {object} getInstancesResult
+// @success 200 {object} []manager.PreparedInstance
 // @Router       /api/v1/manager/instances [get].
 func (s *ManagerHandlers) getInstances(w http.ResponseWriter, r *http.Request) {
-	stroltInstances := manager.GetStroltInstances()
+	instances := manager.GetPreparedInstances()
 
-	items := make([]getInstancesResultItem, len(stroltInstances))
-
-	for i, instance := range stroltInstances {
-		items[i] = getInstancesResultItem{
-			InstanceName:        instance.InstanceName,
-			Config:              instance.Config,
-			IsOnline:            instance.IsOnline,
-			LatestSuccessPingAt: instance.Watch.LatestSuccessPingAt.Format(time.RFC3339),
-			Version:             instance.Info.Version,
-			Status:              instance.Status,
-		}
-	}
-
-	apiu.RenderJSON200(w, r, getInstancesResult{
-		Items:              items,
-		LatestUpdateStatus: instacesStatusVar.LatestUpdatedAt.Format(time.RFC3339),
-	})
+	apiu.RenderJSON200(w, r, instances)
 }

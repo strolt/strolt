@@ -12,33 +12,20 @@ export class ManagerStore {
     makeAutoObservable(this);
   }
 
-  isAutoUpdateInstancesEnabled = false;
-  setIsAutoUpdateInstancesEnabled(status: boolean) {
-    this.isAutoUpdateInstancesEnabled = status;
-  }
-
-  instances: apiGenerated.ManagerhGetInstancesResultItem[] = [];
+  instances: apiGenerated.ManagerPreparedInstance[] = [];
   instancesStatus: IPromiseBasedObservable<
-    AxiosResponse<apiGenerated.ManagerhGetInstancesResult, any>
+    AxiosResponse<apiGenerated.ManagerPreparedInstance[], any>
   > | null = null;
   async fetchInstances() {
     this.instancesStatus = fromPromise(api.manager.getInstances());
 
     const { data } = await this.instancesStatus;
 
-    const sortedInstances = (data.data || []).sort((a, b) =>
-      (a.instanceName || "").localeCompare(b.instanceName || ""),
-    );
-
-    data.data?.forEach((instance) => {
-      instance.status?.tasks?.forEach((taskStatus) => {
-        if (instance.instanceName && taskStatus.serviceName && taskStatus.taskName) {
+    data?.forEach((instance) => {
+      instance.taskStatus?.tasks?.forEach((taskStatus) => {
+        if (instance.name && taskStatus.serviceName && taskStatus.taskName) {
           this.taskStatusMap.set(
-            this.getTaskStatusMapKey(
-              instance.instanceName,
-              taskStatus.serviceName,
-              taskStatus.taskName,
-            ),
+            this.getTaskStatusMapKey(instance.name, taskStatus.serviceName, taskStatus.taskName),
             taskStatus,
           );
         }
@@ -46,10 +33,8 @@ export class ManagerStore {
     });
 
     runInAction(() => {
-      this.instances = sortedInstances;
+      this.instances = data.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     });
-
-    data.data = sortedInstances;
 
     return data;
   }
@@ -68,8 +53,8 @@ export class ManagerStore {
       this.instances.forEach((instance) => {
         Object.entries(instance.config?.services || {}).forEach(([serviceName, service]) => {
           Object.entries(service || {}).forEach(([taskName]) => {
-            if (instance.instanceName) {
-              this.taskStatusMapStart(instance.instanceName, serviceName, taskName);
+            if (instance.name) {
+              this.taskStatusMapStart(instance.name, serviceName, taskName);
             }
           });
         });
@@ -109,7 +94,9 @@ export class ManagerStore {
     this.backupStatusMap.clear();
   }
 
-  snapshots: apiGenerated.ModelsServicesGetSnapshotsResult | null = null;
+  snapshots: apiGenerated.ModelsServicesGetSnapshotsResult = {
+    items: [],
+  };
   snapshotsStatus: IPromiseBasedObservable<
     AxiosResponse<apiGenerated.ModelsServicesGetSnapshotsResult, any>
   > | null = null;
@@ -128,21 +115,17 @@ export class ManagerStore {
 
     const { data } = await this.snapshotsStatus;
 
-    const sortedSnapshots = (data.data || []).sort((a, b) => {
-      return new Date(b.time || "").getTime() - new Date(a.time || "").getTime();
-    });
-
-    data.data = sortedSnapshots;
-
     runInAction(() => {
-      this.snapshots = data;
+      this.snapshots.items = (data.items || []).sort((a, b) => {
+        return new Date(b.time || "").getTime() - new Date(a.time || "").getTime();
+      });
     });
 
     return data;
   }
   resetSnapshots() {
     this.snapshotsForPrune = null;
-    this.snapshots = null;
+    this.snapshots = { items: [] };
   }
 
   snapshotsForPrune: apiGenerated.ModelsServicesGetPruneResult | null = null;
@@ -273,21 +256,3 @@ export class ManagerStore {
 }
 
 export const managerStore = new ManagerStore();
-
-{
-  let intervalId: null | NodeJS.Timer = null;
-  reaction(
-    () => ({
-      isAuthorized: authStore.isAuthorized,
-      isAutoUpdateInstancesEnabled: managerStore.isAutoUpdateInstancesEnabled,
-    }),
-    ({ isAuthorized, isAutoUpdateInstancesEnabled }) => {
-      if (isAuthorized && isAutoUpdateInstancesEnabled) {
-        managerStore.fetchInstances();
-        intervalId = setInterval(() => managerStore.fetchInstances(), 5000);
-      } else if (intervalId) {
-        clearInterval(intervalId);
-      }
-    },
-  );
-}

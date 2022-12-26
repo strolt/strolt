@@ -5,6 +5,7 @@ type LogLevel string
 const (
 	LogLevelInfo  LogLevel = "INFO"
 	LogLevelDebug LogLevel = "DEBUG"
+	LogLevelTrace LogLevel = "TRACE"
 
 	LogLevelDefault = LogLevelInfo
 )

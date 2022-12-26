@@ -29,6 +29,11 @@ func RenderJSON400(w http.ResponseWriter, r *http.Request, err error) {
 	render.JSON(w, r, ResultError{Error: err.Error()})
 }
 
+func RenderJSON401(w http.ResponseWriter, r *http.Request) {
+	render.Status(r, 401) //nolint:gomnd
+	render.JSON(w, r, ResultError{Error: ""})
+}
+
 func RenderJSON500(w http.ResponseWriter, r *http.Request, err error) {
 	render.Status(r, 500) //nolint:gomnd
 	render.JSON(w, r, ResultError{Error: err.Error()})

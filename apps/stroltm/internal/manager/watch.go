@@ -35,11 +35,32 @@ func (m *Manager) Watch(ctx context.Context, cancel func()) {
 	}
 }
 
-func (s *Strolt) isPingAllowed() bool {
+func (s *Instance) isPingAllowed() bool {
+	s.RLock()
+	defer s.RUnlock()
+
 	return !s.Watch.IsPingInProcess
 }
 
-func (s *Strolt) updateConfig() {
+func (m *Manager) pingInstances() {
+	for _, instance := range m.Instances {
+		go func(instance *Instance) {
+			isPingAllowed := instance.isPingAllowed()
+
+			if isPingAllowed {
+				instance.ping()
+			}
+		}(instance)
+	}
+}
+
+func (s *Instance) updateConfig() {
+	requestedAt := time.Now()
+
+	s.Lock()
+	s.Config.UpdateRequestedAt = requestedAt
+	s.Unlock()
+
 	result, err := s.sdk.GetConfig()
 	if err != nil {
 		s.log.Debugf("error get config %s", err)
@@ -47,110 +68,107 @@ func (s *Strolt) updateConfig() {
 	}
 
 	s.Lock()
-	s.Config = result.Payload
-	s.Unlock()
-}
 
-func (s *Strolt) updateInfo() {
-	result, err := s.sdk.GetInfo()
-	if err != nil || result.Payload == nil {
-		return
+	if s.Config.UpdateRequestedAt.Equal(requestedAt) {
+		s.Config.Data = result.Payload
 	}
 
-	s.Lock()
-	s.Info.Version = result.Payload.Version
+	s.Config.IsInitialized = true
+	s.Config.UpdatedAt = time.Now()
 	s.Unlock()
 }
 
-func (s *Strolt) updateStatus() {
+func (s *Instance) updateTaskStatus() {
+	requestedAt := time.Now()
+
+	s.Lock()
+	s.TaskStatus.UpdateRequestedAt = requestedAt
+	s.Unlock()
+
 	result, err := s.sdk.GetStatus()
 	if err != nil || result.Payload == nil {
+		s.log.Debugf("error get task status %s", err)
 		return
 	}
 
 	s.Lock()
-	s.Status = result.Payload.Data
-	s.Unlock()
-}
 
-func (s *Strolt) setIsOnline(isOnline bool) {
-	if !s.IsOnline && isOnline {
-		s.updateInfo()
+	if s.TaskStatus.UpdateRequestedAt.Equal(requestedAt) {
+		s.TaskStatus.Data = result.Payload.Data
 	}
 
-	s.Lock()
-	s.IsOnline = isOnline
+	s.TaskStatus.IsInitialized = true
+	s.TaskStatus.UpdatedAt = time.Now()
 	s.Unlock()
 }
 
-func (s *Strolt) setLatestSuccessPingAt(at time.Time) {
-	s.Lock()
-	s.Watch.LatestSuccessPingAt = at
-	s.Unlock()
-}
-
-func (s *Strolt) setIsPingInProcess(isProcess bool) {
-	s.Lock()
-	s.Watch.IsPingInProcess = isProcess
-	s.Unlock()
-}
-
-func (s *Strolt) setLatestPingAt(at time.Time) {
-	s.Lock()
-	s.Watch.LatestPingAt = at
-	s.Unlock()
-}
-
-func (s *Strolt) ping() {
+func (s *Instance) ping() {
 	pingAt := time.Now()
-	isError := false
 
-	s.setIsPingInProcess(true)
-	s.setLatestPingAt(pingAt)
+	s.Lock()
+	s.Watch.IsPingInProcess = true
+	s.Unlock()
 
-	result, err := s.sdk.Ping()
+	result, err := s.sdk.GetInfo()
 	if err != nil {
 		s.log.Debugf("ping error: %s", err)
 
-		isError = true
-	} else {
-		rConfigLoadedAt, err := time.Parse(time.RFC3339, result.Payload.ConfigLoadedAt)
-		if err != nil {
-			s.log.Debugf("ping error: %s", err)
-			isError = true
-		} else if !s.ConfigLoadedAt.Equal(rConfigLoadedAt) {
-			s.Lock()
-			s.ConfigLoadedAt = rConfigLoadedAt
-			s.Unlock()
+		s.Lock()
+		s.Watch.IsPingInProcess = false
 
-			go s.updateConfig()
+		if s.IsOnline {
+			s.Watch.LatestSuccessPingAt = s.Watch.LatestPingAt
 		}
 
+		s.Watch.LatestPingAt = pingAt
+		s.IsOnline = false
+		s.Unlock()
+	}
+
+	if err == nil {
+		s.Lock()
 		{
-			timeFromRequest, err := time.Parse(time.RFC3339, result.Payload.TaskManagerUpdatedAt)
-			if err == nil && timeFromRequest.Unix() > s.Watch.LatestSuccessUpdateStatusAt.Unix() {
-				s.Watch.LatestSuccessUpdateStatusAt = timeFromRequest
-				s.updateStatus()
+			s.Watch.IsPingInProcess = false
+			s.IsOnline = true
+			s.Watch.LatestPingAt = pingAt
+			s.Watch.LatestSuccessPingAt = pingAt
+		}
+
+		// check and update instance config
+		if !s.Config.IsInitialized {
+			go s.updateConfig()
+		} else {
+			infoConfigUpdatedAt, err := time.Parse(time.RFC3339, s.Info.ConfigUpdatedAt)
+			if err != nil {
+				s.log.Errorf("parse time s.Info.ConfigUpdatedAt %s", s.Info.ConfigUpdatedAt)
+			} else {
+				rConfigUpdatedAt, err := time.Parse(time.RFC3339, result.Payload.ConfigUpdatedAt)
+				if err != nil {
+					s.log.Errorf("parse time result.Payload.ConfigUpdatedAt %s", result.Payload.ConfigUpdatedAt)
+				} else if rConfigUpdatedAt.Unix() > infoConfigUpdatedAt.Unix() {
+					go s.updateConfig()
+				}
 			}
 		}
-	}
 
-	if isError {
-		s.setIsOnline(false)
-	} else {
-		s.setLatestSuccessPingAt(pingAt)
-		s.setIsOnline(true)
-	}
-
-	s.setIsPingInProcess(false)
-}
-
-func (m *Manager) pingInstances() {
-	for _, instance := range m.Strolt {
-		isPingAllowed := instance.isPingAllowed()
-
-		if isPingAllowed {
-			go instance.ping()
+		// check and update instance task status
+		if !s.TaskStatus.IsInitialized {
+			go s.updateTaskStatus()
+		} else {
+			infoTaskStatusUpdatedAt, err := time.Parse(time.RFC3339, s.Info.TaskStatusUpdatedAt)
+			if err != nil {
+				s.log.Errorf("parse time s.Info.TaskStatusUpdatedAt %s", s.Info.TaskStatusUpdatedAt)
+			} else {
+				rTaskStatusUpdatedAt, err := time.Parse(time.RFC3339, result.Payload.TaskStatusUpdatedAt)
+				if err != nil {
+					s.log.Errorf("parse time result.Payload.TaskStatusUpdatedAt %s", result.Payload.TaskStatusUpdatedAt)
+				} else if rTaskStatusUpdatedAt.Unix() > infoTaskStatusUpdatedAt.Unix() {
+					go s.updateTaskStatus()
+				}
+			}
 		}
+
+		s.Info = result.Payload
+		s.Unlock()
 	}
 }

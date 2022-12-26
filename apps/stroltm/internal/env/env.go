@@ -6,9 +6,10 @@ import (
 )
 
 type config struct {
-	Host    string `env:"STROLTM_HOST" envDefault:"0.0.0.0"`
-	Port    int    `env:"STROLTM_PORT" envDefault:"8080"`
-	IsDebug bool   `env:"STROLTM_DEBUG"`
+	Host            string          `env:"STROLTM_HOST" envDefault:"0.0.0.0"`
+	Port            int             `env:"STROLTM_PORT" envDefault:"8080"`
+	LogLevel        logger.LogLevel `env:"STROLTM_LOG_LEVEL"`
+	IsAPILogEnabled bool            `env:"STROLTM_API_LOG_ENABLED"`
 }
 
 var resultConfig config
@@ -18,8 +19,14 @@ func Scan() {
 		logger.New().Fatal(err)
 	}
 
-	if resultConfig.IsDebug {
+	switch resultConfig.LogLevel {
+	case logger.LogLevelDebug:
 		logger.SetLogLevel(logger.LogLevelDebug)
+	case logger.LogLevelTrace:
+		logger.SetLogLevel(logger.LogLevelTrace)
+	case logger.LogLevelInfo:
+	default:
+		logger.SetLogLevel(logger.LogLevelInfo)
 	}
 }
 
@@ -32,5 +39,9 @@ func Host() string {
 }
 
 func IsDebug() bool {
-	return resultConfig.IsDebug
+	return resultConfig.LogLevel == logger.LogLevelDebug || resultConfig.LogLevel == logger.LogLevelTrace
+}
+
+func IsAPILogEnabled() bool {
+	return resultConfig.IsAPILogEnabled
 }

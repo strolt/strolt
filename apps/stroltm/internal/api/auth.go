@@ -26,18 +26,18 @@ func (api *API) authValidate(w http.ResponseWriter, r *http.Request) {
 	var body authValidateBody
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		apiu.RenderJSON500(w, r, fmt.Errorf("qwe"))
+		apiu.RenderJSON400(w, r, fmt.Errorf("invalid body"))
 		return
 	}
 
 	user, ok := config.Get().API.Users[body.Username]
 	if !ok {
-		apiu.RenderJSON500(w, r, fmt.Errorf("qwe"))
+		apiu.RenderJSON401(w, r)
 		return
 	}
 
 	if user.Password != body.Password { //pragma: allowlist secret
-		apiu.RenderJSON500(w, r, fmt.Errorf("qwe"))
+		apiu.RenderJSON401(w, r)
 		return
 	}
 

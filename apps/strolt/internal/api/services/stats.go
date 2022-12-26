@@ -35,7 +35,7 @@ func (s *Services) getStats(w http.ResponseWriter, r *http.Request) {
 	defer t.Close()
 
 	if t.IsRunning() {
-		apiu.RenderJSON500(w, r, apiu.ErrTaskAlreadyWorking)
+		apiu.RenderJSON400(w, r, apiu.ErrTaskAlreadyWorking)
 		return
 	}
 

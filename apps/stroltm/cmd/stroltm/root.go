@@ -80,7 +80,7 @@ var rootCmd = &cobra.Command{
 		{ // Manager
 			wg.Add(1)
 			go func() {
-				manager.New().Watch(ctx, cancel)
+				manager.Init().Watch(ctx, cancel)
 				wg.Done()
 			}()
 		}

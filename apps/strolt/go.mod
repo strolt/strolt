@@ -3,12 +3,10 @@ module github.com/strolt/strolt/apps/strolt
 go 1.19
 
 require (
-	github.com/briandowns/spinner v1.19.0
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/go-chi/chi/v5 v5.0.7
-	github.com/go-chi/docgen v1.2.0
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/imdario/mergo v0.3.13
@@ -34,15 +32,12 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-chi/render v1.0.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect

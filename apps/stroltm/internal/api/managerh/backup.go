@@ -40,10 +40,8 @@ func backup(instanceName, serviceName, taskName string) error {
 		return fmt.Errorf("instance not exists")
 	}
 
-	result, err := sdk.Backup(serviceName, taskName)
-
-	if err != nil || result == nil || result.Payload == nil {
-		return fmt.Errorf("start backup is error")
+	if _, err := sdk.Backup(serviceName, taskName); err != nil {
+		return err
 	}
 
 	return nil
@@ -71,11 +69,11 @@ type backupAllStatusItem struct {
 func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 	items := []backupAllStatusItem{}
 
-	for _, instance := range manager.GetStroltInstances() {
+	for _, instance := range manager.GetPreparedInstances() {
 		for serviceName, service := range instance.Config.Services {
 			for taskName := range service {
 				items = append(items, backupAllStatusItem{
-					InstanceName: instance.InstanceName,
+					InstanceName: instance.Name,
 					ServiceName:  serviceName,
 					TaskName:     taskName,
 				})

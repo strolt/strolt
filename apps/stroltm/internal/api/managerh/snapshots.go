@@ -10,13 +10,11 @@ import (
 	"github.com/strolt/strolt/shared/apiu"
 )
 
-func getSDK(instanceName string) (*strolt.Sdk, error) {
-	instance, ok := manager.GetStroltInstanceByInstanceName(instanceName)
+func getSDK(instanceName string) (*strolt.SDK, error) {
+	sdk, ok := manager.GetSDKByInstanceName(instanceName)
 	if !ok {
 		return nil, fmt.Errorf("not exists instance '%s'", instanceName)
 	}
-
-	sdk := strolt.New(instance.URL, instance.Username, instance.Password)
 
 	return sdk, nil
 }
