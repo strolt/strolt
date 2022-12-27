@@ -135,7 +135,7 @@ func (s *Instance) ping() {
 		}
 
 		// check and update instance config
-		if !s.Config.IsInitialized {
+		if !s.Config.IsInitialized || s.Info.ConfigUpdatedAt == "" {
 			go s.updateConfig()
 		} else {
 			infoConfigUpdatedAt, err := time.Parse(time.RFC3339, s.Info.ConfigUpdatedAt)
@@ -152,7 +152,7 @@ func (s *Instance) ping() {
 		}
 
 		// check and update instance task status
-		if !s.TaskStatus.IsInitialized {
+		if !s.TaskStatus.IsInitialized || s.Info.TaskStatusUpdatedAt == "" {
 			go s.updateTaskStatus()
 		} else {
 			infoTaskStatusUpdatedAt, err := time.Parse(time.RFC3339, s.Info.TaskStatusUpdatedAt)
