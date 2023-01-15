@@ -55,8 +55,8 @@ type backupAllResponse struct {
 
 type backupAllStatusItem struct {
 	InstanceName string `json:"instanceName"`
-	ServiceName  string `json:"serviceName"`
-	TaskName     string `json:"taskName"`
+	ServiceName  string `json:"serviceName,omitempty"`
+	TaskName     string `json:"taskName,omitempty"`
 }
 
 // backupAll godoc
@@ -68,8 +68,17 @@ type backupAllStatusItem struct {
 // @Router       /api/v1/manager/instances/backup-all [post].
 func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 	items := []backupAllStatusItem{}
+	itemsError := []backupAllStatusItem{}
 
 	for _, instance := range manager.GetPreparedInstances() {
+		if !instance.IsOnline || instance.Config == nil {
+			itemsError = append(itemsError, backupAllStatusItem{
+				InstanceName: instance.Name,
+			})
+
+			continue
+		}
+
 		for serviceName, service := range instance.Config.Services {
 			for taskName := range service {
 				items = append(items, backupAllStatusItem{
@@ -83,7 +92,7 @@ func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 
 	response := backupAllResponse{
 		SuccessStarted: []backupAllStatusItem{},
-		ErrorStarted:   []backupAllStatusItem{},
+		ErrorStarted:   itemsError,
 		Mutex:          &sync.Mutex{},
 	}
 

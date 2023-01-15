@@ -51,7 +51,12 @@ const BackupAll: FC = observer(() => {
   const handleClick = async () => {
     const data = await managerStore.backupAll();
     message.info(`Success started: ${data.successStarted?.length}`);
-    message.error(`Error started: ${data.errorStarted?.length}`);
+    message.error(
+      `Error started: ${data.errorStarted?.length} [${data.errorStarted
+        ?.map((el) => [el.instanceName, el.serviceName, el.taskName].filter(Boolean).join(" "))
+        .filter(Boolean)
+        .join(", ")}]`,
+    );
   };
 
   return (
