@@ -2,7 +2,7 @@ FROM alpine:3.17.0@sha256:c0d488a800e4127c334ad20d61d7bc21b4097540327217dfab5226
 WORKDIR /strolt
 COPY ./docker/strolt/scripts scripts
 RUN sh ./scripts/install.sh && rm -rf ./scripts
-RUN apk --update add --no-cache curl=7.87.0-r0
+RUN apk --update add --no-cache curl=7.87.0-r1
 
 FROM golang:1.19.0-alpine3.16@sha256:70df3b8f9f099da7f60f0b32480015165e3d0b51bfacf9e255b59f3dd6bd2828 AS builder
 ARG version

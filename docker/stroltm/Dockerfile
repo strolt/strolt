@@ -1,6 +1,6 @@
 FROM alpine:3.17.0@sha256:c0d488a800e4127c334ad20d61d7bc21b4097540327217dfab52262adc02380c AS base
 WORKDIR /stroltm
-RUN apk --update add --no-cache curl=7.87.0-r0
+RUN apk --update add --no-cache curl=7.87.0-r1
 
 FROM node:18.12.1-bullseye@sha256:5a73d75604f30ec5cc9ed44f2b9fad3beeedc3211a62a8b7ef86b0bfe10ee29b as ui-base
 RUN apt-get update && apt-get -y install openjdk-11-jre=11.0.16+8-1~deb11u1 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
