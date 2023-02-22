@@ -1,12 +1,12 @@
-FROM alpine:3.17.0@sha256:c0d488a800e4127c334ad20d61d7bc21b4097540327217dfab52262adc02380c AS base
+FROM alpine:3.17.2 AS base
 WORKDIR /stroltm
-RUN apk --update add --no-cache curl=7.87.0-r1
+RUN apk --update add --no-cache curl=7.87.0-r2
 
-FROM node:18.12.1-bullseye@sha256:5a73d75604f30ec5cc9ed44f2b9fad3beeedc3211a62a8b7ef86b0bfe10ee29b as ui-base
-RUN apt-get update && apt-get -y install openjdk-11-jre=11.0.16+8-1~deb11u1 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+FROM node:18.14.1-bullseye-slim as ui-base
+RUN apt-get update && apt-get -y install openjdk-11-jre --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-FROM golang:1.19.0-alpine3.16@sha256:70df3b8f9f099da7f60f0b32480015165e3d0b51bfacf9e255b59f3dd6bd2828 AS swagger-base
-RUN apk add --no-cache make=4.3-r0 curl=7.83.1-r5
+FROM golang:1.20.1-alpine3.17 AS swagger-base
+RUN apk add --no-cache make=4.3-r1 curl=7.87.0-r2
 
 FROM ui-base as ui-deps
 WORKDIR /github.com/strolt/strolt/apps/stroltm/ui
@@ -24,7 +24,7 @@ COPY ./apps/stroltm/ui .
 COPY --from=swagger /github.com/strolt/strolt/.swagger /github.com/strolt/strolt/.swagger
 RUN yarn gen-api && yarn build
 
-FROM golang:1.19.0-alpine3.16@sha256:70df3b8f9f099da7f60f0b32480015165e3d0b51bfacf9e255b59f3dd6bd2828 AS builder
+FROM golang:1.20.1-alpine3.17 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/stroltm
 COPY ./apps/stroltm/go.mod .

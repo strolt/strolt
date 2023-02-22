@@ -4,7 +4,7 @@ STROLTM_UI   = $(PROJECT_DIR)/apps/stroltm/ui
 GOLANGCI_LINT = $(PROJECT_BIN)/golangci-lint
 
 .install-swagger-client:
-	[ -f $(PROJECT_BIN)/swagger-client ] || curl -sSfL "https://github.com/go-swagger/go-swagger/releases/download/v0.30.3/swagger_$(shell sh ./scripts/get_platform.sh)" > $(PROJECT_BIN)/swagger-client && chmod +x $(PROJECT_BIN)/swagger-client
+	[ -f $(PROJECT_BIN)/swagger-client ] || curl -sSfL "https://github.com/go-swagger/go-swagger/releases/download/v0.30.4/swagger_$(shell sh ./scripts/get_platform.sh)" > $(PROJECT_BIN)/swagger-client && chmod +x $(PROJECT_BIN)/swagger-client
 
 .install-golangci-lint:
 	[ -f $(PROJECT_BIN)/golangci-lint ] || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(PROJECT_BIN) v1.50.1
@@ -22,7 +22,7 @@ coverage:
 
 ##### SWAGGER #####
 .install-swag:
-	go install github.com/swaggo/swag/cmd/swag@v1.8.9
+	go install github.com/swaggo/swag/cmd/swag@v1.8.10
 
 .swagger-strolt: .install-swag
 	cd ./apps/strolt && swag init -g ./internal/api/api.go --parseDependency --output $(PROJECT_DIR)/.swagger/strolt
