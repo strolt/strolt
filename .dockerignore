@@ -9,3 +9,5 @@ website/
 .editorconfig
 *.md
 **/node_modules
+bin/**
+!bin/.gitignore
