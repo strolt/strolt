@@ -9,15 +9,12 @@ import (
 	"strings"
 )
 
-//nolint:revive
 type ResticConfigBackupFlags struct {
 }
 
-//nolint:revive
 type ResticConfigGlobalFlags struct {
 }
 
-//nolint:revive
 type ResticConfigKeep struct {
 	Last    int `yaml:"last"`
 	Hourly  int `yaml:"hourly"`

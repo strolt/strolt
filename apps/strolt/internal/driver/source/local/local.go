@@ -37,11 +37,7 @@ func (i *Local) SetConfig(config interface{}) error {
 		return err
 	}
 
-	if err := validateConfig(i.config); err != nil {
-		return err
-	}
-
-	return nil
+	return validateConfig(i.config)
 }
 
 func (i *Local) SetEnv(env interface{}) error {
@@ -54,11 +50,7 @@ func (i *Local) SetEnv(env interface{}) error {
 		return err
 	}
 
-	if err := validateEnv(i.env); err != nil {
-		return err
-	}
-
-	return nil
+	return validateEnv(i.env)
 }
 
 func (i *Local) SetLogger(logger *logger.Logger) {
@@ -78,18 +70,18 @@ func validateConfig(config Config) error {
 	return nil
 }
 
-func validateEnv(env Env) error {
+func validateEnv(_ Env) error {
 	return nil
 }
 
-func (i *Local) Backup(ctx context.Context) error {
+func (i *Local) Backup(_ context.Context) error {
 	// if err := copy.Copy(i.config.Path, ctx.WorkDir); err != nil {
 	// 	return err
 	// }
 	return nil
 }
 
-func (i *Local) Restore(ctx context.Context) error {
+func (i *Local) Restore(_ context.Context) error {
 	// if err := copy.Copy(ctx.WorkDir, i.config.Path); err != nil {
 	// 	return err
 	// }

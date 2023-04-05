@@ -69,10 +69,6 @@ type API struct {
 }
 
 var (
-	config        = Config{}
-	fileList      = []string{}
-	initialConfig = Config{
-		timeLocation: time.Local,
-		TimeZone:     time.Local.String(),
-	}
+	config   = Config{}
+	fileList = []string{}
 )

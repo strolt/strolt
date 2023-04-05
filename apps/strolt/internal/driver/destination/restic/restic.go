@@ -40,11 +40,7 @@ func (i *Restic) SetConfig(config interface{}) error {
 		return err
 	}
 
-	if err := i.validateConfig(); err != nil {
-		return err
-	}
-
-	return nil
+	return i.validateConfig()
 }
 
 func (i *Restic) SetEnv(env interface{}) error {
@@ -57,11 +53,7 @@ func (i *Restic) SetEnv(env interface{}) error {
 		return err
 	}
 
-	if err := i.validateEnv(); err != nil {
-		return err
-	}
-
-	return nil
+	return i.validateEnv()
 }
 
 func (i *Restic) SetLogger(logger *logger.Logger) {

@@ -19,7 +19,7 @@ type Operation struct {
 	IsPreviouslyLaunched bool
 }
 
-//nolint:containedctx
+//nolint:containedctx,musttag
 type Task struct {
 	Context     context.Context
 	Trigger     sctxt.TriggerType
@@ -34,7 +34,6 @@ type Task struct {
 	isNotificationsDisabled bool
 }
 
-//nolint:revive
 type TaskOperation string
 
 const (

@@ -28,11 +28,7 @@ func (i *MySQL) SetConfig(config interface{}) error {
 		return err
 	}
 
-	if err := i.validateConfig(); err != nil {
-		return err
-	}
-
-	return nil
+	return i.validateConfig()
 }
 
 func (i *MySQL) validateConfig() error {

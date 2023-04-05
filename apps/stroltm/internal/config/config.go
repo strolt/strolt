@@ -37,11 +37,7 @@ func Load(pathname string) error {
 		return err
 	}
 
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		return err
-	}
-
-	return nil
+	return yaml.Unmarshal(data, &config)
 }
 
 func Get() Config {

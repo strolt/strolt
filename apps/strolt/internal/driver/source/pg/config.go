@@ -6,7 +6,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-//nolint:revive
 type PgDumpConfig struct {
 	BinPathPgDump    string `yaml:"bin_path_pg_dump"`
 	BinPathPgRestore string `yaml:"bin_path_restore"`
@@ -34,11 +33,7 @@ func (i *PgDump) SetConfig(config interface{}) error {
 		return err
 	}
 
-	if err := i.validateConfig(); err != nil {
-		return err
-	}
-
-	return nil
+	return i.validateConfig()
 }
 
 func (i *PgDump) validateConfig() error {

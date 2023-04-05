@@ -131,11 +131,7 @@ func (d *Directory) CreateAsPersist() (string, error) {
 }
 
 func Remove(path string) error {
-	if err := os.RemoveAll(path); err != nil {
-		return err
-	}
-
-	return nil
+	return os.RemoveAll(path)
 }
 
 func RemoveTempDirectories() error {

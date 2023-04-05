@@ -1,0 +1,26 @@
+Arguments: 
+  /Users/shibanet0/Library/Application Support/fnm/node-versions/v16.17.0/installation/bin/node /Users/shibanet0/Library/Caches/fnm_multishells/69400_1680701961078/bin/yarn --frozen-lockfile --non-interactive -s
+
+PATH: 
+  /Users/shibanet0/.rvm/gems/ruby-2.7.6/bin:/Users/shibanet0/.rvm/gems/ruby-2.7.6@global/bin:/Users/shibanet0/.rvm/rubies/ruby-2.7.6/bin:/Users/shibanet0/Library/Caches/fnm_multishells/69400_1680701961078/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin:/Library/Apple/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/shibanet0/.rvm/gems/ruby-2.7.6/bin:/Users/shibanet0/.rvm/gems/ruby-2.7.6@global/bin:/Users/shibanet0/.rvm/rubies/ruby-2.7.6/bin:/Users/shibanet0/Library/Caches/fnm_multishells/22191_1680617377458/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/shibanet0/.cargo/bin:/Users/shibanet0/.yarn/bin:/usr/local/go/bin:/Users/shibanet0/.local/bin:/Users/shibanet0/go/bin:/root/.gem/ruby/2.7.0/bin:/Users/shibanet0/.rvm/bin:/Users/shibanet0/.cargo/bin:/usr/local/go/bin:/Users/shibanet0/.local/bin:/Users/shibanet0/go/bin:/root/.gem/ruby/2.7.0/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  16.17.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: ENOENT: no such file or directory, open '/Users/shibanet0/dev/my/strolt/node_modules/.yarn-integrity'
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

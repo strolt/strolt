@@ -15,11 +15,7 @@ func (c *Config) validate() error {
 		return err
 	}
 
-	if err := c.validateServices(); err != nil {
-		return err
-	}
-
-	return nil
+	return c.validateServices()
 }
 
 func (c *Config) validateNotifications() error {

@@ -57,11 +57,7 @@ func (i *Local) SetConfig(config interface{}) error {
 		return err
 	}
 
-	if err := validateConfig(i.config); err != nil {
-		return err
-	}
-
-	return nil
+	return validateConfig(i.config)
 }
 
 func (i *Local) SetEnv(env interface{}) error {
@@ -74,11 +70,7 @@ func (i *Local) SetEnv(env interface{}) error {
 		return err
 	}
 
-	if err := validateEnv(i.env); err != nil {
-		return err
-	}
-
-	return nil
+	return validateEnv(i.env)
 }
 
 func (i *Local) SetLogger(logger *logger.Logger) {
@@ -104,7 +96,7 @@ func validateConfig(config Config) error {
 	return nil
 }
 
-func validateEnv(env Env) error {
+func validateEnv(_ Env) error {
 	return nil
 }
 
@@ -118,14 +110,10 @@ func (i *Local) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 }
 
 func (i *Local) Restore(ctx context.Context, snapshotName string) error {
-	if err := copy.Copy(path.Join(i.config.Path, snapshotName), ctx.WorkDir); err != nil {
-		return err
-	}
-
-	return nil
+	return copy.Copy(path.Join(i.config.Path, snapshotName), ctx.WorkDir)
 }
 
-func (i *Local) Prune(ctx context.Context, isDryRun bool) ([]interfaces.Snapshot, error) {
+func (i *Local) Prune(_ context.Context, isDryRun bool) ([]interfaces.Snapshot, error) {
 	i.logger.Debug("prune")
 
 	if isDryRun {

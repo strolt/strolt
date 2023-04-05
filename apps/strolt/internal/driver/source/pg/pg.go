@@ -6,7 +6,6 @@ import (
 
 const FileNamePrefix = "strolt_driver_pg"
 
-//nolint:revive
 type PgDump struct {
 	logger *logger.Logger
 	config PgDumpConfig

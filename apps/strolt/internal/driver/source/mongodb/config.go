@@ -30,11 +30,7 @@ func (i *MongoDB) SetConfig(config interface{}) error {
 		return err
 	}
 
-	if err := yaml.Unmarshal(data, &i.config); err != nil {
-		return err
-	}
-
-	return nil
+	return yaml.Unmarshal(data, &i.config)
 }
 
 func (i *MongoDB) getCommonArgs() []string {

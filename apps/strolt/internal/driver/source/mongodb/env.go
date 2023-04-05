@@ -22,9 +22,5 @@ func (i *MongoDB) SetEnv(env interface{}) error {
 		return err
 	}
 
-	if err := yaml.Unmarshal(data, &i.env); err != nil {
-		return err
-	}
-
-	return nil
+	return yaml.Unmarshal(data, &i.env)
 }

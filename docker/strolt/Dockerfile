@@ -1,10 +1,10 @@
-FROM alpine:3.17.2 AS base
+FROM alpine:3.17.3 AS base
 WORKDIR /strolt
 COPY ./docker/strolt/scripts scripts
 RUN sh ./scripts/install.sh && rm -rf ./scripts
-RUN apk --update add --no-cache curl=7.87.0-r2
+RUN apk --update add --no-cache curl
 
-FROM golang:1.20.1-alpine3.17 AS builder
+FROM golang:1.20.3-alpine3.17 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/strolt
 COPY ./apps/strolt/go.mod .

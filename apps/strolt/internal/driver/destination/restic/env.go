@@ -6,7 +6,6 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/util/dir"
 )
 
-//nolint:revive
 type Env struct {
 	// RESTIC_REPOSITORY_FILE  string `yaml:"RESTIC_REPOSITORY_FILE"`  // Name of file containing the repository location (replaces --repository-file)
 	RESTIC_REPOSITORY string `yaml:"RESTIC_REPOSITORY"` //nolint:stylecheck // Location of repository (replaces -r)

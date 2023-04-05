@@ -60,7 +60,6 @@ func getTriggerEmoji(driver string, trigger sctxt.TriggerType) string {
 	return ""
 }
 
-//nolint:revive
 func getErrorEmoji(driver string, ctx context.Context) string {
 	if ctx.Operation.Error == "" {
 		return ""
@@ -74,7 +73,6 @@ func getErrorEmoji(driver string, ctx context.Context) string {
 	return fmt.Sprintf(" %s", emoji.Error)
 }
 
-//nolint:revive
 func New(driver string, ctx context.Context) Template {
 	t := Template{}
 
