@@ -1,12 +1,15 @@
 package manager
 
 import (
+	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt"
 	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/models"
+	"github.com/strolt/strolt/apps/stroltm/internal/sdk/stroltp"
 	"github.com/strolt/strolt/shared/logger"
 )
 
@@ -64,6 +67,33 @@ type WatchItem struct {
 	IsUpdateStatusInProcess     bool
 }
 
+func initStroltp() {
+	configInstances := config.Get().Stroltp.Instances
+
+	for _, instance := range configInstances {
+		i := stroltp.New(instance.URL, instance.Username, instance.Password)
+		fmt.Println("storlt p instance", i)
+		if i != nil {
+			ok, err := i.GetList()
+
+			if err != nil {
+				fmt.Println("STROLTP = ERR", err)
+			} else {
+				if ok != nil {
+					j, _ := json.Marshal(ok)
+					fmt.Println(string(j))
+					fmt.Println("STROLTP:", ok.Payload.Items)
+				} else {
+					fmt.Println("ok is nil", ok)
+				}
+			}
+		} else {
+			fmt.Println("stroltp instance is nil")
+		}
+
+	}
+}
+
 func Init() *Manager {
 	configInstances := config.Get().Strolt.Instances
 
@@ -83,6 +113,8 @@ func Init() *Manager {
 	}
 
 	logger.New().Infof("initialized %d strolt instances", len(configInstances))
+
+	initStroltp()
 
 	return manager
 }

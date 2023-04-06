@@ -27,17 +27,23 @@ coverage:
 .swagger-strolt: .install-swag
 	cd ./apps/strolt && swag init -g ./internal/api/api.go --parseDependency --output $(PROJECT_DIR)/.swagger/strolt
 
-.swagger-strolt-manager: .install-swag
+.swagger-stroltm: .install-swag
 	cd ./apps/stroltm && swag init -g ./internal/api/api.go --parseDependency --output $(PROJECT_DIR)/.swagger/stroltm
 
-.swagger-strolt-manager-generate-client: .install-swagger-client
+.swagger-stroltp: .install-swag
+	cd ./apps/stroltp && swag init -g ./internal/api/api.go --parseDependency --output $(PROJECT_DIR)/.swagger/stroltp
+
+.swagger-stroltm-generate-client: .install-swagger-client
 	rm -rf ./apps/stroltm/internal/sdk/strolt/generated/client && rm -rf ./apps/stroltm/internal/sdk/strolt/generated/models
 	cd ./apps/stroltm/internal/sdk/strolt/generated && $(PROJECT_BIN)/swagger-client generate client -f $(PROJECT_DIR)/.swagger/strolt/swagger.yaml
 
-.swagger-strolt-manager-ui-generate-client: .install-stroltm-ui-node_modules
+	rm -rf ./apps/stroltm/internal/sdk/stroltp/generated/client && rm -rf ./apps/stroltm/internal/sdk/stroltp/generated/models
+	cd ./apps/stroltm/internal/sdk/stroltp/generated && $(PROJECT_BIN)/swagger-client generate client -f $(PROJECT_DIR)/.swagger/stroltp/swagger.yaml
+
+.swagger-stroltm-ui-generate-client: .install-stroltm-ui-node_modules
 	cd $(STROLTM_UI) && yarn gen-api
 
-swagger: .swagger-strolt .swagger-strolt-manager-generate-client .swagger-strolt-manager .swagger-strolt-manager-ui-generate-client
+swagger: .swagger-strolt .swagger-stroltp .swagger-stroltm-generate-client .swagger-stroltm .swagger-stroltm-ui-generate-client
 
 ##### LINT #####
 .lint-strolt: .install-golangci-lint
@@ -60,8 +66,11 @@ lint: .lint-strolt .lint-stroltm .lint-stroltm-ui
 .test-stroltm:
 	cd ./apps/stroltm && go test ./...
 
+.test-stroltp:
+	cd ./apps/stroltp && go test ./...
+
 .PHONY: test
-test: .test-strolt .test-stroltm
+test: .test-strolt .test-stroltp .test-stroltm
 
 ##### DOCKER #####
 .PHONY: docker-strolt
@@ -72,8 +81,12 @@ docker-strolt:
 docker-stroltm:
 	docker build -f ./docker/stroltm/Dockerfile --build-arg version=development -t strolt/stroltm:development ./
 
+.PHONY: docker-stroltp
+docker-stroltp:
+	docker build -f ./docker/stroltp/Dockerfile --build-arg version=development -t strolt/stroltp:development ./
+
 .PHONY: docker
-docker: docker-strolt docker-stroltm
+docker: docker-strolt docker-stroltp docker-stroltm
 
 ##### E2E TEST #####
 .e2e-strolt: docker-strolt

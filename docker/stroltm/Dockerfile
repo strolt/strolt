@@ -8,7 +8,7 @@ RUN apt-get update && apt-get -y install openjdk-11-jre --no-install-recommends 
 FROM --platform=linux/amd64 golang:1.20.3-alpine3.17  AS swagger-base
 RUN apk --update add --no-cache make curl
 
-FROM ui-base as ui-deps
+FROM  --platform=linux/amd64 ui-base as ui-deps
 WORKDIR /github.com/strolt/strolt/apps/stroltm/ui
 COPY ./apps/stroltm/ui/package.json .
 COPY ./apps/stroltm/ui/yarn.lock .
@@ -17,7 +17,7 @@ RUN yarn install --frozen-lockfile --prefer-offline --ignore-scripts --network-t
 FROM swagger-base AS swagger
 WORKDIR /github.com/strolt/strolt
 COPY . .
-RUN make .swagger-strolt && make .swagger-strolt-manager-generate-client && make .swagger-strolt-manager
+RUN make .swagger-strolt && make .swagger-stroltm-generate-client && make .swagger-stroltm
 
 FROM ui-deps as ui-builder
 COPY ./apps/stroltm/ui .

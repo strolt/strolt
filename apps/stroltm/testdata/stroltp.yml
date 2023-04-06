@@ -13,10 +13,3 @@ strolt:
       url: 127.0.0.1:8081
       username: admin
       password: admin #pragma: allowlist secret
-
-stroltp:
-  instances:
-    test:
-      url: 127.0.0.1:8091
-      username: admin
-      password: admin #pragma: allowlist secret

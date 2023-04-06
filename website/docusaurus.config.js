@@ -60,6 +60,10 @@ const config = {
 						spec: "../.swagger/stroltm/swagger.yaml",
 						route: "/api/stroltm",
 					},
+					{
+						spec: "../.swagger/stroltp/swagger.yaml",
+						route: "/api/stroltp",
+					},
 				],
 				// Theme Options for modifying how redoc renders them
 				theme: {
@@ -92,6 +96,7 @@ const config = {
 					},
 					{ to: "/api/strolt", label: "API/Strolt", position: "left" },
 					{ to: "/api/stroltm", label: "API/Stroltm", position: "left" },
+					{ to: "/api/stroltp", label: "API/Stroltp", position: "left" },
 					{
 						href: "https://github.com/strolt/strolt",
 						label: "GitHub",
