@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "./apps/strolt"
+		},
+		{
+			"path": "./apps/stroltm"
+		},
+		{
+			"path": "./apps/stroltp"
+		},
+		{
+			"path": "./shared"
+		},
+	],
+  "settings": {}
+}
