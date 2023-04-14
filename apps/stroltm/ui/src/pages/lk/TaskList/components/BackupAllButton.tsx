@@ -22,7 +22,7 @@ export const BackupAllButton = observer(() => {
   };
 
   return (
-    <Popconfirm title="Are you sure?" onConfirm={handleClick}>
+    <Popconfirm title="Are you sure?" onConfirm={handleClick} okText="Yes">
       <Button
 			block
         type="primary"

@@ -43,6 +43,7 @@ export const BackupButton: React.FC<BackupButtonProps> = observer(
           managerStore.backup(instanceName || "", serviceName || "", taskName || "", proxyName)
         }
         disabled={isLoading || disabled}
+				okText="Yes"
       >
         <Button block loading={isLoading} disabled={disabled} size="small" danger>
           Backup

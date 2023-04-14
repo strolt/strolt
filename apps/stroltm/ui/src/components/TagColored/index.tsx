@@ -1,10 +1,11 @@
 import { Tag } from "antd";
+import { appConfigStore } from "stores/app-config.store";
 import { getSeededHEXColor, getTagKey } from "utils";
 
 
 const getColor = (tag: string) => {
   const seed = getTagKey(tag);
-	return getSeededHEXColor(seed)
+	return getSeededHEXColor(seed, appConfigStore.mode)
 };
 
 export interface TagColoredProps {

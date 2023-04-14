@@ -29,6 +29,7 @@ const BackupButton: FC<BackupButtonProps> = observer(
       <Popconfirm
         title="Are you sure?"
         onConfirm={() => managerStore.backup(instanceName, serviceName, taskName, proxyName)}
+				okText="Yes"
       >
         <Button
           loading={
@@ -66,7 +67,7 @@ const BackupAll: FC = observer(() => {
   };
 
   return (
-    <Popconfirm title="Are you sure?" onConfirm={handleClick}>
+    <Popconfirm title="Are you sure?" onConfirm={handleClick} okText="Yes">
       <Button
         type="primary"
         style={{ marginBottom: "1rem" }}

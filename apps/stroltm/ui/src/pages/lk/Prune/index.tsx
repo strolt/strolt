@@ -31,7 +31,7 @@ const PruneButton: FC<PruneButtonProps> = observer(
     };
 
     return (
-      <Popconfirm title="Are you sure?" onConfirm={handleClick}>
+      <Popconfirm title="Are you sure?" onConfirm={handleClick} okText="Yes">
         <Button
           disabled={!count}
           type="primary"
