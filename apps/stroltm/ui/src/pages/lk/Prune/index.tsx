@@ -5,7 +5,7 @@ import { useParams } from "react-router";
 import { Button, Popconfirm, Table, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 
-import { DebugJSON, Print } from "components";
+import { DebugJSON, Print, TagColored } from "components";
 
 import { StroltModelsInterfacesSnapshot } from "api/generated";
 
@@ -63,7 +63,7 @@ const columns: ColumnsType<StroltModelsInterfacesSnapshot> = [
     render: (tags: string[]) => (
       <>
         {tags.map((tag) => (
-          <Tag key={tag}>{tag}</Tag>
+          <TagColored key={tag} value={tag}/>
         ))}
       </>
     ),

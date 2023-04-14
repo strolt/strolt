@@ -2,7 +2,7 @@ import { FC, useEffect } from "react";
 
 import { Button, Card, message, Popconfirm, Tag, Typography } from "antd";
 
-import { DebugJSON, LatestVersionLink, Link } from "components";
+import { DebugJSON, LatestVersionLink, Link, TagColored } from "components";
 
 import {
   ManagerhManagerPreparedInstance,
@@ -103,7 +103,7 @@ const Task: FC<TaskProps> = observer(({ proxyName, task, instanceName, serviceNa
     >
       <div>
         TAGS:
-        {task?.tags?.length ? task?.tags.map((tag) => <Tag key={tag}>{tag}</Tag>) : <b>-</b>}
+        {task?.tags?.length ? task?.tags.map((tag) => <TagColored key={tag} value={tag}/>) : <b>-</b>}
       </div>
 
       <div>
@@ -180,7 +180,7 @@ const Task: FC<TaskProps> = observer(({ proxyName, task, instanceName, serviceNa
               <li key={notification.name}>
                 {notification.name} (<b>{notification.driver}</b>):{" "}
                 {notification.events?.map((eventName) => (
-                  <Tag key={eventName}>{eventName}</Tag>
+                  <TagColored key={eventName} value={eventName}/>
                 ))}
               </li>
             ))}
@@ -258,7 +258,7 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
               <div>
                 TAGS:
                 {instance.config?.tags?.length ? (
-                  instance.config?.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)
+                  instance.config?.tags.map((tag) => <TagColored key={tag} value={tag}/>)
                 ) : (
                   <b>-</b>
                 )}
