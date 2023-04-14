@@ -129,7 +129,7 @@ const Task: FC<TaskProps> = observer(({ proxyName, task, instanceName, serviceNa
                 <Link
                   to={
                     !!proxyName
-                      ? "instances.instanceId.serviceId.taskId.destinationId.proxySnapshotList"
+                      ? "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxySnapshotList"
                       : "instances.instanceId.serviceId.taskId.destinationId.snapshotList"
                   }
                   params={{

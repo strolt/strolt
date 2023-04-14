@@ -1,11 +1,12 @@
 import { AxiosResponse } from "axios";
-import { makeAutoObservable, reaction, runInAction } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 
 import { fromPromise, IPromiseBasedObservable } from "mobx-utils";
 
-import * as api from "../api";
-import * as apiGenerated from "../api/generated";
-import { authStore } from "./auth.store";
+import * as api from "../../api";
+import * as apiGenerated from "../../api/generated";
+
+import { getTaskList } from "./taskList";
 
 export class ManagerStore {
   constructor() {
@@ -47,6 +48,10 @@ export class ManagerStore {
     this.instancesStatus = null;
     this.instances = [];
   }
+
+	get taskList(){
+		return getTaskList(this.instances)
+	}
 
   backupAllStatus: IPromiseBasedObservable<
     AxiosResponse<apiGenerated.ManagerhBackupAllResponse, any>

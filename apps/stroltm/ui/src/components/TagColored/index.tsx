@@ -1,24 +1,9 @@
 import { Tag } from "antd";
-import { getSeededHEXColor } from "utils";
+import { getSeededHEXColor, getTagKey } from "utils";
 
-const getColorSeed = (tag: string) => {
-  let seed = tag;
-
-  const one = tag.split(":");
-  if (one.length === 2) {
-    seed = one[0];
-  }
-
-  const two = tag.split("=");
-  if (two.length === 2) {
-    seed = two[0];
-  }
-
-  return seed;
-};
 
 const getColor = (tag: string) => {
-  const seed = getColorSeed(tag);
+  const seed = getTagKey(tag);
 	return getSeededHEXColor(seed)
 };
 

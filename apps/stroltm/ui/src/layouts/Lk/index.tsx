@@ -15,7 +15,8 @@ export const Lk = () => {
       <button onClick={() => authStore.logout()}>Logout</button>
 
       <nav>
-        <Link to="instances.main">Instances</Link>
+        <Link to="instances.main">Task List</Link>
+        <Link to="instances.old">Instances</Link>
       </nav>
       <Suspense fallback="loading...">
         <Outlet />

@@ -14,10 +14,11 @@ const r = (c: ConstantsRouteType, element: ReactNode) => ({
 });
 
 const instances = [
-  r("instances.main", <pages.lk.InstanceList />),
+  r("instances.main", <pages.lk.TaskList />),
+  r("instances.old", <pages.lk.InstanceList />),
   r("instances.instanceId.serviceId.taskId.destinationId.snapshotList", <pages.lk.SnapshotList />),
   r(
-    "instances.instanceId.serviceId.taskId.destinationId.proxySnapshotList",
+    "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxySnapshotList",
     <pages.lk.SnapshotList />,
   ),
   r("instances.instanceId.serviceId.taskId.destinationId.prune", <pages.lk.Prune />),
