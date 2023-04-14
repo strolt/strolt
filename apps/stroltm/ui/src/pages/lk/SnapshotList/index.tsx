@@ -7,11 +7,11 @@ import { ColumnsType } from "antd/es/table";
 
 import { DebugJSON, Print } from "components";
 
-import { ModelsInterfacesSnapshot } from "api/generated";
+import { StroltModelsInterfacesSnapshot } from "api/generated";
 
 import { observer, useStores } from "stores";
 
-const columns: ColumnsType<ModelsInterfacesSnapshot> = [
+const columns: ColumnsType<StroltModelsInterfacesSnapshot> = [
   {
     title: "Short ID",
     dataIndex: "shortId",
@@ -45,6 +45,7 @@ const columns: ColumnsType<ModelsInterfacesSnapshot> = [
 const SnapshotList = observer(() => {
   const { managerStore } = useStores();
   const params = useParams<{
+    proxyId: string;
     instanceId: string;
     serviceId: string;
     taskId: string;
@@ -60,6 +61,7 @@ const SnapshotList = observer(() => {
         params.serviceId,
         params.taskId,
         params.destinationId,
+        params.proxyId,
       );
     }
 
@@ -72,7 +74,7 @@ const SnapshotList = observer(() => {
     <div>
       <Typography.Title>Snapshot List</Typography.Title>
       <Typography.Title level={3}>
-        {[params.instanceId, params.serviceId, params.taskId, params.destinationId]
+        {[params.proxyId, params.instanceId, params.serviceId, params.taskId, params.destinationId]
           .filter(Boolean)
           .join(" / ")}
       </Typography.Title>

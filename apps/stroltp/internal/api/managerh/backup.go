@@ -8,7 +8,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/strolt/strolt/shared/apiu"
 	"github.com/strolt/strolt/shared/sdk/strolt"
-	"github.com/strolt/strolt/shared/sdk/stroltp"
 )
 
 // backup godoc
@@ -55,8 +54,7 @@ type backupAllResponse struct {
 }
 
 type backupAllStatusItem struct {
-	ProxyName    string `json:"proxyName,omitempty"`
-	InstanceName string `json:"instanceName,omitempty"`
+	InstanceName string `json:"instanceName"`
 	ServiceName  string `json:"serviceName,omitempty"`
 	TaskName     string `json:"taskName,omitempty"`
 }
@@ -117,35 +115,6 @@ func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 			wg.Done()
 		}(item)
 	}
-
-	wg.Add(1)
-
-	go func() {
-		stroltpResult := stroltp.ManagerBackupAll()
-
-		response.Lock()
-
-		for _, errorStarted := range stroltpResult.ErrorStarted {
-			response.ErrorStarted = append(response.ErrorStarted, backupAllStatusItem{
-				ProxyName:    errorStarted.ProxyName,
-				InstanceName: errorStarted.InstanceName,
-				ServiceName:  errorStarted.ServiceName,
-				TaskName:     errorStarted.TaskName,
-			})
-		}
-
-		for _, successStarted := range stroltpResult.SuccessStarted {
-			response.SuccessStarted = append(response.SuccessStarted, backupAllStatusItem{
-				ProxyName:    successStarted.ProxyName,
-				InstanceName: successStarted.InstanceName,
-				ServiceName:  successStarted.ServiceName,
-				TaskName:     successStarted.TaskName,
-			})
-		}
-
-		response.Unlock()
-		wg.Done()
-	}()
 
 	wg.Wait()
 

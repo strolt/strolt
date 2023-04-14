@@ -1,16 +1,11 @@
-package manager
+package strolt
 
-import (
-	"time"
+import "time"
 
-	"github.com/strolt/strolt/apps/stroltm/internal/ldflags"
-)
-
-type Info struct {
-	Instances     []InfoInstance `json:"instances"`
-	UpdatedAt     string         `json:"updatedAt"`
-	LatestVersion string         `json:"latestVersion"`
-	Version       string         `json:"version"`
+type ManagerInfo struct {
+	Instances []InfoInstance `json:"instances"`
+	UpdatedAt string         `json:"updatedAt"`
+	Version   string         `json:"version"`
 }
 
 type InfoInstance struct {
@@ -30,20 +25,20 @@ type InfoInstanceConfig struct {
 }
 
 type InfoInstanceTaskStatus struct {
-	IsInitialized bool   `json:"isInitialized"`
-	UpdatedAt     string `json:"updatedAt"`
+	IsInitialized     bool   `json:"isInitialized"`
+	UpdatedAt         string `json:"updatedAt"`
+	UpdateRequestedAt string `json:"updateRequestedAt"`
 }
 
-func GetInfo() Info {
+func ManagerGetInfo(version string) ManagerInfo {
 	manager.RLock()
 	defer manager.RUnlock()
 
 	var updatedAt int64
 
-	info := Info{
-		Instances:     make([]InfoInstance, len(manager.Instances)),
-		LatestVersion: ldflags.GetVersion(), // TODO: replace this for github release api
-		Version:       ldflags.GetVersion(),
+	info := ManagerInfo{
+		Instances: make([]InfoInstance, len(manager.Instances)),
+		Version:   version,
 	}
 
 	i := 0
@@ -76,8 +71,9 @@ func GetInfo() Info {
 		}
 
 		infoItem.TaskStatus = InfoInstanceTaskStatus{
-			IsInitialized: instance.TaskStatus.IsInitialized,
-			UpdatedAt:     instance.TaskStatus.UpdatedAt.Format(time.RFC3339),
+			IsInitialized:     instance.TaskStatus.IsInitialized,
+			UpdatedAt:         instance.TaskStatus.UpdatedAt.Format(time.RFC3339),
+			UpdateRequestedAt: instance.TaskStatus.UpdateRequestedAt.Format(time.RFC3339),
 		}
 
 		instance.RUnlock()

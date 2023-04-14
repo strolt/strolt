@@ -23,7 +23,7 @@ func runDockerCompose(args ...string) ([]byte, error) {
 }
 
 func runDockerComposeBash(command string) ([]byte, error) {
-	cmd := exec.Command("docker", "exec", "strolt-e2e", "/bin/sh", "-c", command)
+	cmd := exec.Command("docker", "exec", "strolt", "/bin/sh", "-c", command)
 	fmt.Println(cmd.String()) //nolint:forbidigo
 
 	return cmd.Output()
@@ -35,7 +35,7 @@ func dockerComposeUp(services ...string) error {
 }
 
 func dockerComposeUpStrolt() error {
-	_, err := runDockerCompose("run", "-d", "--name", "strolt-e2e", "--entrypoint", "/bin/sh -c", "strolt", "sleep 99999")
+	_, err := runDockerCompose("run", "-d", "--name", "strolt", "--entrypoint", "/bin/sh -c", "strolt", "sleep 99999")
 	return err
 }
 
@@ -57,7 +57,7 @@ func strolt(args ...string) error {
 }
 
 func stroltWithResponse(args ...string) ([]byte, error) {
-	cmd := exec.Command("docker", "exec", "strolt-e2e", "/bin/sh", "-c", fmt.Sprintf("/strolt/bin/strolt %s", strings.Join(args, " ")))
+	cmd := exec.Command("docker", "exec", "strolt", "/bin/sh", "-c", fmt.Sprintf("/strolt/bin/strolt %s", strings.Join(args, " ")))
 	fmt.Println(cmd.String()) //nolint:forbidigo
 
 	return cmd.CombinedOutput()

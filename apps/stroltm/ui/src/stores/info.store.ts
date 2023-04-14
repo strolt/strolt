@@ -16,10 +16,9 @@ export class InfoStore {
   latestVersion = "";
   version = "";
   updatedAt = new Date(0);
-  map = new Map<string, apiGenerated.ManagerInfoInstance>();
+  map = new Map<string, apiGenerated.ApiInfoInstance>();
 
-  requestFetchInfo: IPromiseBasedObservable<AxiosResponse<apiGenerated.ManagerInfo, any>> | null =
-    null;
+  requestFetchInfo: IPromiseBasedObservable<AxiosResponse<apiGenerated.ApiInfo, any>> | null = null;
   async fetchInfo() {
     this.requestFetchInfo = fromPromise(api.global.getInfo());
     const { data } = await this.requestFetchInfo;

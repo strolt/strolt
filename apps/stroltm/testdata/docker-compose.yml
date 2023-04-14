@@ -55,19 +55,33 @@ services:
     networks:
       - strolt
 
-  stroltp:
+  strolt_stroltp:
     restart: always
-    image: strolt/stroltp:development
+    image: strolt/strolt:development
     ports:
-      - 8091:8080
+      - 8089:8080
     environment:
       - STROLT_LOG_LEVEL=DEBUG
       - STROLT_GLOBAL_TAGS=tag_from_environment
       # - STROLT_API_LOG_ENABLED=true
     volumes:
-      - ./stroltp.yml:/stroltp/config.yml:ro
+      - ./strolt.stroltp.yml:/strolt/config.yml:ro
     networks:
       - strolt
+
+  # stroltp:
+  #   restart: always
+  #   image: strolt/stroltp:development
+  #   ports:
+  #     - 8091:8080
+  #   environment:
+  #     - STROLT_LOG_LEVEL=DEBUG
+  #     - STROLT_GLOBAL_TAGS=tag_from_environment
+  #     # - STROLT_API_LOG_ENABLED=true
+  #   volumes:
+  #     - ./stroltp.yml:/stroltp/config.yml:ro
+  #   networks:
+  #     - strolt
 
   # stroltm:
   #   restart: always

@@ -12,6 +12,7 @@ import (
 	"github.com/strolt/strolt/apps/stroltp/internal/config"
 	"github.com/strolt/strolt/apps/stroltp/internal/env"
 	"github.com/strolt/strolt/shared/logger"
+	"github.com/strolt/strolt/shared/sdk/strolt"
 )
 
 const (
@@ -74,13 +75,23 @@ var rootCmd = &cobra.Command{
 			}()
 		}
 
-		// { // Manager
-		// 	wg.Add(1)
-		// 	go func() {
-		// 		// manager.Init().Watch(ctx, cancel)
-		// 		wg.Done()
-		// 	}()
-		// }
+		{ // Manager
+			wg.Add(1)
+			go func() {
+				// manager.Init().Watch(ctx, cancel)
+				instances := []strolt.ManagerInstanceInit{}
+				for instanceName, instance := range config.Get().Strolt.Instances {
+					instances = append(instances, strolt.ManagerInstanceInit{
+						Name:     instanceName,
+						URL:      instance.URL,
+						Username: instance.Username,
+						Password: instance.Password, //pragma: allowlist secret
+					})
+				}
+				strolt.ManagerInit(ctx, cancel, instances)
+				wg.Done()
+			}()
+		}
 
 		// Watch system exit code
 		go func() {

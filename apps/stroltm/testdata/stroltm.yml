@@ -16,7 +16,7 @@ strolt:
 
 stroltp:
   instances:
-    test:
+    test-stroltp:
       url: 127.0.0.1:8091
       username: admin
       password: admin #pragma: allowlist secret

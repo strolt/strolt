@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/strolt/strolt/shared/apiu"
+	_ "github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_models"
 )
 
 // getSnapshotsForPrune godoc
@@ -17,7 +18,7 @@ import (
 // @Param   serviceName         path    string     true        "Service name"
 // @Param   taskName            path    string     true        "Task name"
 // @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} models.ServicesGetPruneResult
+// @success 200 {object} strolt_models.ServicesGetPruneResult
 // @success 500 {object} apiu.ResultError
 // @Router       /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune/snapshots [get].
 func (s *ManagerHandlers) getSnapshotsForPrune(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +56,7 @@ func (s *ManagerHandlers) getSnapshotsForPrune(w http.ResponseWriter, r *http.Re
 // @Param   serviceName         path    string     true        "Service name"
 // @Param   taskName            path    string     true        "Task name"
 // @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} models.ServicesGetPruneResult
+// @success 200 {object} strolt_models.ServicesGetPruneResult
 // @success 500 {object} apiu.ResultError
 // @Router       /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune [post].
 func (s *ManagerHandlers) prune(w http.ResponseWriter, r *http.Request) {

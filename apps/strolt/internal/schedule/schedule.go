@@ -3,12 +3,11 @@ package schedule
 import (
 	"fmt"
 
+	"github.com/robfig/cron/v3"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/shared/logger"
-
-	"github.com/robfig/cron/v3"
 
 	ctx "context"
 )

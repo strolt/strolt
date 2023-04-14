@@ -21,7 +21,7 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.0
 	github.com/strolt/strolt/shared v0.0.0
-	go.mongodb.org/mongo-driver v1.10.1
+	go.mongodb.org/mongo-driver v1.11.3
 	go.uber.org/goleak v1.1.12
 	gopkg.in/yaml.v3 v3.0.1
 )

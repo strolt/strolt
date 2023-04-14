@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/strolt/strolt/shared/apiu"
@@ -23,6 +22,5 @@ type getListResult struct {
 // @success 200 {object} getListResult
 // @Router       /api/v1/services [get].
 func (s *Services) getList(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(" get list ")
 	apiu.RenderJSON200(w, r, getListResult{Items: []getListResultItem{}})
 }

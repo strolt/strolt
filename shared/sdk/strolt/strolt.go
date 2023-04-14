@@ -5,20 +5,20 @@ import (
 
 	"github.com/go-openapi/runtime"
 	runtimeClient "github.com/go-openapi/runtime/client"
-	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client"
-	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client/info"
-	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client/operations"
-	"github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated/client/services"
+	"github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_client"
+	"github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_client/info"
+	"github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_client/operations"
+	"github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_client/services"
 )
 
 type SDK struct {
-	client   *client.StroltAPI
+	client   *strolt_client.StroltAPI
 	authInfo runtime.ClientAuthInfoWriter
 }
 
 func New(host, username, password string) *SDK {
-	cfg := client.DefaultTransportConfig().WithHost(host)
-	c := client.NewHTTPClientWithConfig(nil, cfg)
+	cfg := strolt_client.DefaultTransportConfig().WithHost(host)
+	c := strolt_client.NewHTTPClientWithConfig(nil, cfg)
 
 	return &SDK{
 		client:   c,

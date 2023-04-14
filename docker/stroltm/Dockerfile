@@ -17,7 +17,7 @@ RUN yarn install --frozen-lockfile --prefer-offline --ignore-scripts --network-t
 FROM swagger-base AS swagger
 WORKDIR /github.com/strolt/strolt
 COPY . .
-RUN make .swagger-strolt && make .swagger-stroltm-generate-client && make .swagger-stroltm
+RUN make .swagger-strolt && make .swagger-shared-generate-client-strolt && make .swagger-stroltp && make .swagger-shared-generate-client-stroltp
 
 FROM ui-deps as ui-builder
 COPY ./apps/stroltm/ui .
@@ -35,7 +35,8 @@ COPY ./apps/stroltm/main.go .
 COPY ./apps/stroltm/cmd ./cmd
 COPY ./apps/stroltm/internal ./internal
 COPY --from=ui-builder /github.com/strolt/strolt/apps/stroltm/ui/dist ./internal/ui/build/dist
-COPY --from=swagger /github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated /go/src/github.com/strolt/strolt/apps/stroltm/internal/sdk/strolt/generated
+COPY --from=swagger /github.com/strolt/strolt/shared/sdk/strolt/generated /go/src/github.com/strolt/strolt/shared/sdk/strolt/generated
+COPY --from=swagger /github.com/strolt/strolt/shared/sdk/stroltp/generated /go/src/github.com/strolt/strolt/shared/sdk/stroltp/generated
 RUN go build -o stroltm -ldflags "-X github.com/strolt/strolt/apps/stroltm/internal/ldflags.version=${version} -s -w"
 
 FROM base

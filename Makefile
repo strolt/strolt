@@ -2,6 +2,7 @@ PROJECT_DIR   = $(shell pwd)
 PROJECT_BIN   = $(PROJECT_DIR)/bin
 STROLTM_UI   = $(PROJECT_DIR)/apps/stroltm/ui
 GOLANGCI_LINT = $(PROJECT_BIN)/golangci-lint
+GO_SWAGGER_TEMPLATES = $(PROJECT_DIR)/.go-swagger/templates
 
 .install-swagger-client:
 	[ -f $(PROJECT_BIN)/swagger-client ] || curl -sSfL "https://github.com/go-swagger/go-swagger/releases/download/v0.30.4/swagger_$(shell sh ./scripts/get_platform.sh)" > $(PROJECT_BIN)/swagger-client && chmod +x $(PROJECT_BIN)/swagger-client
@@ -21,29 +22,44 @@ coverage:
 	rm coverage.strolt.out
 
 ##### SWAGGER #####
+.clear-sdk:
+	rm -rf .swagger
+	rm -rf ./shared/sdk/strolt/generated/strolt_client && rm -rf ./shared/sdk/strolt/generated/strolt_models
+	rm -rf ./shared/sdk/stroltp/generated/stroltp_client && rm -rf ./shared/sdk/stroltp/generated/stroltp_models
+
 .install-swag:
 	go install github.com/swaggo/swag/cmd/swag@v1.8.12
 
 .swagger-strolt: .install-swag
-	cd ./apps/strolt && swag init -g ./internal/api/api.go --parseDependency --output $(PROJECT_DIR)/.swagger/strolt
+	cd ./apps/strolt && swag init -g ./internal/api/api.go -q --parseDependency --output $(PROJECT_DIR)/.swagger/strolt
 
 .swagger-stroltm: .install-swag
-	cd ./apps/stroltm && swag init -g ./internal/api/api.go --parseDependency --output $(PROJECT_DIR)/.swagger/stroltm
+	cd ./apps/stroltm && swag init -g ./internal/api/api.go -q --parseDependency --output $(PROJECT_DIR)/.swagger/stroltm
 
 .swagger-stroltp: .install-swag
-	cd ./apps/stroltp && swag init -g ./internal/api/api.go --parseDependency --output $(PROJECT_DIR)/.swagger/stroltp
+	cd ./apps/stroltp && swag init -g ./internal/api/api.go -q --parseDependency --output $(PROJECT_DIR)/.swagger/stroltp
 
-.swagger-stroltm-generate-client: .install-swagger-client
-	rm -rf ./apps/stroltm/internal/sdk/strolt/generated/client && rm -rf ./apps/stroltm/internal/sdk/strolt/generated/models
-	cd ./apps/stroltm/internal/sdk/strolt/generated && $(PROJECT_BIN)/swagger-client generate client -f $(PROJECT_DIR)/.swagger/strolt/swagger.yaml
+.swagger-shared-generate-client-strolt: .install-swagger-client
+	rm -rf ./shared/sdk/strolt/generated/strolt_client && rm -rf ./shared/sdk/strolt/generated/strolt_models
+	cd ./shared/sdk/strolt/generated && $(PROJECT_BIN)/swagger-client generate client -q -c stroltClient -m stroltModels -f $(PROJECT_DIR)/.swagger/strolt/swagger.yaml --template-dir=${GO_SWAGGER_TEMPLATES} --allow-template-override
 
-	rm -rf ./apps/stroltm/internal/sdk/stroltp/generated/client && rm -rf ./apps/stroltm/internal/sdk/stroltp/generated/models
-	cd ./apps/stroltm/internal/sdk/stroltp/generated && $(PROJECT_BIN)/swagger-client generate client -f $(PROJECT_DIR)/.swagger/stroltp/swagger.yaml
+.swagger-shared-generate-client-stroltp: .install-swagger-client
+	rm -rf ./shared/sdk/stroltp/generated/stroltp_client && rm -rf ./shared/sdk/stroltp/generated/stroltp_models
+	cd ./shared/sdk/stroltp/generated && $(PROJECT_BIN)/swagger-client generate client -q -c stroltpClient -m stroltpModels -f $(PROJECT_DIR)/.swagger/stroltp/swagger.yaml --template-dir=${GO_SWAGGER_TEMPLATES} --allow-template-override
+
 
 .swagger-stroltm-ui-generate-client: .install-stroltm-ui-node_modules
 	cd $(STROLTM_UI) && yarn gen-api
 
-swagger: .swagger-strolt .swagger-stroltp .swagger-stroltm-generate-client .swagger-stroltm .swagger-stroltm-ui-generate-client
+swagger: \
+	.clear-sdk \
+	.swagger-strolt \
+	.swagger-shared-generate-client-strolt \
+	.swagger-stroltp \
+	.swagger-shared-generate-client-stroltp \
+	.swagger-stroltm \
+	.swagger-stroltm-ui-generate-client
+
 
 ##### LINT #####
 .lint-strolt: .install-golangci-lint
@@ -52,11 +68,17 @@ swagger: .swagger-strolt .swagger-stroltp .swagger-stroltm-generate-client .swag
 .lint-stroltm: .install-golangci-lint
 	cd ./apps/stroltm && $(GOLANGCI_LINT) run ./... --fix --config=${PROJECT_DIR}/.golangci.yml
 
+.lint-stroltp: .install-golangci-lint
+	cd ./apps/stroltp && $(GOLANGCI_LINT) run ./... --fix --config=${PROJECT_DIR}/.golangci.yml
+
+.lint-shared: .install-golangci-lint
+	cd ./shared && $(GOLANGCI_LINT) run ./... --fix --config=${PROJECT_DIR}/.golangci.yml
+
 .lint-stroltm-ui: .install-stroltm-ui-node_modules
 	cd $(STROLTM_UI) && yarn typecheck
 
 .PHONY: lint
-lint: .lint-strolt .lint-stroltm .lint-stroltm-ui
+lint: .lint-shared .lint-strolt .lint-stroltp .lint-stroltm .lint-stroltm-ui
 
 
 ##### TEST #####

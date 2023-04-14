@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/strolt/strolt/apps/stroltp/internal/api/managerh"
 	"github.com/strolt/strolt/apps/stroltp/internal/api/public"
-	"github.com/strolt/strolt/apps/stroltp/internal/api/services"
 	"github.com/strolt/strolt/apps/stroltp/internal/config"
 	"github.com/strolt/strolt/apps/stroltp/internal/env"
 
@@ -107,8 +107,9 @@ func (api *API) handler() http.Handler {
 		r.Use(middleware.BasicAuth("api", config.GetUsers()))
 
 		// r.Get("/api/v1/config", api.getConfig)
-		// r.Get("/api/v1/info", api.getInfo)
-		services.New().Router(r)
+		r.Get("/api/v1/info", api.getInfo)
+		// services.New().Router(r)
+		managerh.New().Router(r)
 	})
 
 	return r
