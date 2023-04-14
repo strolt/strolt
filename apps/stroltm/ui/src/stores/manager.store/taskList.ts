@@ -1,3 +1,5 @@
+import { infoStore } from "stores/info.store";
+
 import * as apiGenerated from "../../api/generated";
 
 export interface TaskListItemSource {
@@ -34,6 +36,7 @@ export interface TaskListItem {
   destinations: TaskListItemDestination[];
   notifications: TaskListItemNotification[];
   schedule: TaskListItemSchedule;
+  uptime: number;
 }
 
 const createTask = (instance: apiGenerated.ManagerhManagerPreparedInstance): TaskListItem => {
@@ -52,6 +55,7 @@ const createTask = (instance: apiGenerated.ManagerhManagerPreparedInstance): Tas
       backup: "",
       prune: "",
     },
+    uptime: 0,
   };
 };
 
@@ -101,5 +105,24 @@ export const getTaskList = (
   return list.map((el) => ({
     ...el,
     key: [el.proxyName, el.instanceName, el.serviceName, el.taskName].join("_"),
+    uptime: getUptime(el.proxyName, el.instanceName),
   }));
+};
+
+const getUptime = (proxyName?: string, instanceName?: string) => {
+  let ms = 0;
+
+  if (instanceName) {
+    const startedAt = infoStore.map.get(infoStore.getKey(instanceName, proxyName))?.startedAt;
+    if (startedAt) {
+      try {
+        const date = new Date(startedAt);
+        ms = Date.now() - date.getTime();
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
+
+  return ms;
 };

@@ -10,6 +10,7 @@ import { BackupButton } from "./components/BackupButton";
 import { PrintDestinations } from "./components/PrintDestinations";
 import { PrintNotifications } from "./components/PrintNotifications";
 import { PrintSchedule } from "./components/PrintSchedule";
+import { PrintUptime } from "./components/PrintUptime";
 import { PrintVersion } from "./components/PrintVersion";
 import { Print, Table } from "components";
 
@@ -217,6 +218,13 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
         title: "version",
         key: "version",
         render: (_, r) => <PrintVersion proxyName={r.proxyName} instanceName={r.instanceName} />,
+      },
+      {
+        title: "uptime",
+				dataIndex:"uptime",
+        key: "uptime",
+        render: (v) => <PrintUptime uptime={v}  />,
+        sorter: { compare: (a,b)=>a.uptime-b.uptime },
       },
     ];
 
