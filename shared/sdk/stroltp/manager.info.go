@@ -58,7 +58,7 @@ func ManagerGetInfo(version string) common.ManagerInfo {
 			infoItem := common.ManagerInfoInstance{
 				ProxyName:       &instance.Name,
 				IsOnline:        stroltInstance.IsOnline,
-				LastestOnlineAt: instance.Watch.LatestSuccessPingAt.Format(time.RFC3339),
+				LastestOnlineAt: stroltInfo.LastestOnlineAt,
 			}
 
 			if time.Now().Unix() > instance.Watch.LatestSuccessPingAt.Add(time.Second*15).Unix() { //nolint:gomnd
@@ -95,6 +95,10 @@ func ManagerGetInfo(version string) common.ManagerInfo {
 						UpdatedAt:     stroltInfo.Config.UpdatedAt,
 					}
 				}
+			}
+
+			if !instance.IsOnline && instance.Watch.LatestSuccessPingAt.Unix() > updatedAt {
+				updatedAt = instance.Watch.LatestSuccessPingAt.Unix()
 			}
 
 			info.Instances = append(info.Instances, infoItem)

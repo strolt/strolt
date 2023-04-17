@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
 
 import { ColumnsType } from "antd/es/table";
-import { ColumnFilterItem, CompareFn } from "antd/es/table/interface";
+import { CompareFn } from "antd/es/table/interface";
 
 import { BackupAllButton } from "./components/BackupAllButton";
 import { BackupButton } from "./components/BackupButton";
@@ -55,6 +55,7 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
             instanceName={r.instanceName}
             serviceName={r.serviceName}
             taskName={r.taskName}
+            isDisabled={!r.isOnline}
           />
         ),
         width: "7rem",
@@ -221,10 +222,10 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
       },
       {
         title: "uptime",
-				dataIndex:"uptime",
+        dataIndex: "uptime",
         key: "uptime",
-        render: (v) => <PrintUptime uptime={v}  />,
-        sorter: { compare: (a,b)=>a.uptime-b.uptime },
+        render: (v) => <PrintUptime uptime={v} />,
+        sorter: { compare: (a, b) => a.uptime - b.uptime },
       },
     ];
 

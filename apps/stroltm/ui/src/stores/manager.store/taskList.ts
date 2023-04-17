@@ -40,11 +40,13 @@ export interface TaskListItem {
 }
 
 const createTask = (instance: apiGenerated.ManagerPreparedInstance): TaskListItem => {
+	const isOnline = !!instance.name&&!!infoStore.map.get(infoStore.getKey(instance.name, instance.proxyName))?.isOnline;
+	
   return {
     key: "",
     proxyName: instance.proxyName,
     instanceName: instance.name,
-    isOnline: !!instance.isOnline,
+    isOnline: isOnline,
     workJobs: instance.taskStatus?.tasks?.length || 0,
     tags: [],
     timezone: "UTC",
@@ -113,11 +115,25 @@ const getUptime = (proxyName?: string, instanceName?: string) => {
   let ms = 0;
 
   if (instanceName) {
-    const startedAt = infoStore.map.get(infoStore.getKey(instanceName, proxyName))?.startedAt;
-    if (startedAt) {
+    const instance = infoStore.map.get(infoStore.getKey(instanceName, proxyName));
+
+    if (!instance) {
+      return ms;
+    }
+
+    if (instance.isOnline && instance.startedAt) {
       try {
-        const date = new Date(startedAt);
+        const date = new Date(instance.startedAt);
         ms = Date.now() - date.getTime();
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    if (!instance.isOnline && instance.lastestOnlineAt) {
+      try {
+        const date = new Date(instance.lastestOnlineAt);
+        ms = (Date.now() - date.getTime()) * -1;
       } catch (e) {
         console.log(e);
       }

@@ -52,6 +52,10 @@ func ManagerGetInfo(version string) common.ManagerInfo {
 			UpdateRequestedAt: instance.TaskStatus.UpdateRequestedAt.Format(time.RFC3339),
 		}
 
+		if !instance.IsOnline && instance.Watch.LatestSuccessPingAt.Unix() > updatedAt {
+			updatedAt = instance.Watch.LatestSuccessPingAt.Unix()
+		}
+
 		instance.RUnlock()
 
 		info.Instances[i] = infoItem
