@@ -2,9 +2,12 @@ package stroltp
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/strolt/strolt/shared/logger"
+	"github.com/strolt/strolt/shared/sdk/common"
+	"github.com/strolt/strolt/shared/sdk/stroltp/generated/stroltp_models"
 )
 
 func (m *Manager) Watch(ctx context.Context, cancel func()) {
@@ -103,6 +106,21 @@ func (s *Instance) ping() {
 	}
 }
 
+func convertInstances(src []*stroltp_models.ManagerPreparedInstance) []*common.ManagerPreparedInstance {
+	data, err := json.Marshal(src)
+	if err != nil {
+		return []*common.ManagerPreparedInstance{}
+	}
+
+	var list []*common.ManagerPreparedInstance
+
+	if err := json.Unmarshal(data, &list); err != nil {
+		return []*common.ManagerPreparedInstance{}
+	}
+
+	return list
+}
+
 func (s *Instance) updateStroltInstances(infoTime int64) {
 	result, err := s.sdk.GetInstances()
 	if err != nil {
@@ -110,9 +128,11 @@ func (s *Instance) updateStroltInstances(infoTime int64) {
 		return
 	}
 
+	convertedInstanceList := convertInstances(result.Payload)
+
 	s.Lock()
 
-	s.StroltInstances = result.Payload
+	s.StroltInstances = convertedInstanceList
 
 	s.StroltInstancesUpdatedAt = infoTime
 

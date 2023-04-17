@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/strolt/strolt/shared/logger"
-	"github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_models"
+	"github.com/strolt/strolt/shared/sdk/common"
 )
 
 var (
@@ -35,27 +35,17 @@ func ManagerInit(ctx context.Context, cancel func(), instances []ManagerInstance
 	manager.Watch(ctx, cancel)
 }
 
-type APIConfig = strolt_models.Config
-type TaskManagerStatus = strolt_models.ManagerStatus
-
-type ManagerPreparedInstance struct {
-	Name       string             `json:"name"`
-	Config     *APIConfig         `json:"config"`
-	TaskStatus *TaskManagerStatus `json:"taskStatus"`
-	IsOnline   bool               `json:"isOnline"`
-}
-
-func ManagerGetPreparedInstances() []ManagerPreparedInstance {
+func ManagerGetPreparedInstances() []common.ManagerPreparedInstance {
 	manager.RLock()
 	defer manager.RUnlock()
 
-	list := make([]ManagerPreparedInstance, len(manager.Instances))
+	list := make([]common.ManagerPreparedInstance, len(manager.Instances))
 
 	i := 0
 
 	for _, instance := range manager.Instances {
 		instance.RLock()
-		list[i] = ManagerPreparedInstance{
+		list[i] = common.ManagerPreparedInstance{
 			Name:       instance.Name,
 			Config:     instance.Config.Data,
 			TaskStatus: instance.TaskStatus.Data,

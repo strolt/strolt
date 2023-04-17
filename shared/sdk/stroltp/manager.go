@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/strolt/strolt/shared/logger"
-	"github.com/strolt/strolt/shared/sdk/stroltp/generated/stroltp_models"
+	"github.com/strolt/strolt/shared/sdk/common"
 )
 
 var (
@@ -25,7 +25,7 @@ func ManagerInit(ctx context.Context, cancel func(), instances []ManagerInstance
 			sdk:                      New(instance.URL, instance.Username, instance.Password),
 			log:                      logger.New().WithField("proxyInstanceName", instance.Name),
 			RWMutex:                  &sync.RWMutex{},
-			StroltInstances:          []*stroltp_models.ManagerhManagerPreparedInstance{},
+			StroltInstances:          []*common.ManagerPreparedInstance{},
 			StroltInstancesUpdatedAt: 0,
 		}
 	}
@@ -35,15 +35,7 @@ func ManagerInit(ctx context.Context, cancel func(), instances []ManagerInstance
 	manager.Watch(ctx, cancel)
 }
 
-type ManagerPreparedInstance struct {
-	ProxyName  string                                  `json:"proxyName"`
-	Name       string                                  `json:"name"`
-	Config     *stroltp_models.StroltAPIConfig         `json:"config"`
-	TaskStatus *stroltp_models.StroltTaskManagerStatus `json:"taskStatus"`
-	IsOnline   bool                                    `json:"isOnline"`
-}
-
-func ManagerGetPreparedInstances() []ManagerPreparedInstance {
+func ManagerGetPreparedInstances() []common.ManagerPreparedInstance {
 	manager.RLock()
 	defer manager.RUnlock()
 
@@ -59,7 +51,7 @@ func ManagerGetPreparedInstances() []ManagerPreparedInstance {
 		instance.RUnlock()
 	}
 
-	list := make([]ManagerPreparedInstance, countInstances)
+	list := make([]common.ManagerPreparedInstance, countInstances)
 
 	i := 0
 
@@ -67,8 +59,8 @@ func ManagerGetPreparedInstances() []ManagerPreparedInstance {
 		instance.RLock()
 
 		for _, stroltInstance := range instance.StroltInstances {
-			list[i] = ManagerPreparedInstance{
-				ProxyName:  instance.Name,
+			list[i] = common.ManagerPreparedInstance{
+				ProxyName:  &instance.Name,
 				Name:       stroltInstance.Name,
 				Config:     stroltInstance.Config,
 				TaskStatus: stroltInstance.TaskStatus,

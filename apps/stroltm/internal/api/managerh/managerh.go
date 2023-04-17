@@ -1,15 +1,13 @@
 package managerh
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/strolt/strolt/shared/apiu"
+	"github.com/strolt/strolt/shared/sdk/common"
 	"github.com/strolt/strolt/shared/sdk/strolt"
-	"github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_models"
 	"github.com/strolt/strolt/shared/sdk/stroltp"
-	"github.com/strolt/strolt/shared/sdk/stroltp/generated/stroltp_models"
 )
 
 type ManagerHandlers struct {
@@ -33,104 +31,28 @@ func (s *ManagerHandlers) Router(r chi.Router) {
 	r.Get("/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots", s.getSnapshotsProxy)
 }
 
-// // getInstances godoc
-// //	@Id			getInstances
-// //	@Summary	Get Instances
-// //	@Tags		manager
-// //	@Security	BasicAuth
-// //	@success	200	{object}	[]strolt.ManagerPreparedInstance
-// //	@Router		/api/v1/manager/instances [get].
-// func (s *ManagerHandlers) getInstances(w http.ResponseWriter, r *http.Request) {
-// 	instances := strolt.ManagerGetPreparedInstances()
-
-// 	apiu.RenderJSON200(w, r, instances)
-// }
-
-type ManagerPreparedInstance struct {
-	ProxyName  *string                                 `json:"proxyName,omitempty"`
-	Name       string                                  `json:"name"`
-	Config     *stroltp_models.StroltAPIConfig         `json:"config"`
-	TaskStatus *stroltp_models.StroltTaskManagerStatus `json:"taskStatus"`
-	IsOnline   bool                                    `json:"isOnline"`
-}
-
-func convertConfig(src *strolt_models.Config) *stroltp_models.StroltAPIConfig {
-	if src == nil {
-		return nil
-	}
-
-	var config stroltp_models.StroltAPIConfig
-
-	// TODO: rewrite this
-
-	srcJSON, err := json.Marshal(*src)
-	if err != nil {
-		return nil
-	}
-
-	if err := json.Unmarshal(srcJSON, &config); err != nil {
-		return nil
-	}
-
-	return &config
-}
-
-func convertTaskStatus(src *strolt_models.ManagerStatus) *stroltp_models.StroltTaskManagerStatus {
-	if src == nil {
-		return nil
-	}
-
-	var config stroltp_models.StroltTaskManagerStatus
-
-	// TODO: rewrite this
-
-	srcJSON, err := json.Marshal(*src)
-	if err != nil {
-		return nil
-	}
-
-	if err := json.Unmarshal(srcJSON, &config); err != nil {
-		return nil
-	}
-
-	return &config
-}
-
 // getInstances godoc
 // @Id					 getInstances
 // @Summary      Get Instances
 // @Tags         manager
 // @Security BasicAuth
-// @success 200 {object} []ManagerPreparedInstance
+// @success 200 {object} []common.ManagerPreparedInstance
 // @Router       /api/v1/manager/instances [get].
 func (s *ManagerHandlers) getInstances(w http.ResponseWriter, r *http.Request) {
 	instances := strolt.ManagerGetPreparedInstances()
-
 	instancesFromProxies := stroltp.ManagerGetPreparedInstances()
 
-	list := make([]ManagerPreparedInstance, len(instances)+len(instancesFromProxies))
+	list := make([]common.ManagerPreparedInstance, len(instances)+len(instancesFromProxies))
 
 	i := 0
 
 	for _, instance := range instances {
-		list[i] = ManagerPreparedInstance{
-			Name:       instance.Name,
-			Config:     convertConfig(instance.Config),
-			TaskStatus: convertTaskStatus(instance.TaskStatus),
-			IsOnline:   instance.IsOnline,
-		}
+		list[i] = instance
 		i++
 	}
 
 	for _, instance := range instancesFromProxies {
-		proxyName := instance.ProxyName
-		list[i] = ManagerPreparedInstance{
-			ProxyName:  &proxyName,
-			Name:       instance.Name,
-			Config:     instance.Config,
-			TaskStatus: instance.TaskStatus,
-			IsOnline:   instance.IsOnline,
-		}
+		list[i] = instance
 		i++
 	}
 

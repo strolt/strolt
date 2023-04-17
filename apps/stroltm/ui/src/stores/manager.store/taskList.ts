@@ -39,7 +39,7 @@ export interface TaskListItem {
   uptime: number;
 }
 
-const createTask = (instance: apiGenerated.ManagerhManagerPreparedInstance): TaskListItem => {
+const createTask = (instance: apiGenerated.ManagerPreparedInstance): TaskListItem => {
   return {
     key: "",
     proxyName: instance.proxyName,
@@ -60,7 +60,7 @@ const createTask = (instance: apiGenerated.ManagerhManagerPreparedInstance): Tas
 };
 
 export const getTaskList = (
-  instanceList: apiGenerated.ManagerhManagerPreparedInstance[],
+  instanceList: apiGenerated.ManagerPreparedInstance[],
 ): TaskListItem[] => {
   const list: TaskListItem[] = [];
 

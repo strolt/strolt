@@ -13,9 +13,9 @@ export class ManagerStore {
     makeAutoObservable(this);
   }
 
-  instances: apiGenerated.ManagerhManagerPreparedInstance[] = [];
+  instances: apiGenerated.ManagerPreparedInstance[] = [];
   instancesStatus: IPromiseBasedObservable<
-    AxiosResponse<apiGenerated.ManagerhManagerPreparedInstance[], any>
+    AxiosResponse<apiGenerated.ManagerPreparedInstance[], any>
   > | null = null;
   async fetchInstances() {
     this.instancesStatus = fromPromise(api.manager.getInstances());

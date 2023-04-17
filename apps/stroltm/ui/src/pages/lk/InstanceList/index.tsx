@@ -5,7 +5,7 @@ import { Button, Card, message, Popconfirm, Tag, Typography } from "antd";
 import { DebugJSON, LatestVersionLink, Link, TagColored } from "components";
 
 import {
-  ManagerhManagerPreparedInstance,
+  ManagerPreparedInstance,
   ConfigServiceTask,
 } from "api/generated";
 
@@ -220,7 +220,7 @@ const Service: FC<ServiceProps> = observer(({ proxyName, service, serviceName, i
 });
 
 export interface InstanceProps {
-  instance: ManagerhManagerPreparedInstance;
+  instance: ManagerPreparedInstance;
 }
 const Instance: FC<InstanceProps> = observer(({ instance }) => {
   const { infoStore } = useStores();

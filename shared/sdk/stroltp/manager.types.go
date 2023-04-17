@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/strolt/strolt/shared/logger"
+	"github.com/strolt/strolt/shared/sdk/common"
 	"github.com/strolt/strolt/shared/sdk/stroltp/generated/stroltp_models"
 )
 
@@ -31,7 +32,7 @@ type Instance struct {
 	sdk      *SDK
 	IsOnline bool
 
-	StroltInstances []*stroltp_models.ManagerhManagerPreparedInstance
+	StroltInstances []*common.ManagerPreparedInstance
 
 	StroltInstancesUpdatedAt int64
 
