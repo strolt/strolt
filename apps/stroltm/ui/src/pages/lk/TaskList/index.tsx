@@ -153,7 +153,7 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
         title: "tags",
         dataIndex: "tags",
         key: "tags",
-        render: (v) => <Print.TagList value={v} />,
+        render: (v) => <Print.TagList value={v} fallback={<>-</>} />,
         filters: deleteDuplicates(
           list
             .map((el) => el.tags)
