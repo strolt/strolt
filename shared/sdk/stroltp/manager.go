@@ -44,8 +44,10 @@ func ManagerGetPreparedInstances() []common.ManagerPreparedInstance {
 	for _, instance := range manager.Instances {
 		instance.RLock()
 
-		for range instance.StroltInstances {
+		if len(instance.StroltInstances) == 0 {
 			countInstances++
+		} else {
+			countInstances += len(instance.StroltInstances)
 		}
 
 		instance.RUnlock()
@@ -58,16 +60,24 @@ func ManagerGetPreparedInstances() []common.ManagerPreparedInstance {
 	for _, instance := range manager.Instances {
 		instance.RLock()
 
-		for _, stroltInstance := range instance.StroltInstances {
+		if len(instance.StroltInstances) == 0 {
 			list[i] = common.ManagerPreparedInstance{
-				ProxyName:  &instance.Name,
-				Name:       stroltInstance.Name,
-				Config:     stroltInstance.Config,
-				TaskStatus: stroltInstance.TaskStatus,
-				IsOnline:   stroltInstance.IsOnline,
+				ProxyName: &instance.Name,
+				Name:      "",
 			}
-
 			i++
+		} else {
+			for _, stroltInstance := range instance.StroltInstances {
+				list[i] = common.ManagerPreparedInstance{
+					ProxyName:  &instance.Name,
+					Name:       stroltInstance.Name,
+					Config:     stroltInstance.Config,
+					TaskStatus: stroltInstance.TaskStatus,
+					IsOnline:   stroltInstance.IsOnline,
+				}
+
+				i++
+			}
 		}
 
 		instance.RUnlock()
