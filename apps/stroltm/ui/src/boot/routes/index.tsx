@@ -21,6 +21,7 @@ const instances = [
     "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxySnapshotList",
     <pages.lk.SnapshotList />,
   ),
+  r("instances.proxyId.instanceId.serviceId.taskId.destinationId.prune", <pages.lk.Prune />),
   r("instances.instanceId.serviceId.taskId.destinationId.prune", <pages.lk.Prune />),
   r("instances.instanceId.serviceId.taskId.destinationId.stats", <pages.lk.Stats />),
   r("instances.proxyId.instanceId.serviceId.taskId.destinationId.proxyStats", <pages.lk.Stats />),

@@ -93,3 +93,41 @@ func (sdk *SDK) GetStats(instanceName, serviceName, taskName, destinationName st
 
 	return result, err
 }
+
+func (sdk *SDK) GetSnapshotsForPrune(instanceName, serviceName, taskName, destinationName string) (*managerc.GetSnapshotsForPruneOK, error) {
+	params := managerc.NewGetSnapshotsForPruneParams()
+	params.InstanceName = instanceName
+	params.ServiceName = serviceName
+	params.TaskName = taskName
+	params.DestinationName = destinationName
+
+	result, err := sdk.client.Manager.GetSnapshotsForPrune(params, sdk.authInfo)
+
+	if err != nil {
+		switch errResponse := err.(type) { //nolint:gocritic,errorlint
+		case *managerc.GetSnapshotsForPruneInternalServerError:
+			return result, fmt.Errorf(errResponse.Payload.Error)
+		}
+	}
+
+	return result, err
+}
+
+func (sdk *SDK) Prune(instanceName, serviceName, taskName, destinationName string) (*managerc.PruneOK, error) {
+	params := managerc.NewPruneParams()
+	params.InstanceName = instanceName
+	params.ServiceName = serviceName
+	params.TaskName = taskName
+	params.DestinationName = destinationName
+
+	result, err := sdk.client.Manager.Prune(params, sdk.authInfo)
+
+	if err != nil {
+		switch errResponse := err.(type) { //nolint:gocritic,errorlint
+		case *managerc.PruneInternalServerError:
+			return result, fmt.Errorf(errResponse.Payload.Error)
+		}
+	}
+
+	return result, err
+}

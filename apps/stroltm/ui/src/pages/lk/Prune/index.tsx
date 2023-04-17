@@ -17,16 +17,17 @@ interface PruneButtonProps {
   taskId?: string;
   destinationId?: string;
   count?: number;
+	proxyId?:string;
 }
 const PruneButton: FC<PruneButtonProps> = observer(
-  ({ instanceId, serviceId, taskId, destinationId, count }) => {
+  ({ proxyId,instanceId, serviceId, taskId, destinationId, count }) => {
     const { managerStore } = useStores();
 
     const handleClick = async () => {
       if (instanceId && serviceId && taskId && destinationId) {
-        await managerStore.fetchPrune(instanceId, serviceId, taskId, destinationId);
+        await managerStore.fetchPrune(instanceId, serviceId, taskId, destinationId,proxyId);
 
-        managerStore.fetchSnapshotsForPrune(instanceId, serviceId, taskId, destinationId);
+        managerStore.fetchSnapshotsForPrune(instanceId, serviceId, taskId, destinationId,proxyId);
       }
     };
 
@@ -79,6 +80,7 @@ const columns: ColumnsType<Snapshot> = [
 const Prune = observer(() => {
   const { managerStore } = useStores();
   const params = useParams<{
+		proxyId?:string;
     instanceId: string;
     serviceId: string;
     taskId: string;
@@ -94,6 +96,7 @@ const Prune = observer(() => {
         params.serviceId,
         params.taskId,
         params.destinationId,
+				params.proxyId
       );
     }
 
@@ -112,6 +115,7 @@ const Prune = observer(() => {
       </Typography.Title>
 
       <PruneButton
+			proxyId={params.proxyId}
         instanceId={params.instanceId}
         serviceId={params.serviceId}
         taskId={params.taskId}

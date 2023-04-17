@@ -136,7 +136,14 @@ export class ManagerStore {
             destinationName,
           ),
         )
-      : fromPromise(api.managerDirect.getSnapshotsDirect(instanceName, serviceName, taskName, destinationName));
+      : fromPromise(
+          api.managerDirect.getSnapshotsDirect(
+            instanceName,
+            serviceName,
+            taskName,
+            destinationName,
+          ),
+        );
     runInAction(() => {
       this.taskStatusMapStart(instanceName, serviceName, taskName);
     });
@@ -165,9 +172,23 @@ export class ManagerStore {
     serviceName: string,
     taskName: string,
     destinationName: string,
+    proxyName?: string,
   ) {
     this.snapshotsForPruneStatus = fromPromise(
-      api.managerDirect.getSnapshotsForPrune(instanceName, serviceName, taskName, destinationName),
+      !!proxyName
+        ? api.managerProxy.getSnapshotsForPruneProxy(
+            proxyName,
+            instanceName,
+            serviceName,
+            taskName,
+            destinationName,
+          )
+        : api.managerDirect.getSnapshotsForPruneDirect(
+            instanceName,
+            serviceName,
+            taskName,
+            destinationName,
+          ),
     );
     runInAction(() => {
       this.taskStatusMapStart(instanceName, serviceName, taskName);
@@ -201,9 +222,18 @@ export class ManagerStore {
     serviceName: string,
     taskName: string,
     destinationName: string,
+    proxyName?: string,
   ) {
     this.pruneStatus = fromPromise(
-      api.managerDirect.prune(instanceName, serviceName, taskName, destinationName),
+      !!proxyName
+        ? api.managerProxy.pruneProxy(
+            proxyName,
+            instanceName,
+            serviceName,
+            taskName,
+            destinationName,
+          )
+        : api.managerDirect.pruneDirect(instanceName, serviceName, taskName, destinationName),
     );
 
     runInAction(() => {
@@ -240,11 +270,15 @@ export class ManagerStore {
     destinationName: string,
     proxyName?: string,
   ) {
-		console.log({proxyName, instanceName, serviceName, taskName, destinationName});
-		
     this.statsStatus = fromPromise(
       !!proxyName
-        ? api.managerProxy.getStatsProxy(proxyName, instanceName, serviceName, taskName, destinationName)
+        ? api.managerProxy.getStatsProxy(
+            proxyName,
+            instanceName,
+            serviceName,
+            taskName,
+            destinationName,
+          )
         : api.managerDirect.getStatsDirect(instanceName, serviceName, taskName, destinationName),
     );
     runInAction(() => {

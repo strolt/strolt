@@ -12,7 +12,7 @@ import (
 // getSnapshotsForPrune godoc
 // @Id					 getSnapshotsForPrune
 // @Summary      Get snapshots for prune
-// @Tags         manager-direct
+// @Tags         manager
 // @Security BasicAuth
 // @Param   instanceName        path    string     true        "Instance name"
 // @Param   serviceName         path    string     true        "Service name"
@@ -50,7 +50,7 @@ func (s *ManagerHandlers) getSnapshotsForPrune(w http.ResponseWriter, r *http.Re
 // prune godoc
 // @Id					 prune
 // @Summary      Prune
-// @Tags         manager-direct
+// @Tags         manager
 // @Security BasicAuth
 // @Param   instanceName        path    string     true        "Instance name"
 // @Param   serviceName         path    string     true        "Service name"

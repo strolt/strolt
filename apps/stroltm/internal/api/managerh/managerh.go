@@ -19,16 +19,18 @@ func New() *ManagerHandlers {
 
 func (s *ManagerHandlers) Router(r chi.Router) {
 	r.Get("/api/v1/manager/instances", s.getInstances)
+	r.Post("/api/v1/manager/instances/backup-all", s.backupAll)
 
 	r.Post("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/backup", s.backupDirect)
 	r.Get("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots", s.getSnapshotsDirect)
-	r.Get("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune/snapshots", s.getSnapshotsForPrune)
-	r.Post("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune", s.prune)
+	r.Get("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune/snapshots", s.getSnapshotsForPruneDirect)
+	r.Post("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune", s.pruneDirect)
 	r.Get("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats", s.getStatsDirect)
-	r.Post("/api/v1/manager/instances/backup-all", s.backupAll)
 
 	r.Post("/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/backup", s.backupProxy)
 	r.Get("/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots", s.getSnapshotsProxy)
+	r.Get("/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune/snapshots", s.getSnapshotsForPruneProxy)
+	r.Post("/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune", s.pruneProxy)
 	r.Get("/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats", s.getStatsProxy)
 }
 

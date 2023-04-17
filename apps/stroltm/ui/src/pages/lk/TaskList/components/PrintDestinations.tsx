@@ -41,7 +41,11 @@ const Links: React.FC<LinksProps> = (params) => {
       <Divider type="vertical" style={{ margin: 0 }} />
 
       <Link
-        to={"instances.instanceId.serviceId.taskId.destinationId.prune"}
+        to={
+          !!linkParams.proxyId
+            ? "instances.proxyId.instanceId.serviceId.taskId.destinationId.prune"
+            : "instances.instanceId.serviceId.taskId.destinationId.prune"
+        }
         params={linkParams}
         style={{ display: "block" }}
       >
