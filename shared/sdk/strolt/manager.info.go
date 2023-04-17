@@ -1,43 +1,19 @@
 package strolt
 
-import "time"
+import (
+	"time"
 
-type ManagerInfo struct {
-	Instances []InfoInstance `json:"instances"`
-	UpdatedAt string         `json:"updatedAt"`
-	Version   string         `json:"version"`
-}
+	"github.com/strolt/strolt/shared/sdk/common"
+)
 
-type InfoInstance struct {
-	Name            string `json:"name"`
-	Version         string `json:"version"`
-	LastestOnlineAt string `json:"lastestOnlineAt"`
-
-	StartedAt  string                 `json:"startedAt"`
-	IsOnline   bool                   `json:"isOnline"`
-	Config     InfoInstanceConfig     `json:"config"`
-	TaskStatus InfoInstanceTaskStatus `json:"taskStatus"`
-}
-
-type InfoInstanceConfig struct {
-	IsInitialized bool   `json:"isInitialized"`
-	UpdatedAt     string `json:"updatedAt"`
-}
-
-type InfoInstanceTaskStatus struct {
-	IsInitialized     bool   `json:"isInitialized"`
-	UpdatedAt         string `json:"updatedAt"`
-	UpdateRequestedAt string `json:"updateRequestedAt"`
-}
-
-func ManagerGetInfo(version string) ManagerInfo {
+func ManagerGetInfo(version string) common.ManagerInfo {
 	manager.RLock()
 	defer manager.RUnlock()
 
 	var updatedAt int64
 
-	info := ManagerInfo{
-		Instances: make([]InfoInstance, len(manager.Instances)),
+	info := common.ManagerInfo{
+		Instances: make([]common.ManagerInfoInstance, len(manager.Instances)),
 		Version:   version,
 	}
 
@@ -46,7 +22,7 @@ func ManagerGetInfo(version string) ManagerInfo {
 	for _, instance := range manager.Instances {
 		instance.RLock()
 
-		infoItem := InfoInstance{
+		infoItem := common.ManagerInfoInstance{
 			Name:            instance.Name,
 			IsOnline:        instance.IsOnline,
 			LastestOnlineAt: instance.Watch.LatestSuccessPingAt.Format(time.RFC3339),
@@ -65,12 +41,12 @@ func ManagerGetInfo(version string) ManagerInfo {
 			updatedAt = instance.Config.UpdatedAt.Unix()
 		}
 
-		infoItem.Config = InfoInstanceConfig{
+		infoItem.Config = common.ManagerInfoInstanceConfig{
 			IsInitialized: instance.Config.IsInitialized,
 			UpdatedAt:     instance.Config.UpdatedAt.Format(time.RFC3339),
 		}
 
-		infoItem.TaskStatus = InfoInstanceTaskStatus{
+		infoItem.TaskStatus = common.ManagerInfoInstanceTaskStatus{
 			IsInitialized:     instance.TaskStatus.IsInitialized,
 			UpdatedAt:         instance.TaskStatus.UpdatedAt.Format(time.RFC3339),
 			UpdateRequestedAt: instance.TaskStatus.UpdateRequestedAt.Format(time.RFC3339),

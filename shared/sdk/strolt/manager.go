@@ -35,8 +35,8 @@ func ManagerInit(ctx context.Context, cancel func(), instances []ManagerInstance
 	manager.Watch(ctx, cancel)
 }
 
-type APIConfig = strolt_models.APIConfig
-type TaskManagerStatus = strolt_models.TaskManagerStatus
+type APIConfig = strolt_models.Config
+type TaskManagerStatus = strolt_models.ManagerStatus
 
 type ManagerPreparedInstance struct {
 	Name       string             `json:"name"`

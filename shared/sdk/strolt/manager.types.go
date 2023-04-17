@@ -43,14 +43,14 @@ type Config struct {
 	IsInitialized     bool
 	UpdateRequestedAt time.Time
 	UpdatedAt         time.Time
-	Data              *strolt_models.APIConfig
+	Data              *strolt_models.Config
 }
 
 type TaskStatus struct {
 	IsInitialized     bool
 	UpdateRequestedAt time.Time
 	UpdatedAt         time.Time
-	Data              *strolt_models.TaskManagerStatus
+	Data              *strolt_models.ManagerStatus
 }
 
 type WatchItem struct {

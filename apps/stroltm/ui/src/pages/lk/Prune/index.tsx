@@ -7,7 +7,7 @@ import { ColumnsType } from "antd/es/table";
 
 import { DebugJSON, Print, TagColored } from "components";
 
-import { StroltModelsInterfacesSnapshot } from "api/generated";
+import { Snapshot } from "api/generated";
 
 import { observer, useStores } from "stores";
 
@@ -45,7 +45,7 @@ const PruneButton: FC<PruneButtonProps> = observer(
   },
 );
 
-const columns: ColumnsType<StroltModelsInterfacesSnapshot> = [
+const columns: ColumnsType<Snapshot> = [
   {
     title: "Short ID",
     dataIndex: "shortId",

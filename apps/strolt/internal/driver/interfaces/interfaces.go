@@ -20,18 +20,18 @@ type Snapshot struct {
 	ShortID string    `json:"shortId,omitempty"`
 	Tags    []string  `json:"tags,omitempty"`
 	Paths   []string  `json:"paths,omitempty"`
-}
+} // @name Snapshot
 
 type Stats struct {
 	TotalSize      uint64 `json:"totalSize"`
 	TotalFileCount uint64 `json:"totalFileCount"`
 	SnapshotsCount int    `json:"snapshotsCount"`
-}
+} // @name Stats
 
 type FormattedStats struct {
 	Stats
 	TotalSizeFormatted string `json:"totalSizeFormatted"`
-}
+} // @name FormattedStats
 
 func (s *Stats) Convert() FormattedStats {
 	return FormattedStats{

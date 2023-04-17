@@ -54,7 +54,7 @@ type ManagerPreparedInstance struct {
 	IsOnline   bool                                    `json:"isOnline"`
 }
 
-func convertConfig(src *strolt_models.APIConfig) *stroltp_models.StroltAPIConfig {
+func convertConfig(src *strolt_models.Config) *stroltp_models.StroltAPIConfig {
 	if src == nil {
 		return nil
 	}
@@ -75,7 +75,7 @@ func convertConfig(src *strolt_models.APIConfig) *stroltp_models.StroltAPIConfig
 	return &config
 }
 
-func convertTaskStatus(src *strolt_models.TaskManagerStatus) *stroltp_models.StroltTaskManagerStatus {
+func convertTaskStatus(src *strolt_models.ManagerStatus) *stroltp_models.StroltTaskManagerStatus {
 	if src == nil {
 		return nil
 	}

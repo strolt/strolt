@@ -114,11 +114,11 @@ export class ManagerStore {
     this.backupStatusMap.clear();
   }
 
-  snapshots: apiGenerated.StroltModelsServicesGetSnapshotsResult = {
+  snapshots: apiGenerated.ServicesGetSnapshotsResult = {
     items: [],
   };
   snapshotsStatus: IPromiseBasedObservable<
-    AxiosResponse<apiGenerated.StroltModelsServicesGetSnapshotsResult, any>
+    AxiosResponse<apiGenerated.ServicesGetSnapshotsResult, any>
   > | null = null;
   async fetchSnapshots(
     instanceName: string,
@@ -157,9 +157,9 @@ export class ManagerStore {
     this.snapshots = { items: [] };
   }
 
-  snapshotsForPrune: apiGenerated.StroltModelsServicesGetPruneResult | null = null;
+  snapshotsForPrune: apiGenerated.ServicesGetPruneResult | null = null;
   snapshotsForPruneStatus: IPromiseBasedObservable<
-    AxiosResponse<apiGenerated.StroltModelsServicesGetPruneResult, any>
+    AxiosResponse<apiGenerated.ServicesGetPruneResult, any>
   > | null = null;
   async fetchSnapshotsForPrune(
     instanceName: string,
@@ -193,9 +193,9 @@ export class ManagerStore {
     this.snapshotsForPrune = null;
   }
 
-  prune: apiGenerated.StroltModelsServicesGetPruneResult | null = null;
+  prune: apiGenerated.ServicesGetPruneResult | null = null;
   pruneStatus: IPromiseBasedObservable<
-    AxiosResponse<apiGenerated.StroltModelsServicesGetPruneResult, any>
+    AxiosResponse<apiGenerated.ServicesGetPruneResult, any>
   > | null = null;
   async fetchPrune(
     instanceName: string,
@@ -230,9 +230,9 @@ export class ManagerStore {
     this.prune = null;
   }
 
-  stats: apiGenerated.StroltModelsServicesGetStatsResult | null = null;
+  stats: apiGenerated.ServicesGetStatsResult | null = null;
   statsStatus: IPromiseBasedObservable<
-    AxiosResponse<apiGenerated.StroltModelsServicesGetStatsResult, any>
+    AxiosResponse<apiGenerated.ServicesGetStatsResult, any>
   > | null = null;
   async fetchStats(
     instanceName: string,
@@ -260,7 +260,7 @@ export class ManagerStore {
     this.stats = null;
   }
 
-  taskStatusMap = new Map<string, apiGenerated.StroltpModelsStroltModelsTaskManagerTaskItem>();
+  taskStatusMap = new Map<string, apiGenerated.ManagerTaskItem>();
 
   getTaskStatusMapKey(
     instanceName?: string,

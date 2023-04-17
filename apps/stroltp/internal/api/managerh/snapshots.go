@@ -17,7 +17,7 @@ import (
 // @Param   serviceName         path    string     true        "Service name"
 // @Param   taskName            path    string     true        "Task name"
 // @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} strolt_models.ServicesGetSnapshotsResult
+// @success 200 {object} ServicesGetSnapshotsResult
 // @success 500 {object} apiu.ResultError
 // @Router       /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots [get].
 func (s *ManagerHandlers) getSnapshots(w http.ResponseWriter, r *http.Request) {

@@ -3,39 +3,11 @@ package stroltp
 import (
 	"time"
 
+	"github.com/strolt/strolt/shared/sdk/common"
 	"github.com/strolt/strolt/shared/sdk/stroltp/generated/stroltp_models"
 )
 
-type ManagerInfo struct {
-	Instances []InfoInstance `json:"instances"`
-	UpdatedAt string         `json:"updatedAt"`
-	Version   string         `json:"version"`
-}
-
-type InfoInstance struct {
-	ProxyName       string `json:"proxyName,omitempty"`
-	Name            string `json:"name"`
-	Version         string `json:"version"`
-	LastestOnlineAt string `json:"lastestOnlineAt"`
-
-	StartedAt  string                 `json:"startedAt"`
-	IsOnline   bool                   `json:"isOnline"`
-	Config     InfoInstanceConfig     `json:"config"`
-	TaskStatus InfoInstanceTaskStatus `json:"taskStatus"`
-}
-
-type InfoInstanceConfig struct {
-	IsInitialized bool   `json:"isInitialized"`
-	UpdatedAt     string `json:"updatedAt"`
-}
-
-type InfoInstanceTaskStatus struct {
-	IsInitialized     bool   `json:"isInitialized"`
-	UpdatedAt         string `json:"updatedAt"`
-	UpdateRequestedAt string `json:"updateRequestedAt"`
-}
-
-func getStroltInfo(list []*stroltp_models.StroltInfoInstance, name string) *stroltp_models.StroltInfoInstance {
+func getStroltInfo(list []*stroltp_models.ManagerInfoInstance, name string) *stroltp_models.ManagerInfoInstance {
 	for _, item := range list {
 		if item.Name == name {
 			return item
@@ -45,14 +17,14 @@ func getStroltInfo(list []*stroltp_models.StroltInfoInstance, name string) *stro
 	return nil
 }
 
-func ManagerGetInfo(version string) ManagerInfo {
+func ManagerGetInfo(version string) common.ManagerInfo {
 	manager.RLock()
 	defer manager.RUnlock()
 
 	var updatedAt int64
 
-	info := ManagerInfo{
-		Instances: []InfoInstance{},
+	info := common.ManagerInfo{
+		Instances: []common.ManagerInfoInstance{},
 		Version:   version,
 	}
 
@@ -60,17 +32,17 @@ func ManagerGetInfo(version string) ManagerInfo {
 		instance.RLock()
 
 		if instance.Info == nil {
-			infoItem := InfoInstance{
-				ProxyName:       instance.Name,
+			infoItem := common.ManagerInfoInstance{
+				ProxyName:       &instance.Name,
 				IsOnline:        false,
 				LastestOnlineAt: instance.Watch.LatestSuccessPingAt.Format(time.RFC3339),
 			}
 
-			infoItem.Config = InfoInstanceConfig{
+			infoItem.Config = common.ManagerInfoInstanceConfig{
 				IsInitialized: false,
 			}
 
-			infoItem.TaskStatus = InfoInstanceTaskStatus{
+			infoItem.TaskStatus = common.ManagerInfoInstanceTaskStatus{
 				IsInitialized: false,
 			}
 
@@ -83,8 +55,8 @@ func ManagerGetInfo(version string) ManagerInfo {
 		for _, stroltInstance := range instance.StroltInstances {
 			stroltInfo := getStroltInfo(instance.Info.Instances, stroltInstance.Name)
 
-			infoItem := InfoInstance{
-				ProxyName:       instance.Name,
+			infoItem := common.ManagerInfoInstance{
+				ProxyName:       &instance.Name,
 				IsOnline:        stroltInstance.IsOnline,
 				LastestOnlineAt: instance.Watch.LatestSuccessPingAt.Format(time.RFC3339),
 			}
@@ -104,7 +76,7 @@ func ManagerGetInfo(version string) ManagerInfo {
 						updatedAt = updateRequestedAt.Unix()
 					}
 
-					infoItem.TaskStatus = InfoInstanceTaskStatus{
+					infoItem.TaskStatus = common.ManagerInfoInstanceTaskStatus{
 						IsInitialized:     stroltInfo.TaskStatus.IsInitialized,
 						UpdatedAt:         stroltInfo.TaskStatus.UpdatedAt,
 						UpdateRequestedAt: stroltInfo.TaskStatus.UpdateRequestedAt,
@@ -118,7 +90,7 @@ func ManagerGetInfo(version string) ManagerInfo {
 						updatedAt = configUpdatedAt.Unix()
 					}
 
-					infoItem.Config = InfoInstanceConfig{
+					infoItem.Config = common.ManagerInfoInstanceConfig{
 						IsInitialized: stroltInfo.Config.IsInitialized,
 						UpdatedAt:     stroltInfo.Config.UpdatedAt,
 					}

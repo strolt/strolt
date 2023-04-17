@@ -6,7 +6,7 @@ import { DebugJSON, LatestVersionLink, Link, TagColored } from "components";
 
 import {
   ManagerhManagerPreparedInstance,
-  StroltpModelsStroltModelsAPIConfigServiceTask,
+  ConfigServiceTask,
 } from "api/generated";
 
 import { observer, useStores } from "stores";
@@ -85,7 +85,7 @@ export interface TaskProps {
   instanceName: string;
   serviceName: string;
   taskName: string;
-  task: StroltpModelsStroltModelsAPIConfigServiceTask;
+  task: ConfigServiceTask;
 }
 const Task: FC<TaskProps> = observer(({ proxyName, task, instanceName, serviceName, taskName }) => {
   return (
@@ -198,7 +198,7 @@ export interface ServiceProps {
   proxyName?: string;
   instanceName: string;
   serviceName: string;
-  service: Record<string, StroltpModelsStroltModelsAPIConfigServiceTask>;
+  service: Record<string, ConfigServiceTask>;
 }
 const Service: FC<ServiceProps> = observer(({ proxyName, service, serviceName, instanceName }) => {
   return (

@@ -27,7 +27,7 @@ type Instance struct {
 	Password string
 
 	Watch    WatchItem
-	Info     *stroltp_models.StroltManagerInfo
+	Info     *stroltp_models.ManagerInfo
 	sdk      *SDK
 	IsOnline bool
 
