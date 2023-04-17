@@ -82,6 +82,9 @@ export const getTaskList = (
         task.taskName = taskName;
         task.tags = (instance.config?.tags || []).concat(taskItem.tags || []);
         task.source.driver = taskItem.source?.driver || "";
+        if (instance.config?.timezone) {
+          task.timezone = instance.config.timezone;
+        }
         task.destinations = Object.entries(taskItem.destinations || {}).reduce<
           TaskListItemDestination[]
         >((acc, [destinationName, destination]) => {

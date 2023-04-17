@@ -10,6 +10,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/strolt/strolt/apps/strolt/internal/env"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
+	"github.com/strolt/strolt/shared/utils"
+
+	_ "time/tzdata"
 
 	"gopkg.in/yaml.v3"
 )
@@ -134,7 +137,7 @@ func loadSecrets(pathname string) (*Secrets, error) {
 func (c *Config) setDefaults() error {
 	{
 		if c.TimeZone == "" {
-			c.TimeZone = time.UTC.String()
+			c.TimeZone = utils.TimeGetDefaultTimeZone()
 		}
 
 		timeLocation, err := time.LoadLocation(c.TimeZone)

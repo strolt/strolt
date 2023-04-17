@@ -1,6 +1,7 @@
 FROM alpine:3.17.3 AS base
 WORKDIR /stroltm
 RUN apk --update add --no-cache curl tzdata
+ENV TZ=UTC
 
 FROM node:18.15.0-bullseye-slim as ui-base
 RUN apt-get update && apt-get -y install openjdk-11-jre --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
