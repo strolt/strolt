@@ -93,8 +93,8 @@ export class ManagerStore {
   >();
   async backup(instanceName: string, serviceName: string, taskName: string, proxyName?: string) {
     const request = !!proxyName
-      ? fromPromise(api.manager.backupProxy(proxyName, instanceName, serviceName, taskName))
-      : fromPromise(api.manager.backup(instanceName, serviceName, taskName));
+      ? fromPromise(api.managerProxy.backupProxy(proxyName, instanceName, serviceName, taskName))
+      : fromPromise(api.managerDirect.backupDirect(instanceName, serviceName, taskName));
 
     runInAction(() => {
       this.taskStatusMapStart(instanceName, serviceName, taskName, proxyName);
@@ -128,7 +128,7 @@ export class ManagerStore {
   ) {
     this.snapshotsStatus = !!proxyName
       ? fromPromise(
-          api.manager.getSnapshotsProxy(
+          api.managerProxy.getSnapshotsProxy(
             proxyName,
             instanceName,
             serviceName,
@@ -136,7 +136,7 @@ export class ManagerStore {
             destinationName,
           ),
         )
-      : fromPromise(api.manager.getSnapshots(instanceName, serviceName, taskName, destinationName));
+      : fromPromise(api.managerDirect.getSnapshotsDirect(instanceName, serviceName, taskName, destinationName));
     runInAction(() => {
       this.taskStatusMapStart(instanceName, serviceName, taskName);
     });
@@ -167,7 +167,7 @@ export class ManagerStore {
     destinationName: string,
   ) {
     this.snapshotsForPruneStatus = fromPromise(
-      api.manager.getSnapshotsForPrune(instanceName, serviceName, taskName, destinationName),
+      api.managerDirect.getSnapshotsForPrune(instanceName, serviceName, taskName, destinationName),
     );
     runInAction(() => {
       this.taskStatusMapStart(instanceName, serviceName, taskName);
@@ -203,7 +203,7 @@ export class ManagerStore {
     destinationName: string,
   ) {
     this.pruneStatus = fromPromise(
-      api.manager.prune(instanceName, serviceName, taskName, destinationName),
+      api.managerDirect.prune(instanceName, serviceName, taskName, destinationName),
     );
 
     runInAction(() => {
@@ -244,8 +244,8 @@ export class ManagerStore {
 		
     this.statsStatus = fromPromise(
       !!proxyName
-        ? api.manager.getStatsProxy(proxyName, instanceName, serviceName, taskName, destinationName)
-        : api.manager.getStats(instanceName, serviceName, taskName, destinationName),
+        ? api.managerProxy.getStatsProxy(proxyName, instanceName, serviceName, taskName, destinationName)
+        : api.managerDirect.getStatsDirect(instanceName, serviceName, taskName, destinationName),
     );
     runInAction(() => {
       this.taskStatusMapStart(instanceName, serviceName, taskName);

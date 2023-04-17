@@ -29,10 +29,10 @@ func getProxySDK(instanceName string) (*stroltp.SDK, error) {
 	return sdk, nil
 }
 
-// getSnapshots godoc
-// @Id					 getSnapshots
+// getSnapshotsDirect godoc
+// @Id					 getSnapshotsDirect
 // @Summary      Get snapshots
-// @Tags         manager
+// @Tags         manager-direct
 // @Security BasicAuth
 // @Param   instanceName        path    string     true        "Instance name"
 // @Param   serviceName         path    string     true        "Service name"
@@ -41,7 +41,7 @@ func getProxySDK(instanceName string) (*stroltp.SDK, error) {
 // @success 200 {object} strolt_models.ServicesGetSnapshotsResult
 // @success 500 {object} apiu.ResultError
 // @Router       /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots [get].
-func (s *ManagerHandlers) getSnapshots(w http.ResponseWriter, r *http.Request) {
+func (s *ManagerHandlers) getSnapshotsDirect(w http.ResponseWriter, r *http.Request) {
 	instanceName := chi.URLParam(r, "instanceName")
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")
@@ -70,7 +70,7 @@ func (s *ManagerHandlers) getSnapshots(w http.ResponseWriter, r *http.Request) {
 // getSnapshotsProxy godoc
 // @Id					 getSnapshotsProxy
 // @Summary      Get snapshots proxy
-// @Tags         manager
+// @Tags         manager-proxy
 // @Security BasicAuth
 // @Param   proxyName           path    string     true        "Proxy name"
 // @Param   instanceName        path    string     true        "Instance name"

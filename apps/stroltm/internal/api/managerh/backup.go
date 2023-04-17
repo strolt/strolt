@@ -11,10 +11,10 @@ import (
 	"github.com/strolt/strolt/shared/sdk/stroltp"
 )
 
-// backup godoc
-// @Id					 backup
+// backupDirect godoc
+// @Id					 backupDirect
 // @Summary      Start backup
-// @Tags         manager
+// @Tags         manager-direct
 // @Security BasicAuth
 // @Param   instanceName        path    string     true        "Instance name"
 // @Param   serviceName         path    string     true        "Service name"
@@ -22,7 +22,7 @@ import (
 // @success 200 {object} apiu.ResultSuccess
 // @success 500 {object} apiu.ResultError
 // @Router       /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/backup [post].
-func (s *ManagerHandlers) backup(w http.ResponseWriter, r *http.Request) {
+func (s *ManagerHandlers) backupDirect(w http.ResponseWriter, r *http.Request) {
 	instanceName := chi.URLParam(r, "instanceName")
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")

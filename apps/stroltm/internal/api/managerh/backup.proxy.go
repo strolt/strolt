@@ -11,7 +11,7 @@ import (
 // backupProxy godoc
 // @Id					 backupProxy
 // @Summary      Start backup proxy
-// @Tags         manager
+// @Tags         manager-proxy
 // @Security BasicAuth
 // @Param   proxyName           path    string     true        "Proxy name"
 // @Param   instanceName        path    string     true        "Instance name"

@@ -9,10 +9,10 @@ import (
 	_ "github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_models"
 )
 
-// getStats godoc
-// @Id					 getStats
+// getStatsDirect godoc
+// @Id					 getStatsDirect
 // @Summary      Get stats
-// @Tags         manager
+// @Tags         manager-direct
 // @Security BasicAuth
 // @Param   instanceName        path    string     true        "Instance name"
 // @Param   serviceName         path    string     true        "Service name"
@@ -21,7 +21,7 @@ import (
 // @success 200 {object} strolt_models.ServicesGetStatsResult
 // @success 500 {object} apiu.ResultError
 // @Router       /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats [get].
-func (s *ManagerHandlers) getStats(w http.ResponseWriter, r *http.Request) {
+func (s *ManagerHandlers) getStatsDirect(w http.ResponseWriter, r *http.Request) {
 	instanceName := chi.URLParam(r, "instanceName")
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")
@@ -47,10 +47,10 @@ func (s *ManagerHandlers) getStats(w http.ResponseWriter, r *http.Request) {
 	apiu.RenderJSON200(w, r, result.Payload)
 }
 
-// getStats godoc
+// getStatsProxy godoc
 // @Id					 getStatsProxy
 // @Summary      Get stats proxy
-// @Tags         manager
+// @Tags         manager-proxy
 // @Security BasicAuth
 // @Param   proxyName           path    string     true        "Proxy name"
 // @Param   instanceName        path    string     true        "Instance name"
