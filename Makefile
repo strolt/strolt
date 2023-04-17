@@ -3,7 +3,6 @@ PROJECT_BIN   = $(PROJECT_DIR)/bin
 STROLTM_UI   = $(PROJECT_DIR)/apps/stroltm/ui
 GOLANGCI_LINT = $(PROJECT_BIN)/golangci-lint
 GO_SWAGGER_TEMPLATES = $(PROJECT_DIR)/.go-swagger/templates
-PLATFORM = $(shell uname | tr '[:upper:]' '[:lower:]')_$(shell uname -m)
 
 
 .install-swagger-client:
@@ -103,11 +102,7 @@ docker-strolt:
 
 .PHONY: docker-stroltm
 docker-stroltm:
-ifeq ($(PLATFORM), darwin_arm64)
-	$(shell docker build -f ./docker/stroltm/Dockerfile --build-arg version=development -t strolt/stroltm:development --platform linux/amd64 ./)
-else
-	$(shell docker build -f ./docker/stroltm/Dockerfile --build-arg version=development -t strolt/stroltm:development ./)
-endif
+	docker build -f ./docker/stroltm/Dockerfile --build-arg version=development -t strolt/stroltm:development ./
 
 .PHONY: docker-stroltp
 docker-stroltp:
