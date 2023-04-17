@@ -23,7 +23,7 @@ jobs:
 
       - name: generate swagger
         run: |
-          make .swagger-strolt && make .swagger-stroltm-generate-client
+          make .swagger-strolt .swagger-shared-generate-client-strolt .swagger-stroltp .swagger-shared-generate-client-stroltp .swagger-stroltm .swagger-stroltm-ui-generate-client
 
       - name: golangci-lint (strolt)
         uses: golangci/golangci-lint-action@v3
