@@ -1,4 +1,4 @@
-package manager
+package strolt
 
 import (
 	"context"
@@ -15,11 +15,11 @@ func (m *Manager) Watch(ctx context.Context, cancel func()) {
 	go func() {
 		<-ctx.Done()
 
-		log.Debug("stop manager...")
+		log.Debug("stop strolt manager...")
 
 		close(quit)
 
-		log.Warn("manager stopped")
+		log.Warn("strolt manager stopped")
 	}()
 
 	go m.pingInstances()

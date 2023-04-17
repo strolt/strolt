@@ -2,44 +2,51 @@ import { FC, useEffect } from "react";
 
 import { Button, Card, message, Popconfirm, Tag, Typography } from "antd";
 
-import { DebugJSON, LatestVersionLink, Link } from "components";
+import { DebugJSON, LatestVersionLink, Link, TagColored } from "components";
 
-import { ManagerPreparedInstance, ModelsAPIConfigServiceTask } from "api/generated";
+import {
+  ManagerPreparedInstance,
+  ConfigServiceTask,
+} from "api/generated";
 
 import { observer, useStores } from "stores";
 
 export interface BackupButtonProps {
+  proxyName?: string;
   instanceName: string;
   serviceName: string;
   taskName: string;
 }
-const BackupButton: FC<BackupButtonProps> = observer(({ instanceName, serviceName, taskName }) => {
-  const { managerStore } = useStores();
+const BackupButton: FC<BackupButtonProps> = observer(
+  ({ proxyName, instanceName, serviceName, taskName }) => {
+    const { managerStore } = useStores();
 
-  const status = managerStore.backupStatusMap.get(
-    managerStore.backupStatusMapKey(instanceName, serviceName, taskName),
-  );
+    const status = managerStore.backupStatusMap.get(
+      managerStore.backupStatusMapKey(instanceName, serviceName, taskName, proxyName),
+    );
 
-  return (
-    <Popconfirm
-      title="Are you sure?"
-      onConfirm={() => managerStore.backup(instanceName, serviceName, taskName)}
-    >
-      <Button
-        loading={
-          status?.state === "pending" ||
-          managerStore.taskStatusMap.get(
-            managerStore.getTaskStatusMapKey(instanceName, serviceName, taskName),
-          )?.isRunning
-        }
-        size="small"
-        danger
+    return (
+      <Popconfirm
+        title="Are you sure?"
+        onConfirm={() => managerStore.backup(instanceName, serviceName, taskName, proxyName)}
+				okText="Yes"
       >
-        Backup
-      </Button>
-    </Popconfirm>
-  );
-});
+        <Button
+          loading={
+            status?.state === "pending" ||
+            managerStore.taskStatusMap.get(
+              managerStore.getTaskStatusMapKey(instanceName, serviceName, taskName, proxyName),
+            )?.isRunning
+          }
+          size="small"
+          danger
+        >
+          Backup
+        </Button>
+      </Popconfirm>
+    );
+  },
+);
 
 const BackupAll: FC = observer(() => {
   const { managerStore } = useStores();
@@ -60,7 +67,7 @@ const BackupAll: FC = observer(() => {
   };
 
   return (
-    <Popconfirm title="Are you sure?" onConfirm={handleClick}>
+    <Popconfirm title="Are you sure?" onConfirm={handleClick} okText="Yes">
       <Button
         type="primary"
         style={{ marginBottom: "1rem" }}
@@ -74,24 +81,30 @@ const BackupAll: FC = observer(() => {
 });
 
 export interface TaskProps {
+  proxyName?: string;
   instanceName: string;
   serviceName: string;
   taskName: string;
-  task: ModelsAPIConfigServiceTask;
+  task: ConfigServiceTask;
 }
-const Task: FC<TaskProps> = observer(({ task, instanceName, serviceName, taskName }) => {
+const Task: FC<TaskProps> = observer(({ proxyName, task, instanceName, serviceName, taskName }) => {
   return (
     <Card
       size="small"
       style={{ marginBottom: "1rem" }}
       title={`task: [${taskName}]`}
       extra={
-        <BackupButton instanceName={instanceName} serviceName={serviceName} taskName={taskName} />
+        <BackupButton
+          proxyName={proxyName}
+          instanceName={instanceName}
+          serviceName={serviceName}
+          taskName={taskName}
+        />
       }
     >
       <div>
         TAGS:
-        {task?.tags?.length ? task?.tags.map((tag) => <Tag key={tag}>{tag}</Tag>) : <b>-</b>}
+        {task?.tags?.length ? task?.tags.map((tag) => <TagColored key={tag} value={tag}/>) : <b>-</b>}
       </div>
 
       <div>
@@ -115,8 +128,13 @@ const Task: FC<TaskProps> = observer(({ task, instanceName, serviceName, taskNam
                 {destinationName}: <b>{destination.driver}</b>
                 {" | "}
                 <Link
-                  to="instances.instanceId.serviceId.taskId.destinationId.snapshotList"
+                  to={
+                    !!proxyName
+                      ? "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxySnapshotList"
+                      : "instances.instanceId.serviceId.taskId.destinationId.snapshotList"
+                  }
                   params={{
+                    proxyId: proxyName,
                     instanceId: instanceName,
                     serviceId: serviceName,
                     taskId: taskName,
@@ -163,7 +181,7 @@ const Task: FC<TaskProps> = observer(({ task, instanceName, serviceName, taskNam
               <li key={notification.name}>
                 {notification.name} (<b>{notification.driver}</b>):{" "}
                 {notification.events?.map((eventName) => (
-                  <Tag key={eventName}>{eventName}</Tag>
+                  <TagColored key={eventName} value={eventName}/>
                 ))}
               </li>
             ))}
@@ -177,17 +195,19 @@ const Task: FC<TaskProps> = observer(({ task, instanceName, serviceName, taskNam
 });
 
 export interface ServiceProps {
+  proxyName?: string;
   instanceName: string;
   serviceName: string;
-  service: Record<string, ModelsAPIConfigServiceTask>;
+  service: Record<string, ConfigServiceTask>;
 }
-const Service: FC<ServiceProps> = observer(({ service, serviceName, instanceName }) => {
+const Service: FC<ServiceProps> = observer(({ proxyName, service, serviceName, instanceName }) => {
   return (
     <Card size="small" style={{ marginBottom: "1rem" }} title={`service: [${serviceName}]`}>
       {Object.entries(service).map(([taskName, task]) => {
         return (
           <Task
             key={taskName}
+            proxyName={proxyName}
             instanceName={instanceName}
             serviceName={serviceName}
             taskName={taskName}
@@ -213,7 +233,13 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
         size="small"
         title={
           <>
-            instance: [{instance.name}] version: {instanceInfo?.version}{" "}
+            {[
+              !!instance.proxyName && `proxy: [${instance.proxyName}]`,
+              `instance: [${instance.name}]`,
+              `version: ${instanceInfo?.version}`,
+            ]
+              .filter(Boolean)
+              .join(" ")}{" "}
             <LatestVersionLink version={instanceInfo?.version} /> ({instance.config?.timezone})
           </>
         }
@@ -233,7 +259,7 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
               <div>
                 TAGS:
                 {instance.config?.tags?.length ? (
-                  instance.config?.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)
+                  instance.config?.tags.map((tag) => <TagColored key={tag} value={tag}/>)
                 ) : (
                   <b>-</b>
                 )}
@@ -241,6 +267,7 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
 
               <Service
                 key={serviceName}
+                proxyName={instance.proxyName}
                 instanceName={instance.name || ""}
                 serviceName={serviceName}
                 service={service}
@@ -262,7 +289,7 @@ const InstanceList = observer(() => {
       <BackupAll />
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
         {managerStore.instances.map((instance) => {
-          return <Instance key={instance.name} instance={instance} />;
+          return <Instance key={`${instance.proxyName}_${instance.name}`} instance={instance} />;
         })}
       </div>
 

@@ -9,6 +9,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/api"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/schedule"
+	"github.com/strolt/strolt/shared"
 	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/spf13/cobra"
@@ -32,6 +33,8 @@ var startpCmd = &cobra.Command{
 		defer close(c)
 		signal.Notify(c, os.Interrupt)
 
+		isConfigChanged := false
+
 		{
 			// Api server
 			wg.Add(1)
@@ -45,7 +48,10 @@ var startpCmd = &cobra.Command{
 			// Watch config
 			wg.Add(1)
 			go func() {
-				config.WatchConfigChanges(ctx, cancel)
+				config.WatchConfigChanges(ctx, func() {
+					isConfigChanged = true
+					cancel()
+				})
 				wg.Done()
 			}()
 		}
@@ -69,5 +75,12 @@ var startpCmd = &cobra.Command{
 		}
 
 		wg.Wait()
+
+		if isConfigChanged {
+			log.Debugf("restart self...")
+			if err := shared.RestartSelf(); err != nil {
+				log.Error(err)
+			}
+		}
 	},
 }

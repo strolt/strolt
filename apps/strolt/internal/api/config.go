@@ -15,9 +15,9 @@ type Config struct {
 	DisableWatchChanges bool                     `json:"disableWatchChanges"`
 	Tags                []string                 `json:"tags"`
 	Services            map[string]ConfigService `json:"services"`
-}
+} // @name Config
 
-type ConfigService map[string]ConfigServiceTask
+type ConfigService map[string]ConfigServiceTask // @name ConfigService
 
 type ConfigServiceTask struct {
 	Source        ConfigServiceTaskSource                 `json:"source"`
@@ -25,26 +25,26 @@ type ConfigServiceTask struct {
 	Notifications []ConfigServiceTaskNotification         `json:"notifications"`
 	Schedule      ConfigServiceTaskSchedule               `json:"schedule"`
 	Tags          []string                                `json:"tags"`
-}
+} // @name ConfigServiceTask
 
 type ConfigServiceTaskSource struct {
 	Driver string `json:"driver"`
-}
+} // @name ConfigServiceTaskSource
 
 type ConfigServiceTaskSchedule struct {
 	Backup string `json:"backup"`
 	Prune  string `json:"prune"`
-}
+} // @name ConfigServiceTaskSchedule
 
 type ConfigServiceTaskDestination struct {
 	Driver string `json:"driver"`
-}
+} // @name ConfigServiceTaskDestination
 
 type ConfigServiceTaskNotification struct {
 	Driver string            `json:"driver"`
 	Name   string            `json:"name"`
 	Events []sctxt.EventType `json:"events" enums:"OPERATION_START,OPERATION_STOP,OPERATION_ERROR,SOURCE_START,SOURCE_STOP,SOURCE_ERROR,DESTINATION_START,DESTINATION_STOP,DESTINATION_ERROR"`
-}
+} // @name ConfigServiceTaskNotification
 
 // getConfig godoc
 // @Id					 getConfig

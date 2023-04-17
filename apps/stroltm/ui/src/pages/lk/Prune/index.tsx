@@ -5,9 +5,9 @@ import { useParams } from "react-router";
 import { Button, Popconfirm, Table, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 
-import { DebugJSON, Print } from "components";
+import { DebugJSON, Print, TagColored } from "components";
 
-import { ModelsInterfacesSnapshot } from "api/generated";
+import { Snapshot } from "api/generated";
 
 import { observer, useStores } from "stores";
 
@@ -17,21 +17,22 @@ interface PruneButtonProps {
   taskId?: string;
   destinationId?: string;
   count?: number;
+	proxyId?:string;
 }
 const PruneButton: FC<PruneButtonProps> = observer(
-  ({ instanceId, serviceId, taskId, destinationId, count }) => {
+  ({ proxyId,instanceId, serviceId, taskId, destinationId, count }) => {
     const { managerStore } = useStores();
 
     const handleClick = async () => {
       if (instanceId && serviceId && taskId && destinationId) {
-        await managerStore.fetchPrune(instanceId, serviceId, taskId, destinationId);
+        await managerStore.fetchPrune(instanceId, serviceId, taskId, destinationId,proxyId);
 
-        managerStore.fetchSnapshotsForPrune(instanceId, serviceId, taskId, destinationId);
+        managerStore.fetchSnapshotsForPrune(instanceId, serviceId, taskId, destinationId,proxyId);
       }
     };
 
     return (
-      <Popconfirm title="Are you sure?" onConfirm={handleClick}>
+      <Popconfirm title="Are you sure?" onConfirm={handleClick} okText="Yes">
         <Button
           disabled={!count}
           type="primary"
@@ -45,7 +46,7 @@ const PruneButton: FC<PruneButtonProps> = observer(
   },
 );
 
-const columns: ColumnsType<ModelsInterfacesSnapshot> = [
+const columns: ColumnsType<Snapshot> = [
   {
     title: "Short ID",
     dataIndex: "shortId",
@@ -63,7 +64,7 @@ const columns: ColumnsType<ModelsInterfacesSnapshot> = [
     render: (tags: string[]) => (
       <>
         {tags.map((tag) => (
-          <Tag key={tag}>{tag}</Tag>
+          <TagColored key={tag} value={tag}/>
         ))}
       </>
     ),
@@ -79,6 +80,7 @@ const columns: ColumnsType<ModelsInterfacesSnapshot> = [
 const Prune = observer(() => {
   const { managerStore } = useStores();
   const params = useParams<{
+		proxyId?:string;
     instanceId: string;
     serviceId: string;
     taskId: string;
@@ -94,6 +96,7 @@ const Prune = observer(() => {
         params.serviceId,
         params.taskId,
         params.destinationId,
+				params.proxyId
       );
     }
 
@@ -112,6 +115,7 @@ const Prune = observer(() => {
       </Typography.Title>
 
       <PruneButton
+			proxyId={params.proxyId}
         instanceId={params.instanceId}
         serviceId={params.serviceId}
         taskId={params.taskId}

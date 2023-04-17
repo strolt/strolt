@@ -1,11 +1,11 @@
 import { AxiosResponse } from "axios";
-import { makeAutoObservable, reaction, runInAction } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 
 import { fromPromise, IPromiseBasedObservable } from "mobx-utils";
 
-import * as api from "../api";
-import * as apiGenerated from "../api/generated";
-import { authStore } from "./auth.store";
+import * as api from "../../api";
+import * as apiGenerated from "../../api/generated";
+import { getTaskList } from "./taskList";
 
 export class ManagerStore {
   constructor() {
@@ -21,18 +21,23 @@ export class ManagerStore {
 
     const { data } = await this.instancesStatus;
 
-    data?.forEach((instance) => {
-      instance.taskStatus?.tasks?.forEach((taskStatus) => {
-        if (instance.name && taskStatus.serviceName && taskStatus.taskName) {
-          this.taskStatusMap.set(
-            this.getTaskStatusMapKey(instance.name, taskStatus.serviceName, taskStatus.taskName),
-            taskStatus,
-          );
-        }
-      });
-    });
-
     runInAction(() => {
+      data?.forEach((instance) => {
+        instance.taskStatus?.tasks?.forEach((taskStatus) => {
+          if (instance.name && taskStatus.serviceName && taskStatus.taskName) {
+            this.taskStatusMap.set(
+              this.getTaskStatusMapKey(
+                instance.name,
+                taskStatus.serviceName,
+                taskStatus.taskName,
+                instance.proxyName,
+              ),
+              taskStatus,
+            );
+          }
+        });
+      });
+
       this.instances = data.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     });
 
@@ -41,6 +46,10 @@ export class ManagerStore {
   resetInstances() {
     this.instancesStatus = null;
     this.instances = [];
+  }
+
+  get taskList() {
+    return getTaskList(this.instances);
   }
 
   backupAllStatus: IPromiseBasedObservable<
@@ -54,7 +63,7 @@ export class ManagerStore {
         Object.entries(instance.config?.services || {}).forEach(([serviceName, service]) => {
           Object.entries(service || {}).forEach(([taskName]) => {
             if (instance.name) {
-              this.taskStatusMapStart(instance.name, serviceName, taskName);
+              this.taskStatusMapStart(instance.name, serviceName, taskName, instance.proxyName);
             }
           });
         });
@@ -69,22 +78,32 @@ export class ManagerStore {
     this.backupAllStatus = null;
   }
 
-  backupStatusMapKey(instanceName: string, serviceName: string, taskName: string) {
-    return `${instanceName}_${serviceName}_${taskName}`;
+  backupStatusMapKey(
+    instanceName: string,
+    serviceName: string,
+    taskName: string,
+    proxyName?: string,
+  ) {
+    return [proxyName, instanceName, serviceName, taskName].join("_");
   }
 
   backupStatusMap = new Map<
     string,
     IPromiseBasedObservable<AxiosResponse<apiGenerated.ApiuResultSuccess, any>>
   >();
-  async backup(instanceName: string, serviceName: string, taskName: string) {
-    const request = fromPromise(api.manager.backup(instanceName, serviceName, taskName));
+  async backup(instanceName: string, serviceName: string, taskName: string, proxyName?: string) {
+    const request = !!proxyName
+      ? fromPromise(api.managerProxy.backupProxy(proxyName, instanceName, serviceName, taskName))
+      : fromPromise(api.managerDirect.backupDirect(instanceName, serviceName, taskName));
 
     runInAction(() => {
-      this.taskStatusMapStart(instanceName, serviceName, taskName);
+      this.taskStatusMapStart(instanceName, serviceName, taskName, proxyName);
     });
 
-    this.backupStatusMap.set(this.backupStatusMapKey(instanceName, serviceName, taskName), request);
+    this.backupStatusMap.set(
+      this.backupStatusMapKey(instanceName, serviceName, taskName, proxyName),
+      request,
+    );
 
     const { data } = await request;
 
@@ -94,21 +113,37 @@ export class ManagerStore {
     this.backupStatusMap.clear();
   }
 
-  snapshots: apiGenerated.ModelsServicesGetSnapshotsResult = {
+  snapshots: apiGenerated.ServicesGetSnapshotsResult = {
     items: [],
   };
   snapshotsStatus: IPromiseBasedObservable<
-    AxiosResponse<apiGenerated.ModelsServicesGetSnapshotsResult, any>
+    AxiosResponse<apiGenerated.ServicesGetSnapshotsResult, any>
   > | null = null;
   async fetchSnapshots(
     instanceName: string,
     serviceName: string,
     taskName: string,
     destinationName: string,
+    proxyName?: string,
   ) {
-    this.snapshotsStatus = fromPromise(
-      api.manager.getSnapshots(instanceName, serviceName, taskName, destinationName),
-    );
+    this.snapshotsStatus = !!proxyName
+      ? fromPromise(
+          api.managerProxy.getSnapshotsProxy(
+            proxyName,
+            instanceName,
+            serviceName,
+            taskName,
+            destinationName,
+          ),
+        )
+      : fromPromise(
+          api.managerDirect.getSnapshotsDirect(
+            instanceName,
+            serviceName,
+            taskName,
+            destinationName,
+          ),
+        );
     runInAction(() => {
       this.taskStatusMapStart(instanceName, serviceName, taskName);
     });
@@ -128,18 +163,32 @@ export class ManagerStore {
     this.snapshots = { items: [] };
   }
 
-  snapshotsForPrune: apiGenerated.ModelsServicesGetPruneResult | null = null;
+  snapshotsForPrune: apiGenerated.ServicesGetPruneResult | null = null;
   snapshotsForPruneStatus: IPromiseBasedObservable<
-    AxiosResponse<apiGenerated.ModelsServicesGetPruneResult, any>
+    AxiosResponse<apiGenerated.ServicesGetPruneResult, any>
   > | null = null;
   async fetchSnapshotsForPrune(
     instanceName: string,
     serviceName: string,
     taskName: string,
     destinationName: string,
+    proxyName?: string,
   ) {
     this.snapshotsForPruneStatus = fromPromise(
-      api.manager.getSnapshotsForPrune(instanceName, serviceName, taskName, destinationName),
+      !!proxyName
+        ? api.managerProxy.getSnapshotsForPruneProxy(
+            proxyName,
+            instanceName,
+            serviceName,
+            taskName,
+            destinationName,
+          )
+        : api.managerDirect.getSnapshotsForPruneDirect(
+            instanceName,
+            serviceName,
+            taskName,
+            destinationName,
+          ),
     );
     runInAction(() => {
       this.taskStatusMapStart(instanceName, serviceName, taskName);
@@ -164,18 +213,27 @@ export class ManagerStore {
     this.snapshotsForPrune = null;
   }
 
-  prune: apiGenerated.ModelsServicesGetPruneResult | null = null;
+  prune: apiGenerated.ServicesGetPruneResult | null = null;
   pruneStatus: IPromiseBasedObservable<
-    AxiosResponse<apiGenerated.ModelsServicesGetPruneResult, any>
+    AxiosResponse<apiGenerated.ServicesGetPruneResult, any>
   > | null = null;
   async fetchPrune(
     instanceName: string,
     serviceName: string,
     taskName: string,
     destinationName: string,
+    proxyName?: string,
   ) {
     this.pruneStatus = fromPromise(
-      api.manager.prune(instanceName, serviceName, taskName, destinationName),
+      !!proxyName
+        ? api.managerProxy.pruneProxy(
+            proxyName,
+            instanceName,
+            serviceName,
+            taskName,
+            destinationName,
+          )
+        : api.managerDirect.pruneDirect(instanceName, serviceName, taskName, destinationName),
     );
 
     runInAction(() => {
@@ -201,18 +259,27 @@ export class ManagerStore {
     this.prune = null;
   }
 
-  stats: apiGenerated.ModelsServicesGetStatsResult | null = null;
+  stats: apiGenerated.ServicesGetStatsResult | null = null;
   statsStatus: IPromiseBasedObservable<
-    AxiosResponse<apiGenerated.ModelsServicesGetStatsResult, any>
+    AxiosResponse<apiGenerated.ServicesGetStatsResult, any>
   > | null = null;
   async fetchStats(
     instanceName: string,
     serviceName: string,
     taskName: string,
     destinationName: string,
+    proxyName?: string,
   ) {
     this.statsStatus = fromPromise(
-      api.manager.getStats(instanceName, serviceName, taskName, destinationName),
+      !!proxyName
+        ? api.managerProxy.getStatsProxy(
+            proxyName,
+            instanceName,
+            serviceName,
+            taskName,
+            destinationName,
+          )
+        : api.managerDirect.getStatsDirect(instanceName, serviceName, taskName, destinationName),
     );
     runInAction(() => {
       this.taskStatusMapStart(instanceName, serviceName, taskName);
@@ -231,14 +298,24 @@ export class ManagerStore {
     this.stats = null;
   }
 
-  taskStatusMap = new Map<string, apiGenerated.ModelsTaskManagerTaskItem>();
+  taskStatusMap = new Map<string, apiGenerated.ManagerTaskItem>();
 
-  getTaskStatusMapKey(instanceName?: string, serviceName?: string, taskName?: string) {
-    return [instanceName, serviceName, taskName].join("_");
+  getTaskStatusMapKey(
+    instanceName?: string,
+    serviceName?: string,
+    taskName?: string,
+    proxyName?: string,
+  ) {
+    return [proxyName, instanceName, serviceName, taskName].join("_");
   }
 
-  taskStatusMapStart(instanceName: string, serviceName: string, taskName: string) {
-    const key = this.getTaskStatusMapKey(instanceName, serviceName, taskName);
+  taskStatusMapStart(
+    instanceName: string,
+    serviceName: string,
+    taskName: string,
+    proxyName?: string,
+  ) {
+    const key = this.getTaskStatusMapKey(instanceName, serviceName, taskName, proxyName);
 
     let task = this.taskStatusMap.get(key);
     if (task) {

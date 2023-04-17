@@ -6,14 +6,15 @@ import (
 	"sync"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/strolt/strolt/apps/stroltm/internal/manager"
 	"github.com/strolt/strolt/shared/apiu"
+	"github.com/strolt/strolt/shared/sdk/strolt"
+	"github.com/strolt/strolt/shared/sdk/stroltp"
 )
 
-// backup godoc
-// @Id					 backup
+// backupDirect godoc
+// @Id					 backupDirect
 // @Summary      Start backup
-// @Tags         manager
+// @Tags         manager-direct
 // @Security BasicAuth
 // @Param   instanceName        path    string     true        "Instance name"
 // @Param   serviceName         path    string     true        "Service name"
@@ -21,7 +22,7 @@ import (
 // @success 200 {object} apiu.ResultSuccess
 // @success 500 {object} apiu.ResultError
 // @Router       /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/backup [post].
-func (s *ManagerHandlers) backup(w http.ResponseWriter, r *http.Request) {
+func (s *ManagerHandlers) backupDirect(w http.ResponseWriter, r *http.Request) {
 	instanceName := chi.URLParam(r, "instanceName")
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")
@@ -54,7 +55,8 @@ type backupAllResponse struct {
 }
 
 type backupAllStatusItem struct {
-	InstanceName string `json:"instanceName"`
+	ProxyName    string `json:"proxyName,omitempty"`
+	InstanceName string `json:"instanceName,omitempty"`
 	ServiceName  string `json:"serviceName,omitempty"`
 	TaskName     string `json:"taskName,omitempty"`
 }
@@ -70,7 +72,7 @@ func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 	items := []backupAllStatusItem{}
 	itemsError := []backupAllStatusItem{}
 
-	for _, instance := range manager.GetPreparedInstances() {
+	for _, instance := range strolt.ManagerGetPreparedInstances() {
 		if !instance.IsOnline || instance.Config == nil {
 			itemsError = append(itemsError, backupAllStatusItem{
 				InstanceName: instance.Name,
@@ -115,6 +117,35 @@ func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 			wg.Done()
 		}(item)
 	}
+
+	wg.Add(1)
+
+	go func() {
+		stroltpResult := stroltp.ManagerBackupAll()
+
+		response.Lock()
+
+		for _, errorStarted := range stroltpResult.ErrorStarted {
+			response.ErrorStarted = append(response.ErrorStarted, backupAllStatusItem{
+				ProxyName:    errorStarted.ProxyName,
+				InstanceName: errorStarted.InstanceName,
+				ServiceName:  errorStarted.ServiceName,
+				TaskName:     errorStarted.TaskName,
+			})
+		}
+
+		for _, successStarted := range stroltpResult.SuccessStarted {
+			response.SuccessStarted = append(response.SuccessStarted, backupAllStatusItem{
+				ProxyName:    successStarted.ProxyName,
+				InstanceName: successStarted.InstanceName,
+				ServiceName:  successStarted.ServiceName,
+				TaskName:     successStarted.TaskName,
+			})
+		}
+
+		response.Unlock()
+		wg.Done()
+	}()
 
 	wg.Wait()
 

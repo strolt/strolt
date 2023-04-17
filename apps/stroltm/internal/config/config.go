@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	API    API    `yaml:"api"`
-	Strolt Strolt `yaml:"strolt"`
+	API     API     `yaml:"api"`
+	Strolt  Strolt  `yaml:"strolt"`
+	Stroltp Stroltp `yaml:"stroltp"`
 }
 
 type API struct {
@@ -20,6 +21,10 @@ type User struct {
 }
 
 type Strolt struct {
+	Instances map[string]Instance `yaml:"instances"`
+}
+
+type Stroltp struct {
 	Instances map[string]Instance `yaml:"instances"`
 }
 

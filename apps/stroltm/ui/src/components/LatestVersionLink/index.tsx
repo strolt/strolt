@@ -4,8 +4,9 @@ import { observer, useStores } from "stores";
 
 export interface LatestVersionLinkProps {
   version?: string;
+  label?: string;
 }
-export const LatestVersionLink: FC<LatestVersionLinkProps> = observer(({ version }) => {
+export const LatestVersionLink: FC<LatestVersionLinkProps> = observer(({ version, label }) => {
   const { infoStore } = useStores();
 
   if (infoStore.latestVersion == version) {
@@ -14,7 +15,7 @@ export const LatestVersionLink: FC<LatestVersionLinkProps> = observer(({ version
 
   return (
     <a href="#" target="_blank" rel="noopener noreferrer">
-      new version
+      {label || "new version"} ({infoStore.latestVersion})
     </a>
   );
 });

@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { observer, useStores } from "stores";
 import { RootStore } from "stores/root.store";
 
+import { ThemeProvider } from "./ThemeProvider";
 import { routes } from "./routes";
 
 const Router = observer(() => {
@@ -24,7 +25,9 @@ const Renderer = () => {
 const App = observer(() => {
   return (
     <StoreProvider value={RootStore}>
-      <Renderer />
+      <ThemeProvider>
+        <Renderer />
+      </ThemeProvider>
     </StoreProvider>
   );
 });

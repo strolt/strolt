@@ -11,6 +11,7 @@ import { observer, useStores } from "stores";
 const Stats = observer(() => {
   const { managerStore } = useStores();
   const params = useParams<{
+		proxyId?:string;
     instanceId: string;
     serviceId: string;
     taskId: string;
@@ -24,6 +25,7 @@ const Stats = observer(() => {
         params.serviceId,
         params.taskId,
         params.destinationId,
+				params.proxyId
       );
     }
 

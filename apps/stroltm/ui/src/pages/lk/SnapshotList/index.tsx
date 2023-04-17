@@ -5,13 +5,13 @@ import { useParams } from "react-router";
 import { Table, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 
-import { DebugJSON, Print } from "components";
+import { DebugJSON, Print, TagColored } from "components";
 
-import { ModelsInterfacesSnapshot } from "api/generated";
+import { Snapshot } from "api/generated";
 
 import { observer, useStores } from "stores";
 
-const columns: ColumnsType<ModelsInterfacesSnapshot> = [
+const columns: ColumnsType<Snapshot> = [
   {
     title: "Short ID",
     dataIndex: "shortId",
@@ -29,7 +29,7 @@ const columns: ColumnsType<ModelsInterfacesSnapshot> = [
     render: (tags: string[]) => (
       <>
         {tags.map((tag) => (
-          <Tag key={tag}>{tag}</Tag>
+          <TagColored key={tag} value={tag}/>
         ))}
       </>
     ),
@@ -45,6 +45,7 @@ const columns: ColumnsType<ModelsInterfacesSnapshot> = [
 const SnapshotList = observer(() => {
   const { managerStore } = useStores();
   const params = useParams<{
+    proxyId: string;
     instanceId: string;
     serviceId: string;
     taskId: string;
@@ -60,6 +61,7 @@ const SnapshotList = observer(() => {
         params.serviceId,
         params.taskId,
         params.destinationId,
+        params.proxyId,
       );
     }
 
@@ -72,7 +74,7 @@ const SnapshotList = observer(() => {
     <div>
       <Typography.Title>Snapshot List</Typography.Title>
       <Typography.Title level={3}>
-        {[params.instanceId, params.serviceId, params.taskId, params.destinationId]
+        {[params.proxyId, params.instanceId, params.serviceId, params.taskId, params.destinationId]
           .filter(Boolean)
           .join(" / ")}
       </Typography.Title>

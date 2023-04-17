@@ -18,8 +18,7 @@ export class InfoStore {
   updatedAt = new Date(0);
   map = new Map<string, apiGenerated.ManagerInfoInstance>();
 
-  requestFetchInfo: IPromiseBasedObservable<AxiosResponse<apiGenerated.ManagerInfo, any>> | null =
-    null;
+  requestFetchInfo: IPromiseBasedObservable<AxiosResponse<apiGenerated.ApiInfo, any>> | null = null;
   async fetchInfo() {
     this.requestFetchInfo = fromPromise(api.global.getInfo());
     const { data } = await this.requestFetchInfo;
@@ -37,10 +36,14 @@ export class InfoStore {
       this.map.clear();
       data.instances?.forEach((instance) => {
         if (instance && instance.name) {
-          this.map.set(instance.name, instance);
+          this.map.set(this.getKey(instance.name, instance.proxyName), instance);
         }
       });
     });
+  }
+
+  getKey(instanceName: string, proxyName?: string) {
+    return `${proxyName}_${instanceName}`;
   }
 }
 

@@ -112,7 +112,7 @@ func (api *API) handler() http.Handler {
 
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.Timeout(time.Minute))
-		r.Use(tollbooth_chi.LimitHandler(tollbooth.NewLimiter(10, nil))) //nolint:gomnd
+		// r.Use(tollbooth_chi.LimitHandler(tollbooth.NewLimiter(10, nil))) //nolint:gomnd
 
 		public.New().Router(r)
 

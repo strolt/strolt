@@ -11,8 +11,9 @@ import (
 	"github.com/strolt/strolt/apps/stroltm/internal/api"
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
 	"github.com/strolt/strolt/apps/stroltm/internal/env"
-	"github.com/strolt/strolt/apps/stroltm/internal/manager"
 	"github.com/strolt/strolt/shared/logger"
+	"github.com/strolt/strolt/shared/sdk/strolt"
+	"github.com/strolt/strolt/shared/sdk/stroltp"
 )
 
 const (
@@ -77,10 +78,38 @@ var rootCmd = &cobra.Command{
 			}()
 		}
 
-		{ // Manager
+		{ // Strolt Manager
 			wg.Add(1)
 			go func() {
-				manager.Init().Watch(ctx, cancel)
+				// manager.Init().Watch(ctx, cancel)
+				instances := []strolt.ManagerInstanceInit{}
+				for instanceName, instance := range config.Get().Strolt.Instances {
+					instances = append(instances, strolt.ManagerInstanceInit{
+						Name:     instanceName,
+						URL:      instance.URL,
+						Username: instance.Username,
+						Password: instance.Password, //pragma: allowlist secret
+					})
+				}
+				strolt.ManagerInit(ctx, cancel, instances)
+				wg.Done()
+			}()
+		}
+
+		{ // Stroltp Manager
+			wg.Add(1)
+			go func() {
+				// manager.Init().Watch(ctx, cancel)
+				instances := []stroltp.ManagerInstanceInit{}
+				for instanceName, instance := range config.Get().Stroltp.Instances {
+					instances = append(instances, stroltp.ManagerInstanceInit{
+						Name:     instanceName,
+						URL:      instance.URL,
+						Username: instance.Username,
+						Password: instance.Password, //pragma: allowlist secret
+					})
+				}
+				stroltp.ManagerInit(ctx, cancel, instances)
 				wg.Done()
 			}()
 		}

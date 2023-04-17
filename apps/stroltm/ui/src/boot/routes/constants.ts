@@ -7,14 +7,24 @@ const rLk = (prefix: string) => rPrefix("/lk" + prefix);
 const instances = rLk("/instances");
 const _instances = {
   "instances.main": instances(),
+  "instances.old": instances("/old"),
   "instances.instanceId.serviceId.taskId.destinationId.snapshotList": instances(
     "/:instanceId/:serviceId/:taskId/:destinationId/snapshots",
+  ),
+  "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxySnapshotList": instances(
+    "/:proxyId/:instanceId/:serviceId/:taskId/:destinationId/snapshots",
   ),
   "instances.instanceId.serviceId.taskId.destinationId.prune": instances(
     "/:instanceId/:serviceId/:taskId/:destinationId/prune",
   ),
+  "instances.proxyId.instanceId.serviceId.taskId.destinationId.prune": instances(
+    "/:proxyId/:instanceId/:serviceId/:taskId/:destinationId/prune",
+  ),
   "instances.instanceId.serviceId.taskId.destinationId.stats": instances(
     "/:instanceId/:serviceId/:taskId/:destinationId/stats",
+  ),
+  "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxyStats": instances(
+    "/:proxyId/:instanceId/:serviceId/:taskId/:destinationId/stats",
   ),
 };
 
