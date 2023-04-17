@@ -1,6 +1,6 @@
 FROM alpine:3.17.3 AS base
 WORKDIR /stroltp
-RUN apk --update add --no-cache curl
+RUN apk --update add --no-cache curl tzdata
 
 FROM --platform=linux/amd64 golang:1.20.3-alpine3.17  AS swagger-base
 RUN apk --update add --no-cache make curl
@@ -28,10 +28,10 @@ ARG GITHUB_SHA
 ENV STROLTP_PATH_DATA=/stroltp
 
 LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
-      org.opencontainers.image.description="Stroltp backup engine" \
+      org.opencontainers.image.description="strolt proxy" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/strolt/strolt.git" \
-      org.opencontainers.image.title="Stroltp" \
+      org.opencontainers.image.title="stroltp" \
       org.opencontainers.image.revision="${GITHUB_SHA}"
 
 COPY --from=builder /go/src/github.com/strolt/strolt/apps/stroltp/stroltp ./bin/stroltp

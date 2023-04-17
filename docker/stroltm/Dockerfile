@@ -1,6 +1,6 @@
 FROM alpine:3.17.3 AS base
 WORKDIR /stroltm
-RUN apk --update add --no-cache curl
+RUN apk --update add --no-cache curl tzdata
 
 FROM node:18.15.0-bullseye-slim as ui-base
 RUN apt-get update && apt-get -y install openjdk-11-jre --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -17,7 +17,7 @@ RUN yarn install --frozen-lockfile --prefer-offline --ignore-scripts --network-t
 FROM swagger-base AS swagger
 WORKDIR /github.com/strolt/strolt
 COPY . .
-RUN make .swagger-strolt && make .swagger-shared-generate-client-strolt && make .swagger-stroltp && make .swagger-shared-generate-client-stroltp
+RUN make .swagger-strolt && make .swagger-shared-generate-client-strolt && make .swagger-stroltp && make .swagger-shared-generate-client-stroltp && make .swagger-stroltm
 
 FROM ui-deps as ui-builder
 COPY ./apps/stroltm/ui .
