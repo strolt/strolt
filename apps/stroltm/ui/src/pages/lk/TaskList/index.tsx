@@ -96,6 +96,7 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
         filterResetToDefaultFilteredValue: true,
         sorter: { compare: nameSorter("proxyName") },
         render: (v) => <Print.Text value={v} />,
+        defaultSortOrder: "ascend",
       },
       {
         title: "instance",
@@ -108,6 +109,7 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
         filterResetToDefaultFilteredValue: true,
         sorter: { compare: nameSorter("instanceName") },
         render: (v) => <Print.Text value={v} />,
+        defaultSortOrder: "ascend",
       },
       {
         title: "service",
@@ -120,6 +122,7 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
         filterResetToDefaultFilteredValue: true,
         sorter: { compare: nameSorter("serviceName") },
         render: (v) => <Print.Text value={v} />,
+        defaultSortOrder: "ascend",
       },
       {
         title: "task",
@@ -132,6 +135,7 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
         filterResetToDefaultFilteredValue: true,
         sorter: { compare: nameSorter("taskName") },
         render: (v) => <Print.Text value={v} />,
+        defaultSortOrder: "ascend",
       },
       {
         title: "timezone",
