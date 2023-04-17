@@ -12,6 +12,9 @@ else
         i386)   architecture="386" ;;
         i686)   architecture="386" ;;
         x86_64) architecture="amd64" ;;
+        armv7l) architecture="arm64" ;;
+        aarch64) architecture="arm64" ;;
+        ppc64le) architecture="ppc64le" ;;
         arm)    dpkg --print-architecture | grep -q "arm64" && architecture="arm64" || architecture="arm" ;;
     esac
 fi
