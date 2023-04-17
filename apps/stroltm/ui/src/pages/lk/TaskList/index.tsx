@@ -250,7 +250,14 @@ const TaskList = observer(() => {
   const columns = useColumns(managerStore.taskList);
 
   const count = useMemo(() => {
-    const proxyInstances = managerStore.instances.map((el) => el.proxyName).filter(Boolean).length;
+    const proxyInstances = managerStore.instances
+      .map((el) => el.proxyName)
+      .reduce<string[]>((acc, el) => {
+        if (el && !acc.includes(el)) {
+          acc.push(el);
+        }
+        return acc;
+      }, []).length;
     let stroltInstancesDirect = 0;
     let stroltInstancesProxy = 0;
 
