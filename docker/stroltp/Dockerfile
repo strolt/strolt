@@ -3,7 +3,7 @@ WORKDIR /stroltp
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
-FROM --platform=linux/amd64 golang:1.20.3-alpine3.17  AS swagger-base
+FROM golang:1.20.3-alpine3.17  AS swagger-base
 RUN apk --update add --no-cache make curl
 
 FROM swagger-base AS swagger

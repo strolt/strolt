@@ -6,10 +6,10 @@ ENV TZ=UTC
 FROM node:18.15.0-bullseye-slim as ui-base
 RUN apt-get update && apt-get -y install openjdk-11-jre --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-FROM --platform=linux/amd64 golang:1.20.3-alpine3.17  AS swagger-base
+FROM golang:1.20.3-alpine3.17  AS swagger-base
 RUN apk --update add --no-cache make curl
 
-FROM  --platform=linux/amd64 ui-base as ui-deps
+FROM ui-base as ui-deps
 WORKDIR /github.com/strolt/strolt/apps/stroltm/ui
 COPY ./apps/stroltm/ui/package.json .
 COPY ./apps/stroltm/ui/yarn.lock .
