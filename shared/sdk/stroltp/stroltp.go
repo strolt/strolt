@@ -74,3 +74,22 @@ func (sdk *SDK) GetSnapshots(instanceName, serviceName, taskName, destinationNam
 
 	return result, err
 }
+
+func (sdk *SDK) GetStats(instanceName, serviceName, taskName, destinationName string) (*managerc.GetStatsOK, error) {
+	params := managerc.NewGetStatsParams()
+	params.InstanceName = instanceName
+	params.ServiceName = serviceName
+	params.TaskName = taskName
+	params.DestinationName = destinationName
+
+	result, err := sdk.client.Manager.GetStats(params, sdk.authInfo)
+
+	if err != nil {
+		switch errResponse := err.(type) { //nolint:gocritic,errorlint
+		case *managerc.GetStatsInternalServerError:
+			return result, fmt.Errorf(errResponse.Payload.Error)
+		}
+	}
+
+	return result, err
+}

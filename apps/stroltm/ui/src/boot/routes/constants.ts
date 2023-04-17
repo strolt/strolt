@@ -20,6 +20,9 @@ const _instances = {
   "instances.instanceId.serviceId.taskId.destinationId.stats": instances(
     "/:instanceId/:serviceId/:taskId/:destinationId/stats",
   ),
+  "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxyStats": instances(
+    "/:proxyId/:instanceId/:serviceId/:taskId/:destinationId/stats",
+  ),
 };
 
 const auth = rPrefix("/auth");

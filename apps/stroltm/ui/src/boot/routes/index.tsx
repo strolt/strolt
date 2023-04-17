@@ -23,6 +23,7 @@ const instances = [
   ),
   r("instances.instanceId.serviceId.taskId.destinationId.prune", <pages.lk.Prune />),
   r("instances.instanceId.serviceId.taskId.destinationId.stats", <pages.lk.Stats />),
+  r("instances.proxyId.instanceId.serviceId.taskId.destinationId.proxyStats", <pages.lk.Stats />),
 ];
 
 const auth = [r("auth.login", <pages.auth.Login />)];

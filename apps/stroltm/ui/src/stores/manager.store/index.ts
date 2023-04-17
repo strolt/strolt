@@ -5,7 +5,6 @@ import { fromPromise, IPromiseBasedObservable } from "mobx-utils";
 
 import * as api from "../../api";
 import * as apiGenerated from "../../api/generated";
-
 import { getTaskList } from "./taskList";
 
 export class ManagerStore {
@@ -49,9 +48,9 @@ export class ManagerStore {
     this.instances = [];
   }
 
-	get taskList(){
-		return getTaskList(this.instances)
-	}
+  get taskList() {
+    return getTaskList(this.instances);
+  }
 
   backupAllStatus: IPromiseBasedObservable<
     AxiosResponse<apiGenerated.ManagerhBackupAllResponse, any>
@@ -239,9 +238,14 @@ export class ManagerStore {
     serviceName: string,
     taskName: string,
     destinationName: string,
+    proxyName?: string,
   ) {
+		console.log({proxyName, instanceName, serviceName, taskName, destinationName});
+		
     this.statsStatus = fromPromise(
-      api.manager.getStats(instanceName, serviceName, taskName, destinationName),
+      !!proxyName
+        ? api.manager.getStatsProxy(proxyName, instanceName, serviceName, taskName, destinationName)
+        : api.manager.getStats(instanceName, serviceName, taskName, destinationName),
     );
     runInAction(() => {
       this.taskStatusMapStart(instanceName, serviceName, taskName);

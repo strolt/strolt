@@ -38,7 +38,7 @@ const Links: React.FC<LinksProps> = (params) => {
         Snapshots
       </Link>
 
-			<Divider type="vertical" style={{margin:0}} />
+      <Divider type="vertical" style={{ margin: 0 }} />
 
       <Link
         to={"instances.instanceId.serviceId.taskId.destinationId.prune"}
@@ -48,16 +48,20 @@ const Links: React.FC<LinksProps> = (params) => {
         Prune
       </Link>
 
-			<Divider type="vertical" style={{margin:0}} />
-			
+      <Divider type="vertical" style={{ margin: 0 }} />
+
       <Link
-        to={"instances.instanceId.serviceId.taskId.destinationId.stats"}
+        to={
+          !!linkParams.proxyId
+            ? "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxyStats"
+            : "instances.instanceId.serviceId.taskId.destinationId.stats"
+        }
         params={linkParams}
         style={{ display: "block" }}
       >
         Stats
       </Link>
-			</Space>
+    </Space>
   );
 };
 
@@ -69,14 +73,14 @@ export const PrintDestination: React.FC<TaskListItemDestinationProps> = (el) => 
         <span>{el.name}:</span>
         <b>{el.driver}</b>
       </Space>
-      
-        <Links
-          proxyName={el.proxyName}
-          instanceName={el.instanceName}
-          serviceName={el.serviceName}
-          taskName={el.taskName}
-          destinationName={el.destinationName}
-        />
+
+      <Links
+        proxyName={el.proxyName}
+        instanceName={el.instanceName}
+        serviceName={el.serviceName}
+        taskName={el.taskName}
+        destinationName={el.destinationName}
+      />
     </Space>
   );
 };

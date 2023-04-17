@@ -29,6 +29,7 @@ func (s *ManagerHandlers) Router(r chi.Router) {
 
 	r.Post("/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/backup", s.backupProxy)
 	r.Get("/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots", s.getSnapshotsProxy)
+	r.Get("/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats", s.getStatsProxy)
 }
 
 // getInstances godoc
