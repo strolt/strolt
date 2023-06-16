@@ -1,0 +1,576 @@
+definitions:
+  Config:
+    properties:
+      disableWatchChanges:
+        type: boolean
+      services:
+        additionalProperties:
+          $ref: '#/definitions/ConfigService'
+        type: object
+      tags:
+        items:
+          type: string
+        type: array
+      timezone:
+        type: string
+    type: object
+  ConfigService:
+    additionalProperties:
+      $ref: '#/definitions/ConfigServiceTask'
+    type: object
+  ConfigServiceTask:
+    properties:
+      destinations:
+        additionalProperties:
+          $ref: '#/definitions/ConfigServiceTaskDestination'
+        type: object
+      notifications:
+        items:
+          $ref: '#/definitions/ConfigServiceTaskNotification'
+        type: array
+      schedule:
+        $ref: '#/definitions/ConfigServiceTaskSchedule'
+      source:
+        $ref: '#/definitions/ConfigServiceTaskSource'
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  ConfigServiceTaskDestination:
+    properties:
+      driver:
+        type: string
+    type: object
+  ConfigServiceTaskNotification:
+    properties:
+      driver:
+        type: string
+      events:
+        items:
+          $ref: '#/definitions/EventType'
+        type: array
+      name:
+        type: string
+    type: object
+  ConfigServiceTaskSchedule:
+    properties:
+      backup:
+        type: string
+      prune:
+        type: string
+    type: object
+  ConfigServiceTaskSource:
+    properties:
+      driver:
+        type: string
+    type: object
+  EventType:
+    enum:
+      - OPERATION_START
+      - OPERATION_STOP
+      - OPERATION_ERROR
+      - SOURCE_START
+      - SOURCE_STOP
+      - SOURCE_ERROR
+      - DESTINATION_START
+      - DESTINATION_STOP
+      - DESTINATION_ERROR
+    type: string
+    x-enum-varnames:
+      - EventTypeOPERATIONSTART
+      - EventTypeOPERATIONSTOP
+      - EventTypeOPERATIONERROR
+      - EventTypeSOURCESTART
+      - EventTypeSOURCESTOP
+      - EventTypeSOURCEERROR
+      - EventTypeDESTINATIONSTART
+      - EventTypeDESTINATIONSTOP
+      - EventTypeDESTINATIONERROR
+  FormattedStats:
+    properties:
+      snapshotsCount:
+        type: integer
+      totalFileCount:
+        type: integer
+      totalSize:
+        type: integer
+      totalSizeFormatted:
+        type: string
+    type: object
+  ManagerInfo:
+    properties:
+      instances:
+        items:
+          $ref: '#/definitions/ManagerInfoInstance'
+        type: array
+      updatedAt:
+        type: string
+      version:
+        type: string
+    type: object
+  ManagerInfoInstance:
+    properties:
+      config:
+        $ref: '#/definitions/ManagerInfoInstanceConfig'
+      isOnline:
+        type: boolean
+      lastestOnlineAt:
+        type: string
+      name:
+        type: string
+      proxyName:
+        type: string
+      startedAt:
+        type: string
+      taskStatus:
+        $ref: '#/definitions/ManagerInfoInstanceTaskStatus'
+      version:
+        type: string
+    type: object
+  ManagerInfoInstanceConfig:
+    properties:
+      isInitialized:
+        type: boolean
+      updatedAt:
+        type: string
+    type: object
+  ManagerInfoInstanceTaskStatus:
+    properties:
+      isInitialized:
+        type: boolean
+      updateRequestedAt:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  ManagerPreparedInstance:
+    properties:
+      config:
+        $ref: '#/definitions/Config'
+      isOnline:
+        type: boolean
+      name:
+        type: string
+      proxyName:
+        type: string
+      taskStatus:
+        $ref: '#/definitions/ManagerStatus'
+    type: object
+  ManagerStatus:
+    properties:
+      lastChangedAt:
+        type: string
+      tasks:
+        items:
+          $ref: '#/definitions/ManagerTaskItem'
+        type: array
+    type: object
+  ManagerTaskItem:
+    properties:
+      isRunning:
+        type: boolean
+      lastEndedAt:
+        type: string
+      operation:
+        $ref: '#/definitions/OperationType'
+      serviceName:
+        type: string
+      startedAt:
+        type: string
+      taskName:
+        type: string
+      trigger:
+        $ref: '#/definitions/TriggerType'
+    type: object
+  OperationType:
+    enum:
+      - BACKUP
+      - PRUNE
+      - RESTORE
+      - SNAPSHOTS
+      - STATS
+    type: string
+    x-enum-varnames:
+      - OperationTypeBACKUP
+      - OperationTypePRUNE
+      - OperationTypeRESTORE
+      - OperationTypeSNAPSHOTS
+      - OperationTypeSTATS
+  ServicesGetPruneResult:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/Snapshot'
+        type: array
+    type: object
+  ServicesGetSnapshotsResult:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/Snapshot'
+        type: array
+    type: object
+  ServicesGetStatsResult:
+    properties:
+      data:
+        $ref: '#/definitions/FormattedStats'
+    type: object
+  Snapshot:
+    properties:
+      id:
+        type: string
+      paths:
+        items:
+          type: string
+        type: array
+      shortId:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      time:
+        type: string
+    type: object
+  TriggerType:
+    enum:
+      - SCHEDULE
+      - API
+      - MANUAL
+    type: string
+    x-enum-varnames:
+      - TriggerTypeSCHEDULE
+      - TriggerTypeAPI
+      - TriggerTypeMANUAL
+  apiu.ResultError:
+    properties:
+      error:
+        type: string
+    type: object
+  apiu.ResultSuccess:
+    properties:
+      data:
+        type: string
+    type: object
+  managerh.backupAllResponse:
+    properties:
+      errorStarted:
+        items:
+          $ref: '#/definitions/managerh.backupAllStatusItem'
+        type: array
+      successStarted:
+        items:
+          $ref: '#/definitions/managerh.backupAllStatusItem'
+        type: array
+    type: object
+  managerh.backupAllStatusItem:
+    properties:
+      instanceName:
+        type: string
+      serviceName:
+        type: string
+      taskName:
+        type: string
+    type: object
+  public.getPingResponse:
+    properties:
+      data:
+        type: string
+    type: object
+  services.getListResult:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/services.getListResultItem'
+        type: array
+    type: object
+  services.getListResultItem:
+    properties:
+      temp:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: Strolt Proxy API.
+  version: '1.0'
+paths:
+  /api/v1/info:
+    get:
+      operationId: getInfo
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ManagerInfo'
+      security:
+        - BasicAuth: []
+      summary: Get info
+      tags:
+        - info
+  /api/v1/manager/instances:
+    get:
+      operationId: getInstances
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ManagerPreparedInstance'
+            type: array
+      security:
+        - BasicAuth: []
+      summary: Get Instances
+      tags:
+        - manager
+  /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/backup:
+    post:
+      operationId: backup
+      parameters:
+        - description: Instance name
+          in: path
+          name: instanceName
+          required: true
+          type: string
+        - description: Service name
+          in: path
+          name: serviceName
+          required: true
+          type: string
+        - description: Task name
+          in: path
+          name: taskName
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/apiu.ResultSuccess'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apiu.ResultError'
+      security:
+        - BasicAuth: []
+      summary: Start backup
+      tags:
+        - manager
+  /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune:
+    post:
+      operationId: prune
+      parameters:
+        - description: Instance name
+          in: path
+          name: instanceName
+          required: true
+          type: string
+        - description: Service name
+          in: path
+          name: serviceName
+          required: true
+          type: string
+        - description: Task name
+          in: path
+          name: taskName
+          required: true
+          type: string
+        - description: Destination name
+          in: path
+          name: destinationName
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ServicesGetPruneResult'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apiu.ResultError'
+      security:
+        - BasicAuth: []
+      summary: Prune
+      tags:
+        - manager
+  /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune/snapshots:
+    get:
+      operationId: getSnapshotsForPrune
+      parameters:
+        - description: Instance name
+          in: path
+          name: instanceName
+          required: true
+          type: string
+        - description: Service name
+          in: path
+          name: serviceName
+          required: true
+          type: string
+        - description: Task name
+          in: path
+          name: taskName
+          required: true
+          type: string
+        - description: Destination name
+          in: path
+          name: destinationName
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ServicesGetPruneResult'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apiu.ResultError'
+      security:
+        - BasicAuth: []
+      summary: Get snapshots for prune
+      tags:
+        - manager
+  /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots:
+    get:
+      operationId: getSnapshots
+      parameters:
+        - description: Instance name
+          in: path
+          name: instanceName
+          required: true
+          type: string
+        - description: Service name
+          in: path
+          name: serviceName
+          required: true
+          type: string
+        - description: Task name
+          in: path
+          name: taskName
+          required: true
+          type: string
+        - description: Destination name
+          in: path
+          name: destinationName
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ServicesGetSnapshotsResult'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apiu.ResultError'
+      security:
+        - BasicAuth: []
+      summary: Get snapshots
+      tags:
+        - manager
+  /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats:
+    get:
+      operationId: getStats
+      parameters:
+        - description: Instance name
+          in: path
+          name: instanceName
+          required: true
+          type: string
+        - description: Service name
+          in: path
+          name: serviceName
+          required: true
+          type: string
+        - description: Task name
+          in: path
+          name: taskName
+          required: true
+          type: string
+        - description: Destination name
+          in: path
+          name: destinationName
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ServicesGetStatsResult'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apiu.ResultError'
+      security:
+        - BasicAuth: []
+      summary: Get stats
+      tags:
+        - manager
+  /api/v1/manager/instances/backup-all:
+    post:
+      operationId: backupAll
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/managerh.backupAllResponse'
+      security:
+        - BasicAuth: []
+      summary: Start all backup
+      tags:
+        - manager
+  /api/v1/ping:
+    get:
+      operationId: ping
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/public.getPingResponse'
+      summary: Ping
+      tags:
+        - public
+  /api/v1/services:
+    get:
+      operationId: getList
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/services.getListResult'
+      security:
+        - BasicAuth: []
+      summary: Get services list
+      tags:
+        - services
+  /debug:
+    get:
+      description: >-
+        Available only if env `STROLT_LOG_LEVEL=DEBUG` or
+        `STROLT_LOG_LEVEL=TRACE`
+      operationId: getDebug
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      summary: Go debug info
+      tags:
+        - public
+  /metrics:
+    get:
+      operationId: getMetrics
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      summary: Prometheus metrics
+      tags:
+        - public
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: '2.0'
