@@ -1,4 +1,6 @@
 # strolt
 
-[![Image Size](https://img.shields.io/docker/image-size/strolt/strolt/latest)](https://hub.docker.com/r/strolt/strolt)
-[![Docker Pulls](https://img.shields.io/docker/pulls/strolt/strolt)](https://hub.docker.com/r/strolt/strolt)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/strolt/strolt)](https://github.com/strolt/strolt)
+[![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/strolt/strolt?label=image%20size%20%28strolt%29)](https://hub.docker.com/r/strolt/strolt) [![Docker Pulls](https://img.shields.io/docker/pulls/strolt/strolt?label=docker%20pulls%20%28strolt%29)](https://hub.docker.com/r/strolt/strolt)
+[![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/strolt/stroltp?label=image%20size%20%28stroltp%29)](https://hub.docker.com/r/strolt/stroltp) [![Docker Pulls](https://img.shields.io/docker/pulls/strolt/stroltp?label=docker%20pulls%20%28stroltp%29)](https://hub.docker.com/r/strolt/stroltp)
+[![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/strolt/stroltm?label=image%20size%20%28stroltm%29)](https://hub.docker.com/r/strolt/stroltm) [![Docker Pulls](https://img.shields.io/docker/pulls/strolt/stroltm?label=docker%20pulls%20%28stroltm%29)](https://hub.docker.com/r/strolt/stroltm)
