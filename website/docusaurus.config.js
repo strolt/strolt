@@ -8,7 +8,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/oceanicNext");
 const config = {
 	title: "Strolt",
 	tagline: "Dinosaurs are cool",
-	url: "https://your-docusaurus-test-site.com",
+	url: "https://strolt.shibanet0.com",
 	baseUrl: "/",
 	onBrokenLinks: "throw",
 	onBrokenMarkdownLinks: "warn",
@@ -18,13 +18,15 @@ const config = {
 	// If you aren't using GitHub pages, you don't need these.
 	organizationName: "strolt", // Usually your GitHub org/user name.
 	projectName: "strolt", // Usually your repo name.
+	deploymentBranch: 'gh-pages',
+	trailingSlash: true,
 
 	// Even if you don't use internalization, you can use this field to set useful
 	// metadata like html lang. For example, if your site is Chinese, you may want
 	// to replace "en" with "zh-Hans".
 	i18n: {
 		defaultLocale: "en",
-		locales: ["en", "ru"],
+		locales: ["en"],
 	},
 
 	presets: [
@@ -45,6 +47,16 @@ const config = {
 				theme: {
 					customCss: require.resolve("./src/css/custom.css"),
 				},
+				gtag: {
+          trackingID: 'G-1PKZLPTL7E',
+          anonymizeIP: true,
+        },
+				sitemap: {
+          changefreq: 'weekly',
+          priority: 0.5,
+          ignorePatterns: ['/tags/**'],
+          filename: 'sitemap.xml',
+        },
 			}),
 		],
 		[
