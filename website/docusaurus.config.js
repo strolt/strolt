@@ -18,7 +18,7 @@ const config = {
 	// If you aren't using GitHub pages, you don't need these.
 	organizationName: "strolt", // Usually your GitHub org/user name.
 	projectName: "strolt", // Usually your repo name.
-	deploymentBranch: 'gh-pages',
+	deploymentBranch: "gh-pages",
 	trailingSlash: true,
 
 	// Even if you don't use internalization, you can use this field to set useful
@@ -28,6 +28,14 @@ const config = {
 		defaultLocale: "en",
 		locales: ["en"],
 	},
+
+	scripts: [
+		process.env.NODE_ENV === "production" && {
+			src: "https://analytics.shibanet0.com/pzjlkgj6ujcurpo",
+			"data-website-id": "dc5cd938-935a-4b1e-95f8-da4d89f043ac",
+			async: true,
+		},
+	].filter(Boolean),
 
 	presets: [
 		[
@@ -47,16 +55,12 @@ const config = {
 				theme: {
 					customCss: require.resolve("./src/css/custom.css"),
 				},
-				gtag: {
-          trackingID: 'G-1PKZLPTL7E',
-          anonymizeIP: true,
-        },
 				sitemap: {
-          changefreq: 'weekly',
-          priority: 0.5,
-          ignorePatterns: ['/tags/**'],
-          filename: 'sitemap.xml',
-        },
+					changefreq: "weekly",
+					priority: 0.5,
+					ignorePatterns: ["/tags/**"],
+					filename: "sitemap.xml",
+				},
 			}),
 		],
 		[
