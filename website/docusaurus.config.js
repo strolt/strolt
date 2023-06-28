@@ -118,10 +118,10 @@ const config = {
 						label: "GitHub",
 						position: "right",
 					},
-					{
-						type: "localeDropdown",
-						position: "right",
-					},
+					// {
+					// 	type: "localeDropdown",
+					// 	position: "right",
+					// },
 				],
 			},
 			footer: {
@@ -151,6 +151,9 @@ const config = {
 			prism: {
 				theme: lightCodeTheme,
 				darkTheme: darkCodeTheme,
+			},
+			colorMode: {
+				respectPrefersColorScheme: true,
 			},
 		}),
 };
