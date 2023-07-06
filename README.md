@@ -14,4 +14,4 @@
 
 [![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/strolt/stroltm?label=image%20size%20%28stroltm%29)](https://hub.docker.com/r/strolt/stroltm) [![Docker Pulls](https://img.shields.io/docker/pulls/strolt/stroltm?label=docker%20pulls%20%28stroltm%29)](https://hub.docker.com/r/strolt/stroltm)
 
-![](https://counter.shibanet0.com/collect/2992f29c-c3d5-495e-8d7a-3fadfcab173c)
+![](https://c.shibanet0.com/collect/2992f29c-c3d5-495e-8d7a-3fadfcab173c)

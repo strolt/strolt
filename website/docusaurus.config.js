@@ -31,7 +31,7 @@ const config = {
 
 	scripts: [
 		process.env.NODE_ENV === "production" && {
-			src: "https://analytics.shibanet0.com/pzjlkgj6ujcurpo",
+			src: "https://a.shibanet0.com/pzjlkgj6ujcurpo",
 			"data-website-id": "dc5cd938-935a-4b1e-95f8-da4d89f043ac",
 			async: true,
 		},
