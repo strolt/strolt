@@ -3,23 +3,23 @@
 
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/oceanicNext");
+const { baseURL } = require("./config");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-	title: "Strolt",
-	tagline: "Dinosaurs are cool",
-	url: "https://strolt.shibanet0.com",
+	title: "strolt",
+	tagline: "A user-friendly tool for the effortless backup management.",
+	url: baseURL,
 	baseUrl: "/",
 	onBrokenLinks: "throw",
 	onBrokenMarkdownLinks: "warn",
-	favicon: "img/favicon.ico",
+	favicon: "img/favicon.svg",
 
 	// GitHub pages deployment config.
 	// If you aren't using GitHub pages, you don't need these.
 	organizationName: "strolt", // Usually your GitHub org/user name.
 	projectName: "strolt", // Usually your repo name.
 	deploymentBranch: "gh-pages",
-	trailingSlash: true,
 
 	// Even if you don't use internalization, you can use this field to set useful
 	// metadata like html lang. For example, if your site is Chinese, you may want
@@ -28,6 +28,9 @@ const config = {
 		defaultLocale: "en",
 		locales: ["en"],
 	},
+	themes: [
+		// "@docusaurus/theme-search-algolia"
+	],
 
 	scripts: [
 		process.env.NODE_ENV === "production" && {
@@ -46,9 +49,9 @@ const config = {
 					sidebarPath: require.resolve("./sidebars.js"),
 
 					editUrl: ({ locale, docPath }) => {
-						if (locale !== "en") {
-							return `https://github.com/strolt/strolt/edit/main/website/i18n/${locale}/docusaurus-plugin-content-docs/current/${docPath}`;
-						}
+						// if (locale !== "en") {
+						// 	return `https://github.com/strolt/strolt/edit/main/website/i18n/${locale}/docusaurus-plugin-content-docs/current/${docPath}`;
+						// }
 						return `https://github.com/strolt/strolt/edit/main/website/docs/${docPath}`;
 					},
 				},
@@ -70,15 +73,15 @@ const config = {
 				specs: [
 					{
 						spec: "../.swagger/strolt/swagger.yaml",
-						route: "/api/strolt",
+						route: "/docs/api/strolt",
 					},
 					{
 						spec: "../.swagger/stroltm/swagger.yaml",
-						route: "/api/stroltm",
+						route: "/docs/api/stroltm",
 					},
 					{
 						spec: "../.swagger/stroltp/swagger.yaml",
-						route: "/api/stroltp",
+						route: "/docs/api/stroltp",
 					},
 				],
 				// Theme Options for modifying how redoc renders them
@@ -93,6 +96,14 @@ const config = {
 	themeConfig:
 		/** @type {import('@docusaurus/preset-classic').ThemeConfig} */
 		({
+			metadata: [
+				{
+					name: "keywords",
+					content: "strolt, backup, restic, pg_dump, mongodump, mysqldump",
+				},
+				// { name: "og:image", content: `${baseURL}/img/logo.svg` },
+				// { name: "twitter:image", content: `${baseURL}/img/logo.svg` },
+			],
 			tableOfContents: {
 				minHeadingLevel: 2,
 				maxHeadingLevel: 5,
@@ -100,8 +111,8 @@ const config = {
 			navbar: {
 				title: "Strolt",
 				logo: {
-					alt: "My Site Logo",
-					src: "img/logo.svg",
+					alt: "strolt - logo",
+					src: "img/favicon.svg",
 				},
 				items: [
 					{
@@ -110,9 +121,6 @@ const config = {
 						position: "left",
 						label: "Docs",
 					},
-					{ to: "/api/strolt", label: "API/Strolt", position: "left" },
-					{ to: "/api/stroltm", label: "API/Stroltm", position: "left" },
-					{ to: "/api/stroltp", label: "API/Stroltp", position: "left" },
 					{
 						href: "https://github.com/strolt/strolt",
 						label: "GitHub",
