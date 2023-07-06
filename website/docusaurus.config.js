@@ -28,9 +28,6 @@ const config = {
 		defaultLocale: "en",
 		locales: ["en"],
 	},
-	themes: [
-		// "@docusaurus/theme-search-algolia"
-	],
 
 	scripts: [
 		process.env.NODE_ENV === "production" && {
@@ -162,6 +159,12 @@ const config = {
 			},
 			colorMode: {
 				respectPrefersColorScheme: true,
+			},
+			algolia: {
+				appId: "FF83SZ9CDS",
+				apiKey: "643d73c08ff386e3da20a56e59319785", // pragma: allowlist secret
+				indexName: "strolt-shibanet0",
+				contextualSearch: true,
 			},
 		}),
 };
