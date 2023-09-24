@@ -87,7 +87,6 @@ func stroltGetSnapshotList(serviceName string, taskName string, destination stri
 	return snapshots, nil
 }
 
-//nolint:unparam
 func stroltGetLatestSnapshotID(serviceName string, taskName string, destination string) (string, error) {
 	snapshots, err := stroltGetSnapshotList(serviceName, taskName, destination)
 	if err != nil {

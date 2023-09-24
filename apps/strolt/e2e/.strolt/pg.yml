@@ -56,4 +56,3 @@ services:
           extends: restic_base
           env:
             RESTIC_REPOSITORY: "s3:http://minio:9000/restic-pg-p"
-

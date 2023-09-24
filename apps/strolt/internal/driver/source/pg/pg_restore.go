@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -109,4 +110,12 @@ func (i *PgDump) restoreWithPgRestore(ctx context.Context, filename string) erro
 	}
 
 	return nil
+}
+
+func (i *PgDump) RestorePipe(_ context.Context) error {
+	return errors.New("not support pipe")
+}
+
+func (i *PgDump) IsSupportedRestorePipe(_ context.Context) bool {
+	return false
 }

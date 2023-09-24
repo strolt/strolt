@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -37,4 +38,12 @@ func (i *MySQL) Restore(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (i *MySQL) RestorePipe(_ context.Context) error {
+	return errors.New("not support pipe")
+}
+
+func (i *MySQL) IsSupportedRestorePipe(_ context.Context) bool {
+	return false
 }

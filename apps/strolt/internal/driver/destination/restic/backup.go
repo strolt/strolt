@@ -2,7 +2,9 @@ package restic
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 
@@ -95,4 +97,12 @@ func (i *Restic) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 		TotalBytesProcessed: backupOutput.TotalBytesProcessed,
 		SnapshotID:          backupOutput.SnapshotID,
 	}, nil
+}
+
+func (i *Restic) BackupPipe(ctx context.Context, filename string) (io.WriteCloser, error) {
+	return nil, errors.New("not support pipe")
+}
+
+func (i *Restic) IsSupportedBackupPipe(ctx context.Context) bool {
+	return false
 }

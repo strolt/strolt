@@ -1,7 +1,9 @@
 package pg
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 
@@ -39,4 +41,12 @@ func (i *PgDump) Backup(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (i *PgDump) BackupPipe(_ context.Context) (io.ReadCloser, string, error) {
+	return nil, "", errors.New("not support pipe")
+}
+
+func (i *PgDump) IsSupportedBackupPipe(_ context.Context) bool {
+	return false
 }

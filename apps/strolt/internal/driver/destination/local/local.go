@@ -1,7 +1,9 @@
 package local
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"time"
@@ -109,8 +111,33 @@ func (i *Local) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 	return sctxt.BackupOutput{}, nil
 }
 
+func (i *Local) BackupPipe(ctx context.Context, filename string) (io.WriteCloser, error) {
+	snapshotName := uuid.New().String()
+
+	dirpath := path.Join(i.config.Path, snapshotName)
+	if err := os.MkdirAll(dirpath, 0777); err != nil { //nolint:gomnd
+		return nil, err
+	}
+
+	filepath := path.Join(dirpath, filename)
+
+	return os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644) //nolint:gomnd
+}
+
+func (i *Local) IsSupportedBackupPipe(ctx context.Context) bool {
+	return true
+}
+
 func (i *Local) Restore(ctx context.Context, snapshotName string) error {
 	return copy.Copy(path.Join(i.config.Path, snapshotName), ctx.WorkDir)
+}
+
+func (i *Local) RestorePipe(ctx context.Context, snapshotName string) error {
+	return errors.New("not support pipe")
+}
+
+func (i *Local) IsSupportedRestorePipe(ctx context.Context) bool {
+	return false
 }
 
 func (i *Local) Prune(_ context.Context, isDryRun bool) ([]interfaces.Snapshot, error) {

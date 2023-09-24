@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"io"
 	"time"
 
 	"github.com/dustin/go-humanize"
@@ -54,7 +55,13 @@ type DriverSourceInterface interface {
 	SetEnv(env interface{}) error
 
 	Backup(ctx context.Context) error
+	BackupPipe(ctx context.Context) (io.ReadCloser, string, error)
+	IsSupportedBackupPipe(ctx context.Context) bool
+
 	Restore(ctx context.Context) error
+	RestorePipe(ctx context.Context) error
+	IsSupportedRestorePipe(ctx context.Context) bool
+
 	IsEmpty() (bool, error)
 	BinaryVersion() ([]DriverBinaryVersion, error)
 }
@@ -67,7 +74,13 @@ type DriverDestinationInterface interface {
 	SetDriverName(driverName string)
 
 	Backup(ctx context.Context) (sctxt.BackupOutput, error)
+	BackupPipe(ctx context.Context, filename string) (io.WriteCloser, error)
+	IsSupportedBackupPipe(ctx context.Context) bool
+
 	Restore(ctx context.Context, snapshotName string) error
+	RestorePipe(ctx context.Context, snapshotName string) error
+	IsSupportedRestorePipe(ctx context.Context) bool
+
 	Prune(ctx context.Context, isDryRun bool) ([]Snapshot, error)
 	Stats() (Stats, error)
 	Snapshots() ([]Snapshot, error)

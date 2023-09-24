@@ -1,6 +1,7 @@
 package restic
 
 import (
+	"errors"
 	"os/exec"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
@@ -31,4 +32,12 @@ func (i *Restic) Restore(ctx context.Context, snapshotID string) error {
 	i.logger.Info(string(output))
 
 	return nil
+}
+
+func (i *Restic) RestorePipe(ctx context.Context, snapshotName string) error {
+	return errors.New("not support pipe")
+}
+
+func (i *Restic) IsSupportedRestorePipe(ctx context.Context) bool {
+	return false
 }

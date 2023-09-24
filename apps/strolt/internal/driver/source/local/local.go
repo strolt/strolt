@@ -2,7 +2,10 @@ package local
 
 import (
 	"fmt"
+	"io"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
@@ -81,11 +84,31 @@ func (i *Local) Backup(_ context.Context) error {
 	return nil
 }
 
+func (i *Local) BackupPipe(_ context.Context) (io.ReadCloser, string, error) {
+	stringReader := strings.NewReader("shiny!")
+	stringReadCloser := io.NopCloser(stringReader)
+	filename := fmt.Sprintf("%d.txt", time.Now().UnixNano())
+
+	return stringReadCloser, filename, nil
+}
+
+func (i *Local) IsSupportedBackupPipe(_ context.Context) bool {
+	return true
+}
+
 func (i *Local) Restore(_ context.Context) error {
 	// if err := copy.Copy(ctx.WorkDir, i.config.Path); err != nil {
 	// 	return err
 	// }
 	return nil
+}
+
+func (i *Local) RestorePipe(_ context.Context) error {
+	return nil
+}
+
+func (i *Local) IsSupportedRestorePipe(_ context.Context) bool {
+	return false
 }
 
 func (i *Local) IsEmpty() (bool, error) {
