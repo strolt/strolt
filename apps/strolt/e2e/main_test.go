@@ -12,9 +12,13 @@ func TestMain(t *testing.T) {
 	assert.NoError(t, dockerComposeDown())
 	tt.stop()
 
-	tt = timeTook("docker compose down")
+	tt = timeTook("docker compose up")
 
 	assert.NoError(t, dockerComposeUp("minio", "postgres", "mongo", "mariadb", "mysql"))
+	tt.stop()
+
+	tt = timeTook("strolt up")
+
 	assert.NoError(t, dockerComposeUpStrolt())
 	tt.stop()
 
