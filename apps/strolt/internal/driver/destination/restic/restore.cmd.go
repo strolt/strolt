@@ -12,10 +12,8 @@ func (i *Restic) restoreCmd(ctx context.Context, snapshotID string, path string,
 
 	if isPipe {
 		args = append(args, "dump", snapshotID, path)
-		args = append(args, "")
 	} else {
-		args = append(args, "restore", snapshotID)
-		args = append(args, "--target", ctx.WorkDir)
+		args = append(args, "restore", snapshotID, "--target", ctx.WorkDir)
 	}
 
 	cmd := exec.Command(i.getBin(), args...)
