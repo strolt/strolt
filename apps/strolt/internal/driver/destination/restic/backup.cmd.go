@@ -16,7 +16,7 @@ func (i *Restic) backupCmd(ctx context.Context, filename string, isPipe bool) (*
 
 	var args []string
 	args = append(args, i.getGlobalFlags()...)
-	args = append(args, "backup")
+	args = append(args, "backup", "--host", "strolt_host")
 
 	{
 		for _, tag := range ctx.Tags {
