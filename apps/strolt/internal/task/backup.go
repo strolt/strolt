@@ -131,6 +131,13 @@ func (t *Task) backupManual() error {
 }
 
 func (t *Task) backupPipe() error {
+	if err := t.managerStart(sctxt.OpTypeBackup); err != nil {
+		return err
+	}
+	defer t.managerStop()
+
+	t.eventOperationStart()
+
 	sourceDriver, err := t.getSourceDriver()
 	if err != nil {
 		return err
@@ -177,7 +184,17 @@ func (t *Task) backupPipe() error {
 		exitError <- err
 	}()
 
-	return <-exitError
+	err = <-exitError
+
+	if err != nil {
+		t.eventOperationError(err)
+	} else {
+		t.eventOperationStop()
+	}
+
+	notificationWaitGroup.Wait()
+
+	return err
 }
 
 func (t *Task) Backup() error {
