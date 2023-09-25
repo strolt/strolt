@@ -8,7 +8,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 )
 
-func (t Task) GetStats(destinationName string) (interfaces.FormattedStats, error) {
+func (t *Task) GetStats(destinationName string) (interfaces.FormattedStats, error) {
 	if err := t.managerStart(sctxt.OpTypeStats); err != nil {
 		return interfaces.FormattedStats{}, err
 	}

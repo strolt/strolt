@@ -12,7 +12,7 @@ import (
 
 var notificationWaitGroup = sync.WaitGroup{}
 
-func (t Task) SendNotifications() error {
+func (t *Task) SendNotifications() error {
 	for _, notification := range t.TaskConfig.Notifications {
 		if notification.IsAvailableEvent(t.Context.Event) {
 			driverNotification, err := dmanager.GetNotificationDriver(notification.Driver, t.ServiceName, t.TaskName, notification.Config)

@@ -10,29 +10,3 @@ services:
           extends: restic_base
           env:
             RESTIC_REPOSITORY: "s3:http://minio:9000/restic-local"
-
-  e2e-copy:
-    local:
-      operationMode: copy
-      source:
-        driver: local
-        config:
-          path: "/e2e/input"
-      destinations:
-        restic-local:
-          extends: restic_base
-          env:
-            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-local"
-
-  e2e-pipe:
-    local:
-      operationMode: pipe
-      source:
-        driver: local
-        config:
-          path: "/e2e/input"
-      destinations:
-        restic-local:
-          extends: restic_base
-          env:
-            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-local"

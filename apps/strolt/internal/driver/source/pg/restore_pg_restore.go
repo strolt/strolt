@@ -9,22 +9,23 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 )
 
-func (i *PgDump) backup(ctx context.Context, isPipe bool) *exec.Cmd {
-	args := i.getBackupArgs()
+func (i *PgDump) restoreWithPgRestoreCmd(ctx context.Context, filename string, isPipe bool) *exec.Cmd {
+	i.logger.Info("restore with pg_restore")
 
+	args := i.getRestoreArgs()
 	if !isPipe {
-		args = append(args, "--file="+i.getFileName())
+		args = append(args, filename)
 	}
 
-	cmd := exec.Command(i.getBinPgDump(), args...)
+	cmd := exec.Command(i.getBinPgRestore(), args...)
 	cmd.Dir = ctx.WorkDir
 	cmd.Env = i.getEnv()
 
 	return cmd
 }
 
-func (i *PgDump) Backup(ctx context.Context) error {
-	cmd := i.backup(ctx, false)
+func (i *PgDump) restoreWithPgRestoreCopy(ctx context.Context, filename string) error {
+	cmd := i.restoreWithPgRestoreCmd(ctx, filename, false)
 
 	outputByte, err := cmd.CombinedOutput()
 	outputString := string(outputByte)
@@ -52,21 +53,17 @@ func (i *PgDump) Backup(ctx context.Context) error {
 	return nil
 }
 
-func (i *PgDump) BackupPipe(ctx context.Context) (io.ReadCloser, string, func() error, error) {
-	cmd := i.backup(ctx, true)
+func (i *PgDump) restoreWithPgRestorePipe(ctx context.Context, filename string) (io.WriteCloser, func() error, error) {
+	cmd := i.restoreWithPgRestoreCmd(ctx, filename, true)
 
-	pipe, err := cmd.StdoutPipe()
+	writer, err := cmd.StdinPipe()
 	if err != nil {
-		return nil, "", nil, err
+		return nil, nil, err
 	}
 
 	if err := cmd.Start(); err != nil {
-		return nil, "", nil, err
+		return nil, nil, err
 	}
 
-	return pipe, i.getFileName(), cmd.Wait, err
-}
-
-func (i *PgDump) IsSupportedBackupPipe(_ context.Context) bool {
-	return i.config.Format != FormatDirectory
+	return writer, cmd.Wait, err
 }

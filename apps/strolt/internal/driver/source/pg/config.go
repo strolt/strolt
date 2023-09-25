@@ -6,9 +6,18 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type Format string
+
+const (
+	FormatCustom    Format = "c"
+	FormatDirectory Format = "d"
+	FormatTar       Format = "t"
+	FormatPlainText Format = "p"
+)
+
 type PgDumpConfig struct {
 	BinPathPgDump    string `yaml:"bin_path_pg_dump"`
-	BinPathPgRestore string `yaml:"bin_path_restore"`
+	BinPathPgRestore string `yaml:"bin_path_pg_restore"`
 	BinPathPsql      string `yaml:"bin_path_psql"`
 
 	Host     string `yaml:"host"`
@@ -16,7 +25,7 @@ type PgDumpConfig struct {
 	Database string `yaml:"database"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
-	Format   string `yaml:"format"` // -F, --format=c|d|t|p         output file format (custom, directory, tar, plain text (default))
+	Format   Format `yaml:"format"` // -F, --format=c|d|t|p         output file format (custom, directory, tar, plain text (default))
 
 	BackupParams  string `yaml:"backup_params"`
 	RestoreParams string `yaml:"restore_params"`
@@ -38,10 +47,10 @@ func (i *PgDump) SetConfig(config interface{}) error {
 
 func (i *PgDump) validateConfig() error {
 	if i.config.Format != "" {
-		if i.config.Format != "c" &&
-			i.config.Format != "t" &&
-			i.config.Format != "d" &&
-			i.config.Format != "p" {
+		if i.config.Format != FormatCustom &&
+			i.config.Format != FormatTar &&
+			i.config.Format != FormatDirectory &&
+			i.config.Format != FormatPlainText {
 			return fmt.Errorf("not available format. available [c|t|p|d]")
 		}
 	}

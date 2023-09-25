@@ -64,9 +64,12 @@ func strolt(args ...string) error {
 
 func stroltWithResponse(args ...string) ([]byte, error) {
 	cmd := exec.Command("docker", "exec", "strolt", "/bin/sh", "-c", fmt.Sprintf("/strolt/bin/strolt %s", strings.Join(args, " ")))
-	fmt.Println(cmd.String()) //nolint:forbidigo
 
-	return cmd.CombinedOutput()
+	output, err := cmd.CombinedOutput()
+
+	fmt.Println(string(output)) //nolint:forbidigo
+
+	return output, err
 }
 
 func stroltGetSnapshotList(serviceName string, taskName string, destination string) ([]Snapshot, error) {

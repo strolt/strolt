@@ -55,11 +55,11 @@ type DriverSourceInterface interface {
 	SetEnv(env interface{}) error
 
 	Backup(ctx context.Context) error
-	BackupPipe(ctx context.Context) (io.ReadCloser, string, error)
+	BackupPipe(ctx context.Context) (reader io.ReadCloser, filename string, wait func() error, err error)
 	IsSupportedBackupPipe(ctx context.Context) bool
 
 	Restore(ctx context.Context) error
-	RestorePipe(ctx context.Context) error
+	RestorePipe(ctx context.Context, filename string) (writer io.WriteCloser, wait func() error, err error)
 	IsSupportedRestorePipe(ctx context.Context) bool
 
 	IsEmpty() (bool, error)
@@ -74,11 +74,11 @@ type DriverDestinationInterface interface {
 	SetDriverName(driverName string)
 
 	Backup(ctx context.Context) (sctxt.BackupOutput, error)
-	BackupPipe(ctx context.Context, filename string) (io.WriteCloser, error)
+	BackupPipe(ctx context.Context, filename string) (writer io.WriteCloser, wait func() error, err error)
 	IsSupportedBackupPipe(ctx context.Context) bool
 
 	Restore(ctx context.Context, snapshotName string) error
-	RestorePipe(ctx context.Context, snapshotName string) error
+	RestorePipe(ctx context.Context, snapshotName string) (reader io.ReadCloser, filename string, wait func() error, err error)
 	IsSupportedRestorePipe(ctx context.Context) bool
 
 	Prune(ctx context.Context, isDryRun bool) ([]Snapshot, error)

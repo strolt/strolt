@@ -11,7 +11,7 @@ import (
 
 type SnapshotList []interfaces.Snapshot
 
-func (t Task) GetSnapshotList(destinationName string) (SnapshotList, error) {
+func (t *Task) GetSnapshotList(destinationName string) (SnapshotList, error) {
 	if err := t.managerStart(sctxt.OpTypeSnapshots); err != nil {
 		return nil, err
 	}

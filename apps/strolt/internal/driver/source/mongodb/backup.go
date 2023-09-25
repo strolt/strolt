@@ -45,8 +45,8 @@ func (i *MongoDB) Backup(ctx context.Context) error {
 	return nil
 }
 
-func (i *MongoDB) BackupPipe(_ context.Context) (io.ReadCloser, string, error) {
-	return nil, "", errors.New("not support pipe")
+func (i *MongoDB) BackupPipe(_ context.Context) (io.ReadCloser, string, func() error, error) {
+	return nil, "", func() error { return nil }, errors.New("not support pipe")
 }
 
 func (i *MongoDB) IsSupportedBackupPipe(_ context.Context) bool {

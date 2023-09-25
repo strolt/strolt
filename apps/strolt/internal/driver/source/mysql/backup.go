@@ -41,8 +41,8 @@ func (i *MySQL) Backup(ctx context.Context) error {
 	return nil
 }
 
-func (i *MySQL) BackupPipe(_ context.Context) (io.ReadCloser, string, error) {
-	return nil, "", errors.New("not support pipe")
+func (i *MySQL) BackupPipe(_ context.Context) (io.ReadCloser, string, func() error, error) {
+	return nil, "", func() error { return nil }, errors.New("not support pipe")
 }
 
 func (i *MySQL) IsSupportedBackupPipe(_ context.Context) bool {

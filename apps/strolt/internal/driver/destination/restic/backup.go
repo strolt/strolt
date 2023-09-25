@@ -2,14 +2,10 @@ package restic
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
-	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
-	"github.com/strolt/strolt/apps/strolt/internal/ldflags"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 )
 
@@ -32,41 +28,10 @@ type resticBackupOutput struct {
 }
 
 func (i *Restic) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
-	tags, err := i.BinaryVersion()
+	cmd, err := i.backupCmd(ctx, "", false)
 	if err != nil {
 		return sctxt.BackupOutput{}, err
 	}
-
-	var args []string
-	args = append(args, i.getGlobalFlags()...)
-	args = append(args, "backup")
-
-	{
-		for _, tag := range ctx.Tags {
-			args = append(args, "--tag", tag)
-		}
-
-		for _, tag := range tags {
-			args = append(args, "--tag", fmt.Sprintf("%s=%s", tag.Name, tag.Version))
-		}
-
-		args = append(args, "--tag", fmt.Sprintf("%s=%s", ldflags.GetBinaryName(), ldflags.GetVersion()))
-	}
-
-	args = append(args, "--tag", fmt.Sprintf("stroltStartedAt=%d", ctx.Operation.Time.Start.Unix()))
-
-	args = append(args, i.getBackupFlags()...)
-	args = append(args, ".")
-
-	cmd := exec.Command(i.getBin(), args...)
-	cmd.Dir = ctx.WorkDir
-
-	env, err := i.getEnv()
-	if err != nil {
-		return sctxt.BackupOutput{}, err
-	}
-
-	cmd.Env = env
 
 	i.logger.Debug(cmd.String())
 
@@ -99,10 +64,24 @@ func (i *Restic) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 	}, nil
 }
 
-func (i *Restic) BackupPipe(ctx context.Context, filename string) (io.WriteCloser, error) {
-	return nil, errors.New("not support pipe")
+func (i *Restic) BackupPipe(ctx context.Context, filename string) (io.WriteCloser, func() error, error) {
+	cmd, err := i.backupCmd(ctx, filename, true)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	writer, err := cmd.StdinPipe()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if err := cmd.Start(); err != nil {
+		return nil, nil, err
+	}
+
+	return writer, cmd.Wait, nil
 }
 
 func (i *Restic) IsSupportedBackupPipe(ctx context.Context) bool {
-	return false
+	return true
 }

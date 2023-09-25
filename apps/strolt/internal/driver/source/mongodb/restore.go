@@ -3,6 +3,7 @@ package mongodb
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 
@@ -42,8 +43,8 @@ func (i *MongoDB) Restore(ctx context.Context) error {
 	return nil
 }
 
-func (i *MongoDB) RestorePipe(_ context.Context) error {
-	return errors.New("not support pipe")
+func (i *MongoDB) RestorePipe(_ context.Context, filename string) (io.WriteCloser, func() error, error) {
+	return nil, func() error { return nil }, errors.New("not support pipe")
 }
 
 func (i *MongoDB) IsSupportedRestorePipe(_ context.Context) bool {

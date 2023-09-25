@@ -136,10 +136,15 @@ func (t *Task) backupPipe() error {
 		return err
 	}
 
-	reader, filename, err := sourceDriver.BackupPipe(t.Context)
+	reader, filename, wait, err := sourceDriver.BackupPipe(t.Context)
 	if err != nil {
 		return err
 	}
+
+	defer func() {
+		reader.Close()
+		wait() //nolint: errcheck
+	}()
 
 	writerList := []io.Writer{}
 
@@ -149,10 +154,15 @@ func (t *Task) backupPipe() error {
 			return err
 		}
 
-		writer, err := destinationDriver.BackupPipe(t.Context, filename)
+		writer, wait, err := destinationDriver.BackupPipe(t.Context, filename)
 		if err != nil {
 			return err
 		}
+
+		defer func() {
+			writer.Close()
+			wait() //nolint: errcheck
+		}()
 
 		writerList = append(writerList, writer)
 	}
@@ -162,9 +172,8 @@ func (t *Task) backupPipe() error {
 	exitError := make(chan error)
 
 	go func() {
-		// copy all reads from pipe to multiwriter, which writes to stdout and file
 		_, err := io.Copy(mw, reader)
-		// when r or w is closed copy will finish and true will be sent to channel
+
 		exitError <- err
 	}()
 
@@ -192,7 +201,7 @@ func (t *Task) Backup() error {
 	return t.backupManual()
 }
 
-func (t Task) backupWorkDirToDestination(destinationName string) (sctxt.BackupOutput, error) {
+func (t *Task) backupWorkDirToDestination(destinationName string) (sctxt.BackupOutput, error) {
 	destinationDriver, err := t.getDestinationDriver(destinationName)
 	if err != nil {
 		return sctxt.BackupOutput{}, err
@@ -201,7 +210,7 @@ func (t Task) backupWorkDirToDestination(destinationName string) (sctxt.BackupOu
 	return destinationDriver.Backup(t.Context)
 }
 
-func (t Task) getDestinationDriver(destinationName string) (interfaces.DriverDestinationInterface, error) {
+func (t *Task) getDestinationDriver(destinationName string) (interfaces.DriverDestinationInterface, error) {
 	destination, ok := t.TaskConfig.Destinations[destinationName]
 	if !ok {
 		return nil, fmt.Errorf("destination not exits")
