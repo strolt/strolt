@@ -12,6 +12,7 @@ import (
 type TaskConfig struct {
 	Schedule      Schedule
 	Source        DriverSourceConfig
+	OperationMode OperationMode
 	Destinations  map[string]DriverDestinationConfig
 	Notifications map[string]DriverNotificationConfig
 	Tags          []string
@@ -82,6 +83,8 @@ func GetConfigForTask(serviceName string, taskName string) (TaskConfig, error) {
 	if !ok {
 		return cTask, fmt.Errorf("not found config for task %s", taskName)
 	}
+
+	cTask.OperationMode = task.OperationMode
 
 	cTask.Schedule = task.Schedule
 

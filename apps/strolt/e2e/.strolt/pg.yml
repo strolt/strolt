@@ -57,3 +57,126 @@ services:
           env:
             RESTIC_REPOSITORY: "s3:http://minio:9000/restic-pg-p"
 
+  e2e-copy:
+    pg-t:
+      operationMode: copy
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: t
+      destinations:
+        restic-pg-t:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/copy/restic-pg-t"
+    pg-d:
+      operationMode: copy
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: d
+      destinations:
+        restic-pg-d:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/copy/restic-pg-d"
+    pg-c:
+      operationMode: copy
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: c
+      destinations:
+        restic-pg-c:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/copy/restic-pg-c"
+    pg-p:
+      operationMode: copy
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: p
+      destinations:
+        restic-pg-p:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/copy/restic-pg-p"
+
+  e2e-pipe:
+    pg-t:
+      operationMode: pipe
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: t
+      destinations:
+        restic-pg-t:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/pipe/restic-pg-t"
+    pg-d:
+      operationMode: pipe
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: d
+      destinations:
+        restic-pg-d:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/pipe/restic-pg-d"
+    pg-c:
+      operationMode: pipe
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: c
+      destinations:
+        restic-pg-c:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/pipe/restic-pg-c"
+    pg-p:
+      operationMode: pipe
+      source:
+        driver: pg
+        config:
+          host: postgres
+          database: "{{.PG_DATABASE}}"
+          username: "{{.PG_USER}}"
+          password: "{{.PG_PASSWORD}}"
+          format: p
+      destinations:
+        restic-pg-p:
+          extends: restic_base
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/pipe/restic-pg-p"

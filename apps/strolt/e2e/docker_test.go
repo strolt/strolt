@@ -17,16 +17,22 @@ type Snapshot struct {
 
 func runDockerCompose(args ...string) ([]byte, error) {
 	cmd := exec.Command("docker", append([]string{"compose"}, args...)...)
-	fmt.Println(cmd.String()) //nolint:forbidigo
 
-	return cmd.CombinedOutput()
+	output, err := cmd.CombinedOutput()
+
+	fmt.Println(string(output)) //nolint:forbidigo
+
+	return output, err
 }
 
 func runDockerComposeBash(command string) ([]byte, error) {
 	cmd := exec.Command("docker", "exec", "strolt", "/bin/sh", "-c", command)
-	fmt.Println(cmd.String()) //nolint:forbidigo
 
-	return cmd.Output()
+	output, err := cmd.Output()
+
+	fmt.Println(string(output)) //nolint:forbidigo
+
+	return output, err
 }
 
 func dockerComposeUp(services ...string) error {
@@ -44,7 +50,7 @@ func dockerComposeDown() error {
 		return err
 	}
 
-	_, err := runDockerCompose("down", "-v")
+	_, err := runDockerCompose("down", "--remove-orphans", "-v")
 
 	return err
 }
@@ -58,9 +64,12 @@ func strolt(args ...string) error {
 
 func stroltWithResponse(args ...string) ([]byte, error) {
 	cmd := exec.Command("docker", "exec", "strolt", "/bin/sh", "-c", fmt.Sprintf("/strolt/bin/strolt %s", strings.Join(args, " ")))
-	fmt.Println(cmd.String()) //nolint:forbidigo
 
-	return cmd.CombinedOutput()
+	output, err := cmd.CombinedOutput()
+
+	fmt.Println(string(output)) //nolint:forbidigo
+
+	return output, err
 }
 
 func stroltGetSnapshotList(serviceName string, taskName string, destination string) ([]Snapshot, error) {
@@ -87,7 +96,6 @@ func stroltGetSnapshotList(serviceName string, taskName string, destination stri
 	return snapshots, nil
 }
 
-//nolint:unparam
 func stroltGetLatestSnapshotID(serviceName string, taskName string, destination string) (string, error) {
 	snapshots, err := stroltGetSnapshotList(serviceName, taskName, destination)
 	if err != nil {

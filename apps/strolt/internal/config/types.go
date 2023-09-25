@@ -7,6 +7,14 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 )
 
+type OperationMode string
+
+const (
+	OperationModeCopy       OperationMode = "copy"
+	OperationModePreferPipe OperationMode = "prefer-pipe"
+	OperationModePipe       OperationMode = "pipe"
+)
+
 type Secrets map[string]string
 
 type Schedule struct {
@@ -34,6 +42,7 @@ type DriverNotificationConfig struct {
 }
 
 type Task struct {
+	OperationMode OperationMode                      `yaml:"operationMode,omitempty"`
 	Source        DriverSourceConfig                 `yaml:"source,omitempty"`
 	Destinations  map[string]DriverDestinationConfig `yaml:"destinations,omitempty"`
 	Notifications []string                           `yaml:"notifications,omitempty"`

@@ -1,7 +1,9 @@
 package local
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
@@ -81,11 +83,50 @@ func (i *Local) Backup(_ context.Context) error {
 	return nil
 }
 
+func (i *Local) BackupPipe(_ context.Context) (io.ReadCloser, string, func() error, error) {
+	stat, err := os.Stat(i.config.Path)
+	if err != nil {
+		return nil, "", nil, err
+	}
+
+	if stat.IsDir() {
+		return nil, "", nil, fmt.Errorf("'%s' is not file", i.config.Path)
+	}
+
+	reader, err := os.Open(i.config.Path)
+	if err != nil {
+		return nil, "", nil, err
+	}
+
+	// stringReader := strings.NewReader("shiny!")
+	// stringReadCloser := io.NopCloser(stringReader)
+	// filename := fmt.Sprintf("%d.txt", time.Now().UnixNano())
+
+	return reader, stat.Name(), func() error { return nil }, nil
+}
+
+func (i *Local) IsSupportedBackupPipe(_ context.Context) bool {
+	stat, err := os.Stat(i.config.Path)
+	if err != nil {
+		return false
+	}
+
+	return !stat.IsDir()
+}
+
 func (i *Local) Restore(_ context.Context) error {
 	// if err := copy.Copy(ctx.WorkDir, i.config.Path); err != nil {
 	// 	return err
 	// }
 	return nil
+}
+
+func (i *Local) RestorePipe(_ context.Context, filename string) (io.WriteCloser, func() error, error) {
+	return nil, func() error { return nil }, errors.New("not support pipe")
+}
+
+func (i *Local) IsSupportedRestorePipe(_ context.Context) bool {
+	return false
 }
 
 func (i *Local) IsEmpty() (bool, error) {

@@ -156,15 +156,14 @@ func (c *Config) setDefaults() error {
 		c.Definitions.Notifications[notificationName] = notification
 	}
 
-	// for serviceName,service := range c.Services {
-
-	// 	for taskName,task := range service {
-	// 		for destinationName,destination := range task.Destinations {
-
-	// 			c.Services[serviceName][taskName].Destinations[destinationName]=destination
-	// 		}
-	// 	}
-	// }
+	for serviceName, service := range c.Services {
+		for taskName, task := range service {
+			if task.OperationMode == "" {
+				task.OperationMode = OperationModePreferPipe
+				c.Services[serviceName][taskName] = task
+			}
+		}
+	}
 
 	return nil
 }
