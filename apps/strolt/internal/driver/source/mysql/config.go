@@ -89,7 +89,7 @@ func (i *MySQL) getBinMySQLDump() string {
 		return i.config.BinPathMySQLDump
 	}
 
-	return "/usr/bin/mysqldump"
+	return "/usr/bin/mariadb-dump"
 }
 
 func (i *MySQL) getBinMySQL() string {
@@ -97,5 +97,5 @@ func (i *MySQL) getBinMySQL() string {
 		return i.config.BinPathMySQL
 	}
 
-	return "/usr/bin/mysql"
+	return "/usr/bin/mariadb"
 }

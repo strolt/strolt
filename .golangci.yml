@@ -1,5 +1,5 @@
 run:
-  go: "1.20.3"
+  go: "1.24.0"
 
 linters:
   enable-all: true
@@ -37,6 +37,7 @@ linters:
     - inamedparam
     - gosec
     - containedctx
+    - copyloopvar
 
 linters-settings:
   ireturn:

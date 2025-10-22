@@ -244,7 +244,7 @@ func (cm *ContainerManager) StartAllContainers() error {
 	}()
 
 	// Collect results
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		result := <-results
 		if result.err != nil {
 			return fmt.Errorf("failed to start %s: %w", result.name, result.err)
@@ -309,7 +309,7 @@ func (cm *ContainerManager) startMongo() (testcontainers.Container, error) {
 
 func (cm *ContainerManager) startMariaDB() (testcontainers.Container, error) {
 	req := testcontainers.ContainerRequest{
-		Image:        "mariadb:10.8.3",
+		Image:        "mariadb:11.4.8",
 		ExposedPorts: []string{"3306/tcp"},
 		Env: map[string]string{
 			"TZ":                  "UTC",
@@ -333,7 +333,6 @@ func (cm *ContainerManager) startMySQL() (testcontainers.Container, error) {
 	req := testcontainers.ContainerRequest{
 		Image:        "mysql:8.0.30",
 		ExposedPorts: []string{"3306/tcp"},
-		Cmd:          []string{"mysqld", "--default-authentication-plugin=mysql_native_password"},
 		Env: map[string]string{
 			"TZ":                  "UTC",
 			"MYSQL_DATABASE":      "strolt",

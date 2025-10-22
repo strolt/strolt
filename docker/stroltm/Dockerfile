@@ -1,4 +1,4 @@
-FROM alpine:3.18.0 AS base
+FROM alpine:3.22.2 AS base
 WORKDIR /stroltm
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
@@ -6,7 +6,7 @@ ENV TZ=UTC
 FROM node:18.16.0-bullseye-slim as ui-base
 RUN apt-get update && apt-get -y install openjdk-11-jre --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-FROM golang:1.20.4-alpine3.18 AS swagger-base
+FROM golang:1.25.3-alpine3.22 AS swagger-base
 RUN apk --update add --no-cache make curl
 
 FROM ui-base as ui-deps
@@ -25,7 +25,7 @@ COPY ./apps/stroltm/ui .
 COPY --from=swagger /github.com/strolt/strolt/.swagger /github.com/strolt/strolt/.swagger
 RUN yarn gen-api && yarn build
 
-FROM golang:1.20.4-alpine3.18 AS builder
+FROM golang:1.25.3-alpine3.22 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/stroltm
 COPY ./apps/stroltm/go.mod .

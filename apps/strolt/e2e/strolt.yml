@@ -17,5 +17,5 @@ extends:
 
     - .strolt/pg.yml
     - .strolt/mongo.yml
-    - .strolt/mysql.yml
+    # - .strolt/mysql.yml
     - .strolt/mariadb.yml

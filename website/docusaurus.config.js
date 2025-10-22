@@ -96,7 +96,7 @@ const config = {
 			metadata: [
 				{
 					name: "keywords",
-					content: "strolt, backup, restic, pg_dump, mongodump, mysqldump",
+					content: "strolt, backup, restic, pg_dump, mongodump, mariadb-dump",
 				},
 				// { name: "og:image", content: `${baseURL}/img/logo.svg` },
 				// { name: "twitter:image", content: `${baseURL}/img/logo.svg` },

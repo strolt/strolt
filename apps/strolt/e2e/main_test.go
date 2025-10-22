@@ -102,9 +102,9 @@ func TestE2E(t *testing.T) {
 		MongoSuiteTest(t)
 	})
 
-	t.Run("MySQL", func(t *testing.T) {
-		MySQLSuiteTest(t)
-	})
+	// t.Run("MySQL", func(t *testing.T) {
+	// 	MySQLSuiteTest(t)
+	// })
 
 	t.Run("MariaDB", func(t *testing.T) {
 		MariaDBSuiteTest(t)

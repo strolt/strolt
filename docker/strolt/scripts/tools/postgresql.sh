@@ -1,5 +1,5 @@
 # Postgresql (psql, pg_dump, pg_restore)
-apk --update add --no-cache postgresql15-client
+apk --update add --no-cache postgresql16-client
 
 rm /usr/bin/clusterdb
 rm /usr/bin/createdb
