@@ -1,6 +1,7 @@
 package e2e_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -12,7 +13,11 @@ type MariaDBSuite struct {
 }
 
 func (s *MariaDBSuite) SetupSuite() {
-	c, err := sqlConnect("mysql", "strolt:strolt@(localhost:9004)/strolt?timeout=60s")
+	port, err := containerManager.GetMariaDBPort()
+	s.NoError(err)
+
+	connStr := fmt.Sprintf("strolt:strolt@(localhost:%s)/strolt?timeout=60s", port)
+	c, err := sqlConnect("mysql", connStr)
 	s.NoError(err)
 	s.c = c
 }

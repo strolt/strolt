@@ -51,7 +51,7 @@ type StructuredLoggerEntry struct {
 func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
 	logger.New().WithFields(l.Fields).WithFields(logger.Fields{
 		"resp_status": status, "resp_bytes_length": bytes,
-		"resp_elapsed_ms": float64(elapsed.Nanoseconds()) / 1000000.0, //nolint:gomnd
+		"resp_elapsed_ms": float64(elapsed.Nanoseconds()) / 1000000.0, //nolint:mnd
 	}).Info("api")
 }
 

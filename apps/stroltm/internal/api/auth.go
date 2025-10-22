@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
 
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
@@ -26,7 +26,7 @@ func (api *API) authValidate(w http.ResponseWriter, r *http.Request) {
 	var body authValidateBody
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		apiu.RenderJSON400(w, r, fmt.Errorf("invalid body"))
+		apiu.RenderJSON400(w, r, errors.New("invalid body"))
 		return
 	}
 

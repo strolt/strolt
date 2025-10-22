@@ -14,11 +14,11 @@ func (i *PgDump) getEnv() []string {
 	}
 
 	if i.config.Username != "" {
-		env = append(env, fmt.Sprintf("PGUSER=%s", i.config.Username))
+		env = append(env, "PGUSER="+i.config.Username)
 	}
 
 	if i.config.Password != "" {
-		env = append(env, fmt.Sprintf("PGPASSWORD=%s", i.config.Password))
+		env = append(env, "PGPASSWORD="+i.config.Password)
 	}
 
 	if i.config.Port != 0 {
@@ -26,7 +26,7 @@ func (i *PgDump) getEnv() []string {
 	}
 
 	if i.config.Host != "" {
-		env = append(env, fmt.Sprintf("PGHOST=%s", i.config.Host))
+		env = append(env, "PGHOST="+i.config.Host)
 	}
 
 	return env

@@ -70,7 +70,7 @@ func getErrorEmoji(driver string, ctx context.Context) string {
 		return ""
 	}
 
-	return fmt.Sprintf(" %s", emoji.Error)
+	return " " + emoji.Error
 }
 
 func New(driver string, ctx context.Context) Template {
@@ -81,54 +81,54 @@ func New(driver string, ctx context.Context) Template {
 	t.Header = fmt.Sprintf("%s[%s] [%s] - %s%s", getTriggerEmoji(driver, ctx.Trigger), ctx.ServiceName, ctx.TaskName, ctx.OpertationType, getErrorEmoji(driver, ctx))
 
 	t.Body += fmt.Sprintf("Event: %s", ctx.Event)
-	t.Body += fmt.Sprintf("\nStart: %s", ctx.Operation.Time.Start.Format(time.RFC3339))
+	t.Body += "\nStart: " + ctx.Operation.Time.Start.Format(time.RFC3339)
 
 	if !ctx.Operation.Time.Stop.IsZero() {
-		t.Body += fmt.Sprintf("\nStop: %s", ctx.Operation.Time.Stop.Format(time.RFC3339))
+		t.Body += "\nStop: " + ctx.Operation.Time.Stop.Format(time.RFC3339)
 		t.Body += fmt.Sprintf("\nDuration: %s", ctx.Operation.Time.Stop.Sub(ctx.Operation.Time.Start))
 	}
 
 	if ctx.Operation.Error != "" {
-		t.Body += fmt.Sprintf("\n\nError: %s", ctx.Operation.Error)
+		t.Body += "\n\nError: " + ctx.Operation.Error
 	}
 
 	for destinationName, destination := range ctx.Destination {
 		t.Body += fmt.Sprintf("\n\n[destination] %s:", destinationName)
 
 		if destination.BackupOutput.SnapshotID != "" {
-			t.Body += fmt.Sprintf("\n    snapshot_id: %s", destination.BackupOutput.SnapshotID)
+			t.Body += "\n    snapshot_id: " + destination.BackupOutput.SnapshotID
 		}
 
 		if destination.BackupOutput.FilesNew != 0 {
-			t.Body += fmt.Sprintf("\n    files_new: %s", humanize.Comma(int64(destination.BackupOutput.FilesNew)))
+			t.Body += "\n    files_new: " + humanize.Comma(int64(destination.BackupOutput.FilesNew))
 		}
 
 		if destination.BackupOutput.FilesChanged != 0 {
-			t.Body += fmt.Sprintf("\n    files_changed: %s", humanize.Comma(int64(destination.BackupOutput.FilesChanged)))
+			t.Body += "\n    files_changed: " + humanize.Comma(int64(destination.BackupOutput.FilesChanged))
 		}
 
 		if destination.BackupOutput.FilesUnmodified != 0 {
-			t.Body += fmt.Sprintf("\n    files_unmodified: %s", humanize.Comma(int64(destination.BackupOutput.FilesUnmodified)))
+			t.Body += "\n    files_unmodified: " + humanize.Comma(int64(destination.BackupOutput.FilesUnmodified))
 		}
 
 		if destination.BackupOutput.DirsNew != 0 {
-			t.Body += fmt.Sprintf("\n    dirs_new: %s", humanize.Comma(int64(destination.BackupOutput.DirsNew)))
+			t.Body += "\n    dirs_new: " + humanize.Comma(int64(destination.BackupOutput.DirsNew))
 		}
 
 		if destination.BackupOutput.DirsChanged != 0 {
-			t.Body += fmt.Sprintf("\n    dirs_changed: %s", humanize.Comma(int64(destination.BackupOutput.DirsChanged)))
+			t.Body += "\n    dirs_changed: " + humanize.Comma(int64(destination.BackupOutput.DirsChanged))
 		}
 
 		if destination.BackupOutput.DirsUnmodified != 0 {
-			t.Body += fmt.Sprintf("\n    dirs_unmodified: %s", humanize.Comma(int64(destination.BackupOutput.DirsUnmodified)))
+			t.Body += "\n    dirs_unmodified: " + humanize.Comma(int64(destination.BackupOutput.DirsUnmodified))
 		}
 
 		if destination.BackupOutput.TotalFilesProcessed != 0 {
-			t.Body += fmt.Sprintf("\n    total_files_processed: %s", humanize.Comma(int64(destination.BackupOutput.TotalFilesProcessed)))
+			t.Body += "\n    total_files_processed: " + humanize.Comma(int64(destination.BackupOutput.TotalFilesProcessed))
 		}
 
 		if destination.BackupOutput.TotalBytesProcessed != 0 {
-			t.Body += fmt.Sprintf("\n    total_size_processed: %s", humanize.Bytes(destination.BackupOutput.TotalBytesProcessed))
+			t.Body += "\n    total_size_processed: " + humanize.Bytes(destination.BackupOutput.TotalBytesProcessed)
 		}
 	}
 

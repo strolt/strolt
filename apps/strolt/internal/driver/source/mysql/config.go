@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"fmt"
 	"strconv"
 
 	"gopkg.in/yaml.v3"
@@ -51,7 +50,7 @@ func (i *MySQL) getCommonArgs() []string {
 	}
 
 	if i.config.Password != "" {
-		args = append(args, fmt.Sprintf("-p%s", i.config.Password))
+		args = append(args, "-p"+i.config.Password)
 	}
 
 	return args
@@ -64,7 +63,7 @@ func (i *MySQL) getBackupArgs() []string {
 
 	args = append(args, "--no-tablespaces")
 
-	args = append(args, fmt.Sprintf("--result-file=%s", i.getFileName()))
+	args = append(args, "--result-file="+i.getFileName())
 
 	if i.config.Database != "" {
 		args = append(args, i.config.Database)
@@ -80,7 +79,7 @@ func (i *MySQL) getRestoreArgs() []string {
 
 	args = append(args, "-D", i.config.Database)
 
-	args = append(args, "-e", fmt.Sprintf("source %s", i.getFileName()))
+	args = append(args, "-e", "source "+i.getFileName())
 
 	return args
 }

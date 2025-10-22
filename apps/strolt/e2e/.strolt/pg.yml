@@ -135,21 +135,6 @@ services:
           extends: restic_base
           env:
             RESTIC_REPOSITORY: "s3:http://minio:9000/pipe/restic-pg-t"
-    pg-d:
-      operationMode: pipe
-      source:
-        driver: pg
-        config:
-          host: postgres
-          database: "{{.PG_DATABASE}}"
-          username: "{{.PG_USER}}"
-          password: "{{.PG_PASSWORD}}"
-          format: d
-      destinations:
-        restic-pg-d:
-          extends: restic_base
-          env:
-            RESTIC_REPOSITORY: "s3:http://minio:9000/pipe/restic-pg-d"
     pg-c:
       operationMode: pipe
       source:

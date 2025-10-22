@@ -1,7 +1,7 @@
 package restic
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/strolt/strolt/apps/strolt/internal/util/dir"
 )
@@ -64,7 +64,7 @@ type Env struct {
 
 func (i *Restic) validateEnv() error {
 	if i.env.RESTIC_REPOSITORY == "" {
-		return fmt.Errorf("env RESTIC_REPOSITORY is empty")
+		return errors.New("env RESTIC_REPOSITORY is empty")
 	}
 
 	return nil
@@ -79,155 +79,157 @@ func (i *Restic) getEnv() ([]string, error) {
 		d.SetTaskName(i.taskName)
 		d.SetDriverName(i.driverName)
 		d.SetName("RESTIC_CACHE_DIR")
+
 		path, err := d.CreateAsPersist()
 		if err != nil {
 			return nil, err
 		}
-		env = append(env, fmt.Sprintf("RESTIC_CACHE_DIR=%s", path))
+
+		env = append(env, "RESTIC_CACHE_DIR="+path)
 	}
 
 	if i.env.RESTIC_REPOSITORY != "" {
-		env = append(env, fmt.Sprintf("RESTIC_REPOSITORY=%s", i.env.RESTIC_REPOSITORY))
+		env = append(env, "RESTIC_REPOSITORY="+i.env.RESTIC_REPOSITORY)
 	}
 
 	if i.config.Compression != "" {
-		env = append(env, fmt.Sprintf("RESTIC_COMPRESSION=%s", i.config.Compression))
+		env = append(env, "RESTIC_COMPRESSION="+i.config.Compression)
 	}
 
 	if i.env.RESTIC_PASSWORD != "" {
-		env = append(env, fmt.Sprintf("RESTIC_PASSWORD=%s", i.env.RESTIC_PASSWORD))
+		env = append(env, "RESTIC_PASSWORD="+i.env.RESTIC_PASSWORD)
 	}
 
 	if i.env.AWS_ACCESS_KEY_ID != "" {
-		env = append(env, fmt.Sprintf("AWS_ACCESS_KEY_ID=%s", i.env.AWS_ACCESS_KEY_ID))
+		env = append(env, "AWS_ACCESS_KEY_ID="+i.env.AWS_ACCESS_KEY_ID)
 	}
 
 	if i.env.AWS_SECRET_ACCESS_KEY != "" {
-		env = append(env, fmt.Sprintf("AWS_SECRET_ACCESS_KEY=%s", i.env.AWS_SECRET_ACCESS_KEY))
+		env = append(env, "AWS_SECRET_ACCESS_KEY="+i.env.AWS_SECRET_ACCESS_KEY)
 	}
 
 	if i.env.AWS_DEFAULT_REGION != "" {
-		env = append(env, fmt.Sprintf("AWS_DEFAULT_REGION=%s", i.env.AWS_DEFAULT_REGION))
+		env = append(env, "AWS_DEFAULT_REGION="+i.env.AWS_DEFAULT_REGION)
 	}
 
 	if i.env.AWS_PROFILE != "" {
-		env = append(env, fmt.Sprintf("AWS_PROFILE=%s", i.env.AWS_PROFILE))
+		env = append(env, "AWS_PROFILE="+i.env.AWS_PROFILE)
 	}
 
 	if i.env.AWS_SHARED_CREDENTIALS_FILE != "" {
-		env = append(env, fmt.Sprintf("AWS_SHARED_CREDENTIALS_FILE=%s", i.env.AWS_SHARED_CREDENTIALS_FILE))
+		env = append(env, "AWS_SHARED_CREDENTIALS_FILE="+i.env.AWS_SHARED_CREDENTIALS_FILE)
 	}
 
 	if i.env.ST_AUTH != "" {
-		env = append(env, fmt.Sprintf("ST_AUTH=%s", i.env.ST_AUTH))
+		env = append(env, "ST_AUTH="+i.env.ST_AUTH)
 	}
 
 	if i.env.ST_USER != "" {
-		env = append(env, fmt.Sprintf("ST_USER=%s", i.env.ST_USER))
+		env = append(env, "ST_USER="+i.env.ST_USER)
 	}
 
 	if i.env.ST_KEY != "" {
-		env = append(env, fmt.Sprintf("ST_KEY=%s", i.env.ST_KEY))
+		env = append(env, "ST_KEY="+i.env.ST_KEY)
 	}
 
 	if i.env.OS_AUTH_URL != "" {
-		env = append(env, fmt.Sprintf("OS_AUTH_URL=%s", i.env.OS_AUTH_URL))
+		env = append(env, "OS_AUTH_URL="+i.env.OS_AUTH_URL)
 	}
 
 	if i.env.OS_REGION_NAME != "" {
-		env = append(env, fmt.Sprintf("OS_REGION_NAME=%s", i.env.OS_REGION_NAME))
+		env = append(env, "OS_REGION_NAME="+i.env.OS_REGION_NAME)
 	}
 
 	if i.env.OS_USERNAME != "" {
-		env = append(env, fmt.Sprintf("OS_USERNAME=%s", i.env.OS_USERNAME))
+		env = append(env, "OS_USERNAME="+i.env.OS_USERNAME)
 	}
 
 	if i.env.OS_USER_ID != "" {
-		env = append(env, fmt.Sprintf("OS_USER_ID=%s", i.env.OS_USER_ID))
+		env = append(env, "OS_USER_ID="+i.env.OS_USER_ID)
 	}
 
 	if i.env.OS_PASSWORD != "" {
-		env = append(env, fmt.Sprintf("OS_PASSWORD=%s", i.env.OS_PASSWORD))
+		env = append(env, "OS_PASSWORD="+i.env.OS_PASSWORD)
 	}
 
 	if i.env.OS_TENANT_ID != "" {
-		env = append(env, fmt.Sprintf("OS_TENANT_ID=%s", i.env.OS_TENANT_ID))
+		env = append(env, "OS_TENANT_ID="+i.env.OS_TENANT_ID)
 	}
 
 	if i.env.OS_TENANT_NAME != "" {
-		env = append(env, fmt.Sprintf("OS_TENANT_NAME=%s", i.env.OS_TENANT_NAME))
+		env = append(env, "OS_TENANT_NAME="+i.env.OS_TENANT_NAME)
 	}
 
 	if i.env.OS_USER_DOMAIN_NAME != "" {
-		env = append(env, fmt.Sprintf("OS_USER_DOMAIN_NAME=%s", i.env.OS_USER_DOMAIN_NAME))
+		env = append(env, "OS_USER_DOMAIN_NAME="+i.env.OS_USER_DOMAIN_NAME)
 	}
 
 	if i.env.OS_USER_DOMAIN_ID != "" {
-		env = append(env, fmt.Sprintf("OS_USER_DOMAIN_ID=%s", i.env.OS_USER_DOMAIN_ID))
+		env = append(env, "OS_USER_DOMAIN_ID="+i.env.OS_USER_DOMAIN_ID)
 	}
 
 	if i.env.OS_PROJECT_NAME != "" {
-		env = append(env, fmt.Sprintf("OS_PROJECT_NAME=%s", i.env.OS_PROJECT_NAME))
+		env = append(env, "OS_PROJECT_NAME="+i.env.OS_PROJECT_NAME)
 	}
 
 	if i.env.OS_PROJECT_DOMAIN_NAME != "" {
-		env = append(env, fmt.Sprintf("OS_PROJECT_DOMAIN_NAME=%s", i.env.OS_PROJECT_DOMAIN_NAME))
+		env = append(env, "OS_PROJECT_DOMAIN_NAME="+i.env.OS_PROJECT_DOMAIN_NAME)
 	}
 
 	if i.env.OS_PROJECT_DOMAIN_ID != "" {
-		env = append(env, fmt.Sprintf("OS_PROJECT_DOMAIN_ID=%s", i.env.OS_PROJECT_DOMAIN_ID))
+		env = append(env, "OS_PROJECT_DOMAIN_ID="+i.env.OS_PROJECT_DOMAIN_ID)
 	}
 
 	if i.env.OS_TRUST_ID != "" {
-		env = append(env, fmt.Sprintf("OS_TRUST_ID=%s", i.env.OS_TRUST_ID))
+		env = append(env, "OS_TRUST_ID="+i.env.OS_TRUST_ID)
 	}
 
 	if i.env.OS_APPLICATION_CREDENTIAL_ID != "" {
-		env = append(env, fmt.Sprintf("OS_APPLICATION_CREDENTIAL_ID=%s", i.env.OS_APPLICATION_CREDENTIAL_ID))
+		env = append(env, "OS_APPLICATION_CREDENTIAL_ID="+i.env.OS_APPLICATION_CREDENTIAL_ID)
 	}
 
 	if i.env.OS_APPLICATION_CREDENTIAL_NAME != "" {
-		env = append(env, fmt.Sprintf("OS_APPLICATION_CREDENTIAL_NAME=%s", i.env.OS_APPLICATION_CREDENTIAL_NAME))
+		env = append(env, "OS_APPLICATION_CREDENTIAL_NAME="+i.env.OS_APPLICATION_CREDENTIAL_NAME)
 	}
 
 	if i.env.OS_APPLICATION_CREDENTIAL_SECRET != "" {
-		env = append(env, fmt.Sprintf("OS_APPLICATION_CREDENTIAL_SECRET=%s", i.env.OS_APPLICATION_CREDENTIAL_SECRET))
+		env = append(env, "OS_APPLICATION_CREDENTIAL_SECRET="+i.env.OS_APPLICATION_CREDENTIAL_SECRET)
 	}
 
 	if i.env.OS_STORAGE_URL != "" {
-		env = append(env, fmt.Sprintf("OS_STORAGE_URL=%s", i.env.OS_STORAGE_URL))
+		env = append(env, "OS_STORAGE_URL="+i.env.OS_STORAGE_URL)
 	}
 
 	if i.env.OS_AUTH_TOKEN != "" {
-		env = append(env, fmt.Sprintf("OS_AUTH_TOKEN=%s", i.env.OS_AUTH_TOKEN))
+		env = append(env, "OS_AUTH_TOKEN="+i.env.OS_AUTH_TOKEN)
 	}
 
 	if i.env.B2_ACCOUNT_ID != "" {
-		env = append(env, fmt.Sprintf("B2_ACCOUNT_ID=%s", i.env.B2_ACCOUNT_ID))
+		env = append(env, "B2_ACCOUNT_ID="+i.env.B2_ACCOUNT_ID)
 	}
 
 	if i.env.B2_ACCOUNT_KEY != "" {
-		env = append(env, fmt.Sprintf("B2_ACCOUNT_KEY=%s", i.env.B2_ACCOUNT_KEY))
+		env = append(env, "B2_ACCOUNT_KEY="+i.env.B2_ACCOUNT_KEY)
 	}
 
 	if i.env.AZURE_ACCOUNT_NAME != "" {
-		env = append(env, fmt.Sprintf("AZURE_ACCOUNT_NAME=%s", i.env.AZURE_ACCOUNT_NAME))
+		env = append(env, "AZURE_ACCOUNT_NAME="+i.env.AZURE_ACCOUNT_NAME)
 	}
 
 	if i.env.AZURE_ACCOUNT_KEY != "" {
-		env = append(env, fmt.Sprintf("AZURE_ACCOUNT_KEY=%s", i.env.AZURE_ACCOUNT_KEY))
+		env = append(env, "AZURE_ACCOUNT_KEY="+i.env.AZURE_ACCOUNT_KEY)
 	}
 
 	if i.env.GOOGLE_PROJECT_ID != "" {
-		env = append(env, fmt.Sprintf("GOOGLE_PROJECT_ID=%s", i.env.GOOGLE_PROJECT_ID))
+		env = append(env, "GOOGLE_PROJECT_ID="+i.env.GOOGLE_PROJECT_ID)
 	}
 
 	if i.env.GOOGLE_APPLICATION_CREDENTIALS != "" {
-		env = append(env, fmt.Sprintf("GOOGLE_APPLICATION_CREDENTIALS=%s", i.env.GOOGLE_APPLICATION_CREDENTIALS))
+		env = append(env, "GOOGLE_APPLICATION_CREDENTIALS="+i.env.GOOGLE_APPLICATION_CREDENTIALS)
 	}
 
 	if i.env.RCLONE_BWLIMIT != "" {
-		env = append(env, fmt.Sprintf("RCLONE_BWLIMIT=%s", i.env.RCLONE_BWLIMIT))
+		env = append(env, "RCLONE_BWLIMIT="+i.env.RCLONE_BWLIMIT)
 	}
 
 	return env, nil

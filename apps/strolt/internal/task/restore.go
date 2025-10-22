@@ -1,7 +1,7 @@
 package task
 
 import (
-	"fmt"
+	"errors"
 	"io"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
@@ -36,7 +36,7 @@ func (t *Task) isAvailableRestorePipe() (bool, error) {
 func (t *Task) RestoreDestinationToTemp(destinationName string, snapshotName string) error {
 	destination, ok := t.TaskConfig.Destinations[destinationName]
 	if !ok {
-		return fmt.Errorf("destination not exits")
+		return errors.New("destination not exits")
 	}
 
 	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)

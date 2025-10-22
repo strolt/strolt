@@ -35,7 +35,7 @@ func (i *Restic) backupCmd(ctx context.Context, filename string, isPipe bool) (*
 	args = append(args, i.getBackupFlags()...)
 
 	if isPipe {
-		args = append(args, "--stdin", fmt.Sprintf("--stdin-filename=%s", filename))
+		args = append(args, "--stdin", "--stdin-filename="+filename)
 	} else {
 		args = append(args, ".")
 	}

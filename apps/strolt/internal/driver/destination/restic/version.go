@@ -25,7 +25,7 @@ func (i *Restic) getBinVersion() (string, error) {
 
 	outputList := strings.Split(arr[0], " ")
 
-	if len(outputList) < 2 { //nolint:gomnd
+	if len(outputList) < 2 { //nolint:mnd
 		return "", errors.New("error parse 'restic version' output")
 	}
 

@@ -1,7 +1,7 @@
 package stroltp
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/go-openapi/runtime"
 	runtimeClient "github.com/go-openapi/runtime/client"
@@ -45,7 +45,7 @@ func (sdk *SDK) Backup(instanceName, serviceName, taskName string) (*managerc.Ba
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.BackupInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
 	}
 
@@ -68,7 +68,7 @@ func (sdk *SDK) GetSnapshots(instanceName, serviceName, taskName, destinationNam
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.BackupInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
 	}
 
@@ -87,7 +87,7 @@ func (sdk *SDK) GetStats(instanceName, serviceName, taskName, destinationName st
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.GetStatsInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
 	}
 
@@ -106,7 +106,7 @@ func (sdk *SDK) GetSnapshotsForPrune(instanceName, serviceName, taskName, destin
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.GetSnapshotsForPruneInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
 	}
 
@@ -125,7 +125,7 @@ func (sdk *SDK) Prune(instanceName, serviceName, taskName, destinationName strin
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.PruneInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
 	}
 

@@ -1,8 +1,6 @@
 package mysql
 
 import (
-	"fmt"
-
 	"github.com/strolt/strolt/shared/logger"
 )
 
@@ -18,7 +16,7 @@ func New() *MySQL {
 }
 
 func (i *MySQL) getFileName() string {
-	return fmt.Sprintf("%s.sql", FileNamePrefix)
+	return FileNamePrefix + ".sql"
 }
 
 func (i *MySQL) SetLogger(logger *logger.Logger) {

@@ -77,19 +77,19 @@ func (d *Directory) path() (string, error) {
 	parts := []string{path}
 
 	if d.serviceName != "" {
-		parts = append(parts, fmt.Sprintf("i-%s", d.serviceName))
+		parts = append(parts, "i-"+d.serviceName)
 	}
 
 	if d.taskName != "" {
-		parts = append(parts, fmt.Sprintf("t-%s", d.taskName))
+		parts = append(parts, "t-"+d.taskName)
 	}
 
 	if d.driverName != "" {
-		parts = append(parts, fmt.Sprintf("d-%s", d.driverName))
+		parts = append(parts, "d-"+d.driverName)
 	}
 
 	if d.name != "" {
-		parts = append(parts, fmt.Sprintf("n-%s", d.name))
+		parts = append(parts, "n-"+d.name)
 	}
 
 	return filepath.Join(parts...), nil

@@ -1,6 +1,7 @@
 package task
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -12,7 +13,7 @@ import (
 func (t *Task) prune(destinationName string, isDryRun bool) ([]interfaces.Snapshot, error) {
 	destination, ok := t.TaskConfig.Destinations[destinationName]
 	if !ok {
-		return []interfaces.Snapshot{}, fmt.Errorf("destination not exits")
+		return []interfaces.Snapshot{}, errors.New("destination not exits")
 	}
 
 	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)

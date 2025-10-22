@@ -30,7 +30,7 @@ func New() *API {
 
 	api := API{
 		addr:       addr,
-		httpServer: &http.Server{}, //nolint
+		httpServer: &http.Server{},
 		log:        logger.New(),
 	}
 
@@ -57,9 +57,9 @@ func (api *API) makeHTTPServer() *http.Server {
 	return &http.Server{
 		Addr:              api.addr,
 		Handler:           api.handler(),
-		ReadHeaderTimeout: 5 * time.Second,   //nolint:gomnd
-		WriteTimeout:      120 * time.Second, //nolint:gomnd
-		IdleTimeout:       30 * time.Second,  //nolint:gomnd
+		ReadHeaderTimeout: 5 * time.Second,   //nolint:mnd
+		WriteTimeout:      120 * time.Second, //nolint:mnd
+		IdleTimeout:       30 * time.Second,  //nolint:mnd
 	}
 }
 
@@ -97,14 +97,14 @@ func (api *API) handler() http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
-	r.Use(middleware.Compress(5)) //nolint:gomnd
+	r.Use(middleware.Compress(5)) //nolint:mnd
 
 	if env.IsAPILogEnabled() {
 		r.Use(apiu.Logger())
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Use(middleware.Timeout(5 * time.Second)) //nolint:gomnd
+		r.Use(middleware.Timeout(5 * time.Second)) //nolint:mnd
 		r.Use(tollbooth_chi.LimitHandler(tollbooth.NewLimiter(1, nil)))
 
 		r.Post("/api/v1/auth/validate", api.authValidate)
@@ -112,7 +112,7 @@ func (api *API) handler() http.Handler {
 
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.Timeout(time.Minute))
-		// r.Use(tollbooth_chi.LimitHandler(tollbooth.NewLimiter(10, nil))) //nolint:gomnd
+		// r.Use(tollbooth_chi.LimitHandler(tollbooth.NewLimiter(10, nil))) //nolint:mnd
 
 		public.New().Router(r)
 

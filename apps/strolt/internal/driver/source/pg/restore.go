@@ -1,7 +1,7 @@
 package pg
 
 import (
-	"fmt"
+	"errors"
 	"io"
 	"os"
 	"strings"
@@ -34,7 +34,7 @@ func (i *PgDump) getFilenameFromBackup(ctx context.Context) (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("not found dump")
+	return "", errors.New("not found dump")
 }
 
 func (i *PgDump) RestorePipe(ctx context.Context, filename string) (io.WriteCloser, func() error, error) {

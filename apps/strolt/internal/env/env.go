@@ -8,8 +8,8 @@ import (
 )
 
 type config struct {
-	Host                 string          `env:"STROLT_HOST" envDefault:"0.0.0.0"`
-	Port                 int             `env:"STROLT_PORT" envDefault:"8080"`
+	Host                 string          `env:"STROLT_HOST"                        envDefault:"0.0.0.0"`
+	Port                 int             `env:"STROLT_PORT"                        envDefault:"8080"`
 	GlobalTags           globalTags      `env:"STROLT_GLOBAL_TAGS"`
 	LogLevel             logger.LogLevel `env:"STROLT_LOG_LEVEL"`
 	IsAPILogEnabled      bool            `env:"STROLT_API_LOG_ENABLED"`
@@ -45,6 +45,8 @@ func Scan() {
 	default:
 		logger.SetLogLevel(logger.LogLevelInfo)
 	}
+
+	logger.SetLogLevel(logger.LogLevelTrace)
 }
 
 func Port() int {

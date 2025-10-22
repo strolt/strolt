@@ -230,7 +230,7 @@ func (t *Task) backupWorkDirToDestination(destinationName string) (sctxt.BackupO
 func (t *Task) getDestinationDriver(destinationName string) (interfaces.DriverDestinationInterface, error) {
 	destination, ok := t.TaskConfig.Destinations[destinationName]
 	if !ok {
-		return nil, fmt.Errorf("destination not exits")
+		return nil, errors.New("destination not exits")
 	}
 
 	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)

@@ -1,7 +1,7 @@
 package task
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
@@ -16,7 +16,7 @@ func (t *Task) GetStats(destinationName string) (interfaces.FormattedStats, erro
 
 	destination, ok := t.TaskConfig.Destinations[destinationName]
 	if !ok {
-		return interfaces.FormattedStats{}, fmt.Errorf("destination not exits")
+		return interfaces.FormattedStats{}, errors.New("destination not exits")
 	}
 
 	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)

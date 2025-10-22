@@ -41,12 +41,12 @@ func fs() *Fs {
 }
 
 func (fs *Fs) isFile(path string) (bool, string) {
-	o, err := runDockerComposeBash(fmt.Sprintf("cat %s", path))
+	o, err := runDockerComposeBash("cat " + path)
 	return err == nil, strings.Join(strings.Split(string(o), "\n")[:1], "\n")
 }
 
 func (fs *Fs) scan() ([]File, error) {
-	o, err := runDockerComposeBash(fmt.Sprintf("ls -R1 %s", fsInputPath))
+	o, err := runDockerComposeBash("ls -R1 " + fsInputPath)
 	if err != nil {
 		return files, err
 	}
@@ -75,7 +75,7 @@ func (fs *Fs) scan() ([]File, error) {
 
 func (fs *Fs) createData() error {
 	for _, file := range files {
-		if _, err := runDockerComposeBash(fmt.Sprintf("mkdir -p %s", filepath.Dir(file.Path))); err != nil {
+		if _, err := runDockerComposeBash("mkdir -p " + filepath.Dir(file.Path)); err != nil {
 			fmt.Println(err) //nolint:forbidigo
 			return err
 		}

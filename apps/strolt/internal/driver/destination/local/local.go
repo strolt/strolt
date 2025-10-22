@@ -2,7 +2,6 @@ package local
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -82,7 +81,7 @@ func (i *Local) SetLogger(logger *logger.Logger) {
 
 func validateConfig(config Config) error {
 	if config.Path == "" {
-		return fmt.Errorf("not found field 'path' in config")
+		return errors.New("not found field 'path' in config")
 	}
 
 	_, err := os.Stat(config.Path)
@@ -116,13 +115,13 @@ func (i *Local) BackupPipe(ctx context.Context, filename string) (io.WriteCloser
 	snapshotName := uuid.New().String()
 
 	dirpath := path.Join(i.config.Path, snapshotName)
-	if err := os.MkdirAll(dirpath, 0777); err != nil { //nolint:gomnd
+	if err := os.MkdirAll(dirpath, 0777); err != nil { //nolint:mnd
 		return nil, nil, err
 	}
 
 	filepath := path.Join(dirpath, filename)
 
-	writer, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644) //nolint:gomnd
+	writer, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644) //nolint:mnd
 
 	return writer, func() error { return nil }, err
 }
@@ -160,7 +159,7 @@ func (i *Local) Prune(_ context.Context, isDryRun bool) ([]interfaces.Snapshot, 
 	i.logger.Debug("prune")
 
 	if isDryRun {
-		return []interfaces.Snapshot{}, fmt.Errorf("dry run not supported")
+		return []interfaces.Snapshot{}, errors.New("dry run not supported")
 	}
 
 	return []interfaces.Snapshot{}, nil

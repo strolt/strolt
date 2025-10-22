@@ -1,7 +1,7 @@
 package task
 
 import (
-	"fmt"
+	"errors"
 	"sort"
 
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
@@ -19,7 +19,7 @@ func (t *Task) GetSnapshotList(destinationName string) (SnapshotList, error) {
 
 	destination, ok := t.TaskConfig.Destinations[destinationName]
 	if !ok {
-		return nil, fmt.Errorf("destination not exits")
+		return nil, errors.New("destination not exits")
 	}
 
 	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)

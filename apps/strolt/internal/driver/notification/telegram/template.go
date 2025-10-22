@@ -19,8 +19,8 @@ func getTemplate(ctx context.Context) (*bytes.Buffer, error) {
 	t := template.New("telegram", ctx)
 
 	msg := fmt.Sprintf("<b>%s</b>", t.Header)
-	msg += fmt.Sprintf("\n\n%s", t.Body)
-	msg += fmt.Sprintf("\n\n %s", t.CopyrightHTML)
+	msg += "\n\n" + t.Body
+	msg += "\n\n " + t.CopyrightHTML
 
 	body := telegramMsg{Text: msg, ParseMode: "HTML"}
 

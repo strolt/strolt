@@ -64,7 +64,7 @@ type Definitions struct {
 
 type Config struct {
 	TimeZone     string             `yaml:"timezone,omitempty"`
-	timeLocation *time.Location     `json:"-" yaml:"-"`
+	timeLocation *time.Location     `json:"-"                     yaml:"-"`
 	Services     map[string]Service `yaml:"services"`
 	Tags         []string           `yaml:"tags,omitempty"`
 	Secrets      Secrets            `yaml:"secrets,omitempty"`

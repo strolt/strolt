@@ -8,8 +8,8 @@ import (
 )
 
 type config struct {
-	Host                  string          `env:"STROLTP_HOST" envDefault:"0.0.0.0"`
-	Port                  int             `env:"STROLTP_PORT" envDefault:"8080"`
+	Host                  string          `env:"STROLTP_HOST"                         envDefault:"0.0.0.0"`
+	Port                  int             `env:"STROLTP_PORT"                         envDefault:"8080"`
 	GlobalTags            globalTags      `env:"STROLTP_GLOBAL_TAGS"`
 	LogLevel              logger.LogLevel `env:"STROLTP_LOG_LEVEL"`
 	IsAPILogEnabled       bool            `env:"STROLTP_API_LOG_ENABLED"`

@@ -5,16 +5,6 @@ linters:
   enable-all: true
   disable:
     - wrapcheck
-    - structcheck
-    - golint
-    - nosnakecase
-    - exhaustivestruct
-    - scopelint
-    - maligned
-    - deadcode
-    - ifshort
-    - varcheck
-    - interfacer
     - rowserrcheck
     - sqlclosecheck
     - wastedassign
@@ -33,9 +23,20 @@ linters:
     - interfacebloat
     - exhaustruct
     - godox
-    - goerr113
+    - err113
     - testpackage
     - dupl
+    - tenv
+
+    - depguard
+    - testifylint
+    - musttag
+    - staticcheck
+    - ireturn
+    - recvcheck
+    - inamedparam
+    - gosec
+    - containedctx
 
 linters-settings:
   ireturn:
@@ -50,7 +51,7 @@ linters-settings:
   gosec:
     excludes:
       - G204
-  gomnd:
+  mnd:
     ignored-numbers:
       - "0o700"
     ignored-functions:

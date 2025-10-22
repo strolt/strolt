@@ -1,6 +1,7 @@
 package restic
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -174,7 +175,7 @@ func (i *Restic) validateConfigBinPath() error {
 	if i.config.BinPath != "" {
 		_, err := os.Stat(i.config.BinPath)
 		if os.IsNotExist(err) {
-			return fmt.Errorf("bin not exists")
+			return errors.New("bin not exists")
 		}
 
 		binPathAbs, err := filepath.Abs(i.config.BinPath)
@@ -186,7 +187,7 @@ func (i *Restic) validateConfigBinPath() error {
 	}
 
 	if !i.isExistsBin() {
-		return fmt.Errorf("bin not exists")
+		return errors.New("bin not exists")
 	}
 
 	return nil

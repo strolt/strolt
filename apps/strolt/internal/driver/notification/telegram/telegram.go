@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -92,11 +93,11 @@ func (i *Telegram) Send(ctx context.Context) {
 
 func validateConfig(config Config) error {
 	if config.Token == "" {
-		return fmt.Errorf("token is empty")
+		return errors.New("token is empty")
 	}
 
 	if config.ChatID == "" {
-		return fmt.Errorf("chatId is empty")
+		return errors.New("chatId is empty")
 	}
 
 	return nil

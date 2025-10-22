@@ -81,6 +81,7 @@ services:
 
 networks:
   strolt:
+    external: true
 
 volumes:
   minio:

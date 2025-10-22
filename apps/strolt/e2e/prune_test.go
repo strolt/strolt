@@ -41,7 +41,7 @@ func (s *PruneSuite) TestPruneRestic() {
 
 	snapshots, err := stroltGetSnapshotList("e2e", "prune", "restic-prune")
 	s.NoError(err)
-	s.Equal(len(snapshots), 5)
+	s.Len(snapshots, 5)
 
 	log.Println("before:", snapshots)
 
@@ -52,7 +52,7 @@ func (s *PruneSuite) TestPruneRestic() {
 
 	log.Println("after:", snapshots)
 
-	s.Equal(len(snapshots), 3)
+	s.Len(snapshots, 3)
 }
 
 //nolint:thelper

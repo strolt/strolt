@@ -1,7 +1,7 @@
 package strolt
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/go-openapi/runtime"
 	runtimeClient "github.com/go-openapi/runtime/client"
@@ -41,9 +41,9 @@ func (sdk *SDK) GetSnapshots(serviceName, taskName, destinationName string) (*se
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:errorlint
 		case *services.GetSnapshotsBadRequest:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		case *services.GetSnapshotsForPruneInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
 	}
 
@@ -60,7 +60,7 @@ func (sdk *SDK) Backup(serviceName, taskName string) (*services.BackupOK, error)
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *services.BackupInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
 	}
 
@@ -78,7 +78,7 @@ func (sdk *SDK) GetSnapshotsForPrune(serviceName, taskName, destinationName stri
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *services.GetSnapshotsForPruneInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
 	}
 
@@ -96,7 +96,7 @@ func (sdk *SDK) Prune(serviceName, taskName, destinationName string) (*services.
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *services.PruneInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
 	}
 
@@ -118,7 +118,7 @@ func (sdk *SDK) GetStats(serviceName, taskName, destinationName string) (*servic
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *services.GetStatsInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
 	}
 

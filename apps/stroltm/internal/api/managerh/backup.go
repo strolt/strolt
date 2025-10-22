@@ -1,7 +1,7 @@
 package managerh
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"sync"
 
@@ -38,7 +38,7 @@ func (s *ManagerHandlers) backupDirect(w http.ResponseWriter, r *http.Request) {
 func backup(instanceName, serviceName, taskName string) error {
 	sdk, err := getSDK(instanceName)
 	if err != nil {
-		return fmt.Errorf("instance not exists")
+		return errors.New("instance not exists")
 	}
 
 	if _, err := sdk.Backup(serviceName, taskName); err != nil {

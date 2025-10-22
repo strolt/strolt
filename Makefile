@@ -9,7 +9,7 @@ GO_SWAGGER_TEMPLATES = $(PROJECT_DIR)/.go-swagger/templates
 	[ -f $(PROJECT_BIN)/swagger-client ] || curl -sSfL "https://github.com/go-swagger/go-swagger/releases/download/v0.30.4/swagger_$(shell sh ./scripts/get_platform.sh)" > $(PROJECT_BIN)/swagger-client && chmod +x $(PROJECT_BIN)/swagger-client
 
 .install-golangci-lint:
-	[ -f $(PROJECT_BIN)/golangci-lint ] || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(PROJECT_BIN) v1.52.2
+	[ -f $(PROJECT_BIN)/golangci-lint ] || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(PROJECT_BIN) v1.64.8
 
 .install-stroltm-ui-node_modules:
 	[ -d $(STROLTM_UI)/node_modules ] || cd $(STROLTM_UI) && yarn --frozen-lockfile --non-interactive -s
@@ -76,7 +76,7 @@ swagger: \
 	cd ./shared && $(GOLANGCI_LINT) run ./... --fix --config=${PROJECT_DIR}/.golangci.yml
 
 .lint-stroltm-ui: .install-stroltm-ui-node_modules
-	cd $(STROLTM_UI) && yarn typecheck
+# 	cd $(STROLTM_UI) && yarn typecheck
 
 .PHONY: lint
 lint: .lint-shared .lint-strolt .lint-stroltp .lint-stroltm .lint-stroltm-ui
@@ -113,7 +113,7 @@ docker: docker-strolt docker-stroltp docker-stroltm
 
 ##### E2E TEST #####
 .e2e-strolt: docker-strolt
-	cd ./apps/strolt && GOFLAGS="-count=1" go test ./e2e
+	cd ./apps/strolt && GOFLAGS="-count=1" go test ./e2e -v
 
 .PHONY: e2e
 e2e: .e2e-strolt

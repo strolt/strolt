@@ -61,7 +61,7 @@ func (i *Local) SetLogger(logger *logger.Logger) {
 
 func validateConfig(config Config) error {
 	if config.Path == "" {
-		return fmt.Errorf("not found field 'path' in config")
+		return errors.New("not found field 'path' in config")
 	}
 
 	_, err := os.Stat(config.Path)

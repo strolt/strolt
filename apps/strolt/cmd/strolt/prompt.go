@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -57,7 +58,7 @@ func (p *Prompt) ScanServiceName() error {
 
 func (p *Prompt) ScanTaskName() error {
 	if p.ServiceName == "" {
-		return fmt.Errorf("serviceName is empty")
+		return errors.New("serviceName is empty")
 	}
 
 	c := config.Get()
@@ -89,11 +90,11 @@ func (p *Prompt) ScanTaskName() error {
 
 func (p *Prompt) ScanDestinationName() error {
 	if p.ServiceName == "" {
-		return fmt.Errorf("serviceName is empty")
+		return errors.New("serviceName is empty")
 	}
 
 	if p.TaskName == "" {
-		return fmt.Errorf("taskName is empty")
+		return errors.New("taskName is empty")
 	}
 
 	destinationName, _ := p.cmd.Flags().GetString("destination")
@@ -129,15 +130,15 @@ func (p *Prompt) ScanDestinationName() error {
 
 func (p *Prompt) ScanSnapshotName() error {
 	if p.ServiceName == "" {
-		return fmt.Errorf("serviceName is empty")
+		return errors.New("serviceName is empty")
 	}
 
 	if p.TaskName == "" {
-		return fmt.Errorf("taskName is empty")
+		return errors.New("taskName is empty")
 	}
 
 	if p.DestinationName == "" {
-		return fmt.Errorf("destinationName is empty")
+		return errors.New("destinationName is empty")
 	}
 
 	t, err := task.New(p.ServiceName, p.TaskName, sctxt.TManual, sctxt.OpTypeRestore)
@@ -183,7 +184,7 @@ func (p *Prompt) ScanSnapshotName() error {
 	}
 
 	if !snapshotList.IsAvailable(snapshotName) {
-		return fmt.Errorf("snapshot not exists")
+		return errors.New("snapshot not exists")
 	}
 
 	p.SnapshotName = snapshotName

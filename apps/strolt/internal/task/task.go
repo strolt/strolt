@@ -19,7 +19,6 @@ type Operation struct {
 	IsPreviouslyLaunched bool
 }
 
-//nolint:containedctx,musttag
 type Task struct {
 	Context     context.Context
 	Trigger     sctxt.TriggerType

@@ -43,7 +43,7 @@ type ConfigServiceTaskDestination struct {
 type ConfigServiceTaskNotification struct {
 	Driver string            `json:"driver"`
 	Name   string            `json:"name"`
-	Events []sctxt.EventType `json:"events" enums:"OPERATION_START,OPERATION_STOP,OPERATION_ERROR,SOURCE_START,SOURCE_STOP,SOURCE_ERROR,DESTINATION_START,DESTINATION_STOP,DESTINATION_ERROR"`
+	Events []sctxt.EventType `enums:"OPERATION_START,OPERATION_STOP,OPERATION_ERROR,SOURCE_START,SOURCE_STOP,SOURCE_ERROR,DESTINATION_START,DESTINATION_STOP,DESTINATION_ERROR" json:"events"`
 } // @name ConfigServiceTaskNotification
 
 // getConfig godoc

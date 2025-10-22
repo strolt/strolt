@@ -6,8 +6,8 @@ import (
 )
 
 type config struct {
-	Host            string          `env:"STROLTM_HOST" envDefault:"0.0.0.0"`
-	Port            int             `env:"STROLTM_PORT" envDefault:"8080"`
+	Host            string          `env:"STROLTM_HOST"            envDefault:"0.0.0.0"`
+	Port            int             `env:"STROLTM_PORT"            envDefault:"8080"`
 	LogLevel        logger.LogLevel `env:"STROLTM_LOG_LEVEL"`
 	IsAPILogEnabled bool            `env:"STROLTM_API_LOG_ENABLED"`
 }

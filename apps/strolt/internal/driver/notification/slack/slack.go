@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -87,15 +88,15 @@ func (i *Slack) Send(ctx context.Context) {
 
 func validateConfig(config Config) error {
 	if config.TeamID == "" {
-		return fmt.Errorf("teamId is empty")
+		return errors.New("teamId is empty")
 	}
 
 	if config.BotID == "" {
-		return fmt.Errorf("botId is empty")
+		return errors.New("botId is empty")
 	}
 
 	if config.HookID == "" {
-		return fmt.Errorf("hookId is empty")
+		return errors.New("hookId is empty")
 	}
 
 	return nil

@@ -1,6 +1,7 @@
 package task
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -139,7 +140,7 @@ func (t *Task) managerCreateErrorIsRunning() error {
 
 	taskItem, ok := managerVar.Tasks[taskKey]
 	if !ok {
-		return fmt.Errorf("task not found in manager")
+		return errors.New("task not found in manager")
 	}
 
 	return fmt.Errorf("task '%s' for service '%s' already started '%s' with operation '%s' - trigger '%s'", t.TaskName, t.Context.ServiceName, taskItem.StartedAt.Format(time.RFC3339), taskItem.Opeation, taskItem.TriggerType)

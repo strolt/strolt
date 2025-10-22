@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"errors"
 	"fmt"
 
 	"gopkg.in/yaml.v3"
@@ -51,7 +52,7 @@ func (i *PgDump) validateConfig() error {
 			i.config.Format != FormatTar &&
 			i.config.Format != FormatDirectory &&
 			i.config.Format != FormatPlainText {
-			return fmt.Errorf("not available format. available [c|t|p|d]")
+			return errors.New("not available format. available [c|t|p|d]")
 		}
 	}
 
@@ -68,7 +69,7 @@ func (i *PgDump) getCommonArgs() []string {
 	args = append(args, "--no-password")
 
 	if i.config.Database != "" {
-		args = append(args, fmt.Sprintf("--dbname=%s", i.config.Database))
+		args = append(args, "--dbname="+i.config.Database)
 	}
 
 	// if i.config.Host != "" {

@@ -15,18 +15,8 @@ type Snapshot struct {
 	Date    string `json:"date"`
 }
 
-func runDockerCompose(args ...string) ([]byte, error) {
-	cmd := exec.Command("docker", append([]string{"compose"}, args...)...)
-
-	output, err := cmd.CombinedOutput()
-
-	fmt.Println(string(output)) //nolint:forbidigo
-
-	return output, err
-}
-
-func runDockerComposeBash(command string) ([]byte, error) {
-	cmd := exec.Command("docker", "exec", "strolt", "/bin/sh", "-c", command)
+func runDockerExec(containerName string, command string) ([]byte, error) {
+	cmd := exec.Command("docker", "exec", containerName, "/bin/sh", "-c", command)
 
 	output, err := cmd.Output()
 
@@ -35,24 +25,17 @@ func runDockerComposeBash(command string) ([]byte, error) {
 	return output, err
 }
 
-func dockerComposeUp(services ...string) error {
-	_, err := runDockerCompose(append([]string{"up", "-d"}, services...)...)
-	return err
-}
-
-func dockerComposeUpStrolt() error {
-	_, err := runDockerCompose("run", "-d", "--name", "strolt", "--entrypoint", "/bin/sh -c", "strolt", "sleep 99999")
-	return err
-}
-
-func dockerComposeDown() error {
-	if _, err := runDockerCompose("kill"); err != nil {
-		return err
+func runDockerComposeBash(command string) ([]byte, error) {
+	if containerManager == nil || containerManager.GetStroltContainer() == nil {
+		return nil, errors.New("strolt container not initialized")
 	}
 
-	_, err := runDockerCompose("down", "--remove-orphans", "-v")
+	containerName, err := GetContainerName(ctx, containerManager.GetStroltContainer())
+	if err != nil {
+		return nil, err
+	}
 
-	return err
+	return runDockerExec(containerName, command)
 }
 
 func strolt(args ...string) error {
@@ -63,7 +46,13 @@ func strolt(args ...string) error {
 }
 
 func stroltWithResponse(args ...string) ([]byte, error) {
-	cmd := exec.Command("docker", "exec", "strolt", "/bin/sh", "-c", fmt.Sprintf("/strolt/bin/strolt %s", strings.Join(args, " ")))
+	cmd := exec.Command("docker", "run", "--rm", "--network", "strolt",
+		"-v", "./strolt.yml:/strolt/config.yml:ro",
+		"-v", "./.strolt:/strolt/.strolt:ro",
+		"-v", "./.temp/input:/e2e/input",
+		"--entrypoint", "/bin/sh",
+		"strolt/strolt:development",
+		"-c", "/strolt/bin/strolt "+strings.Join(args, " "))
 
 	output, err := cmd.CombinedOutput()
 
@@ -84,13 +73,26 @@ func stroltGetSnapshotList(serviceName string, taskName string, destination stri
 		return nil, errors.New("snapshots not exists")
 	}
 
-	lastItem := lineList[len(lineList)-2]
+	// Find the last non-empty line that contains JSON array
+	var lastItem string
+
+	for i := len(lineList) - 1; i >= 0; i-- {
+		trimmed := strings.TrimSpace(lineList[i])
+		if trimmed != "" && strings.HasPrefix(trimmed, "[") {
+			lastItem = trimmed
+			break
+		}
+	}
+
+	if lastItem == "" {
+		return nil, errors.New("no valid JSON array found in output")
+	}
 
 	var snapshots []Snapshot
 
 	err = json.Unmarshal([]byte(lastItem), &snapshots)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal snapshots: %w, data: %s", err, lastItem)
 	}
 
 	return snapshots, nil

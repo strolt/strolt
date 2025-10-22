@@ -2,7 +2,7 @@ package e2e_test
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"testing"
 	"time"
 
@@ -70,7 +70,13 @@ func mongoConnect() (*MongoConn, error) {
 
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:9003"))
+	port, err := containerManager.GetMongoPort()
+	if err != nil {
+		return nil, err
+	}
+
+	uri := "mongodb://localhost:" + port
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 
 	return &MongoConn{
 		ctx:        &ctx,
@@ -115,15 +121,15 @@ func (c *MongoConn) checkValidData() error {
 	}
 
 	if len(users) == 0 {
-		return fmt.Errorf("not found records")
+		return errors.New("not found records")
 	}
 
 	if len(users) != 1 {
-		return fmt.Errorf("count records > 1")
+		return errors.New("count records > 1")
 	}
 
 	if users[0].Username != user.Username || users[0].Password != user.Password || users[0].ID != user.ID {
-		return fmt.Errorf("record not match with mock")
+		return errors.New("record not match with mock")
 	}
 
 	return nil

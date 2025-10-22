@@ -1,7 +1,7 @@
 package managerh
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -37,7 +37,7 @@ func (s *ManagerHandlers) backupProxy(w http.ResponseWriter, r *http.Request) {
 func backupProxy(proxyName, instanceName, serviceName, taskName string) error {
 	sdk, err := getProxySDK(proxyName)
 	if err != nil {
-		return fmt.Errorf("instance not exists")
+		return errors.New("instance not exists")
 	}
 
 	if _, err := sdk.Backup(instanceName, serviceName, taskName); err != nil {

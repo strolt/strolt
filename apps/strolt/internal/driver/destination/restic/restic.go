@@ -1,7 +1,7 @@
 package restic
 
 import (
-	"fmt"
+	"errors"
 	"os/exec"
 	"strings"
 
@@ -67,7 +67,7 @@ func startCmd(cmd *exec.Cmd) ([]byte, error) {
 		outputList := strings.Split(string(output), "\n")
 
 		if len(outputList) > 1 {
-			return nil, fmt.Errorf(outputList[0])
+			return nil, errors.New(outputList[0])
 		}
 
 		return nil, err

@@ -1,6 +1,7 @@
 package managerh
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -60,7 +61,7 @@ func (s *ManagerHandlers) getSnapshotsDirect(w http.ResponseWriter, r *http.Requ
 	}
 
 	if result == nil || result.Payload == nil {
-		apiu.RenderJSON500(w, r, fmt.Errorf("response is empty"))
+		apiu.RenderJSON500(w, r, errors.New("response is empty"))
 		return
 	}
 
@@ -100,7 +101,7 @@ func (s *ManagerHandlers) getSnapshotsProxy(w http.ResponseWriter, r *http.Reque
 	}
 
 	if result == nil || result.Payload == nil {
-		apiu.RenderJSON500(w, r, fmt.Errorf("response is empty"))
+		apiu.RenderJSON500(w, r, errors.New("response is empty"))
 		return
 	}
 

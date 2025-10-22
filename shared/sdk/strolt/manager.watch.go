@@ -9,7 +9,7 @@ import (
 
 func (m *Manager) Watch(ctx context.Context, cancel func()) {
 	log := logger.New()
-	ticker := time.NewTicker(5 * time.Second) //nolint:gomnd
+	ticker := time.NewTicker(5 * time.Second) //nolint:mnd
 	quit := make(chan struct{})
 
 	go func() {

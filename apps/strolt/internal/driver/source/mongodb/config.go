@@ -42,7 +42,7 @@ func (i *MongoDB) getCommonArgs() []string {
 
 	args = append(args, "--gzip")
 
-	args = append(args, fmt.Sprintf("--archive=%s", ArchiveFileName))
+	args = append(args, "--archive="+ArchiveFileName)
 
 	if i.config.URI != "" {
 		args = append(args, fmt.Sprintf("--uri=%q", i.config.URI))
@@ -57,7 +57,7 @@ func (i *MongoDB) getCommonArgs() []string {
 	}
 
 	if i.config.Database != "" {
-		args = append(args, fmt.Sprintf("--db=%s", i.config.Database))
+		args = append(args, "--db="+i.config.Database)
 	}
 
 	if i.config.Username != "" {

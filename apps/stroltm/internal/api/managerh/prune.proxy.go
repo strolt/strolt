@@ -1,7 +1,7 @@
 package managerh
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -42,7 +42,7 @@ func (s *ManagerHandlers) getSnapshotsForPruneProxy(w http.ResponseWriter, r *ht
 	}
 
 	if result == nil || result.Payload == nil {
-		apiu.RenderJSON500(w, r, fmt.Errorf("response is empty"))
+		apiu.RenderJSON500(w, r, errors.New("response is empty"))
 		return
 	}
 
@@ -82,7 +82,7 @@ func (s *ManagerHandlers) pruneProxy(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if result == nil || result.Payload == nil {
-		apiu.RenderJSON500(w, r, fmt.Errorf("response is empty"))
+		apiu.RenderJSON500(w, r, errors.New("response is empty"))
 		return
 	}
 
