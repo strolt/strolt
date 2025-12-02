@@ -6,7 +6,7 @@ ENV TZ=UTC
 FROM node:24.11.1-trixie-slim as ui-base
 RUN apt-get update && apt-get -y install openjdk21 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-FROM golang:1.25.3-alpine3.22 AS swagger-base
+FROM golang:1.24.11-alpine3.22 AS swagger-base
 RUN apk --update add --no-cache make curl
 
 FROM ui-base as ui-deps
@@ -25,7 +25,7 @@ COPY ./apps/stroltm/ui .
 COPY --from=swagger /github.com/strolt/strolt/.swagger /github.com/strolt/strolt/.swagger
 RUN pnpm gen-api && pnpm build
 
-FROM golang:1.25.3-alpine3.22 AS builder
+FROM golang:1.24.11-alpine3.22 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/stroltm
 COPY ./apps/stroltm/go.mod .

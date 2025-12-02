@@ -3,7 +3,7 @@ WORKDIR /stroltp
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
-FROM golang:1.25.3-alpine3.22  AS swagger-base
+FROM golang:1.24.11-alpine3.22  AS swagger-base
 RUN apk --update add --no-cache make curl
 
 FROM swagger-base AS swagger
@@ -11,7 +11,7 @@ WORKDIR /github.com/strolt/strolt
 COPY . .
 RUN make .swagger-strolt && make .swagger-shared-generate-client-strolt
 
-FROM golang:1.25.3-alpine3.22 AS builder
+FROM golang:1.24.11-alpine3.22 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/stroltp
 COPY ./apps/stroltp/go.mod .
