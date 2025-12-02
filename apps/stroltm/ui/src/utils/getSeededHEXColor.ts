@@ -1,4 +1,3 @@
-
 // const light = '89ABCDEF'
 const light = "89abcd00";
 // const dark = '01234567'
@@ -11,7 +10,7 @@ const xmur3 = (str: string): number => {
   let h = 1779033703 ^ str.length;
 
   for (let i = 0; i < str.length; i++)
-    (h = Math.imul(h ^ str.charCodeAt(i), 3432918353)), (h = (h << 13) | (h >>> 19));
+    ((h = Math.imul(h ^ str.charCodeAt(i), 3432918353)), (h = (h << 13) | (h >>> 19)));
   h = Math.imul(h ^ (h >>> 16), 2246822507);
   h = Math.imul(h ^ (h >>> 13), 3266489909);
   return (h ^= h >>> 16) >>> 0;
@@ -58,7 +57,7 @@ const randomLightColor = (seed?: Seed): string => _randomColor(light, seed);
 
 const randomDarkColor = (seed?: Seed): string => _randomColor(dark, seed);
 
-export const getSeededHEXColor = (seed?: Seed,mode?:"dark"|"light"): string => {
+export const getSeededHEXColor = (seed?: Seed, mode?: "dark" | "light"): string => {
   let c = "";
   if (mode === "dark") {
     c = randomLightColor(seed);

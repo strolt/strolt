@@ -9,10 +9,10 @@ export interface BackupButtonProps {
   instanceName?: string;
   serviceName?: string;
   taskName?: string;
-	isDisabled:boolean;
+  isDisabled: boolean;
 }
 export const BackupButton: React.FC<BackupButtonProps> = observer(
-  ({ isDisabled,proxyName, instanceName, serviceName, taskName }) => {
+  ({ isDisabled, proxyName, instanceName, serviceName, taskName }) => {
     const { managerStore } = useStores();
 
     const status = managerStore.backupStatusMap.get(
@@ -35,7 +35,7 @@ export const BackupButton: React.FC<BackupButtonProps> = observer(
         ),
       )?.isRunning;
 
-    const disabled = isDisabled||!instanceName || !serviceName || !taskName;
+    const disabled = isDisabled || !instanceName || !serviceName || !taskName;
 
     return (
       <Popconfirm
@@ -44,7 +44,7 @@ export const BackupButton: React.FC<BackupButtonProps> = observer(
           managerStore.backup(instanceName || "", serviceName || "", taskName || "", proxyName)
         }
         disabled={isLoading || disabled}
-				okText="Yes"
+        okText="Yes"
       >
         <Button block loading={isLoading} disabled={disabled} size="small" danger>
           Backup

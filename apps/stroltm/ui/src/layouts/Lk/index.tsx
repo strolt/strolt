@@ -5,10 +5,9 @@ import { Outlet } from "react-router";
 import { Link } from "components";
 
 import { observer, useStores } from "stores";
-
-import { Footer } from "./footer";
 import { appConfigStore } from "stores/app-config.store";
 
+import { Footer } from "./footer";
 
 export const Lk = () => {
   const { authStore } = useStores();
@@ -19,7 +18,7 @@ export const Lk = () => {
       <nav>
         <Link to="instances.main">Task List</Link>
         <Link to="instances.old">Instances</Link>
-				<button onClick={()=>appConfigStore.toggleMode()}>toogle theme</button>
+        <button onClick={() => appConfigStore.toggleMode()}>toogle theme</button>
       </nav>
       <Suspense fallback="loading...">
         <Outlet />
