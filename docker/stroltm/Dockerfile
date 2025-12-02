@@ -3,8 +3,8 @@ WORKDIR /stroltm
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
-FROM node:18.16.0-bullseye-slim as ui-base
-RUN apt-get update && apt-get -y install openjdk-11-jre --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+FROM node:24.11.1-trixie-slim as ui-base
+RUN apt-get update && apt-get -y install openjdk21 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 FROM golang:1.20.4-alpine3.18 AS swagger-base
 RUN apk --update add --no-cache make curl
@@ -12,8 +12,8 @@ RUN apk --update add --no-cache make curl
 FROM ui-base as ui-deps
 WORKDIR /github.com/strolt/strolt/apps/stroltm/ui
 COPY ./apps/stroltm/ui/package.json .
-COPY ./apps/stroltm/ui/yarn.lock .
-RUN yarn install --frozen-lockfile --prefer-offline --ignore-scripts --network-timeout 1000000 && yarn cache clean
+COPY ./apps/stroltm/ui/pnpm-lock.yaml .
+RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
 
 FROM swagger-base AS swagger
 WORKDIR /github.com/strolt/strolt
@@ -23,7 +23,7 @@ RUN make .swagger-strolt && make .swagger-shared-generate-client-strolt && make 
 FROM ui-deps as ui-builder
 COPY ./apps/stroltm/ui .
 COPY --from=swagger /github.com/strolt/strolt/.swagger /github.com/strolt/strolt/.swagger
-RUN yarn gen-api && yarn build
+RUN pnpm gen-api && pnpm build
 
 FROM golang:1.20.4-alpine3.18 AS builder
 ARG version

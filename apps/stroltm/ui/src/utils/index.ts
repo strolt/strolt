@@ -1,2 +1,2 @@
-export * from "./getSeededHEXColor"
-export * from "./getTagKey"
+export * from "./getSeededHEXColor";
+export * from "./getTagKey";

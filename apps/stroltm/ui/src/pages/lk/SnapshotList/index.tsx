@@ -29,7 +29,7 @@ const columns: ColumnsType<Snapshot> = [
     render: (tags: string[]) => (
       <>
         {tags.map((tag) => (
-          <TagColored key={tag} value={tag}/>
+          <TagColored key={tag} value={tag} />
         ))}
       </>
     ),

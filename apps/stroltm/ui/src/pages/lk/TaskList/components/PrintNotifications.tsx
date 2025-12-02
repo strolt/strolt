@@ -26,7 +26,6 @@ export const PrintNotifications: React.FC<PrintNotificationsProps> = ({ list }) 
 
   return (
     <>
-
       {list.map((el, i) => (
         <div key={`${el.driver}_${el.name}`}>
           <PrintNotification {...el} />

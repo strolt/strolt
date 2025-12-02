@@ -1,6 +1,9 @@
-import { Button, Popconfirm, message } from "antd";
 import { observer } from "mobx-react-lite";
+
 import { useEffect } from "react";
+
+import { Button, Popconfirm, message } from "antd";
+
 import { useStores } from "stores";
 
 export const BackupAllButton = observer(() => {
@@ -24,7 +27,7 @@ export const BackupAllButton = observer(() => {
   return (
     <Popconfirm title="Are you sure?" onConfirm={handleClick} okText="Yes">
       <Button
-			block
+        block
         type="primary"
         style={{ marginBottom: "1rem" }}
         loading={managerStore.backupAllStatus?.state === "pending"}
