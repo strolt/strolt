@@ -2,7 +2,7 @@ import { Button, Form, Input, message } from "antd";
 
 import { useStores, observer } from "stores";
 
-import styles from "./style.module.scss";
+import * as s from "./styles.css";
 
 const Login = observer(() => {
   const { authStore } = useStores();
@@ -16,7 +16,7 @@ const Login = observer(() => {
   };
 
   return (
-    <div className={styles.auth_layout}>
+    <div className={s.authLayout}>
       <Form
         name="basic"
         labelCol={{ span: 8 }}

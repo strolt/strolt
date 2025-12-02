@@ -4,10 +4,7 @@ import { Button, Card, message, Popconfirm, Tag, Typography } from "antd";
 
 import { DebugJSON, LatestVersionLink, Link, TagColored } from "components";
 
-import {
-  ManagerPreparedInstance,
-  ConfigServiceTask,
-} from "api/generated";
+import { ManagerPreparedInstance, ConfigServiceTask } from "api/generated";
 
 import { observer, useStores } from "stores";
 
@@ -29,7 +26,7 @@ const BackupButton: FC<BackupButtonProps> = observer(
       <Popconfirm
         title="Are you sure?"
         onConfirm={() => managerStore.backup(instanceName, serviceName, taskName, proxyName)}
-				okText="Yes"
+        okText="Yes"
       >
         <Button
           loading={
@@ -104,7 +101,11 @@ const Task: FC<TaskProps> = observer(({ proxyName, task, instanceName, serviceNa
     >
       <div>
         TAGS:
-        {task?.tags?.length ? task?.tags.map((tag) => <TagColored key={tag} value={tag}/>) : <b>-</b>}
+        {task?.tags?.length ? (
+          task?.tags.map((tag) => <TagColored key={tag} value={tag} />)
+        ) : (
+          <b>-</b>
+        )}
       </div>
 
       <div>
@@ -181,7 +182,7 @@ const Task: FC<TaskProps> = observer(({ proxyName, task, instanceName, serviceNa
               <li key={notification.name}>
                 {notification.name} (<b>{notification.driver}</b>):{" "}
                 {notification.events?.map((eventName) => (
-                  <TagColored key={eventName} value={eventName}/>
+                  <TagColored key={eventName} value={eventName} />
                 ))}
               </li>
             ))}
@@ -259,7 +260,7 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
               <div>
                 TAGS:
                 {instance.config?.tags?.length ? (
-                  instance.config?.tags.map((tag) => <TagColored key={tag} value={tag}/>)
+                  instance.config?.tags.map((tag) => <TagColored key={tag} value={tag} />)
                 ) : (
                   <b>-</b>
                 )}

@@ -4,4 +4,3 @@
 /docker-backup
 /.swagger
 /node_modules
-/yarn.lock

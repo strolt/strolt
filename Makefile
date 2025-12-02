@@ -12,7 +12,7 @@ GO_SWAGGER_TEMPLATES = $(PROJECT_DIR)/.go-swagger/templates
 	[ -f $(PROJECT_BIN)/golangci-lint ] || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(PROJECT_BIN) v1.64.8
 
 .install-stroltm-ui-node_modules:
-	[ -d $(STROLTM_UI)/node_modules ] || cd $(STROLTM_UI) && yarn --frozen-lockfile --non-interactive -s
+	[ -d $(STROLTM_UI)/node_modules ] || (cd $(STROLTM_UI) && pnpm install --frozen-lockfile)
 
 all: .install-stroltm-ui-node_modules .install-swagger-client .install-swag
 
@@ -50,7 +50,7 @@ coverage:
 
 
 .swagger-stroltm-ui-generate-client: .install-stroltm-ui-node_modules
-	cd $(STROLTM_UI) && yarn gen-api
+	cd $(STROLTM_UI) && pnpm gen-api
 
 swagger: \
 	.clear-sdk \
@@ -76,7 +76,7 @@ swagger: \
 	cd ./shared && $(GOLANGCI_LINT) run ./... --fix --config=${PROJECT_DIR}/.golangci.yml
 
 .lint-stroltm-ui: .install-stroltm-ui-node_modules
-# 	cd $(STROLTM_UI) && yarn typecheck
+	cd $(STROLTM_UI) && pnpm typecheck
 
 .PHONY: lint
 lint: .lint-shared .lint-strolt .lint-stroltp .lint-stroltm .lint-stroltm-ui

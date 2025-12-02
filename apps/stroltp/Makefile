@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	cd ./ui && yarn build && rm -rf ../internal/ui/build/dist && cp -R ./dist ../internal/ui/build/dist && cd ../ && go build
+	cd ./ui && pnpm build && rm -rf ../internal/ui/build/dist && cp -R ./dist ../internal/ui/build/dist && cd ../ && go build
 
 .PHONY: run-debug
 run-debug:

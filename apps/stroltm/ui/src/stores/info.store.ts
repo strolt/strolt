@@ -50,7 +50,7 @@ export class InfoStore {
 export const infoStore = new InfoStore();
 
 {
-  let intervalId: null | NodeJS.Timer = null;
+  let intervalId: null | NodeJS.Timeout = null;
   reaction(
     () => ({
       isAuthorized: authStore.isAuthorized,
