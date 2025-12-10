@@ -1,15 +1,15 @@
-FROM alpine:3.22.2 AS base
+FROM alpine:3.23.0 AS base
 WORKDIR /stroltm
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
-FROM node:24.11.1-trixie-slim as ui-base
-RUN apt-get update && apt-get -y install openjdk21 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+FROM node:24.11.1-trixie-slim AS ui-base
+RUN apt-get update && apt-get -y install openjdk-21-jre-headless --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-FROM golang:1.24.11-alpine3.22 AS swagger-base
+FROM golang:1.24.11-alpine3.23 AS swagger-base
 RUN apk --update add --no-cache make curl
 
-FROM ui-base as ui-deps
+FROM ui-base AS ui-deps
 WORKDIR /github.com/strolt/strolt/apps/stroltm/ui
 COPY ./apps/stroltm/ui/package.json .
 COPY ./apps/stroltm/ui/pnpm-lock.yaml .
@@ -20,12 +20,12 @@ WORKDIR /github.com/strolt/strolt
 COPY . .
 RUN make .swagger-strolt && make .swagger-shared-generate-client-strolt && make .swagger-stroltp && make .swagger-shared-generate-client-stroltp && make .swagger-stroltm
 
-FROM ui-deps as ui-builder
+FROM ui-deps AS ui-builder
 COPY ./apps/stroltm/ui .
 COPY --from=swagger /github.com/strolt/strolt/.swagger /github.com/strolt/strolt/.swagger
 RUN pnpm gen-api && pnpm build
 
-FROM golang:1.24.11-alpine3.22 AS builder
+FROM golang:1.24.11-alpine3.23 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/stroltm
 COPY ./apps/stroltm/go.mod .
