@@ -1,4 +1,4 @@
-FROM alpine:3.23.0 AS fetch
+FROM alpine:3.23.2 AS fetch
 
 RUN apk add --no-cache \
     postgresql18-client=18.1-r0 \
@@ -25,7 +25,7 @@ RUN rm -f \
 
 RUN apk info -v > /apk-lock.txt
 
-FROM alpine:3.23.0 AS base
+FROM alpine:3.23.2 AS base
 ENV TZ=UTC
 WORKDIR /strolt
 

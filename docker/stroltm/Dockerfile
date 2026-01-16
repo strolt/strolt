@@ -1,9 +1,9 @@
-FROM alpine:3.23.0 AS base
+FROM alpine:3.23.2 AS base
 WORKDIR /stroltm
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
-FROM node:24.11.1-trixie-slim AS ui-base
+FROM node:24.13.0-trixie-slim AS ui-base
 RUN apt-get update && apt-get -y install openjdk-21-jre-headless --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 FROM golang:1.24.11-alpine3.23 AS swagger-base

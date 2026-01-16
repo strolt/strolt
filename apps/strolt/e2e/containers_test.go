@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/docker/go-connections/nat"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -279,7 +280,9 @@ func (cm *ContainerManager) startPostgres() (testcontainers.Container, error) {
 		},
 		Networks:       []string{"strolt"},
 		NetworkAliases: map[string][]string{"strolt": {"postgres"}},
-		WaitingFor:     wait.ForListeningPort("5432/tcp").WithStartupTimeout(30 * time.Second),
+		WaitingFor: wait.ForSQL("5432/tcp", "postgres", func(host string, port nat.Port) string {
+			return "postgres://strolt:strolt@" + host + ":" + port.Port() + "/strolt?sslmode=disable"
+		}).WithQuery("SELECT 1").WithPollInterval(1 * time.Second).WithStartupTimeout(60 * time.Second),
 	}
 
 	return testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
@@ -320,7 +323,9 @@ func (cm *ContainerManager) startMariaDB() (testcontainers.Container, error) {
 		},
 		Networks:       []string{"strolt"},
 		NetworkAliases: map[string][]string{"strolt": {"mariadb"}},
-		WaitingFor:     wait.ForListeningPort("3306/tcp").WithStartupTimeout(30 * time.Second),
+		WaitingFor: wait.ForSQL("3306/tcp", "mysql", func(host string, port nat.Port) string {
+			return "strolt:strolt@tcp(" + host + ":" + port.Port() + ")/strolt"
+		}).WithQuery("SELECT 1").WithPollInterval(2 * time.Second).WithStartupTimeout(90 * time.Second),
 	}
 
 	return testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
@@ -342,7 +347,9 @@ func (cm *ContainerManager) startMySQL() (testcontainers.Container, error) {
 		},
 		Networks:       []string{"strolt"},
 		NetworkAliases: map[string][]string{"strolt": {"mysql"}},
-		WaitingFor:     wait.ForListeningPort("3306/tcp").WithStartupTimeout(30 * time.Second),
+		WaitingFor: wait.ForSQL("3306/tcp", "mysql", func(host string, port nat.Port) string {
+			return "strolt:strolt@tcp(" + host + ":" + port.Port() + ")/strolt"
+		}).WithQuery("SELECT 1").WithPollInterval(2 * time.Second).WithStartupTimeout(120 * time.Second),
 	}
 
 	return testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{

@@ -2,6 +2,7 @@ package e2e_test
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -35,6 +36,11 @@ func TestMain(m *testing.M) {
 func setupContainers() error {
 	ctx = context.Background()
 
+	// Ensure required directories exist
+	if err := os.MkdirAll(".temp/input", 0755); err != nil {
+		return fmt.Errorf("failed to create .temp/input: %w", err)
+	}
+
 	tt := timeTook("setup containers")
 
 	// Initialize container manager
@@ -64,9 +70,19 @@ func setupContainers() error {
 
 	tt = timeTook("strolt init")
 
+	log.Println("Initializing strolt repositories...")
 	if err := strolt("init"); err != nil {
+		log.Printf("ERROR: strolt init failed: %v", err)
 		return err
 	}
+
+	// Validate initialization succeeded
+	if _, err := os.Stat(".strolt"); err != nil {
+		log.Printf("ERROR: .strolt directory not accessible after init: %v", err)
+		return fmt.Errorf("strolt init did not create expected state: %w", err)
+	}
+
+	log.Println("Strolt initialization successful")
 
 	tt.stop()
 

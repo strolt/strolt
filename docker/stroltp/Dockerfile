@@ -1,4 +1,4 @@
-FROM alpine:3.23.0 AS base
+FROM alpine:3.23.2 AS base
 WORKDIR /stroltp
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC

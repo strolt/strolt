@@ -48,7 +48,7 @@ func strolt(args ...string) error {
 func stroltWithResponse(args ...string) ([]byte, error) {
 	cmd := exec.Command("docker", "run", "--rm", "--network", "strolt",
 		"-v", "./strolt.yml:/strolt/config.yml:ro",
-		"-v", "./.strolt:/strolt/.strolt:ro",
+		"-v", "./.strolt:/strolt/.strolt",
 		"-v", "./.temp/input:/e2e/input",
 		"--entrypoint", "/bin/sh",
 		"strolt/strolt:development",
