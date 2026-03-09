@@ -4,3 +4,4 @@
 /docker-backup
 /.swagger
 /node_modules
+.temp/

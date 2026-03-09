@@ -41,6 +41,10 @@ func setupContainers() error {
 		return fmt.Errorf("failed to create .temp/input: %w", err)
 	}
 
+	if err := os.MkdirAll(".temp/workdir", 0755); err != nil {
+		return fmt.Errorf("failed to create .temp/workdir: %w", err)
+	}
+
 	tt := timeTook("setup containers")
 
 	// Initialize container manager

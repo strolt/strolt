@@ -14,7 +14,7 @@ services:
       - strolt
 
   postgres:
-    image: postgres:13.2-alpine
+    image: postgres:15.17-alpine3.23
     environment:
       TZ: UTC
       POSTGRES_DB: strolt
@@ -63,21 +63,21 @@ services:
     networks:
       - strolt
 
-  mysql:
-    image: mysql:8.0.30
-    command: mysqld --default-authentication-plugin=mysql_native_password
-    environment:
-      TZ: UTC
-      MYSQL_DATABASE: strolt
-      MYSQL_USER: strolt
-      MYSQL_PASSWORD: strolt #pragma: allowlist secret
-      MYSQL_ROOT_PASSWORD: strolt #pragma: allowlist secret
-    ports:
-      - 9005:3306
-    volumes:
-      - mysql:/var/lib/mysql
-    networks:
-      - strolt
+  # mysql:
+  #   image: mysql:8.0.30
+  #   command: mysqld --default-authentication-plugin=mysql_native_password
+  #   environment:
+  #     TZ: UTC
+  #     MYSQL_DATABASE: strolt
+  #     MYSQL_USER: strolt
+  #     MYSQL_PASSWORD: strolt #pragma: allowlist secret
+  #     MYSQL_ROOT_PASSWORD: strolt #pragma: allowlist secret
+  #   ports:
+  #     - 9005:3306
+  #   volumes:
+  #     - mysql:/var/lib/mysql
+  #   networks:
+  #     - strolt
 
 networks:
   strolt:

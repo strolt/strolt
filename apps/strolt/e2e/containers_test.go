@@ -270,7 +270,7 @@ func (cm *ContainerManager) StartAllContainers() error {
 
 func (cm *ContainerManager) startPostgres() (testcontainers.Container, error) {
 	req := testcontainers.ContainerRequest{
-		Image:        "postgres:13.2-alpine",
+		Image:        "postgres:18.3-alpine3.23",
 		ExposedPorts: []string{"5432/tcp"},
 		Env: map[string]string{
 			"TZ":                "UTC",

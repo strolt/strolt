@@ -53,6 +53,7 @@ COPY --from=fetch /usr/bin/pg_restore /usr/bin/
 # MariaDB
 COPY --from=fetch /usr/bin/mysqldump  /usr/bin/
 COPY --from=fetch /usr/bin/mariadb    /usr/bin/
+RUN ln -s /usr/bin/mysqldump /usr/bin/mariadb-dump
 
 # MongoDB tools
 COPY --from=fetch /usr/bin/mongodump     /usr/bin/

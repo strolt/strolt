@@ -50,6 +50,7 @@ func stroltWithResponse(args ...string) ([]byte, error) {
 		"-v", "./strolt.yml:/strolt/config.yml:ro",
 		"-v", "./.strolt:/strolt/.strolt",
 		"-v", "./.temp/input:/e2e/input",
+		"-v", "./.temp/workdir:/strolt/bin/strolt-data",
 		"--entrypoint", "/bin/sh",
 		"strolt/strolt:development",
 		"-c", "/strolt/bin/strolt "+strings.Join(args, " "))
