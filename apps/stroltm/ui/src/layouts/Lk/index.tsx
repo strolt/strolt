@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { Outlet } from "react-router";
 
 import { Link } from "components";
-import { observer, useStores } from "stores";
+import { useStores } from "stores";
 import { appConfigStore } from "stores/app-config.store";
 
 import { Footer } from "./footer";

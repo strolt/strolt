@@ -8,7 +8,6 @@ const config = await defineConfig(
   [
     {
       rules: {
-        "@typescript-eslint/consistent-type-imports": "off",
         "@typescript-eslint/no-unused-expressions": "off",
         "i18next/no-literal-string": "off",
         "jsx-a11y/anchor-has-content": "off",
@@ -29,7 +28,6 @@ const config = await defineConfig(
         "unicorn/prefer-code-point": "off",
         "unicorn/prefer-ternary": "off",
         "unicorn/prefer-top-level-await": "off",
-        "unused-imports/no-unused-imports": "off",
         "yml/no-empty-mapping-value": "off",
       },
     },
