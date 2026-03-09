@@ -1,11 +1,17 @@
+root = true
+
 [*]
+charset                  = utf8
+end_of_line              = lf
+indent_size              = 2
+insert_final_newline     = true
+trim_trailing_whitespace = true
+indent_style             = tab
+
+[GNUmakefile]
+indent_size  = 2
 indent_style = tab
-insert_final_newline = true
 
-[*.md]
-indent_style = space
-trim_trailing_whitespace = false
-
-[*.{yml,json}]
-indent_size = 2
-indent_style = space
+[Makefile]
+indent_size  = 2
+indent_style = tab

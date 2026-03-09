@@ -10,8 +10,8 @@ const Login = observer(() => {
   const onFinish = async ({ username, password }: { username: string; password: string }) => {
     try {
       await authStore.login(username, password);
-    } catch (err: any) {
-      message.error(err?.message);
+    } catch (error: any) {
+      message.error(error?.message);
     }
   };
 

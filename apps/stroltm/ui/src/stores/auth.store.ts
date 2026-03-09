@@ -1,10 +1,11 @@
-import { AxiosResponse } from "axios";
+import type { AxiosResponse } from "axios";
 import { makeAutoObservable, runInAction } from "mobx";
 
-import { fromPromise, IPromiseBasedObservable } from "mobx-utils";
+import type { IPromiseBasedObservable } from "mobx-utils";
+import { fromPromise } from "mobx-utils";
 
 import * as api from "../api";
-import * as apiGenerated from "../api/generated";
+import type * as apiGenerated from "../api/generated";
 import * as env from "../env";
 
 const setApiAuthorization = (username: string, password: string) => {

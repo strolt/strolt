@@ -5,7 +5,7 @@ import {
   CloseCircleFilled,
 } from "@ant-design/icons";
 
-import { FC } from "react";
+import type { FC } from "react";
 
 const iconCheck = (square?: boolean, size?: number | string) => {
   if (square) {

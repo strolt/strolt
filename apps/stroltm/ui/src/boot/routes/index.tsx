@@ -1,12 +1,13 @@
 import * as layouts from "layouts";
 import * as pages from "pages";
 
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
-import { RouteObject } from "react-router";
+import type { RouteObject } from "react-router";
 import { Navigate } from "react-router-dom";
 
-import { toPath, toNavigate, ConstantsRouteType } from "./constants";
+import type { ConstantsRouteType } from "./constants";
+import { toPath, toNavigate } from "./constants";
 
 const r = (c: ConstantsRouteType, element: ReactNode) => ({
   path: toPath(c),

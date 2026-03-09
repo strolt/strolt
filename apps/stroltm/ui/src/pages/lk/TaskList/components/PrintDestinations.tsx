@@ -2,7 +2,7 @@ import { Divider, Space } from "antd";
 
 import { Link } from "components";
 
-import { TaskListItemDestination } from "stores/manager.store/taskList";
+import type { TaskListItemDestination } from "stores/manager.store/taskList";
 
 interface LinksProps {
   proxyName?: string;

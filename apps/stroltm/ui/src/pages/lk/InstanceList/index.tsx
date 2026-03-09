@@ -1,10 +1,14 @@
-import { FC, useEffect } from "react";
+import type { FC } from "react";
+import { useEffect } from "react";
 
-import { Button, Card, message, Popconfirm, Tag, Typography } from "antd";
+import { Button, message, Popconfirm, Tag, Typography } from "antd";
+import InternalCard from "antd/es/card/Card";
+
+const Card = InternalCard;
 
 import { DebugJSON, LatestVersionLink, Link, TagColored } from "components";
 
-import { ManagerPreparedInstance, ConfigServiceTask } from "api/generated";
+import type { ManagerPreparedInstance, ConfigServiceTask } from "api/generated";
 
 import { observer, useStores } from "stores";
 

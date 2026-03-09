@@ -1,0 +1,11 @@
+enableGlobalVirtualStore: true
+enablePrePostScripts: false
+hoistPattern: []
+ignorePatchFailures: false
+optimisticRepeatInstall: true
+packages:
+  - apps/*
+  - website
+  - apps/stroltm/ui
+resolutionMode: lowest-direct
+verifyDepsBeforeRun: install

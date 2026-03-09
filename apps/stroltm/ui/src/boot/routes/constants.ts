@@ -1,4 +1,5 @@
-import { generatePath, Params } from "react-router";
+import type { Params } from "react-router";
+import { generatePath } from "react-router";
 
 const rPrefix = (prefix: string) => (router?: string) => prefix + (router || "");
 

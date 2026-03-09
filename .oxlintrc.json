@@ -1,0 +1,30 @@
+{
+  "$schema": "./node_modules/@shibanet0/datamitsu-config/oxlint_configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "pedantic": "error",
+    "perf": "error",
+    "style": "warn",
+    "suspicious": "error"
+  },
+  "extends": ["./node_modules/@shibanet0/datamitsu-config/.oxlintrc.json"],
+  "rules": {
+    "max-params": "off",
+    "no-unused-expressions": "off",
+    "no-negated-condition": "off",
+    "unicorn/prefer-array-some": "off",
+    "unicorn/prefer-array-flat-map": "off",
+    "no-unused-vars": "off",
+    "typescript-eslint/consistent-type-imports": "off",
+    "no-extra-boolean-cast": "off",
+    "unicorn/explicit-length-check": "off",
+    "unicorn/prefer-spread": "off",
+    "unicorn/prefer-code-point": "off",
+    "no-implicit-coercion": "off",
+    "unicorn/prefer-math-trunc": "off",
+    "no-duplicate-imports": "off",
+    "max-statements": "off",
+    "unicorn/prefer-top-level-await": "off",
+    "no-map-spread": "off"
+  }
+}

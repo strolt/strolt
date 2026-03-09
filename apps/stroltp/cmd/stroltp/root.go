@@ -46,8 +46,10 @@ func init() {
 
 var rootCmd = &cobra.Command{
 	Use:   "stroltp",
-	Short: "Stroltp",
-	Long:  ``,
+	Short: "Strolt Proxy - reverse proxy and load balancer for Strolt instances",
+	Long: `Strolt Proxy (stroltp) provides reverse proxy and load balancing capabilities for Strolt instances.
+It enables centralized access management, request routing, and high availability
+for your distributed backup infrastructure.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		env.Scan()
 

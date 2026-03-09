@@ -1,0 +1,17 @@
+{
+  "name": "@strolt/strolt",
+  "version": "0.0.0",
+  "private": true,
+  "keywords": [],
+  "license": "MIT",
+  "author": "Alexander Svinarev <shibanet0@gmail.com> (shibanet0.com)",
+  "type": "module",
+  "scripts": {
+    "fix": "datamitsu fix",
+    "lint": "datamitsu lint"
+  },
+  "devDependencies": {
+    "@shibanet0/datamitsu-config": "0.0.2-alpha-2"
+  },
+  "packageManager": "pnpm@10.29.3"
+}

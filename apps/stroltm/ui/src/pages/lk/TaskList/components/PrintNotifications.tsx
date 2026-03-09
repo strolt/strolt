@@ -2,7 +2,7 @@ import { Divider, Space } from "antd";
 
 import { Print } from "components";
 
-import { TaskListItemNotification } from "stores/manager.store/taskList";
+import type { TaskListItemNotification } from "stores/manager.store/taskList";
 
 export const PrintNotification: React.FC<TaskListItemNotification> = (el) => {
   return (

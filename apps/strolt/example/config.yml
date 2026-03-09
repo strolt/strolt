@@ -30,6 +30,5 @@ destinations:
 #   slack:
 #     driver: slack # [slack, telegram]
 
-
 extendConfig:
   - ./notifications.yml

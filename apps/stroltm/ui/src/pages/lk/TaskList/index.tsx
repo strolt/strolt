@@ -2,8 +2,8 @@ import { observer } from "mobx-react-lite";
 
 import { useMemo } from "react";
 
-import { ColumnsType } from "antd/es/table";
-import { CompareFn } from "antd/es/table/interface";
+import type { ColumnsType } from "antd/es/table";
+import type { CompareFn } from "antd/es/table/interface";
 
 import { BackupAllButton } from "./components/BackupAllButton";
 import { BackupButton } from "./components/BackupButton";
@@ -15,7 +15,7 @@ import { PrintVersion } from "./components/PrintVersion";
 import { Print, Table } from "components";
 
 import { managerStore } from "stores/manager.store";
-import { TaskListItem } from "stores/manager.store/taskList";
+import type { TaskListItem } from "stores/manager.store/taskList";
 
 import { getTagKey } from "utils";
 

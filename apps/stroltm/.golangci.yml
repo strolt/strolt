@@ -1,0 +1,94 @@
+version: "2"
+run:
+  go: 1.24.0
+linters:
+  default: all
+  disable:
+    - containedctx
+    - copyloopvar
+    - cyclop
+    - funcorder
+    - depguard
+    - dupl
+    - nilnesserr
+    - unqueryvet
+    - noctx
+    - err113
+    - noinlineerr
+    - modernize
+    - embeddedstructfieldcheck
+    - wsl_v5
+    - wsl
+    - prealloc
+    - exhaustruct
+    - funlen
+    - gochecknoglobals
+    - gocognit
+    - gocyclo
+    - godox
+    - gosec
+    - inamedparam
+    - interfacebloat
+    - ireturn
+    - lll
+    - musttag
+    - nestif
+    - paralleltest
+    - recvcheck
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - tagliatelle
+    - testifylint
+    - testpackage
+    - varnamelen
+    - wastedassign
+    - wrapcheck
+  settings:
+    gomoddirectives:
+      replace-local: true
+    gosec:
+      excludes:
+        - G204
+    ireturn:
+      allow:
+        - anon
+        - error
+        - empty
+        - stdlib
+        - DriverDestinationInterface
+        - DriverNotificationInterface
+        - DriverSourceInterface
+    mnd:
+      ignored-numbers:
+        - "0o700"
+      ignored-functions:
+        - ParseInt
+    nlreturn:
+      block-size: 2
+    revive:
+      rules:
+        - name: unused-parameter
+          severity: warning
+          disabled: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

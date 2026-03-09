@@ -44,11 +44,11 @@ FROM base
 ARG GITHUB_SHA
 
 LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
-      org.opencontainers.image.description="Strolt manager" \
-      org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.source="https://github.com/strolt/strolt.git" \
-      org.opencontainers.image.title="Stroltm" \
-      org.opencontainers.image.revision="${GITHUB_SHA}"
+			org.opencontainers.image.description="Strolt manager" \
+			org.opencontainers.image.licenses="MIT" \
+			org.opencontainers.image.source="https://github.com/strolt/strolt.git" \
+			org.opencontainers.image.title="Stroltm" \
+			org.opencontainers.image.revision="${GITHUB_SHA}"
 
 COPY --from=builder /go/src/github.com/strolt/strolt/apps/stroltm/stroltm ./bin/stroltm
 

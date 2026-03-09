@@ -7,12 +7,13 @@ const random = dark + light;
 type Seed = string | number;
 
 const xmur3 = (str: string): number => {
-  let h = 1779033703 ^ str.length;
+  let h = 1_779_033_703 ^ str.length;
 
-  for (let i = 0; i < str.length; i++)
-    ((h = Math.imul(h ^ str.charCodeAt(i), 3432918353)), (h = (h << 13) | (h >>> 19)));
-  h = Math.imul(h ^ (h >>> 16), 2246822507);
-  h = Math.imul(h ^ (h >>> 13), 3266489909);
+  for (let i = 0; i < str.length; i++) {
+    ((h = Math.imul(h ^ str.charCodeAt(i), 3_432_918_353)), (h = (h << 13) | (h >>> 19)));
+  }
+  h = Math.imul(h ^ (h >>> 16), 2_246_822_507);
+  h = Math.imul(h ^ (h >>> 13), 3_266_489_909);
   return (h ^= h >>> 16) >>> 0;
 };
 
@@ -24,8 +25,9 @@ const _randomColor = (list: string, seed?: Seed): string => {
     .split("")
     .map((n) => +n);
 
-  while (arrayOfNumber.length < 6)
+  while (arrayOfNumber.length < 6) {
     arrayOfNumber.push(+((seedNumber / arrayOfNumber.length) % 10).toFixed(0));
+  }
 
   const isRandom = list.length === random.length;
   const indexColor = arrayOfNumber.map((n, i) => {
@@ -33,14 +35,24 @@ const _randomColor = (list: string, seed?: Seed): string => {
     if (isRandom || isOdd) {
       let m = 0;
       m = n * 2;
-      if (isOdd) m += 1;
-      if (m < random.length) return m;
+      if (isOdd) {
+        m += 1;
+      }
+      if (m < random.length) {
+        return m;
+      }
       const o = (m - random.length) * 3 + 1;
-      if (isOdd && o % 2) return o + 1;
-      if (isOdd) return o - 1;
+      if (isOdd && o % 2) {
+        return o + 1;
+      }
+      if (isOdd) {
+        return o - 1;
+      }
       return o;
     }
-    if (n < list.length) return n;
+    if (n < list.length) {
+      return n;
+    }
     return [4, 5, 6, 7, 8, 9].indexOf(n - i);
   });
 

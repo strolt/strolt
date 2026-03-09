@@ -1,6 +1,6 @@
 import { infoStore } from "stores/info.store";
 
-import * as apiGenerated from "../../api/generated";
+import type * as apiGenerated from "../../api/generated";
 
 export interface TaskListItemSource {
   driver: string;
@@ -130,8 +130,8 @@ const getUptime = (proxyName?: string, instanceName?: string) => {
       try {
         const date = new Date(instance.startedAt);
         ms = Date.now() - date.getTime();
-      } catch (e) {
-        console.log(e);
+      } catch (error) {
+        console.log(error);
       }
     }
 
@@ -142,8 +142,8 @@ const getUptime = (proxyName?: string, instanceName?: string) => {
           return ms;
         }
         ms = (Date.now() - date.getTime()) * -1;
-      } catch (e) {
-        console.log(e);
+      } catch (error) {
+        console.log(error);
       }
     }
   }

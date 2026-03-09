@@ -1,10 +1,11 @@
-import { AxiosResponse } from "axios";
+import type { AxiosResponse } from "axios";
 import { makeAutoObservable, reaction, runInAction } from "mobx";
 
-import { fromPromise, IPromiseBasedObservable } from "mobx-utils";
+import type { IPromiseBasedObservable } from "mobx-utils";
+import { fromPromise } from "mobx-utils";
 
 import * as api from "../api";
-import * as apiGenerated from "../api/generated";
+import type * as apiGenerated from "../api/generated";
 import { authStore } from "./auth.store";
 import { managerStore } from "./manager.store";
 

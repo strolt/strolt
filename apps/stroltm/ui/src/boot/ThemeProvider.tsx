@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 
 import { ConfigProvider, theme } from "antd";
-import { AliasToken } from "antd/es/theme/internal";
+import type { AliasToken } from "antd/es/theme/internal";
 
 import { appConfigStore } from "stores/app-config.store";
 

@@ -2,7 +2,7 @@ const encode = (v: unknown) => JSON.stringify(v);
 const decode = (v: string) => {
   try {
     return JSON.parse(v);
-  } catch (e) {
+  } catch {
     return null;
   }
 };
