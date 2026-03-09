@@ -3,8 +3,8 @@ import { Space } from "antd";
 import { TagColored } from "components/TagColored";
 
 export interface TagListProps {
-  value: string[];
   fallback?: React.ReactNode;
+  value: string[];
 }
 export const TagList: React.FC<TagListProps> = ({ fallback, value }) => {
   if (!value.length && fallback) {

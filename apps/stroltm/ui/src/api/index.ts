@@ -1,6 +1,6 @@
-import axios from "axios";
-
 import { message } from "antd";
+
+import axios from "axios";
 
 import * as _api from "./generated/api";
 import { Configuration } from "./generated/configuration";

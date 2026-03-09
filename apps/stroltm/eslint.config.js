@@ -8,9 +8,7 @@ const config = await defineConfig(
   [
     {
       rules: {
-        "perfectionist/sort-objects": "off",
         "sonarjs/pseudo-random": "off",
-        "yml/sort-keys": "off",
         "yml/no-empty-mapping-value": "off",
       },
     },

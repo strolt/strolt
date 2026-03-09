@@ -8,8 +8,6 @@ const config = await defineConfig(
   [
     {
       rules: {
-        "yml/sort-keys": "off",
-        "perfectionist/sort-objects": "off",
         "yml/no-empty-document": "off",
         "yml/no-empty-mapping-value": "off",
       },

@@ -4,7 +4,7 @@ const light = "89abcd00";
 const dark = "01453d";
 const random = dark + light;
 
-type Seed = string | number;
+type Seed = number | string;
 
 const xmur3 = (str: string): number => {
   let h = 1_779_033_703 ^ str.length;

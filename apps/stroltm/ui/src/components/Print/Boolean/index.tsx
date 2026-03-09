@@ -1,19 +1,19 @@
-import {
-  CheckSquareFilled,
-  CheckCircleFilled,
-  CloseSquareFilled,
-  CloseCircleFilled,
-} from "@ant-design/icons";
-
 import type { FC } from "react";
+
+import {
+  CheckCircleFilled,
+  CheckSquareFilled,
+  CloseCircleFilled,
+  CloseSquareFilled,
+} from "@ant-design/icons";
 
 const iconCheck = (square?: boolean, size?: number | string) => {
   if (square) {
     return (
       <CheckSquareFilled
         style={{
-          fontSize: size,
           color: "green",
+          fontSize: size,
         }}
       />
     );
@@ -22,8 +22,8 @@ const iconCheck = (square?: boolean, size?: number | string) => {
   return (
     <CheckCircleFilled
       style={{
-        fontSize: size,
         color: "green",
+        fontSize: size,
       }}
     />
   );
@@ -34,8 +34,8 @@ const iconUnCheck = (square?: boolean, size?: number | string) => {
     return (
       <CloseSquareFilled
         style={{
-          fontSize: size,
           color: "red",
+          fontSize: size,
         }}
       />
     );
@@ -44,19 +44,19 @@ const iconUnCheck = (square?: boolean, size?: number | string) => {
   return (
     <CloseCircleFilled
       style={{
-        fontSize: size,
         color: "red",
+        fontSize: size,
       }}
     />
   );
 };
 
 export interface BooleanProps {
-  value?: string | boolean | number;
-  square?: boolean;
   size?: number | string;
+  square?: boolean;
+  value?: boolean | number | string;
 }
-export const Boolean: FC<BooleanProps> = ({ value, square, size }) => {
+export const Boolean: FC<BooleanProps> = ({ size, square, value }) => {
   if (!value) {
     return iconUnCheck(square, size);
   }

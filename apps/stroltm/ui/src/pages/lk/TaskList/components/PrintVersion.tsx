@@ -1,16 +1,14 @@
-import { observer } from "mobx-react-lite";
-
 import { Space } from "antd";
 
 import { LatestVersionLink } from "components";
-
+import { observer } from "mobx-react-lite";
 import { infoStore } from "stores/info.store";
 
 export interface PrintVersionProps {
-  proxyName?: string;
   instanceName?: string;
+  proxyName?: string;
 }
-export const PrintVersion: React.FC<PrintVersionProps> = observer(({ proxyName, instanceName }) => {
+export const PrintVersion: React.FC<PrintVersionProps> = observer(({ instanceName, proxyName }) => {
   if (!instanceName) {
     return <>-</>;
   }
@@ -24,7 +22,7 @@ export const PrintVersion: React.FC<PrintVersionProps> = observer(({ proxyName, 
   return (
     <Space>
       {info.version}
-      <LatestVersionLink version={info.version} label="Upgrade" />
+      <LatestVersionLink label="Upgrade" version={info.version} />
     </Space>
   );
 });

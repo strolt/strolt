@@ -1,9 +1,13 @@
-import { observer } from "mobx-react-lite";
-
 import { useMemo } from "react";
 
 import type { ColumnsType } from "antd/es/table";
 import type { CompareFn } from "antd/es/table/interface";
+import type { TaskListItem } from "stores/manager.store/taskList";
+
+import { Print, Table } from "components";
+import { observer } from "mobx-react-lite";
+import { managerStore } from "stores/manager.store";
+import { getTagKey } from "utils";
 
 import { BackupAllButton } from "./components/BackupAllButton";
 import { BackupButton } from "./components/BackupButton";
@@ -12,12 +16,6 @@ import { PrintNotifications } from "./components/PrintNotifications";
 import { PrintSchedule } from "./components/PrintSchedule";
 import { PrintUptime } from "./components/PrintUptime";
 import { PrintVersion } from "./components/PrintVersion";
-import { Print, Table } from "components";
-
-import { managerStore } from "stores/manager.store";
-import type { TaskListItem } from "stores/manager.store/taskList";
-
-import { getTagKey } from "utils";
 
 const nameSorter = (field: keyof TaskListItem): CompareFn<TaskListItem> => {
   return (a, b, order) => {
@@ -51,19 +49,24 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
         key: "backupButton",
         render: (_, r) => (
           <BackupButton
-            proxyName={r.proxyName}
             instanceName={r.instanceName}
+            isDisabled={!r.isOnline}
+            proxyName={r.proxyName}
             serviceName={r.serviceName}
             taskName={r.taskName}
-            isDisabled={!r.isOnline}
           />
         ),
         width: "7rem",
       },
       {
-        title: "online",
         dataIndex: "isOnline",
+        defaultSortOrder: "ascend",
         key: "isOnline",
+        render: (v) => (
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <Print.Boolean size="1.2rem" value={v} />
+          </div>
+        ),
         sorter: {
           compare: (a, b) => {
             if (+a.isOnline < +b.isOnline) {
@@ -77,83 +80,76 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
           },
           multiple: 1,
         },
-        render: (v) => (
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <Print.Boolean size="1.2rem" value={v} />
-          </div>
-        ),
-        defaultSortOrder: "ascend",
+        title: "online",
         width: "1rem",
       },
       {
-        title: "proxy",
         dataIndex: "proxyName",
-        key: "proxyName",
+        defaultSortOrder: "ascend",
+        filterResetToDefaultFilteredValue: true,
         filters: deleteDuplicates(list.map((el) => el.proxyName || ""))
           .filter(Boolean)
           .map((v) => ({ text: v, value: v })),
+        key: "proxyName",
         onFilter: (value, r) => r.proxyName === value,
-        filterResetToDefaultFilteredValue: true,
-        sorter: { compare: nameSorter("proxyName") },
         render: (v) => <Print.Text value={v} />,
-        defaultSortOrder: "ascend",
+        sorter: { compare: nameSorter("proxyName") },
+        title: "proxy",
       },
       {
-        title: "instance",
         dataIndex: "instanceName",
-        key: "instanceName",
+        defaultSortOrder: "ascend",
+        filterResetToDefaultFilteredValue: true,
         filters: deleteDuplicates(list.map((el) => el.instanceName || ""))
           .filter(Boolean)
           .map((v) => ({ text: v, value: v })),
+        key: "instanceName",
         onFilter: (value, r) => r.instanceName === value,
-        filterResetToDefaultFilteredValue: true,
-        sorter: { compare: nameSorter("instanceName") },
         render: (v) => <Print.Text value={v} />,
-        defaultSortOrder: "ascend",
+        sorter: { compare: nameSorter("instanceName") },
+        title: "instance",
       },
       {
-        title: "service",
         dataIndex: "serviceName",
-        key: "serviceName",
+        defaultSortOrder: "ascend",
+        filterResetToDefaultFilteredValue: true,
         filters: deleteDuplicates(list.map((el) => el.serviceName || ""))
           .filter(Boolean)
           .map((v) => ({ text: v, value: v })),
+        key: "serviceName",
         onFilter: (value, r) => r.serviceName === value,
-        filterResetToDefaultFilteredValue: true,
-        sorter: { compare: nameSorter("serviceName") },
         render: (v) => <Print.Text value={v} />,
-        defaultSortOrder: "ascend",
+        sorter: { compare: nameSorter("serviceName") },
+        title: "service",
       },
       {
-        title: "task",
         dataIndex: "taskName",
-        key: "taskName",
+        defaultSortOrder: "ascend",
+        filterResetToDefaultFilteredValue: true,
         filters: deleteDuplicates(list.map((el) => el.taskName || ""))
           .filter(Boolean)
           .map((v) => ({ text: v, value: v })),
+        key: "taskName",
         onFilter: (value, r) => r.taskName === value,
-        filterResetToDefaultFilteredValue: true,
-        sorter: { compare: nameSorter("taskName") },
         render: (v) => <Print.Text value={v} />,
-        defaultSortOrder: "ascend",
+        sorter: { compare: nameSorter("taskName") },
+        title: "task",
       },
       {
-        title: "timezone",
         dataIndex: "timezone",
-        key: "timezone",
-        sorter: { compare: nameSorter("taskName") },
+        filterResetToDefaultFilteredValue: true,
         filters: deleteDuplicates(list.map((el) => el.timezone)).map((v) => ({
           text: v,
           value: v,
         })),
+        key: "timezone",
         onFilter: (value, r) => r.timezone === String(value),
-        filterResetToDefaultFilteredValue: true,
+        sorter: { compare: nameSorter("taskName") },
+        title: "timezone",
       },
       {
-        title: "tags",
         dataIndex: "tags",
-        key: "tags",
-        render: (v) => <Print.TagList value={v} fallback={<>-</>} />,
+        filterResetToDefaultFilteredValue: true,
         filters: deleteDuplicates(
           list
             .map((el) => el.tags)
@@ -163,73 +159,75 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
           text: v,
           value: v,
         })),
-        onFilter: (value, r) => !!r.tags.find((tag) => tag.startsWith(String(value))),
-        filterResetToDefaultFilteredValue: true,
+        key: "tags",
         onCell: () => ({ style: { maxWidth: "25rem" } }),
+        onFilter: (value, r) => !!r.tags.find((tag) => tag.startsWith(String(value))),
+        render: (v) => <Print.TagList fallback={<>-</>} value={v} />,
+        title: "tags",
       },
       {
-        title: "schedule",
         dataIndex: "schedule",
         key: "schedule",
         render: (_, r) => <PrintSchedule {...r.schedule} />,
+        title: "schedule",
       },
       {
-        title: "source",
         dataIndex: "source",
-        key: "source",
-        sorter: { compare: nameSorter("source") },
+        filterResetToDefaultFilteredValue: true,
         filters: deleteDuplicates(list.map((el) => el.source.driver))
           .filter(Boolean)
           .map((v) => ({ text: v, value: v })),
+        key: "source",
         onFilter: (value, r) => r.source.driver === String(value),
-        filterResetToDefaultFilteredValue: true,
         render: (_, r) => <Print.Text value={r.source.driver} />,
+        sorter: { compare: nameSorter("source") },
+        title: "source",
       },
       {
-        title: "destinations",
         dataIndex: "destinations",
-        key: "destinations",
+        filterResetToDefaultFilteredValue: true,
         filters: deleteDuplicates(list.map((el) => el.destinations.map((el) => el.driver)).flat())
           .filter(Boolean)
           .map((v) => ({ text: v, value: v })),
+        key: "destinations",
         onFilter: (value, r) => !!r.destinations.find((el) => el.driver === String(value)),
-        filterResetToDefaultFilteredValue: true,
         render: (_, r) => (
           <PrintDestinations
             list={r.destinations.map((el) => ({
               ...el,
-              proxyName: r.proxyName,
+              destinationName: el.name,
               instanceName: r.instanceName,
+              proxyName: r.proxyName,
               serviceName: r.serviceName,
               taskName: r.taskName,
-              destinationName: el.name,
             }))}
           />
         ),
+        title: "destinations",
       },
       {
-        title: "notifications",
         dataIndex: "notifications",
-        key: "notifications",
+        filterResetToDefaultFilteredValue: true,
         filters: deleteDuplicates(list.map((el) => el.notifications.map((el) => el.driver)).flat())
           .filter(Boolean)
           .map((v) => ({ text: v, value: v })),
-        onFilter: (value, r) => !!r.notifications.find((el) => el.driver === String(value)),
-        filterResetToDefaultFilteredValue: true,
-        render: (_, r) => <PrintNotifications list={r.notifications} />,
+        key: "notifications",
         onCell: () => ({ style: { maxWidth: "20rem" } }),
+        onFilter: (value, r) => !!r.notifications.find((el) => el.driver === String(value)),
+        render: (_, r) => <PrintNotifications list={r.notifications} />,
+        title: "notifications",
       },
       {
-        title: "version",
         key: "version",
-        render: (_, r) => <PrintVersion proxyName={r.proxyName} instanceName={r.instanceName} />,
+        render: (_, r) => <PrintVersion instanceName={r.instanceName} proxyName={r.proxyName} />,
+        title: "version",
       },
       {
-        title: "uptime",
         dataIndex: "uptime",
         key: "uptime",
         render: (v) => <PrintUptime uptime={v} />,
         sorter: { compare: (a, b) => a.uptime - b.uptime },
+        title: "uptime",
       },
     ];
 
@@ -274,9 +272,9 @@ const TaskList = observer(() => {
     });
 
     return {
+      proxyInstances,
       stroltInstancesDirect,
       stroltInstancesProxy,
-      proxyInstances,
       tasks: managerStore.taskList.length,
     };
   }, [managerStore.instances, managerStore.taskList]);
@@ -285,11 +283,8 @@ const TaskList = observer(() => {
     <>
       <BackupAllButton />
       <Table
-        scroll={{ x: "max-content" }}
-        dataSource={managerStore.taskList}
-        rowKey="key"
         columns={columns}
-        pagination={false}
+        dataSource={managerStore.taskList}
         footer={() => (
           <>
             <div>
@@ -306,6 +301,9 @@ const TaskList = observer(() => {
             </div>
           </>
         )}
+        pagination={false}
+        rowKey="key"
+        scroll={{ x: "max-content" }}
       />
       {/* <ReactJson src={managerStore.taskList || {}} /> */}
     </>

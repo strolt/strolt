@@ -1,29 +1,26 @@
 import { useEffect, useState } from "react";
-
 import { useParams } from "react-router";
 
 import { Table, Typography } from "antd";
+
 import type { ColumnsType } from "antd/es/table";
-
-import { DebugJSON, Print, TagColored } from "components";
-
 import type { Snapshot } from "api/generated";
 
+import { DebugJSON, Print, TagColored } from "components";
 import { observer, useStores } from "stores";
 
 const columns: ColumnsType<Snapshot> = [
   {
-    title: "Short ID",
     dataIndex: "shortId",
     key: "shortId",
+    title: "Short ID",
   },
   {
-    title: "ID",
     dataIndex: "id",
     key: "id",
+    title: "ID",
   },
   {
-    title: "Tags",
     dataIndex: "tags",
     key: "tags",
     render: (tags: string[]) => (
@@ -33,23 +30,24 @@ const columns: ColumnsType<Snapshot> = [
         ))}
       </>
     ),
+    title: "Tags",
   },
   {
-    title: "Time",
     dataIndex: "time",
     key: "time",
     render: (v) => <Print.Time value={v} withTime />,
+    title: "Time",
   },
 ];
 
 const SnapshotList = observer(() => {
   const { managerStore } = useStores();
   const params = useParams<{
-    proxyId: string;
+    destinationId: string;
     instanceId: string;
+    proxyId: string;
     serviceId: string;
     taskId: string;
-    destinationId: string;
   }>();
 
   const [expandedKey, setExpandedKey] = useState("");
@@ -80,14 +78,8 @@ const SnapshotList = observer(() => {
       </Typography.Title>
 
       <Table
-        dataSource={managerStore.snapshots?.items}
         columns={columns}
-        loading={managerStore.snapshotsStatus?.state === "pending"}
-        rowKey="id"
-        pagination={false}
-        scroll={{
-          x: "max-content",
-        }}
+        dataSource={managerStore.snapshots?.items}
         expandable={{
           expandedRowKeys: expandedKey ? [expandedKey] : [],
           expandedRowRender: (data: Snapshot) => (
@@ -109,6 +101,12 @@ const SnapshotList = observer(() => {
           },
         }}
         footer={() => <b>Total: {managerStore.snapshots?.items?.length || 0}</b>}
+        loading={managerStore.snapshotsStatus?.state === "pending"}
+        pagination={false}
+        rowKey="id"
+        scroll={{
+          x: "max-content",
+        }}
       />
 
       <br />

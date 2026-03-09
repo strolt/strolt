@@ -14,12 +14,7 @@ interface Options<T> {
 
 const storage = <T = unknown>(key: string, options?: Options<T>) => {
   return {
-    setItem: async (value: T) => {
-      await options?.validate(value);
-
-      localStorage.setItem(key, encode(value));
-    },
-    getItem: async (): Promise<T | null> => {
+    getItem: async (): Promise<null | T> => {
       const v = localStorage.getItem(key);
       if (!v) {
         return options?.defaultValue || null;
@@ -36,12 +31,17 @@ const storage = <T = unknown>(key: string, options?: Options<T>) => {
     removeItem: async () => {
       localStorage.removeItem(key);
     },
+    setItem: async (value: T) => {
+      await options?.validate(value);
+
+      localStorage.setItem(key, encode(value));
+    },
   };
 };
 
-export const themeMode = storage<"light" | "dark">("theme:mode", {
+export const themeMode = storage<"dark" | "light">("theme:mode", {
   validate: async (value) => {
-    if (!["light", "dark"].includes(value)) {
+    if (!["dark", "light"].includes(value)) {
       throw new Error(`invalid theme mode '${value}'`);
     }
   },

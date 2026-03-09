@@ -1,8 +1,8 @@
-import cronstrue from "cronstrue";
-
 import { Popover, Space } from "antd";
 
 import type { TaskListItemSchedule } from "stores/manager.store/taskList";
+
+import cronstrue from "cronstrue";
 
 interface PrintCronProps {
   schedule: string;

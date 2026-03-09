@@ -1,78 +1,20 @@
-name: strolt-stroltp
-
-timezone: UTC
-
 api:
   users:
     admin: admin
 
-services:
-  e2e:
-    pg-t:
-      tags:
-        - tag_from_task_config
-      source:
-        driver: pg
-        config:
-          host: postgres
-          database: strolt
-          username: strolt
-          password: strolt #pragma: allowlist secret
-          format: t
-      destinations:
-        restic-pg-t:
-          extends: restic_base
-          env:
-            RESTIC_REPOSITORY: "s3:http://minio:9000/stroltp/e2e/restic-pg-t"
-      # notifications:
-      #   - terminal
-  e2e2:
-    pg-t:
-      source:
-        driver: pg
-        config:
-          host: postgres
-          database: strolt
-          username: strolt
-          password: strolt #pragma: allowlist secret
-          format: t
-      destinations:
-        restic-pg-t:
-          extends: restic_base
-          env:
-            RESTIC_REPOSITORY: "s3:http://minio:9000/stroltp/e2e2/restic-pg-t"
-      notifications:
-        - terminal
-    pg-t2:
-      source:
-        driver: pg
-        config:
-          host: postgres
-          database: strolt
-          username: strolt
-          password: strolt #pragma: allowlist secret
-          format: t
-      destinations:
-        restic-pg-t:
-          extends: restic_base
-          env:
-            RESTIC_REPOSITORY: "s3:http://minio:9000/stroltp/e2e2/restic-pg-t2"
-      notifications:
-        - terminal
-
 definitions:
   destinations:
     restic_base:
-      driver: restic
       config:
         keep:
           last: 3
+      driver: restic
       env:
-        RESTIC_PASSWORD: strolt #pragma: allowlist secret
-        RESTIC_REPOSITORY: s3:http://minio:9000/restic-pg-t
         AWS_ACCESS_KEY_ID: minioadmin
         AWS_SECRET_ACCESS_KEY: minioadmin #pragma: allowlist secret
 
+        RESTIC_PASSWORD: strolt #pragma: allowlist secret
+        RESTIC_REPOSITORY: s3:http://minio:9000/restic-pg-t
   notifications:
     terminal:
       driver: console
@@ -86,3 +28,59 @@ definitions:
         - DESTINATION_START
         - DESTINATION_STOP
         - DESTINATION_ERROR
+name: strolt-stroltp
+services:
+  e2e:
+    pg-t:
+      destinations:
+        restic-pg-t:
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/stroltp/e2e/restic-pg-t"
+          extends: restic_base
+      source:
+        config:
+          database: strolt
+          format: t
+          host: postgres
+          password: strolt #pragma: allowlist secret
+          username: strolt
+        driver: pg
+      tags:
+        - tag_from_task_config
+      # notifications:
+      #   - terminal
+  e2e2:
+    pg-t:
+      destinations:
+        restic-pg-t:
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/stroltp/e2e2/restic-pg-t"
+          extends: restic_base
+      notifications:
+        - terminal
+      source:
+        config:
+          database: strolt
+          format: t
+          host: postgres
+          password: strolt #pragma: allowlist secret
+          username: strolt
+        driver: pg
+    pg-t2:
+      destinations:
+        restic-pg-t:
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/stroltp/e2e2/restic-pg-t2"
+          extends: restic_base
+      notifications:
+        - terminal
+
+      source:
+        config:
+          database: strolt
+          format: t
+          host: postgres
+          password: strolt #pragma: allowlist secret
+          username: strolt
+        driver: pg
+timezone: UTC

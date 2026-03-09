@@ -1,25 +1,26 @@
 import type { AxiosResponse } from "axios";
-import { makeAutoObservable, reaction, runInAction } from "mobx";
-
 import type { IPromiseBasedObservable } from "mobx-utils";
+
+import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { fromPromise } from "mobx-utils";
 
-import * as api from "../api";
 import type * as apiGenerated from "../api/generated";
+
+import * as api from "../api";
 import { authStore } from "./auth.store";
 import { managerStore } from "./manager.store";
 
 export class InfoStore {
+  latestVersion = "";
+
+  map = new Map<string, apiGenerated.ManagerInfoInstance>();
+  requestFetchInfo: IPromiseBasedObservable<AxiosResponse<apiGenerated.ApiInfo, any>> | null = null;
+  updatedAt = new Date(0);
+  version = "";
+
   constructor() {
     makeAutoObservable(this);
   }
-
-  latestVersion = "";
-  version = "";
-  updatedAt = new Date(0);
-  map = new Map<string, apiGenerated.ManagerInfoInstance>();
-
-  requestFetchInfo: IPromiseBasedObservable<AxiosResponse<apiGenerated.ApiInfo, any>> | null = null;
   async fetchInfo() {
     this.requestFetchInfo = fromPromise(api.global.getInfo());
     const { data } = await this.requestFetchInfo;
@@ -51,7 +52,7 @@ export class InfoStore {
 export const infoStore = new InfoStore();
 
 {
-  let intervalId: null | NodeJS.Timeout = null;
+  let intervalId: NodeJS.Timeout | null = null;
   reaction(
     () => ({
       isAuthorized: authStore.isAuthorized,

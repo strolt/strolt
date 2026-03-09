@@ -1,8 +1,8 @@
-import { observer } from "mobx-react-lite";
-
 import { ConfigProvider, theme } from "antd";
+
 import type { AliasToken } from "antd/es/theme/internal";
 
+import { observer } from "mobx-react-lite";
 import { appConfigStore } from "stores/app-config.store";
 
 const themeTokenCommon: Partial<AliasToken> = {

@@ -1,21 +1,19 @@
 import { useEffect } from "react";
-
 import { useParams } from "react-router";
 
 import { Spin, Typography } from "antd";
 
 import { DebugJSON } from "components";
-
 import { observer, useStores } from "stores";
 
 const Stats = observer(() => {
   const { managerStore } = useStores();
   const params = useParams<{
-    proxyId?: string;
+    destinationId: string;
     instanceId: string;
+    proxyId?: string;
     serviceId: string;
     taskId: string;
-    destinationId: string;
   }>();
 
   useEffect(() => {

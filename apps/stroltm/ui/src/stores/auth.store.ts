@@ -1,39 +1,40 @@
 import type { AxiosResponse } from "axios";
-import { makeAutoObservable, runInAction } from "mobx";
-
 import type { IPromiseBasedObservable } from "mobx-utils";
+
+import { makeAutoObservable, runInAction } from "mobx";
 import { fromPromise } from "mobx-utils";
 
-import * as api from "../api";
 import type * as apiGenerated from "../api/generated";
+
+import * as api from "../api";
 import * as env from "../env";
 
 const setApiAuthorization = (username: string, password: string) => {
   api.axiosInstance.defaults.auth = {
-    username,
     password,
+    username,
   };
 };
 
 export class AuthStore {
-  constructor() {
-    makeAutoObservable(this);
-  }
+  isAuthorized = false;
+
+  password = "";
 
   requestValidateStatus: IPromiseBasedObservable<
     AxiosResponse<apiGenerated.ApiuResultSuccess, any>
   > | null = null;
 
-  isAuthorized = false;
-
   username = "";
-  password = "";
+  constructor() {
+    makeAutoObservable(this);
+  }
 
   async login(username: string, password: string) {
     this.requestValidateStatus = fromPromise(
       api.auth.validate({
-        username,
         password,
+        username,
       }),
     );
     await this.requestValidateStatus;

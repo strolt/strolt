@@ -7,9 +7,7 @@ const config = await defineConfig(
   /** @type {import("@shibanet0/datamitsu-config/type-fest").PackageJson} */ (packageJSON),
   [
     {
-      rules: {
-        "yml/sort-keys": "off",
-      },
+      rules: {},
     },
   ],
   {

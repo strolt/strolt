@@ -7,10 +7,7 @@ const config = await defineConfig(
   /** @type {import("@shibanet0/datamitsu-config/type-fest").PackageJson} */ (packageJSON),
   [
     {
-      rules: {
-        "perfectionist/sort-objects": "off",
-        "perfectionist/sort-imports": "off",
-      },
+      rules: {},
     },
   ],
   {
