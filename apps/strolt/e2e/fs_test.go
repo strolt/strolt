@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-
-	_ "github.com/lib/pq"
 )
 
 type File struct {
@@ -15,6 +13,7 @@ type File struct {
 
 var fsInputPath = "/e2e/input"
 
+// files is the immutable fixture set; scan() must never modify it.
 var files = []File{
 	{
 		Path:  filepath.Join(fsInputPath, "0.txt"),
@@ -37,44 +36,60 @@ func fs() *Fs {
 }
 
 func (fs *Fs) isFile(path string) (bool, string) {
-	o, err := runDockerComposeBash("cat " + path)
-	return err == nil, strings.Join(strings.Split(string(o), "\n")[:1], "\n")
-}
-
-func (fs *Fs) scan() ([]File, error) {
-	o, err := runDockerComposeBash("ls -R1 " + fsInputPath)
+	o, err := execInStrolt("cat " + path)
 	if err != nil {
-		return files, err
+		return false, ""
 	}
 
-	for line := range strings.SplitSeq(string(o), "\n\n") {
-		l := strings.Split(line, "\n")
-		path := strings.TrimSuffix(l[0], ":")
+	value, _, _ := strings.Cut(string(o), "\n")
 
-		for _, f := range l[1:] {
-			_path := filepath.Join(path, f)
+	return true, value
+}
 
-			isFile, fileValue := fs.isFile(_path)
+// scan returns the files currently present under fsInputPath.
+func (fs *Fs) scan() ([]File, error) {
+	o, err := execInStrolt("ls -R1 " + fsInputPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var scanned []File
+
+	for block := range strings.SplitSeq(string(o), "\n\n") {
+		lines := strings.Split(strings.TrimSpace(block), "\n")
+		if len(lines) == 0 || lines[0] == "" {
+			continue
+		}
+
+		dir := strings.TrimSuffix(lines[0], ":")
+
+		for _, entry := range lines[1:] {
+			if entry == "" {
+				continue
+			}
+
+			path := filepath.Join(dir, entry)
+
+			isFile, fileValue := fs.isFile(path)
 			if isFile {
-				files = append(files, File{
-					Path:  filepath.Join(path, f),
+				scanned = append(scanned, File{
+					Path:  path,
 					Value: fileValue,
 				})
 			}
 		}
 	}
 
-	return files, err
+	return scanned, nil
 }
 
 func (fs *Fs) createData() error {
 	for _, file := range files {
-		if _, err := runDockerComposeBash("mkdir -p " + filepath.Dir(file.Path)); err != nil {
-			fmt.Println(err) //nolint:forbidigo
+		if _, err := execInStrolt("mkdir -p " + filepath.Dir(file.Path)); err != nil {
 			return err
 		}
 
-		if _, err := runDockerComposeBash(fmt.Sprintf("echo \"%s\" > %s", file.Value, file.Path)); err != nil {
+		if _, err := execInStrolt(fmt.Sprintf("echo \"%s\" > %s", file.Value, file.Path)); err != nil {
 			return err
 		}
 	}
@@ -83,7 +98,7 @@ func (fs *Fs) createData() error {
 }
 
 func (fs *Fs) dropData() error {
-	_, err := runDockerComposeBash(fmt.Sprintf("rm -rf %s/*", fsInputPath))
+	_, err := execInStrolt(fmt.Sprintf("rm -rf %s/*", fsInputPath))
 	if err != nil {
 		return err
 	}
@@ -91,30 +106,38 @@ func (fs *Fs) dropData() error {
 	return nil
 }
 
-func (file File) exists() (bool, File) {
-	for _, _file := range files {
-		if file.Path == _file.Path {
-			return true, _file
-		}
-	}
-
-	return false, File{}
-}
-
+// checkValidData verifies the input directory matches the fixture set
+// exactly: every fixture file exists with the right content and nothing
+// extra is present.
 func (fs *Fs) checkValidData() error {
 	scannedFiles, err := fs.scan()
 	if err != nil {
 		return err
 	}
 
-	for _, scannedFile := range scannedFiles {
-		isExists, _file := scannedFile.exists()
-		if !isExists {
-			return fmt.Errorf("'%s' not exists in mock", scannedFile.Path)
+	if len(scannedFiles) != len(files) {
+		return fmt.Errorf("expected %d files in %s, found %d: %+v", len(files), fsInputPath, len(scannedFiles), scannedFiles)
+	}
+
+	for _, want := range files {
+		found := false
+
+		for _, got := range scannedFiles {
+			if got.Path != want.Path {
+				continue
+			}
+
+			if got.Value != want.Value {
+				return fmt.Errorf("'%s' different content: want %q, got %q", want.Path, want.Value, got.Value)
+			}
+
+			found = true
+
+			break
 		}
 
-		if _file.Value != scannedFile.Value {
-			return fmt.Errorf("'%s' different content", scannedFile.Path)
+		if !found {
+			return fmt.Errorf("'%s' not found in %s", want.Path, fsInputPath)
 		}
 	}
 

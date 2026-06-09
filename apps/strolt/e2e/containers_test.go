@@ -3,15 +3,33 @@ package e2e_test
 import (
 	"context"
 	"errors"
-	"fmt"
 	"path/filepath"
 	"time"
 
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/go-connections/nat"
+	"github.com/moby/moby/api/types/container"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/mariadb"
+	"github.com/testcontainers/testcontainers-go/modules/minio"
+	"github.com/testcontainers/testcontainers-go/modules/mongodb"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/network"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"golang.org/x/sync/errgroup"
+)
+
+// Service images used by the e2e environment. Keep the database server
+// versions compatible with the client tools baked into
+// docker/strolt/Dockerfile when bumping these.
+const (
+	postgresImage = "postgres:18.4-alpine3.23"
+	mongoImage    = "mongo:8.0.23"
+	mariadbImage  = "mariadb:11.4.12"
+	minioImage    = "minio/minio:RELEASE.2025-09-07T16-13-09Z"
+	stroltImage   = "strolt/strolt:development"
+
+	dbName     = "strolt"
+	dbUser     = "strolt"
+	dbPassword = "strolt" // pragma: allowlist secret
 )
 
 // ContainerManager manages all testcontainers for e2e tests.
@@ -21,7 +39,6 @@ type ContainerManager struct {
 	postgresContainer testcontainers.Container
 	mongoContainer    testcontainers.Container
 	mariadbContainer  testcontainers.Container
-	mysqlContainer    testcontainers.Container
 	minioContainer    testcontainers.Container
 	stroltContainer   testcontainers.Container
 }
@@ -68,7 +85,7 @@ func (cm *ContainerManager) StartStrolt() error {
 	}
 
 	req := testcontainers.ContainerRequest{
-		Image: "strolt/strolt:development",
+		Image: stroltImage,
 		Files: []testcontainers.ContainerFile{
 			{
 				HostFilePath:      absConfigPath,
@@ -86,18 +103,24 @@ func (cm *ContainerManager) StartStrolt() error {
 		NetworkAliases: map[string][]string{cm.NetworkName(): {"strolt"}},
 		Entrypoint:     []string{"/bin/sh"},
 		Cmd:            []string{"-c", "sleep infinity"},
-		WaitingFor:     wait.ForExec([]string{"sh", "-c", "test -d /e2e/input"}).WithExitCodeMatcher(func(exitCode int) bool { return exitCode == 0 }),
+		WaitingFor: wait.ForExec([]string{"sh", "-c", "test -d /e2e/input"}).
+			WithExitCodeMatcher(func(exitCode int) bool { return exitCode == 0 }).
+			WithStartupTimeout(60 * time.Second),
 	}
 
-	container, err := testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
+	stroltContainer, err := testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
 		Started:          true,
 	})
 	if err != nil {
+		if stroltContainer != nil {
+			_ = stroltContainer.Terminate(cm.ctx)
+		}
+
 		return err
 	}
 
-	cm.stroltContainer = container
+	cm.stroltContainer = stroltContainer
 
 	return nil
 }
@@ -144,258 +167,146 @@ func (cm *ContainerManager) GetMariaDBPort() (string, error) {
 	return mappedPort.Port(), nil
 }
 
-// GetMySQLPort returns the mapped port for MySQL.
-func (cm *ContainerManager) GetMySQLPort() (string, error) {
-	if cm.mysqlContainer == nil {
-		return "", errors.New("mysql container not started")
-	}
-
-	mappedPort, err := cm.mysqlContainer.MappedPort(cm.ctx, "3306")
-	if err != nil {
-		return "", err
-	}
-
-	return mappedPort.Port(), nil
-}
-
 // GetStroltContainer returns the Strolt container.
 func (cm *ContainerManager) GetStroltContainer() testcontainers.Container {
 	return cm.stroltContainer
 }
 
-// Cleanup terminates all containers and removes the network.
+// Cleanup terminates all containers and removes the network. It uses its own
+// context so cleanup still runs when the suite context is already done.
 func (cm *ContainerManager) Cleanup() error {
+	cleanupCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+
 	var errs []error
 
-	if cm.stroltContainer != nil {
-		if err := cm.stroltContainer.Terminate(cm.ctx); err != nil {
-			errs = append(errs, err)
-		}
+	containers := []testcontainers.Container{
+		cm.stroltContainer,
+		cm.postgresContainer,
+		cm.mongoContainer,
+		cm.mariadbContainer,
+		cm.minioContainer,
 	}
 
-	if cm.postgresContainer != nil {
-		if err := cm.postgresContainer.Terminate(cm.ctx); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if cm.mongoContainer != nil {
-		if err := cm.mongoContainer.Terminate(cm.ctx); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if cm.mariadbContainer != nil {
-		if err := cm.mariadbContainer.Terminate(cm.ctx); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if cm.mysqlContainer != nil {
-		if err := cm.mysqlContainer.Terminate(cm.ctx); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if cm.minioContainer != nil {
-		if err := cm.minioContainer.Terminate(cm.ctx); err != nil {
-			errs = append(errs, err)
+	for _, c := range containers {
+		if c != nil {
+			if err := c.Terminate(cleanupCtx); err != nil {
+				errs = append(errs, err)
+			}
 		}
 	}
 
 	if cm.network != nil {
-		if err := cm.network.Remove(cm.ctx); err != nil {
+		if err := cm.network.Remove(cleanupCtx); err != nil {
 			errs = append(errs, err)
 		}
 	}
 
-	if len(errs) > 0 {
-		return fmt.Errorf("cleanup errors: %v", errs)
-	}
-
-	return nil
+	return errors.Join(errs...)
 }
 
 // StartAllContainers starts all containers in parallel.
 func (cm *ContainerManager) StartAllContainers() error {
-	type containerResult struct {
-		name      string
-		container testcontainers.Container
-		err       error
-	}
+	g := new(errgroup.Group)
 
-	results := make(chan containerResult, 5)
+	g.Go(func() error {
+		c, err := cm.startPostgres()
+		cm.postgresContainer = c
 
-	// Start containers in parallel
-	go func() {
-		container, err := cm.startPostgres()
-		results <- containerResult{"postgres", container, err}
-	}()
-	go func() {
-		container, err := cm.startMongo()
-		results <- containerResult{"mongo", container, err}
-	}()
-	go func() {
-		container, err := cm.startMariaDB()
-		results <- containerResult{"mariadb", container, err}
-	}()
-	go func() {
-		container, err := cm.startMySQL()
-		results <- containerResult{"mysql", container, err}
-	}()
-	go func() {
-		container, err := cm.startMinio()
-		results <- containerResult{"minio", container, err}
-	}()
+		return err
+	})
+	g.Go(func() error {
+		c, err := cm.startMongo()
+		cm.mongoContainer = c
 
-	// Collect results
-	for range 5 {
-		result := <-results
-		if result.err != nil {
-			return fmt.Errorf("failed to start %s: %w", result.name, result.err)
-		}
+		return err
+	})
+	g.Go(func() error {
+		c, err := cm.startMariaDB()
+		cm.mariadbContainer = c
 
-		switch result.name {
-		case "postgres":
-			cm.postgresContainer = result.container
-		case "mongo":
-			cm.mongoContainer = result.container
-		case "mariadb":
-			cm.mariadbContainer = result.container
-		case "mysql":
-			cm.mysqlContainer = result.container
-		case "minio":
-			cm.minioContainer = result.container
-		}
-	}
+		return err
+	})
+	g.Go(func() error {
+		c, err := cm.startMinio()
+		cm.minioContainer = c
 
-	return nil
+		return err
+	})
+
+	return g.Wait()
 }
 
+// startPostgres starts PostgreSQL via the official testcontainers module.
+// BasicWaitStrategies handles the temporary-server restart performed by the
+// image entrypoint during initialization, which a plain SQL probe races with.
 func (cm *ContainerManager) startPostgres() (testcontainers.Container, error) {
-	req := testcontainers.ContainerRequest{
-		Image:        "postgres:18.3-alpine3.23",
-		ExposedPorts: []string{"5432/tcp"},
-		Env: map[string]string{
-			"TZ":                "UTC",
-			"POSTGRES_DB":       "strolt",
-			"POSTGRES_PASSWORD": "strolt",
-			"POSTGRES_USER":     "strolt",
-		},
-		Networks:       []string{cm.NetworkName()},
-		NetworkAliases: map[string][]string{cm.NetworkName(): {"postgres"}},
-		WaitingFor: wait.ForSQL("5432/tcp", "postgres", func(host string, port nat.Port) string {
-			return "postgres://strolt:strolt@" + host + ":" + port.Port() + "/strolt?sslmode=disable"
-		}).WithQuery("SELECT 1").WithPollInterval(1 * time.Second).WithStartupTimeout(60 * time.Second),
+	c, err := postgres.Run(cm.ctx, postgresImage,
+		postgres.WithDatabase(dbName),
+		postgres.WithUsername(dbUser),
+		postgres.WithPassword(dbPassword),
+		postgres.BasicWaitStrategies(),
+		testcontainers.WithEnv(map[string]string{"TZ": "UTC"}),
+		network.WithNetwork([]string{"postgres"}, cm.network),
+	)
+	if err != nil {
+		if c != nil {
+			_ = c.Terminate(cm.ctx)
+		}
+
+		return nil, err
 	}
 
-	return testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
+	return c, nil
 }
 
 func (cm *ContainerManager) startMongo() (testcontainers.Container, error) {
-	req := testcontainers.ContainerRequest{
-		Image:        "mongo:4.4.15",
-		ExposedPorts: []string{"27017/tcp"},
-		Env: map[string]string{
-			"PUID": "1000",
-			"PGID": "1000",
-		},
-		Networks:       []string{cm.NetworkName()},
-		NetworkAliases: map[string][]string{cm.NetworkName(): {"mongo"}},
-		WaitingFor:     wait.ForListeningPort("27017/tcp").WithStartupTimeout(30 * time.Second),
+	c, err := mongodb.Run(cm.ctx, mongoImage,
+		network.WithNetwork([]string{"mongo"}, cm.network),
+	)
+	if err != nil {
+		if c != nil {
+			_ = c.Terminate(cm.ctx)
+		}
+
+		return nil, err
 	}
 
-	return testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
+	return c, nil
 }
 
 func (cm *ContainerManager) startMariaDB() (testcontainers.Container, error) {
-	req := testcontainers.ContainerRequest{
-		Image:        "mariadb:11.4.8",
-		ExposedPorts: []string{"3306/tcp"},
-		Env: map[string]string{
-			"TZ":                  "UTC",
-			"MYSQL_DATABASE":      "strolt",
-			"MYSQL_USER":          "strolt",
-			"MYSQL_PASSWORD":      "strolt",
-			"MYSQL_ROOT_PASSWORD": "strolt",
-		},
-		Networks:       []string{cm.NetworkName()},
-		NetworkAliases: map[string][]string{cm.NetworkName(): {"mariadb"}},
-		WaitingFor: wait.ForSQL("3306/tcp", "mysql", func(host string, port nat.Port) string {
-			return "strolt:strolt@tcp(" + host + ":" + port.Port() + ")/strolt"
-		}).WithQuery("SELECT 1").WithPollInterval(2 * time.Second).WithStartupTimeout(90 * time.Second),
-	}
-
-	return testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-}
-
-func (cm *ContainerManager) startMySQL() (testcontainers.Container, error) {
-	req := testcontainers.ContainerRequest{
-		Image:        "mysql:8.0.30",
-		ExposedPorts: []string{"3306/tcp"},
-		Env: map[string]string{
-			"TZ":                  "UTC",
-			"MYSQL_DATABASE":      "strolt",
-			"MYSQL_USER":          "strolt",
-			"MYSQL_PASSWORD":      "strolt",
-			"MYSQL_ROOT_PASSWORD": "strolt",
-		},
-		Networks:       []string{cm.NetworkName()},
-		NetworkAliases: map[string][]string{cm.NetworkName(): {"mysql"}},
-		WaitingFor: wait.ForSQL("3306/tcp", "mysql", func(host string, port nat.Port) string {
-			return "strolt:strolt@tcp(" + host + ":" + port.Port() + ")/strolt"
-		}).WithQuery("SELECT 1").WithPollInterval(2 * time.Second).WithStartupTimeout(120 * time.Second),
-	}
-
-	return testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-}
-
-func (cm *ContainerManager) startMinio() (testcontainers.Container, error) {
-	req := testcontainers.ContainerRequest{
-		Image:        "minio/minio:RELEASE.2022-08-13T21-54-44Z",
-		ExposedPorts: []string{"9000/tcp", "9001/tcp"},
-		Cmd:          []string{"server", "--address", "0.0.0.0:9000", "--console-address", "0.0.0.0:9001", "/data"},
-		Env: map[string]string{
-			"MINIO_ROOT_USER":     "minioadmin",
-			"MINIO_ROOT_PASSWORD": "minioadmin",
-		},
-		Networks:       []string{cm.NetworkName()},
-		NetworkAliases: map[string][]string{cm.NetworkName(): {"minio"}},
-		WaitingFor:     wait.ForHTTP("/minio/health/live").WithPort("9000/tcp").WithStartupTimeout(30 * time.Second),
-	}
-
-	return testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-}
-
-// GetContainerName returns the container name for a given container.
-func GetContainerName(ctx context.Context, container testcontainers.Container) (string, error) {
-	if container == nil {
-		return "", errors.New("container is nil")
-	}
-
-	name, err := container.Name(ctx)
+	c, err := mariadb.Run(cm.ctx, mariadbImage,
+		mariadb.WithDatabase(dbName),
+		mariadb.WithUsername(dbUser),
+		mariadb.WithPassword(dbPassword),
+		testcontainers.WithEnv(map[string]string{"TZ": "UTC"}),
+		network.WithNetwork([]string{"mariadb"}, cm.network),
+	)
 	if err != nil {
-		return "", err
-	}
-	// Remove the leading "/" from the container name
-	if len(name) > 0 && name[0] == '/' {
-		name = name[1:]
+		if c != nil {
+			_ = c.Terminate(cm.ctx)
+		}
+
+		return nil, err
 	}
 
-	return name, nil
+	return c, nil
+}
+
+// startMinio starts MinIO via the official testcontainers module. The module
+// defaults to minioadmin/minioadmin credentials, matching .strolt/secrets.yml.
+func (cm *ContainerManager) startMinio() (testcontainers.Container, error) {
+	c, err := minio.Run(cm.ctx, minioImage,
+		network.WithNetwork([]string{"minio"}, cm.network),
+	)
+	if err != nil {
+		if c != nil {
+			_ = c.Terminate(cm.ctx)
+		}
+
+		return nil, err
+	}
+
+	return c, nil
 }

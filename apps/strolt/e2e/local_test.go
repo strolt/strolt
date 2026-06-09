@@ -23,9 +23,9 @@ func (s *LocalSuite) TearDownSuite() {
 }
 
 func (s *LocalSuite) BeforeTest(suiteName, testName string) {
-	s.NoError(s.fs.dropData())
-	s.NoError(s.fs.createData())
-	s.NoError(s.fs.checkValidData())
+	s.Require().NoError(s.fs.dropData())
+	s.Require().NoError(s.fs.createData())
+	s.Require().NoError(s.fs.checkValidData())
 }
 
 func (s *LocalSuite) AfterTest(suiteName, testName string) {
@@ -35,10 +35,10 @@ func (s *LocalSuite) AfterTest(suiteName, testName string) {
 func (s *LocalSuite) TestLocal() {
 	s.NoError(strolt("backup", "--service", "e2e", "--task", "local", "--y"))
 
-	s.NoError(s.fs.dropData())
+	s.Require().NoError(s.fs.dropData())
 
 	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e", "local", "restic-local")
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.NoError(strolt("restore", "--service", "e2e", "--task", "local", "--destination", "restic-local", "--snapshot", latestSnapshotID, "--y"))
 }

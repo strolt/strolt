@@ -113,7 +113,7 @@ docker: docker-strolt docker-stroltp docker-stroltm
 
 ##### E2E TEST #####
 .e2e-strolt: docker-strolt
-	cd ./apps/strolt && GOFLAGS="-count=1" go test ./e2e -v
+	cd ./apps/strolt && GOFLAGS="-count=1" go test ./e2e -v -timeout 30m
 
 .PHONY: e2e
 e2e: .e2e-strolt

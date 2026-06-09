@@ -19,7 +19,7 @@ func (s *PostgresqlSuite) SetupSuite() {
 
 	connStr := fmt.Sprintf("user=strolt password=strolt host=localhost port=%s dbname=strolt sslmode=disable connect_timeout=60", port)
 	c, err := sqlConnect("postgres", connStr)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.c = c
 }
 

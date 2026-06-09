@@ -6,7 +6,10 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
+
+const initRetries = 3
 
 var (
 	containerManager *ContainerManager
@@ -15,17 +18,16 @@ var (
 
 // It sets up containers once and reuses them across all tests.
 func TestMain(m *testing.M) {
-	var exitCode int
-
-	// Setup
 	if err := setupContainers(); err != nil {
+		if cleanupErr := cleanupContainers(); cleanupErr != nil {
+			log.Printf("Failed to cleanup containers after setup failure: %v", cleanupErr)
+		}
+
 		log.Fatalf("Failed to setup containers: %v", err)
 	}
 
-	// Run tests
-	exitCode = m.Run()
+	exitCode := m.Run()
 
-	// Cleanup
 	if err := cleanupContainers(); err != nil {
 		log.Printf("Failed to cleanup containers: %v", err)
 	}
@@ -36,18 +38,18 @@ func TestMain(m *testing.M) {
 func setupContainers() error {
 	ctx = context.Background()
 
-	// Ensure required directories exist
+	// Start from a clean slate: leftovers from a previous run are a source
+	// of false test results.
+	if err := os.RemoveAll(".temp"); err != nil {
+		return fmt.Errorf("failed to clean .temp: %w", err)
+	}
+
 	if err := os.MkdirAll(".temp/input", 0o755); err != nil {
 		return fmt.Errorf("failed to create .temp/input: %w", err)
 	}
 
-	if err := os.MkdirAll(".temp/workdir", 0o755); err != nil {
-		return fmt.Errorf("failed to create .temp/workdir: %w", err)
-	}
-
 	tt := timeTook("setup containers")
 
-	// Initialize container manager
 	cm, err := NewContainerManager(ctx)
 	if err != nil {
 		return err
@@ -55,12 +57,10 @@ func setupContainers() error {
 
 	containerManager = cm
 
-	// Setup network
 	if err := cm.SetupNetwork(); err != nil {
 		return err
 	}
 
-	// Start all containers in parallel
 	if err := cm.StartAllContainers(); err != nil {
 		return err
 	}
@@ -73,24 +73,34 @@ func setupContainers() error {
 	tt.stop()
 
 	tt = timeTook("strolt init")
+	defer tt.stop()
 
 	log.Println("Initializing strolt repositories...")
-	if err := strolt("init"); err != nil {
-		log.Printf("ERROR: strolt init failed: %v", err)
-		return err
-	}
 
-	// Validate initialization succeeded
-	if _, err := os.Stat(".strolt"); err != nil {
-		log.Printf("ERROR: .strolt directory not accessible after init: %v", err)
-		return fmt.Errorf("strolt init did not create expected state: %w", err)
+	if err := stroltInit(); err != nil {
+		return err
 	}
 
 	log.Println("Strolt initialization successful")
 
-	tt.stop()
-
 	return nil
+}
+
+// stroltInit initializes the restic repositories, retrying to absorb
+// transient object-storage hiccups right after MinIO startup.
+func stroltInit() error {
+	var err error
+
+	for attempt := 1; attempt <= initRetries; attempt++ {
+		if err = strolt("init"); err == nil {
+			return nil
+		}
+
+		log.Printf("strolt init attempt %d/%d failed: %v", attempt, initRetries, err)
+		time.Sleep(2 * time.Second)
+	}
+
+	return fmt.Errorf("strolt init failed after %d attempts: %w", initRetries, err)
 }
 
 func cleanupContainers() error {
@@ -121,10 +131,6 @@ func TestE2E(t *testing.T) {
 	t.Run("MongoDB", func(t *testing.T) {
 		MongoSuiteTest(t)
 	})
-
-	// t.Run("MySQL", func(t *testing.T) {
-	// 	MySQLSuiteTest(t)
-	// })
 
 	t.Run("MariaDB", func(t *testing.T) {
 		MariaDBSuiteTest(t)

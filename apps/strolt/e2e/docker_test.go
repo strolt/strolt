@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
-	"os/exec"
+	"io"
 	"slices"
 	"strings"
+
+	tcexec "github.com/testcontainers/testcontainers-go/exec"
 )
 
 type Snapshot struct {
@@ -16,55 +17,45 @@ type Snapshot struct {
 	Date    string `json:"date"`
 }
 
-func runDockerExec(containerName string, command string) ([]byte, error) {
-	cmd := exec.Command("docker", "exec", containerName, "/bin/sh", "-c", command)
-
-	output, err := cmd.Output()
-
-	fmt.Println(string(output)) //nolint:forbidigo
-
-	return output, err
-}
-
-func runDockerComposeBash(command string) ([]byte, error) {
+// execInStrolt runs a shell command inside the long-running strolt container.
+// Reusing one container instead of spawning `docker run` per CLI call keeps
+// the strolt working directory stable and avoids host docker CLI dependency.
+func execInStrolt(command string) ([]byte, error) {
 	if containerManager == nil || containerManager.GetStroltContainer() == nil {
 		return nil, errors.New("strolt container not initialized")
 	}
 
-	containerName, err := GetContainerName(ctx, containerManager.GetStroltContainer())
+	exitCode, reader, err := containerManager.GetStroltContainer().Exec(
+		ctx,
+		[]string{"/bin/sh", "-c", command},
+		tcexec.Multiplexed(),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return runDockerExec(containerName, command)
+	output, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(string(output)) //nolint:forbidigo
+
+	if exitCode != 0 {
+		return output, fmt.Errorf("command %q exited with code %d", command, exitCode)
+	}
+
+	return output, nil
 }
 
 func strolt(args ...string) error {
-	o, err := stroltWithResponse(args...)
-	log.Println(string(o))
+	_, err := stroltWithResponse(args...)
 
 	return err
 }
 
 func stroltWithResponse(args ...string) ([]byte, error) {
-	if containerManager == nil {
-		return nil, errors.New("container manager not initialized")
-	}
-
-	cmd := exec.Command("docker", "run", "--rm", "--network", containerManager.NetworkName(),
-		"-v", "./strolt.yml:/strolt/config.yml:ro",
-		"-v", "./.strolt:/strolt/.strolt",
-		"-v", "./.temp/input:/e2e/input",
-		"-v", "./.temp/workdir:/strolt/bin/strolt-data",
-		"--entrypoint", "/bin/sh",
-		"strolt/strolt:development",
-		"-c", "/strolt/bin/strolt "+strings.Join(args, " "))
-
-	output, err := cmd.CombinedOutput()
-
-	fmt.Println(string(output)) //nolint:forbidigo
-
-	return output, err
+	return execInStrolt("/strolt/bin/strolt " + strings.Join(args, " "))
 }
 
 func stroltGetSnapshotList(serviceName string, taskName string, destination string) ([]Snapshot, error) {
@@ -73,35 +64,21 @@ func stroltGetSnapshotList(serviceName string, taskName string, destination stri
 		return nil, err
 	}
 
-	lineList := strings.Split(string(output), "\n")
-
-	if len(lineList) == 0 {
-		return nil, errors.New("snapshots not exists")
-	}
-
-	// Find the last non-empty line that contains JSON array
-	var lastItem string
-
-	for _, line := range slices.Backward(lineList) {
+	// The CLI mixes log lines with the JSON payload; the snapshot list is the
+	// last line that parses as a JSON array.
+	for _, line := range slices.Backward(strings.Split(string(output), "\n")) {
 		trimmed := strings.TrimSpace(line)
-		if trimmed != "" && strings.HasPrefix(trimmed, "[") {
-			lastItem = trimmed
-			break
+		if !strings.HasPrefix(trimmed, "[") {
+			continue
+		}
+
+		var snapshots []Snapshot
+		if err := json.Unmarshal([]byte(trimmed), &snapshots); err == nil {
+			return snapshots, nil
 		}
 	}
 
-	if lastItem == "" {
-		return nil, errors.New("no valid JSON array found in output")
-	}
-
-	var snapshots []Snapshot
-
-	err = json.Unmarshal([]byte(lastItem), &snapshots)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal snapshots: %w, data: %s", err, lastItem)
-	}
-
-	return snapshots, nil
+	return nil, fmt.Errorf("no snapshot JSON array found in output: %s", output)
 }
 
 func stroltGetLatestSnapshotID(serviceName string, taskName string, destination string) (string, error) {

@@ -1,19 +1,3 @@
-# mysql:
-#   image: mysql:8.0.30
-#   command: mysqld --default-authentication-plugin=mysql_native_password
-#   environment:
-#     TZ: UTC
-#     MYSQL_DATABASE: strolt
-#     MYSQL_USER: strolt
-#     MYSQL_PASSWORD: strolt #pragma: allowlist secret
-#     MYSQL_ROOT_PASSWORD: strolt #pragma: allowlist secret
-#   ports:
-#     - 9005:3306
-#   volumes:
-#     - mysql:/var/lib/mysql
-#   networks:
-#     - strolt
-
 networks:
   strolt:
     external: true
@@ -26,7 +10,7 @@ services:
       MYSQL_ROOT_PASSWORD: strolt #pragma: allowlist secret
       MYSQL_USER: strolt
       TZ: UTC
-    image: mariadb:10.8.3
+    image: mariadb:11.4.12
     networks:
       - strolt
 
@@ -39,7 +23,7 @@ services:
     environment:
       MINIO_ROOT_PASSWORD: minioadmin #pragma: allowlist secret
       MINIO_ROOT_USER: minioadmin
-    image: minio/minio:RELEASE.2022-08-13T21-54-44Z
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     networks:
       - strolt
 
@@ -49,10 +33,7 @@ services:
     volumes:
       - minio:/data
   mongo:
-    environment:
-      - PUID=1000
-      - PGID=1000
-    image: mongo:4.4.15
+    image: mongo:8.0.23
     networks:
       - strolt
 
@@ -66,14 +47,14 @@ services:
       POSTGRES_PASSWORD: strolt #pragma: allowlist secret
       POSTGRES_USER: strolt
       TZ: UTC
-    image: postgres:15.17-alpine3.23
+    image: postgres:18.4-alpine3.23
     networks:
       - strolt
 
     ports:
       - 9002:5432
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql
   strolt:
     image: strolt/strolt:development
     networks:
@@ -87,5 +68,4 @@ volumes:
   mariadb:
   minio:
   mongo:
-  mysql:
   postgres:

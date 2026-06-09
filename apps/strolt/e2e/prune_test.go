@@ -24,9 +24,9 @@ func (s *PruneSuite) TearDownSuite() {
 }
 
 func (s *PruneSuite) BeforeTest(suiteName, testName string) {
-	s.NoError(s.fs.dropData())
-	s.NoError(s.fs.createData())
-	s.NoError(s.fs.checkValidData())
+	s.Require().NoError(s.fs.dropData())
+	s.Require().NoError(s.fs.createData())
+	s.Require().NoError(s.fs.checkValidData())
 }
 
 func (s *PruneSuite) AfterTest(suiteName, testName string) {

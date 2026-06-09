@@ -20,7 +20,6 @@ type MongoSuite struct {
 }
 
 type MongoConn struct {
-	ctx        *context.Context
 	client     *mongo.Client
 	database   string
 	collection string
@@ -28,7 +27,7 @@ type MongoConn struct {
 
 func (s *MongoSuite) SetupSuite() {
 	c, err := mongoConnect()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.c = c
 }
 
@@ -37,10 +36,10 @@ func (s *MongoSuite) TearDownSuite() {
 }
 
 func (s *MongoSuite) BeforeTest(suiteName, testName string) {
-	s.NoError(s.c.drop())
-	s.NoError(s.c.createCollection())
-	s.NoError(s.c.insertData())
-	s.NoError(s.c.checkValidData())
+	s.Require().NoError(s.c.drop())
+	s.Require().NoError(s.c.createCollection())
+	s.Require().NoError(s.c.insertData())
+	s.Require().NoError(s.c.checkValidData())
 }
 
 func (s *MongoSuite) AfterTest(suiteName, testName string) {
@@ -48,12 +47,12 @@ func (s *MongoSuite) AfterTest(suiteName, testName string) {
 }
 
 func (s *MongoSuite) TestMongo() {
-	s.NoError(strolt("backup", "--service", "e2e", "--task", "mongo", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "mongo", "--y"))
 
-	s.NoError(s.c.drop())
+	s.Require().NoError(s.c.drop())
 
 	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e", "mongo", "restic-mongo")
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.NoError(strolt("restore", "--service", "e2e", "--task", "mongo", "--destination", "restic-mongo", "--snapshot", latestSnapshotID, "--y"))
 }
@@ -67,41 +66,50 @@ func MongoSuiteTest(t *testing.T) {
 }
 
 func mongoConnect() (*MongoConn, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-
-	defer cancel()
-
 	port, err := containerManager.GetMongoPort()
 	if err != nil {
 		return nil, err
 	}
 
-	uri := "mongodb://localhost:" + port
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	connectCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	client, err := mongo.Connect(connectCtx, options.Client().ApplyURI("mongodb://localhost:"+port))
+	if err != nil {
+		return nil, err
+	}
+
+	// Connect is lazy; ping to make sure the server is actually reachable
+	// before the suite starts mutating data.
+	if err := client.Ping(connectCtx, nil); err != nil {
+		return nil, errors.Join(err, client.Disconnect(context.Background()))
+	}
 
 	return &MongoConn{
-		ctx:        &ctx,
 		client:     client,
 		database:   "strolt",
 		collection: "strolt",
-	}, err
+	}, nil
 }
 
 func (c *MongoConn) close() error {
-	return c.client.Disconnect(*c.ctx)
+	disconnectCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return c.client.Disconnect(disconnectCtx)
 }
 
 func (c *MongoConn) drop() error {
-	return c.client.Database(c.database).Drop(context.TODO())
+	return c.client.Database(c.database).Drop(ctx)
 }
 
 func (c *MongoConn) createCollection() error {
-	return c.client.Database(c.database).CreateCollection(context.TODO(), c.collection)
+	return c.client.Database(c.database).CreateCollection(ctx, c.collection)
 }
 
 func (c *MongoConn) insertData() error {
 	collection := c.client.Database(c.database).Collection(c.collection)
-	if _, err := collection.InsertOne(context.TODO(), user); err != nil {
+	if _, err := collection.InsertOne(ctx, user); err != nil {
 		return err
 	}
 
@@ -111,13 +119,13 @@ func (c *MongoConn) insertData() error {
 func (c *MongoConn) checkValidData() error {
 	collection := c.client.Database(c.database).Collection(c.collection)
 
-	cur, err := collection.Find(context.TODO(), bson.D{})
+	cur, err := collection.Find(ctx, bson.D{})
 	if err != nil {
 		return err
 	}
 
 	var users []User
-	if err := cur.All(context.TODO(), &users); err != nil {
+	if err := cur.All(ctx, &users); err != nil {
 		return err
 	}
 

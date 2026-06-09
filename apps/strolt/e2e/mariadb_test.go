@@ -19,7 +19,7 @@ func (s *MariaDBSuite) SetupSuite() {
 
 	connStr := fmt.Sprintf("strolt:strolt@(localhost:%s)/strolt?timeout=60s", port)
 	c, err := sqlConnect("mysql", connStr)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.c = c
 }
 
