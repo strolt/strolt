@@ -22,7 +22,7 @@ const _randomColor = (list: string, seed?: Seed): string => {
     ? xmur3(seed.toString())
     : Number((Math.random() * Date.now()).toFixed(0));
   const fixedSeedNumber = seedNumber % 1e6;
-  const arrayOfNumber = [...fixedSeedNumber.toString()].map((n) => Number(n));
+  const arrayOfNumber = [...fixedSeedNumber.toString()].map(Number);
 
   while (arrayOfNumber.length < 6) {
     arrayOfNumber.push(Number(((seedNumber / arrayOfNumber.length) % 10).toFixed(0)));
