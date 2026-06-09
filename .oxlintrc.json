@@ -7,23 +7,23 @@
     "style": "warn",
     "suspicious": "error"
   },
+  "extends": ["./.datamitsu/.oxlintrc.json"],
   "rules": {
     "max-params": "off",
-    "no-unused-expressions": "off",
-    "no-negated-condition": "off",
-    "unicorn/prefer-array-some": "off",
-    "unicorn/prefer-array-flat-map": "off",
-    "no-unused-vars": "off",
-    "no-extra-boolean-cast": "off",
-    "unicorn/explicit-length-check": "off",
-    "unicorn/prefer-spread": "off",
-    "unicorn/prefer-code-point": "off",
-    "no-implicit-coercion": "off",
-    "unicorn/prefer-math-trunc": "off",
-    "no-duplicate-imports": "off",
     "max-statements": "off",
-    "unicorn/prefer-top-level-await": "off",
-    "no-map-spread": "off"
-  },
-  "extends": ["./.datamitsu/.oxlintrc.json"]
+    "no-duplicate-imports": "off",
+    "no-extra-boolean-cast": "off",
+    "no-implicit-coercion": "off",
+    "no-map-spread": "off",
+    "no-negated-condition": "off",
+    "no-unused-expressions": "off",
+    "no-unused-vars": "off",
+    "unicorn/explicit-length-check": "off",
+    "unicorn/prefer-array-flat-map": "off",
+    "unicorn/prefer-array-some": "off",
+    "unicorn/prefer-code-point": "off",
+    "unicorn/prefer-math-trunc": "off",
+    "unicorn/prefer-spread": "off",
+    "unicorn/prefer-top-level-await": "off"
+  }
 }

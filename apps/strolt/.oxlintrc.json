@@ -7,6 +7,6 @@
     "style": "warn",
     "suspicious": "error"
   },
-  "rules": {},
-  "extends": ["../../.datamitsu/.oxlintrc.json"]
+  "extends": ["../../.datamitsu/.oxlintrc.json"],
+  "rules": {}
 }

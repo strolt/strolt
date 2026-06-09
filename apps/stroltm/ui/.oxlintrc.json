@@ -7,18 +7,18 @@
     "style": "warn",
     "suspicious": "error"
   },
+  "extends": ["../../../.datamitsu/.oxlintrc.json"],
   "rules": {
-    "no-empty-interface": "off",
     "max-params": "off",
-    "no-shadow": "off",
-    "no-unused-vars": "off",
-    "no-map-spread": "off",
     "no-duplicate-imports": "off",
-    "unicorn/prefer-native-coercion-functions": "off",
+    "no-empty-interface": "off",
+    "no-map-spread": "off",
     "no-nested-ternary": "off",
+    "no-shadow": "off",
+    "no-unused-expressions": "off",
+    "no-unused-vars": "off",
     "unicorn/prefer-math-trunc": "off",
-    "unicorn/prefer-top-level-await": "off",
-    "no-unused-expressions": "off"
-  },
-  "extends": ["../../../.datamitsu/.oxlintrc.json"]
+    "unicorn/prefer-native-coercion-functions": "off",
+    "unicorn/prefer-top-level-await": "off"
+  }
 }
