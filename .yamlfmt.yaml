@@ -1,5 +1,5 @@
 exclude:
-- pnpm-lock.yaml
+  - pnpm-lock.yaml
 formatter:
   array_indent: 2
   eof_newline: true

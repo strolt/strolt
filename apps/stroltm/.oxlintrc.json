@@ -7,7 +7,5 @@
     "style": "warn",
     "suspicious": "error"
   },
-  "extends": [
-    "../../.datamitsu/.oxlintrc.json"
-  ]
+  "extends": ["../../.datamitsu/.oxlintrc.json"]
 }

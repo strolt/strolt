@@ -1,11 +1,13 @@
 import { join } from "node:path";
 
-  import { defineConfig } from "../../.datamitsu/eslint.config.js";
+import { defineConfig } from "../../.datamitsu/eslint.config.js";
 
-  import packageJSON from "./package.json" with { type: "json" };
+import packageJSON from "./package.json" with { type: "json" };
 
-  const config = await defineConfig(
-  /** @type {import("@shibanet0/datamitsu-config/type-fest").PackageJson} */ (packageJSON),
+const config = await defineConfig(
+  /**
+   * @type {import("@shibanet0/datamitsu-config/type-fest").PackageJson}
+   */ (packageJSON),
   [
     {
       rules: {

@@ -1,4 +1,11 @@
-allowBuilds: { '@nestjs/core': false, '@openapitools/openapi-generator-cli': false, '@swc/core': false, core-js-pure: false, esbuild: false }
+allowBuilds:
+  {
+    "@nestjs/core": false,
+    "@openapitools/openapi-generator-cli": false,
+    "@swc/core": false,
+    core-js-pure: false,
+    esbuild: false,
+  }
 audit: true
 auditLevel: high
 autoInstallPeers: true

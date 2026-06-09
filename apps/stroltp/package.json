@@ -8,9 +8,9 @@
   "type": "module",
   "scripts": {},
   "devDependencies": {
-        "@shibanet0/datamitsu-config": "0.1.0"
-      },
+    "@shibanet0/datamitsu-config": "0.1.0"
+  },
   "engines": {
-        "node": ">=22.12.0"
-      }
+    "node": ">=22.12.0"
+  }
 }

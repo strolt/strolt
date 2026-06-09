@@ -26,7 +26,5 @@
     "unicorn/prefer-top-level-await": "off",
     "no-map-spread": "off"
   },
-  "extends": [
-    "./.datamitsu/.oxlintrc.json"
-  ]
+  "extends": ["./.datamitsu/.oxlintrc.json"]
 }
