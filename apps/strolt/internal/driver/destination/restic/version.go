@@ -1,19 +1,36 @@
 package restic
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
 )
 
+// BinaryVersion returns the version of the restic binary used by the driver.
+func (i *Restic) BinaryVersion() ([]interfaces.DriverBinaryVersion, error) {
+	resticVersion, err := i.getBinVersion()
+	if err != nil {
+		return nil, err
+	}
+
+	return []interfaces.DriverBinaryVersion{
+		{
+			Name:    "restic",
+			Version: resticVersion,
+		},
+	}, nil
+}
+
 func (i *Restic) getBinVersion() (string, error) {
-	cmd := exec.Command(i.getBin(), "version")
+	cmd := exec.CommandContext(context.Background(), i.getBin(), "version") //nolint:gosec // restic binary path comes from validated config
 
 	output, err := cmd.Output()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("restic version: %w", err)
 	}
 
 	str := string(output)
@@ -30,18 +47,4 @@ func (i *Restic) getBinVersion() (string, error) {
 	}
 
 	return outputList[1], nil
-}
-
-func (i *Restic) BinaryVersion() ([]interfaces.DriverBinaryVersion, error) {
-	resticVersion, err := i.getBinVersion()
-	if err != nil {
-		return nil, err
-	}
-
-	return []interfaces.DriverBinaryVersion{
-		{
-			Name:    "restic",
-			Version: resticVersion,
-		},
-	}, nil
 }

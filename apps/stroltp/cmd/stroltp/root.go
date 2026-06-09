@@ -1,3 +1,4 @@
+// Package cmd implements the stroltp command-line interface.
 package cmd
 
 import (
@@ -46,8 +47,10 @@ func init() {
 
 var rootCmd = &cobra.Command{
 	Use:   "stroltp",
-	Short: "Stroltp",
-	Long:  ``,
+	Short: "Strolt Proxy - reverse proxy and load balancer for Strolt instances",
+	Long: `Strolt Proxy (stroltp) provides reverse proxy and load balancing capabilities for Strolt instances.
+It enables centralized access management, request routing, and high availability
+for your distributed backup infrastructure.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		env.Scan()
 
@@ -79,13 +82,13 @@ var rootCmd = &cobra.Command{
 			wg.Add(1)
 			go func() {
 				// manager.Init().Watch(ctx, cancel)
-				instances := []strolt.ManagerInstanceInit{}
+				instances := make([]strolt.ManagerInstanceInit, 0, len(config.Get().Strolt.Instances))
 				for instanceName, instance := range config.Get().Strolt.Instances {
 					instances = append(instances, strolt.ManagerInstanceInit{
 						Name:     instanceName,
 						URL:      instance.URL,
 						Username: instance.Username,
-						Password: instance.Password, //pragma: allowlist secret
+						Password: instance.Password, // pragma: allowlist secret
 					})
 				}
 				strolt.ManagerInit(ctx, cancel, instances)
@@ -104,6 +107,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+// Execute runs the root command and exits on error.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		logger.New().Fatal(err)

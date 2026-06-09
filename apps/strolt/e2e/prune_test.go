@@ -9,6 +9,7 @@ import (
 
 type PruneSuite struct {
 	suite.Suite
+
 	fs *Fs
 }
 
@@ -40,15 +41,15 @@ func (s *PruneSuite) TestPruneRestic() {
 	s.NoError(strolt("backup", "--service", "e2e", "--task", "prune", "--y"))
 
 	snapshots, err := stroltGetSnapshotList("e2e", "prune", "restic-prune")
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Len(snapshots, 5)
 
 	log.Println("before:", snapshots)
 
-	s.NoError(strolt("prune", "--service", "e2e", "--task", "prune", "--destination", "restic-prune", "--y"))
+	s.Require().NoError(strolt("prune", "--service", "e2e", "--task", "prune", "--destination", "restic-prune", "--y"))
 
 	snapshots, err = stroltGetSnapshotList("e2e", "prune", "restic-prune")
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	log.Println("after:", snapshots)
 

@@ -45,7 +45,7 @@ var pruneCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer t.Close()
+		defer func() { _ = t.Close() }()
 
 		if !isSkipConfirmation && !prompt.AskIsConfirm() {
 			return

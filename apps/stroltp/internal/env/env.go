@@ -1,3 +1,4 @@
+// Package env reads stroltp settings from environment variables.
 package env
 
 import (
@@ -30,6 +31,7 @@ func (t *globalTags) UnmarshalText(text []byte) error {
 
 var resultConfig config
 
+// Scan parses environment variables and applies the log level.
 func Scan() {
 	if err := env.Parse(&resultConfig); err != nil {
 		logger.New().Fatal(err)
@@ -46,26 +48,32 @@ func Scan() {
 	}
 }
 
+// Port returns the API server port.
 func Port() int {
 	return resultConfig.Port
 }
 
+// Host returns the API server host.
 func Host() string {
 	return resultConfig.Host
 }
 
+// GlobalTags returns the configured global tags.
 func GlobalTags() []string {
 	return resultConfig.GlobalTags
 }
 
+// IsDebug reports whether the log level is debug or trace.
 func IsDebug() bool {
 	return resultConfig.LogLevel == logger.LogLevelDebug || resultConfig.LogLevel == logger.LogLevelTrace
 }
 
+// IsAPILogEnabled reports whether API request logging is enabled.
 func IsAPILogEnabled() bool {
 	return resultConfig.IsAPILogEnabled
 }
 
+// IsWatchConfigDisabled reports whether config change watching is disabled.
 func IsWatchConfigDisabled() bool {
 	return resultConfig.IsWatchConfigDisabled
 }

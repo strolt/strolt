@@ -9,12 +9,13 @@ import (
 
 type MariaDBSuite struct {
 	suite.Suite
+
 	c *Conn
 }
 
 func (s *MariaDBSuite) SetupSuite() {
 	port, err := containerManager.GetMariaDBPort()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	connStr := fmt.Sprintf("strolt:strolt@(localhost:%s)/strolt?timeout=60s", port)
 	c, err := sqlConnect("mysql", connStr)
@@ -38,7 +39,7 @@ func (s *MariaDBSuite) AfterTest(suiteName, testName string) {
 }
 
 func (s *MariaDBSuite) TestMariaDB() {
-	s.NoError(strolt("backup", "--service", "e2e", "--task", "mariadb", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "mariadb", "--y"))
 
 	s.c.dropTable()
 

@@ -22,7 +22,7 @@ func (i *PgDump) restoreWithPSQLCmd(ctx context.Context, filename string, isPipe
 		args = append(args, "--file="+filename)
 	}
 
-	cmd := exec.Command(i.getBinPSQL(), args...)
+	cmd := exec.Command(i.getBinPSQL(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
 	cmd.Dir = ctx.WorkDir
 	cmd.Env = i.getEnv()
 
@@ -48,7 +48,7 @@ func (i *PgDump) restoreWithPSQLCopy(ctx context.Context, filename string) error
 			return fmt.Errorf("%w (%v)", err, lastMessage)
 		}
 
-		return err
+		return fmt.Errorf("run psql: %w", err)
 	}
 
 	if outputString != "" {
@@ -63,12 +63,12 @@ func (i *PgDump) restoreWithPSQLPipe(ctx context.Context, filename string) (io.W
 
 	writer, err := cmd.StdinPipe()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("get stdin pipe: %w", err)
 	}
 
 	if err := cmd.Start(); err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("start psql: %w", err)
 	}
 
-	return writer, cmd.Wait, err
+	return writer, cmd.Wait, nil
 }

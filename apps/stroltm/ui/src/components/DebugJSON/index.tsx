@@ -1,5 +1,4 @@
-import { FC } from "react";
-
+import type { FC } from "react";
 import ReactJson from "react-json-view";
 
 import { Collapse } from "antd";
@@ -11,7 +10,7 @@ export interface DebugJSONProps {
 export const DebugJSON: FC<DebugJSONProps> = ({ data, title }) => {
   return (
     <Collapse>
-      <Collapse.Panel key="raw" header={title || "raw"}>
+      <Collapse.Panel header={title || "raw"} key="raw">
         <ReactJson src={data || {}} />
       </Collapse.Panel>
     </Collapse>

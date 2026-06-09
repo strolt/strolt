@@ -1,3 +1,4 @@
+// Package schedule runs backup and prune tasks on their cron schedules.
 package schedule
 
 import (
@@ -30,6 +31,7 @@ func start(serviceName string, taskName string, operation sctxt.OperationType) f
 	}
 }
 
+// Run starts the cron scheduler and blocks until the context is canceled.
 func Run(ctx ctx.Context) {
 	log := logger.New()
 	c := config.Get()
@@ -48,7 +50,6 @@ func Run(ctx ctx.Context) {
 
 	for serviceName, service := range c.Services {
 		for taskName, task := range service {
-			taskName, task := taskName, task
 			log := log.WithField("taskName", taskName)
 
 			if task.Schedule.Backup != "" {
@@ -71,12 +72,15 @@ func Run(ctx ctx.Context) {
 func backup(serviceName string, taskName string) {
 	log := logger.New().WithField("serviceName", serviceName).WithField("taskName", taskName).WithField("trigger", sctxt.TSchedule)
 	t, err := task.New(serviceName, taskName, sctxt.TSchedule, sctxt.OpTypeBackup)
-
 	if err != nil {
 		log.Error(err)
 	}
 
-	defer t.Close()
+	defer func() {
+		if err := t.Close(); err != nil {
+			log.Error(err)
+		}
+	}()
 
 	if err := t.Backup(); err != nil {
 		log.Error(err)
@@ -91,7 +95,11 @@ func prune(serviceName string, taskName string) {
 		log.Error(err)
 	}
 
-	defer t.Close()
+	defer func() {
+		if err := t.Close(); err != nil {
+			log.Error(err)
+		}
+	}()
 
 	if err := t.PruneAll(); err != nil {
 		log.Error(err)

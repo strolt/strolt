@@ -10,6 +10,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
+// WatchConfigChanges watches loaded config files and calls cancel when any of them changes.
 func WatchConfigChanges(ctx context.Context, cancel func()) {
 	if env.IsWatchFilesDisabled() {
 		return
@@ -28,7 +29,9 @@ func WatchConfigChanges(ctx context.Context, cancel func()) {
 	if err != nil {
 		log.Error(err)
 	}
-	defer watcher.Close()
+	defer func() {
+		_ = watcher.Close()
+	}()
 
 	done := make(chan bool)
 

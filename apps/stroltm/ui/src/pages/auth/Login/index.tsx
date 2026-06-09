@@ -1,33 +1,33 @@
 import { Button, Form, Input, message } from "antd";
 
-import { useStores, observer } from "stores";
+import { observer, useStores } from "stores";
 
 import * as s from "./styles.css";
 
 const Login = observer(() => {
   const { authStore } = useStores();
 
-  const onFinish = async ({ username, password }: { username: string; password: string }) => {
+  const onFinish = async ({ password, username }: { password: string; username: string }) => {
     try {
       await authStore.login(username, password);
-    } catch (err: any) {
-      message.error(err?.message);
+    } catch (error: any) {
+      message.error(error?.message);
     }
   };
 
   return (
     <div className={s.authLayout}>
       <Form
-        name="basic"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        onFinish={onFinish}
         autoComplete="off"
+        labelCol={{ span: 8 }}
+        name="basic"
+        onFinish={onFinish}
+        wrapperCol={{ span: 16 }}
       >
         <Form.Item
           label="Username"
           name="username"
-          rules={[{ required: true, message: "Please input your username!" }]}
+          rules={[{ message: "Please input your username!", required: true }]}
         >
           <Input />
         </Form.Item>
@@ -35,16 +35,16 @@ const Login = observer(() => {
         <Form.Item
           label="Password"
           name="password"
-          rules={[{ required: true, message: "Please input your password!" }]}
+          rules={[{ message: "Please input your password!", required: true }]}
         >
           <Input.Password />
         </Form.Item>
 
         <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
           <Button
-            type="primary"
             htmlType="submit"
             loading={authStore.requestValidateStatus?.state === "pending"}
+            type="primary"
           >
             Submit
           </Button>

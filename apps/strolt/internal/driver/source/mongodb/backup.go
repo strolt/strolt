@@ -10,10 +10,11 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 )
 
+// Backup runs mongodump and stores the archive in the working directory.
 func (i *MongoDB) Backup(ctx context.Context) error {
 	args := i.getBackupArgs()
 
-	cmd := exec.Command(i.getBinMongoDump(), args...)
+	cmd := exec.Command(i.getBinMongoDump(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
 	cmd.Dir = ctx.WorkDir
 	cmd.Env = i.getEnv()
 
@@ -35,7 +36,7 @@ func (i *MongoDB) Backup(ctx context.Context) error {
 			return fmt.Errorf("%w (%v)", err, lastMessage)
 		}
 
-		return err
+		return fmt.Errorf("run mongodump: %w", err)
 	}
 
 	if outputString != "" {
@@ -45,10 +46,12 @@ func (i *MongoDB) Backup(ctx context.Context) error {
 	return nil
 }
 
+// BackupPipe is not supported by the MongoDB driver.
 func (i *MongoDB) BackupPipe(_ context.Context) (io.ReadCloser, string, func() error, error) {
 	return nil, "", func() error { return nil }, errors.New("not support pipe")
 }
 
+// IsSupportedBackupPipe reports whether backing up as a stream is supported.
 func (i *MongoDB) IsSupportedBackupPipe(_ context.Context) bool {
 	return false
 }

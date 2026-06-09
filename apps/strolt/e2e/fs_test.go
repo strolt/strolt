@@ -13,26 +13,22 @@ type File struct {
 	Value string
 }
 
-var (
-	fsInputPath = "/e2e/input"
-)
+var fsInputPath = "/e2e/input"
 
-var (
-	files = []File{
-		{
-			Path:  filepath.Join(fsInputPath, "0.txt"),
-			Value: "0",
-		},
-		{
-			Path:  filepath.Join(fsInputPath, "1", "1.txt"),
-			Value: "1",
-		},
-		{
-			Path:  filepath.Join(fsInputPath, "1", "2", "2.txt"),
-			Value: "2",
-		},
-	}
-)
+var files = []File{
+	{
+		Path:  filepath.Join(fsInputPath, "0.txt"),
+		Value: "0",
+	},
+	{
+		Path:  filepath.Join(fsInputPath, "1", "1.txt"),
+		Value: "1",
+	},
+	{
+		Path:  filepath.Join(fsInputPath, "1", "2", "2.txt"),
+		Value: "2",
+	},
+}
 
 type Fs struct{}
 
@@ -51,9 +47,7 @@ func (fs *Fs) scan() ([]File, error) {
 		return files, err
 	}
 
-	lines := strings.Split(string(o), "\n\n")
-
-	for _, line := range lines {
+	for line := range strings.SplitSeq(string(o), "\n\n") {
 		l := strings.Split(line, "\n")
 		path := strings.TrimSuffix(l[0], ":")
 

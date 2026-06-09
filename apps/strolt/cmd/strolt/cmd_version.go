@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"runtime"
+	"slices"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
@@ -18,13 +19,7 @@ func init() {
 }
 
 func isExistsVersion(versionList *[]string, version string) bool {
-	for _, _version := range *versionList {
-		if _version == version {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(*versionList, version)
 }
 
 func excludeDuplicateVersion(versionList *[]string) []string {

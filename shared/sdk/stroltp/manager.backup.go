@@ -4,6 +4,7 @@ import (
 	"sync"
 )
 
+// BackupAllStatusItem identifies a single task affected by a backup-all operation.
 type BackupAllStatusItem struct {
 	ProxyName    string `json:"proxyName,omitempty"`
 	InstanceName string `json:"instanceName,omitempty"`
@@ -11,12 +12,15 @@ type BackupAllStatusItem struct {
 	TaskName     string `json:"taskName,omitempty"`
 }
 
+// ManagerhBackupAllResponse aggregates the results of a backup-all operation across all instances.
 type ManagerhBackupAllResponse struct {
+	*sync.Mutex
+
 	ErrorStarted   []*BackupAllStatusItem `json:"errorStarted"`
 	SuccessStarted []*BackupAllStatusItem `json:"successStarted"`
-	*sync.Mutex
 }
 
+// ManagerBackupAll starts a backup for every task on every managed instance and reports the results.
 func ManagerBackupAll() *ManagerhBackupAllResponse {
 	status := ManagerhBackupAllResponse{
 		ErrorStarted:   []*BackupAllStatusItem{},

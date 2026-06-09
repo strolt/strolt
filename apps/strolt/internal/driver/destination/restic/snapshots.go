@@ -1,7 +1,9 @@
 package restic
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"os/exec"
 	"time"
 
@@ -21,8 +23,9 @@ type resticSnapshot struct {
 	Tags     []string  `json:"tags"`
 }
 
+// Snapshots lists the snapshots stored in the restic repository.
 func (i *Restic) Snapshots() ([]interfaces.Snapshot, error) {
-	cmd := exec.Command(i.getBin(), "--json", "snapshots")
+	cmd := exec.CommandContext(context.Background(), i.getBin(), "--json", "snapshots") //nolint:gosec // restic binary path comes from validated config
 
 	env, err := i.getEnv()
 	if err != nil {
@@ -45,7 +48,7 @@ func (i *Restic) Snapshots() ([]interfaces.Snapshot, error) {
 	var resticSnapshots []resticSnapshot
 	if err := json.Unmarshal(output, &resticSnapshots); err != nil {
 		i.logger.Error(err)
-		return nil, err
+		return nil, fmt.Errorf("unmarshal snapshots output: %w", err)
 	}
 
 	snapshots := []interfaces.Snapshot{}

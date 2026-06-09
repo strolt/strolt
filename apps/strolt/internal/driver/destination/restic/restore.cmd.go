@@ -1,6 +1,7 @@
 package restic
 
 import (
+	gocontext "context"
 	"os/exec"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
@@ -16,7 +17,7 @@ func (i *Restic) restoreCmd(ctx context.Context, snapshotID string, path string,
 		args = append(args, "restore", snapshotID, "--target", ctx.WorkDir)
 	}
 
-	cmd := exec.Command(i.getBin(), args...)
+	cmd := exec.CommandContext(gocontext.Background(), i.getBin(), args...) //nolint:gosec // restic binary path and flags come from validated config
 
 	env, err := i.getEnv()
 	if err != nil {

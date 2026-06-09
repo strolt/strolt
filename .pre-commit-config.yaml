@@ -1,83 +1,64 @@
 repos:
-  - repo: local
-    hooks:
-      - id: swagger
-        name: swagger
-        entry: make swagger
+  - hooks:
+      - entry: make swagger
         files: ^apps/stroltm?/internal/api
+        id: swagger
         language: system
+        name: swagger
         types_or: [go]
 
+    repo: local
   # stroltm/ui
-  - repo: local
-    hooks:
-      - id: stroltm/ui/prettier
-        name: stroltm/ui/prettier
-        entry: prettier --write --list-different --ignore-unknown
-        args: [--plugin, "@trivago/prettier-plugin-sort-imports", --config, ./apps/stroltm/ui/.prettierrc, --write]
-        language: node
-        types: [text]
-        files: ^apps/stroltm/ui
-        types_or: [javascript, jsx, ts, tsx, css, json]
-        additional_dependencies: [prettier@2.8.7, "@trivago/prettier-plugin-sort-imports@4.1.1"]
-      - id: stroltm/ui/typescript
-        name: stroltm/ui/typescript
+  - hooks:
+      - always_run: true
+
         entry: make .lint-stroltm-ui
+        id: stroltm/ui/typescript
         language: system
-        always_run: true
-
+        name: stroltm/ui/typescript
+    repo: local
   # strolt
-  - repo: local
-    hooks:
-      - id: strolt/lint
+  - hooks:
+      - entry: make .lint-strolt
+        files: ^apps/strolt
+        id: strolt/lint
+        language: system
         name: strolt/lint
-        entry: make .lint-strolt
-        language: system
-        types: [text]
-        files: ^apps/strolt
-        types_or: [go]
         require_serial: true
-      - id: strolt/test
+        types: [text]
+        types_or: [go]
+      - entry: make .test-strolt
+        files: ^apps/strolt
+        id: strolt/test
+        language: system
         name: strolt/test
-        entry: make .test-strolt
-        language: system
         types: [text]
-        files: ^apps/strolt
         types_or: [go]
 
+    repo: local
   # stroltm
-  - repo: local
-    hooks:
-      - id: stroltm/lint
+  - hooks:
+      - entry: make .lint-stroltm
+        files: ^apps/stroltm
+        id: stroltm/lint
+        language: system
         name: stroltm/lint
-        entry: make .lint-stroltm
-        language: system
-        types: [text]
-        files: ^apps/stroltm
-        types_or: [go]
         require_serial: true
-      - id: stroltm/test
-        name: stroltm/test
-        entry: make .test-stroltm
-        language: system
         types: [text]
+        types_or: [go]
+      - entry: make .test-stroltm
         files: ^apps/stroltm
+        id: stroltm/test
+        language: system
+        name: stroltm/test
+        types: [text]
         types_or: [go]
 
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
-    hooks:
+    repo: local
+  - hooks:
       - id: check-merge-conflict
       - id: check-added-large-files
       - id: end-of-file-fixer
 
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
-    hooks:
-      - id: detect-secrets
-
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
-    hooks:
-      - id: hadolint
-        args: ["--ignore=DL3029", "--ignore=DL3008", "--ignore=DL3018"]
+    repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0

@@ -1,7 +1,9 @@
+// Package ui serves the embedded web user interface.
 package ui
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"net/http/httputil"
@@ -12,6 +14,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Assets contains the embedded UI build artifacts.
+//
 //go:embed build/*
 var Assets embed.FS
 
@@ -33,10 +37,14 @@ func assetHandler() http.Handler {
 
 		f, err := Assets.Open(assetPath)
 		if os.IsNotExist(err) || isDeny(name) {
-			return Assets.Open("build/dist/index.html")
+			f, err = Assets.Open("build/dist/index.html")
 		}
 
-		return f, err
+		if err != nil {
+			return nil, fmt.Errorf("open embedded asset: %w", err)
+		}
+
+		return f, nil
 	})
 
 	return http.StripPrefix("/", http.FileServer(http.FS(handler)))
@@ -54,6 +62,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	proxy.ServeHTTP(w, r)
 }
 
+// Router registers the UI routes on the given router.
 func Router(r chi.Router) {
 	if mode == "proxy" {
 		r.Get("/*", proxyHandler)

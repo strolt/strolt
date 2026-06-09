@@ -46,10 +46,11 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use: "strolt",
+	Use:   "strolt",
+	Short: "Backup and restore tool with support for multiple sources and destinations",
 	Long: `strolt is a program for backup and restore with
-        support for various sources (filesystem, databases), notifications and API.
-        Source code is available at https://github.com/strolt/strolt`,
+				support for various sources (filesystem, databases), notifications and API.
+				Source code is available at https://github.com/strolt/strolt`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		env.Scan()
 		metrics.Init()
@@ -57,6 +58,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+// Execute runs the root command of the strolt CLI.
 func Execute() {
 	log := logger.New()
 
@@ -64,7 +66,7 @@ func Execute() {
 		log.Error(err)
 	}
 
-	rootCmd.Execute() //nolint:errcheck
+	_ = rootCmd.Execute()
 
 	if err := dir.RemoveTempDirectories(); err != nil {
 		log.Error(err)

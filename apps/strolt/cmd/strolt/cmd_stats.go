@@ -47,7 +47,7 @@ var statsCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		defer t.Close()
+		defer func() { _ = t.Close() }()
 
 		stats, err := t.GetStats(prompt.DestinationName)
 		if err != nil {

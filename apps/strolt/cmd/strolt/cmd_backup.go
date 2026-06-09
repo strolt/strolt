@@ -43,7 +43,7 @@ var backupCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer t.Close()
+		defer func() { _ = t.Close() }()
 
 		if err := t.Backup(); err != nil {
 			log.Fatal(err)

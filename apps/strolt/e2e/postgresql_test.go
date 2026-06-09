@@ -9,12 +9,13 @@ import (
 
 type PostgresqlSuite struct {
 	suite.Suite
+
 	c *Conn
 }
 
 func (s *PostgresqlSuite) SetupSuite() {
 	port, err := containerManager.GetPostgresPort()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	connStr := fmt.Sprintf("user=strolt password=strolt host=localhost port=%s dbname=strolt sslmode=disable connect_timeout=60", port)
 	c, err := sqlConnect("postgres", connStr)
@@ -38,7 +39,7 @@ func (s *PostgresqlSuite) AfterTest(suiteName, testName string) {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_t() {
-	s.NoError(strolt("backup", "--service", "e2e", "--task", "pg-t", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "pg-t", "--y"))
 
 	s.c.dropTable()
 
@@ -49,7 +50,7 @@ func (s *PostgresqlSuite) TestPostgresql_t() {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_d() {
-	s.NoError(strolt("backup", "--service", "e2e", "--task", "pg-d", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "pg-d", "--y"))
 
 	s.c.dropTable()
 
@@ -60,7 +61,7 @@ func (s *PostgresqlSuite) TestPostgresql_d() {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_p() {
-	s.NoError(strolt("backup", "--service", "e2e", "--task", "pg-p", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "pg-p", "--y"))
 
 	s.c.dropTable()
 
@@ -71,7 +72,7 @@ func (s *PostgresqlSuite) TestPostgresql_p() {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_c() {
-	s.NoError(strolt("backup", "--service", "e2e", "--task", "pg-c", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "pg-c", "--y"))
 
 	s.c.dropTable()
 
@@ -82,7 +83,7 @@ func (s *PostgresqlSuite) TestPostgresql_c() {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_copy_t() {
-	s.NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-t", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-t", "--y"))
 
 	s.c.dropTable()
 
@@ -93,7 +94,7 @@ func (s *PostgresqlSuite) TestPostgresql_copy_t() {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_copy_d() {
-	s.NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-d", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-d", "--y"))
 
 	s.c.dropTable()
 
@@ -104,7 +105,7 @@ func (s *PostgresqlSuite) TestPostgresql_copy_d() {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_copy_p() {
-	s.NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-p", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-p", "--y"))
 
 	s.c.dropTable()
 
@@ -115,7 +116,7 @@ func (s *PostgresqlSuite) TestPostgresql_copy_p() {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_copy_c() {
-	s.NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-c", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-c", "--y"))
 
 	s.c.dropTable()
 
@@ -126,7 +127,7 @@ func (s *PostgresqlSuite) TestPostgresql_copy_c() {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_pipe_t() {
-	s.NoError(strolt("backup", "--service", "e2e-pipe", "--task", "pg-t", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e-pipe", "--task", "pg-t", "--y"))
 
 	s.c.dropTable()
 
@@ -141,7 +142,7 @@ func (s *PostgresqlSuite) TestPostgresql_pipe_d() {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_pipe_p() {
-	s.NoError(strolt("backup", "--service", "e2e-pipe", "--task", "pg-p", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e-pipe", "--task", "pg-p", "--y"))
 
 	s.c.dropTable()
 
@@ -152,7 +153,7 @@ func (s *PostgresqlSuite) TestPostgresql_pipe_p() {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_pipe_c() {
-	s.NoError(strolt("backup", "--service", "e2e-pipe", "--task", "pg-c", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e-pipe", "--task", "pg-c", "--y"))
 
 	s.c.dropTable()
 

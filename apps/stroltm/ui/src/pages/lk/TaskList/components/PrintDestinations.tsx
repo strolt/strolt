@@ -1,15 +1,15 @@
 import { Divider, Space } from "antd";
 
+import type { TaskListItemDestination } from "stores/manager.store/taskList";
+
 import { Link } from "components";
 
-import { TaskListItemDestination } from "stores/manager.store/taskList";
-
 interface LinksProps {
-  proxyName?: string;
+  destinationName?: string;
   instanceName?: string;
+  proxyName?: string;
   serviceName?: string;
   taskName?: string;
-  destinationName?: string;
 }
 const Links: React.FC<LinksProps> = (params) => {
   if (!params.instanceName && !params.serviceName && !params.taskName && params.destinationName) {
@@ -17,51 +17,51 @@ const Links: React.FC<LinksProps> = (params) => {
   }
 
   const linkParams = {
-    proxyId: params.proxyName,
+    destinationId: params.destinationName,
     instanceId: params.instanceName,
+    proxyId: params.proxyName,
     serviceId: params.serviceName,
     taskId: params.taskName,
-    destinationId: params.destinationName,
   };
 
   return (
     <Space wrap>
       <Link
+        params={linkParams}
+        style={{ display: "block" }}
         to={
-          !!linkParams.proxyId
+          linkParams.proxyId
             ? "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxySnapshotList"
             : "instances.instanceId.serviceId.taskId.destinationId.snapshotList"
         }
-        params={linkParams}
-        style={{ display: "block" }}
       >
         Snapshots
       </Link>
 
-      <Divider type="vertical" style={{ margin: 0 }} />
+      <Divider style={{ margin: 0 }} type="vertical" />
 
       <Link
+        params={linkParams}
+        style={{ display: "block" }}
         to={
-          !!linkParams.proxyId
+          linkParams.proxyId
             ? "instances.proxyId.instanceId.serviceId.taskId.destinationId.prune"
             : "instances.instanceId.serviceId.taskId.destinationId.prune"
         }
-        params={linkParams}
-        style={{ display: "block" }}
       >
         Prune
       </Link>
 
-      <Divider type="vertical" style={{ margin: 0 }} />
+      <Divider style={{ margin: 0 }} type="vertical" />
 
       <Link
+        params={linkParams}
+        style={{ display: "block" }}
         to={
-          !!linkParams.proxyId
+          linkParams.proxyId
             ? "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxyStats"
             : "instances.instanceId.serviceId.taskId.destinationId.stats"
         }
-        params={linkParams}
-        style={{ display: "block" }}
       >
         Stats
       </Link>
@@ -69,7 +69,7 @@ const Links: React.FC<LinksProps> = (params) => {
   );
 };
 
-export interface TaskListItemDestinationProps extends TaskListItemDestination, LinksProps {}
+export interface TaskListItemDestinationProps extends LinksProps, TaskListItemDestination {}
 export const PrintDestination: React.FC<TaskListItemDestinationProps> = (el) => {
   return (
     <Space direction="vertical">
@@ -79,11 +79,11 @@ export const PrintDestination: React.FC<TaskListItemDestinationProps> = (el) => 
       </Space>
 
       <Links
-        proxyName={el.proxyName}
+        destinationName={el.destinationName}
         instanceName={el.instanceName}
+        proxyName={el.proxyName}
         serviceName={el.serviceName}
         taskName={el.taskName}
-        destinationName={el.destinationName}
       />
     </Space>
   );
@@ -93,7 +93,7 @@ export interface PrintDestinationsProps {
   list: TaskListItemDestinationProps[];
 }
 export const PrintDestinations: React.FC<PrintDestinationsProps> = ({ list }) => {
-  if (!list.length) {
+  if (list.length === 0) {
     return <>-</>;
   }
 

@@ -11,6 +11,7 @@ import (
 
 var startedAt = time.Now().Format(time.RFC3339)
 
+// GetInfoResponse is the response payload of the info endpoint.
 type GetInfoResponse struct {
 	Version               string `json:"version"`
 	StartedAt             string `json:"startedAt"`
@@ -19,12 +20,13 @@ type GetInfoResponse struct {
 }
 
 // getInfo godoc
-// @Id					 getInfo
-// @Summary      Get info
-// @Tags         info
-// @Security BasicAuth
-// @success 200 {object} GetInfoResponse
-// @Router       /api/v1/info [get].
+//
+//	@Id			getInfo
+//	@Summary	Get info
+//	@Tags		info
+//	@Security	BasicAuth
+//	@success	200	{object}	GetInfoResponse
+//	@Router		/api/v1/info [get].
 func (api *API) getInfo(w http.ResponseWriter, r *http.Request) {
 	apiu.RenderJSON200(w, r, GetInfoResponse{
 		Version:               ldflags.GetVersion(),

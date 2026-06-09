@@ -1,7 +1,7 @@
-import { FC } from "react";
+import type { FC } from "react";
 
 export interface TimeProps {
-  value?: string | Date;
+  value?: Date | string;
   withTime?: boolean;
 }
 export const Time: FC<TimeProps> = ({ value, withTime }) => {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"slices"
 	"strings"
 )
 
@@ -46,7 +47,11 @@ func strolt(args ...string) error {
 }
 
 func stroltWithResponse(args ...string) ([]byte, error) {
-	cmd := exec.Command("docker", "run", "--rm", "--network", "strolt",
+	if containerManager == nil {
+		return nil, errors.New("container manager not initialized")
+	}
+
+	cmd := exec.Command("docker", "run", "--rm", "--network", containerManager.NetworkName(),
 		"-v", "./strolt.yml:/strolt/config.yml:ro",
 		"-v", "./.strolt:/strolt/.strolt",
 		"-v", "./.temp/input:/e2e/input",
@@ -77,8 +82,8 @@ func stroltGetSnapshotList(serviceName string, taskName string, destination stri
 	// Find the last non-empty line that contains JSON array
 	var lastItem string
 
-	for i := len(lineList) - 1; i >= 0; i-- {
-		trimmed := strings.TrimSpace(lineList[i])
+	for _, line := range slices.Backward(lineList) {
+		trimmed := strings.TrimSpace(line)
 		if trimmed != "" && strings.HasPrefix(trimmed, "[") {
 			lastItem = trimmed
 			break

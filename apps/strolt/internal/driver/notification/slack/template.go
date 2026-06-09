@@ -3,6 +3,7 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/template"
@@ -25,14 +26,14 @@ type slackMsgBlockElements struct {
 }
 
 type slackMsg struct {
-	Blocks []interface{} `json:"blocks"`
+	Blocks []any `json:"blocks"`
 }
 
 func getTemplate(ctx context.Context) (*bytes.Buffer, error) {
 	t := template.New("slack", ctx)
 
 	body := slackMsg{
-		Blocks: []interface{}{
+		Blocks: []any{
 			slackMsgBlock{
 				Type: "header",
 				Text: slackMsgBlockText{
@@ -62,7 +63,7 @@ func getTemplate(ctx context.Context) (*bytes.Buffer, error) {
 
 	data, err := json.Marshal(body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("marshal slack message: %w", err)
 	}
 
 	return bytes.NewBuffer(data), nil

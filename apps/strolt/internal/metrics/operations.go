@@ -20,12 +20,15 @@ func (m *Metrics) registerOperations() {
 	prometheus.MustRegister(m.operations)
 }
 
+// Oper updates the operation counters.
 type Oper struct{}
 
+// Operations returns an Oper for updating the operation counters.
 func Operations() *Oper {
 	return &Oper{}
 }
 
+// BackupSuccess increments the successful backup counter.
 func (o *Oper) BackupSuccess() {
 	metrics.operations.With(prometheus.Labels{
 		"type":      "success",
@@ -33,6 +36,7 @@ func (o *Oper) BackupSuccess() {
 	}).Inc()
 }
 
+// BackupError increments the failed backup counter.
 func (o *Oper) BackupError() {
 	metrics.operations.With(prometheus.Labels{
 		"type":      "error",
@@ -40,6 +44,7 @@ func (o *Oper) BackupError() {
 	}).Inc()
 }
 
+// PruneSuccess increments the successful prune counter.
 func (o *Oper) PruneSuccess() {
 	metrics.operations.With(prometheus.Labels{
 		"type":      "success",
@@ -47,6 +52,7 @@ func (o *Oper) PruneSuccess() {
 	}).Inc()
 }
 
+// PruneError increments the failed prune counter.
 func (o *Oper) PruneError() {
 	metrics.operations.With(prometheus.Labels{
 		"type":      "error",

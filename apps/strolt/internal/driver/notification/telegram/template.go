@@ -26,7 +26,7 @@ func getTemplate(ctx context.Context) (*bytes.Buffer, error) {
 
 	data, err := json.Marshal(body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("marshal telegram message: %w", err)
 	}
 
 	return bytes.NewBuffer(data), nil

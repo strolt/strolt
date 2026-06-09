@@ -1,9 +1,8 @@
-import { observer } from "mobx-react-lite";
-
 import { useEffect } from "react";
 
-import { Button, Popconfirm, message } from "antd";
+import { Button, message, Popconfirm } from "antd";
 
+import { observer } from "mobx-react-lite";
 import { useStores } from "stores";
 
 export const BackupAllButton = observer(() => {
@@ -25,13 +24,13 @@ export const BackupAllButton = observer(() => {
   };
 
   return (
-    <Popconfirm title="Are you sure?" onConfirm={handleClick} okText="Yes">
+    <Popconfirm okText="Yes" onConfirm={handleClick} title="Are you sure?">
       <Button
         block
-        type="primary"
-        style={{ marginBottom: "1rem" }}
-        loading={managerStore.backupAllStatus?.state === "pending"}
         danger
+        loading={managerStore.backupAllStatus?.state === "pending"}
+        style={{ marginBottom: "1rem" }}
+        type="primary"
       >
         Backup ALL (without filters)
       </Button>

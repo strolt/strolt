@@ -1,35 +1,34 @@
-watchChanges: true
-name: strolt
-secrets:
-    NOTIFICATIONS_SLACK_BOT_ID: B**********
-    NOTIFICATIONS_SLACK_HOOK_ID: hook_id
-    NOTIFICATIONS_SLACK_TEAM_ID: T**********
-tasks:
-    task_local:
-        source: source_local
-        destinations:
-            - destination_local
-        notifications:
-            - notification_slack
-        schedule:
-            backup: '*/1 * * * *'
-            forget: '*/1 * * * *'
-            prune: '*/1 * * * *'
-sources:
-    source_local:
-        driver: local
-        config:
-            path: ./example/source
 destinations:
-    destination_local:
-        driver: local
-        config:
-            path: ./example/destination
+  destination_local:
+    config:
+      path: ./example/destination
+    driver: local
+name: strolt
 notifications:
-    notification_slack:
-        driver: slack
-        config:
-            botId: B**********
-            hookId: hook_id
-            teamId: T**********
-
+  notification_slack:
+    config:
+      botId: B**********
+      hookId: hook_id
+      teamId: T**********
+    driver: slack
+secrets:
+  NOTIFICATIONS_SLACK_BOT_ID: B**********
+  NOTIFICATIONS_SLACK_HOOK_ID: hook_id
+  NOTIFICATIONS_SLACK_TEAM_ID: T**********
+sources:
+  source_local:
+    config:
+      path: ./example/source
+    driver: local
+tasks:
+  task_local:
+    destinations:
+      - destination_local
+    notifications:
+      - notification_slack
+    schedule:
+      backup: "*/1 * * * *"
+      forget: "*/1 * * * *"
+      prune: "*/1 * * * *"
+    source: source_local
+watchChanges: true

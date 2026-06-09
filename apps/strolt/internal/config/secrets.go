@@ -2,6 +2,7 @@ package config
 
 import (
 	"bytes"
+	"fmt"
 	"text/template"
 
 	"gopkg.in/yaml.v3"
@@ -50,12 +51,12 @@ func (c *Config) replaceSecretsNotifications() error {
 		for name, value := range notification.Config {
 			t, err := template.New("notification/config").Option("missingkey=error").Parse(value)
 			if err != nil {
-				return err
+				return fmt.Errorf("parse notification config template: %w", err)
 			}
 
 			var tpl bytes.Buffer
 			if err := t.Execute(&tpl, c.Secrets); err != nil {
-				return err
+				return fmt.Errorf("execute notification config template: %w", err)
 			}
 
 			notification.Config[name] = tpl.String()
@@ -71,22 +72,22 @@ func (destination DriverDestinationConfig) replaceSecrets(secrets Secrets) (Driv
 	{
 		configYaml, err := yaml.Marshal(destination.Config)
 		if err != nil {
-			return DriverDestinationConfig{}, err
+			return DriverDestinationConfig{}, fmt.Errorf("marshal destination config: %w", err)
 		}
 
 		t, err := template.New("destination/config").Option("missingkey=error").Parse(string(configYaml))
 		if err != nil {
-			return DriverDestinationConfig{}, err
+			return DriverDestinationConfig{}, fmt.Errorf("parse destination config template: %w", err)
 		}
 
 		var tpl bytes.Buffer
 		if err := t.Execute(&tpl, secrets); err != nil {
-			return DriverDestinationConfig{}, err
+			return DriverDestinationConfig{}, fmt.Errorf("execute destination config template: %w", err)
 		}
 
-		var configInterface interface{}
+		var configInterface any
 		if err := yaml.Unmarshal(tpl.Bytes(), &configInterface); err != nil {
-			return DriverDestinationConfig{}, err
+			return DriverDestinationConfig{}, fmt.Errorf("unmarshal destination config: %w", err)
 		}
 
 		destination.Config = configInterface
@@ -95,22 +96,22 @@ func (destination DriverDestinationConfig) replaceSecrets(secrets Secrets) (Driv
 	{
 		envData, err := yaml.Marshal(destination.Env)
 		if err != nil {
-			return DriverDestinationConfig{}, err
+			return DriverDestinationConfig{}, fmt.Errorf("marshal destination env: %w", err)
 		}
 
 		t, err := template.New("destination/env").Option("missingkey=error").Parse(string(envData))
 		if err != nil {
-			return DriverDestinationConfig{}, err
+			return DriverDestinationConfig{}, fmt.Errorf("parse destination env template: %w", err)
 		}
 
 		var tpl bytes.Buffer
 		if err := t.Execute(&tpl, secrets); err != nil {
-			return DriverDestinationConfig{}, err
+			return DriverDestinationConfig{}, fmt.Errorf("execute destination env template: %w", err)
 		}
 
 		var env map[string]string
 		if err := yaml.Unmarshal(tpl.Bytes(), &env); err != nil {
-			return DriverDestinationConfig{}, err
+			return DriverDestinationConfig{}, fmt.Errorf("unmarshal destination env: %w", err)
 		}
 
 		destination.Env = env
@@ -123,22 +124,22 @@ func (source DriverSourceConfig) replaceSecrets(secrets Secrets) (DriverSourceCo
 	{
 		configYaml, err := yaml.Marshal(source.Config)
 		if err != nil {
-			return DriverSourceConfig{}, err
+			return DriverSourceConfig{}, fmt.Errorf("marshal source config: %w", err)
 		}
 
 		t, err := template.New("source/config").Option("missingkey=error").Parse(string(configYaml))
 		if err != nil {
-			return DriverSourceConfig{}, err
+			return DriverSourceConfig{}, fmt.Errorf("parse source config template: %w", err)
 		}
 
 		var tpl bytes.Buffer
 		if err := t.Execute(&tpl, secrets); err != nil {
-			return DriverSourceConfig{}, err
+			return DriverSourceConfig{}, fmt.Errorf("execute source config template: %w", err)
 		}
 
-		var configInterface interface{}
+		var configInterface any
 		if err := yaml.Unmarshal(tpl.Bytes(), &configInterface); err != nil {
-			return DriverSourceConfig{}, err
+			return DriverSourceConfig{}, fmt.Errorf("unmarshal source config: %w", err)
 		}
 
 		source.Config = configInterface
@@ -147,22 +148,22 @@ func (source DriverSourceConfig) replaceSecrets(secrets Secrets) (DriverSourceCo
 	{
 		envData, err := yaml.Marshal(source.Env)
 		if err != nil {
-			return DriverSourceConfig{}, err
+			return DriverSourceConfig{}, fmt.Errorf("marshal source env: %w", err)
 		}
 
 		t, err := template.New("source/env").Option("missingkey=error").Parse(string(envData))
 		if err != nil {
-			return DriverSourceConfig{}, err
+			return DriverSourceConfig{}, fmt.Errorf("parse source env template: %w", err)
 		}
 
 		var tpl bytes.Buffer
 		if err := t.Execute(&tpl, secrets); err != nil {
-			return DriverSourceConfig{}, err
+			return DriverSourceConfig{}, fmt.Errorf("execute source env template: %w", err)
 		}
 
 		var env map[string]string
 		if err := yaml.Unmarshal(tpl.Bytes(), &env); err != nil {
-			return DriverSourceConfig{}, err
+			return DriverSourceConfig{}, fmt.Errorf("unmarshal source env: %w", err)
 		}
 
 		source.Env = env
@@ -177,12 +178,12 @@ func (api API) replaceSecrets(secrets Secrets) (API, error) {
 	for username, password := range api.Users {
 		t, err := template.New("api/users").Option("missingkey=error").Parse(password)
 		if err != nil {
-			return API{}, err
+			return API{}, fmt.Errorf("parse api users template: %w", err)
 		}
 
 		var tpl bytes.Buffer
 		if err := t.Execute(&tpl, secrets); err != nil {
-			return API{}, err
+			return API{}, fmt.Errorf("execute api users template: %w", err)
 		}
 
 		users[username] = tpl.String()

@@ -1,11 +1,13 @@
 package mysql
 
 import (
+	"fmt"
 	"strconv"
 
 	"gopkg.in/yaml.v3"
 )
 
+// Config describes the MySQL source driver configuration.
 type Config struct {
 	BinPathMySQL     string `yaml:"bin_path_mysql"`
 	BinPathMySQLDump string `yaml:"bin_path_mysqldump"`
@@ -17,14 +19,15 @@ type Config struct {
 	Password string `yaml:"password"`
 }
 
-func (i *MySQL) SetConfig(config interface{}) error {
+// SetConfig parses and validates the driver configuration.
+func (i *MySQL) SetConfig(config any) error {
 	data, err := yaml.Marshal(config)
 	if err != nil {
-		return err
+		return fmt.Errorf("marshal config: %w", err)
 	}
 
 	if err := yaml.Unmarshal(data, &i.config); err != nil {
-		return err
+		return fmt.Errorf("unmarshal config: %w", err)
 	}
 
 	return i.validateConfig()
@@ -73,9 +76,10 @@ func (i *MySQL) getBackupArgs() []string {
 }
 
 func (i *MySQL) getRestoreArgs() []string {
-	args := []string{}
+	commonArgs := i.getCommonArgs()
 
-	args = append(args, i.getCommonArgs()...)
+	args := make([]string, 0, len(commonArgs)+4)
+	args = append(args, commonArgs...)
 
 	args = append(args, "-D", i.config.Database)
 

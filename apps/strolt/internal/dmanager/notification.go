@@ -2,6 +2,7 @@ package dmanager
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/notification/console"
@@ -10,8 +11,10 @@ import (
 	"github.com/strolt/strolt/shared/logger"
 )
 
+// Notification is the name of a notification driver.
 type Notification string
 
+// Supported notification drivers.
 const (
 	DriverNotificationConsole  Notification = "console"
 	DriverNotificationEmail    Notification = "email"
@@ -19,6 +22,7 @@ const (
 	DriverNotificationTelegram Notification = "telegram"
 )
 
+// GetAvailableDriverNotification returns the supported notification drivers.
 func GetAvailableDriverNotification() []Notification {
 	return []Notification{
 		DriverNotificationConsole,
@@ -28,17 +32,13 @@ func GetAvailableDriverNotification() []Notification {
 	}
 }
 
+// IsAvailableDriverNotification reports whether the notification driver is supported.
 func IsAvailableDriverNotification(driver Notification) bool {
-	for _, d := range GetAvailableDriverNotification() {
-		if driver == d {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(GetAvailableDriverNotification(), driver)
 }
 
-func GetNotificationDriver(driver Notification, serviceName string, taskName string, driverConfig interface{}) (interfaces.DriverNotificationInterface, error) {
+// GetNotificationDriver creates and configures the requested notification driver.
+func GetNotificationDriver(driver Notification, serviceName string, taskName string, driverConfig any) (interfaces.DriverNotificationInterface, error) {
 	notificationDrivers := map[Notification]interfaces.DriverNotificationInterface{
 		DriverNotificationConsole:  console.New(),
 		DriverNotificationSlack:    slack.New(slack.Params{}),
@@ -59,7 +59,7 @@ func GetNotificationDriver(driver Notification, serviceName string, taskName str
 	d.SetLogger(logger.New().WithFields(loggerFields))
 
 	if err := d.SetConfig(driverConfig); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("set notification driver config: %w", err)
 	}
 
 	return d, nil

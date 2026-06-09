@@ -1,16 +1,17 @@
+import type { ReactNode } from "react";
+import type { RouteObject } from "react-router";
+import { Navigate } from "react-router-dom";
+
 import * as layouts from "layouts";
 import * as pages from "pages";
 
-import { ReactNode } from "react";
+import type { ConstantsRouteType } from "./constants";
 
-import { RouteObject } from "react-router";
-import { Navigate } from "react-router-dom";
-
-import { toPath, toNavigate, ConstantsRouteType } from "./constants";
+import { toNavigate, toPath } from "./constants";
 
 const r = (c: ConstantsRouteType, element: ReactNode) => ({
-  path: toPath(c),
   element,
+  path: toPath(c),
 });
 
 const instances = [
@@ -30,15 +31,15 @@ const instances = [
 const auth = [r("auth.login", <pages.auth.Login />)];
 
 const routesLayoutLk = {
-  path: toPath("main"),
-  element: <layouts.Lk />,
   children: [...instances],
+  element: <layouts.Lk />,
+  path: toPath("main"),
 };
 
 const routesLayoutAuth = {
-  path: toPath("main"),
-  element: <layouts.Auth />,
   children: [...auth],
+  element: <layouts.Auth />,
+  path: toPath("main"),
 };
 
 export const routes = (isAuthorized: boolean): RouteObject[] => {
@@ -46,13 +47,13 @@ export const routes = (isAuthorized: boolean): RouteObject[] => {
     return [
       routesLayoutLk,
       {
-        path: toPath("main"),
-        index: true,
         element: <Navigate replace to={toNavigate("instances.main")} />,
+        index: true,
+        path: toPath("main"),
       },
       {
-        path: "*",
         element: <Navigate replace to={toNavigate("instances.main")} />,
+        path: "*",
       },
     ];
   }
@@ -60,13 +61,13 @@ export const routes = (isAuthorized: boolean): RouteObject[] => {
   return [
     routesLayoutAuth,
     {
-      path: toPath("main"),
-      index: true,
       element: <Navigate replace to={toNavigate("auth.login")} />,
+      index: true,
+      path: toPath("main"),
     },
     {
-      path: "*",
       element: <Navigate replace to={toNavigate("auth.login")} />,
+      path: "*",
     },
   ];
 };

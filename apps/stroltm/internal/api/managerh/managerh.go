@@ -1,3 +1,4 @@
+// Package managerh contains HTTP handlers for managing Strolt and Stroltp instances.
 package managerh
 
 import (
@@ -10,13 +11,15 @@ import (
 	"github.com/strolt/strolt/shared/sdk/stroltp"
 )
 
-type ManagerHandlers struct {
-}
+// ManagerHandlers groups HTTP handlers for instance management endpoints.
+type ManagerHandlers struct{}
 
+// New creates a ManagerHandlers instance.
 func New() *ManagerHandlers {
 	return &ManagerHandlers{}
 }
 
+// Router registers the manager endpoints on the given router.
 func (s *ManagerHandlers) Router(r chi.Router) {
 	r.Get("/api/v1/manager/instances", s.getInstances)
 	r.Post("/api/v1/manager/instances/backup-all", s.backupAll)
@@ -35,12 +38,13 @@ func (s *ManagerHandlers) Router(r chi.Router) {
 }
 
 // getInstances godoc
-// @Id					 getInstances
-// @Summary      Get Instances
-// @Tags         manager
-// @Security BasicAuth
-// @success 200 {object} []common.ManagerPreparedInstance
-// @Router       /api/v1/manager/instances [get].
+//
+//	@Id			getInstances
+//	@Summary	Get Instances
+//	@Tags		manager
+//	@Security	BasicAuth
+//	@success	200	{object}	[]common.ManagerPreparedInstance
+//	@Router		/api/v1/manager/instances [get].
 func (s *ManagerHandlers) getInstances(w http.ResponseWriter, r *http.Request) {
 	instances := strolt.ManagerGetPreparedInstances()
 	instancesFromProxies := stroltp.ManagerGetPreparedInstances()

@@ -7,6 +7,7 @@ import (
 	"github.com/strolt/strolt/shared/logger"
 )
 
+// Watch periodically pings all instances until the context is canceled.
 func (m *Manager) Watch(ctx context.Context, cancel func()) {
 	log := logger.New()
 	ticker := time.NewTicker(5 * time.Second) //nolint:mnd

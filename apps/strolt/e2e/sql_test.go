@@ -14,13 +14,11 @@ type User struct {
 	Password string `db:"password"`
 }
 
-var (
-	user = User{
-		ID:       1,
-		Username: "username",
-		Password: "password",
-	}
-)
+var user = User{
+	ID:       1,
+	Username: "username",
+	Password: "password",
+}
 
 type Conn struct {
 	db *sqlx.DB
@@ -60,7 +58,7 @@ func (c *Conn) dropTable() {
 func (c *Conn) checkValidData() error {
 	users := []User{}
 
-	if err := c.db.Select(&users, "SELECT * FROM users"); err != nil {
+	if err := c.db.Select(&users, "SELECT id, username, password FROM users"); err != nil {
 		return err
 	}
 

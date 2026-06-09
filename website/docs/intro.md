@@ -10,7 +10,6 @@ Strolt is a powerful and easy-to-use tool for effortless backup management.
   <img src="/img/logo.svg" alt="Strolt - logo"/>
 </p>
 
-
 ## Features
 
 - Run scheduled operations (cron)

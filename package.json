@@ -1,0 +1,26 @@
+{
+  "name": "strolt",
+  "version": "0.0.0",
+  "private": true,
+  "keywords": [],
+  "license": "MIT",
+  "author": "Alexander Svinarev <shibanet0@gmail.com> (shibanet0.com)",
+  "type": "module",
+  "scripts": {
+    "prepare": "datamitsu init"
+  },
+  "devDependencies": {
+    "@shibanet0/datamitsu-config": "0.1.0"
+  },
+  "packageManager": "pnpm@11.5.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "onFail": "warn",
+      "version": ">=26.3.0"
+    }
+  }
+}

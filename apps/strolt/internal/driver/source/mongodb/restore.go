@@ -10,10 +10,11 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 )
 
+// Restore runs mongorestore using the archive from the working directory.
 func (i *MongoDB) Restore(ctx context.Context) error {
 	args := i.getRestoreArgs()
 
-	cmd := exec.Command(i.getBinMongoRestore(), args...)
+	cmd := exec.Command(i.getBinMongoRestore(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
 	cmd.Dir = ctx.WorkDir
 	cmd.Env = i.getEnv()
 
@@ -33,7 +34,7 @@ func (i *MongoDB) Restore(ctx context.Context) error {
 			return fmt.Errorf("%w (%v)", err, lastMessage)
 		}
 
-		return err
+		return fmt.Errorf("run mongorestore: %w", err)
 	}
 
 	if outputString != "" {
@@ -43,10 +44,12 @@ func (i *MongoDB) Restore(ctx context.Context) error {
 	return nil
 }
 
+// RestorePipe is not supported by the MongoDB driver.
 func (i *MongoDB) RestorePipe(_ context.Context, filename string) (io.WriteCloser, func() error, error) {
 	return nil, func() error { return nil }, errors.New("not support pipe")
 }
 
+// IsSupportedRestorePipe reports whether restoring from a stream is supported.
 func (i *MongoDB) IsSupportedRestorePipe(_ context.Context) bool {
 	return false
 }

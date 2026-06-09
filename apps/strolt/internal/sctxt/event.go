@@ -1,7 +1,11 @@
 package sctxt
 
-type EventType string // @name EventType
+import "slices"
 
+// EventType identifies a lifecycle event of an operation.
+type EventType string //	@name	EventType
+
+// Lifecycle events emitted during operation, source and destination phases.
 const (
 	EvOperationStart EventType = "OPERATION_START"
 	EvOperationStop  EventType = "OPERATION_STOP"
@@ -16,6 +20,7 @@ const (
 	EvDestinationError EventType = "DESTINATION_ERROR"
 )
 
+// IsContextEventAvaliable reports whether the given event is a known context event.
 func IsContextEventAvaliable(event EventType) bool {
 	availableList := []EventType{
 		EvOperationStart,
@@ -31,11 +36,5 @@ func IsContextEventAvaliable(event EventType) bool {
 		EvDestinationError,
 	}
 
-	for _, e := range availableList {
-		if e == event {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(availableList, event)
 }

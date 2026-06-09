@@ -1,20 +1,33 @@
 import { infoStore } from "stores/info.store";
 
-import * as apiGenerated from "../../api/generated";
+import type * as apiGenerated from "../../api/generated";
 
-export interface TaskListItemSource {
-  driver: string;
+export interface TaskListItem {
+  destinations: TaskListItemDestination[];
+  instanceName?: string;
+  isOnline: boolean;
+  key: string;
+  notifications: TaskListItemNotification[];
+  proxyName?: string;
+  schedule: TaskListItemSchedule;
+  serviceName?: string;
+  source: TaskListItemSource;
+  tags: string[];
+  taskName?: string;
+  timezone: string;
+  uptime: number;
+  workJobs: number;
 }
 
 export interface TaskListItemDestination {
-  name: string;
   driver: string;
+  name: string;
 }
 
 export interface TaskListItemNotification {
-  name: string;
   driver: string;
   events: string[];
+  name: string;
 }
 
 export interface TaskListItemSchedule {
@@ -22,44 +35,31 @@ export interface TaskListItemSchedule {
   prune: string;
 }
 
-export interface TaskListItem {
-  key: string;
-  proxyName?: string;
-  instanceName?: string;
-  serviceName?: string;
-  taskName?: string;
-  isOnline: boolean;
-  workJobs: number;
-  tags: string[];
-  timezone: string;
-  source: TaskListItemSource;
-  destinations: TaskListItemDestination[];
-  notifications: TaskListItemNotification[];
-  schedule: TaskListItemSchedule;
-  uptime: number;
+export interface TaskListItemSource {
+  driver: string;
 }
 
 const createTask = (instance: apiGenerated.ManagerPreparedInstance): TaskListItem => {
   const isOnline =
-    !!instance.name &&
-    !!infoStore.map.get(infoStore.getKey(instance.name, instance.proxyName))?.isOnline;
+    Boolean(instance.name) &&
+    Boolean(infoStore.map.get(infoStore.getKey(instance.name, instance.proxyName))?.isOnline);
 
   return {
-    key: "",
-    proxyName: instance.proxyName,
+    destinations: [],
     instanceName: instance.name,
     isOnline: isOnline,
-    workJobs: instance.taskStatus?.tasks?.length || 0,
-    tags: [],
-    timezone: "UTC",
-    source: { driver: "" },
-    destinations: [],
+    key: "",
     notifications: [],
+    proxyName: instance.proxyName,
     schedule: {
       backup: "",
       prune: "",
     },
+    source: { driver: "" },
+    tags: [],
+    timezone: "UTC",
     uptime: 0,
+    workJobs: instance.taskStatus?.tasks?.length || 0,
   };
 };
 
@@ -95,8 +95,8 @@ export const getTaskList = (
           (acc, notification) => {
             acc.push({
               driver: notification.driver || "",
-              name: notification.name || "",
               events: notification.events || [],
+              name: notification.name || "",
             });
             return acc;
           },
@@ -130,8 +130,8 @@ const getUptime = (proxyName?: string, instanceName?: string) => {
       try {
         const date = new Date(instance.startedAt);
         ms = Date.now() - date.getTime();
-      } catch (e) {
-        console.log(e);
+      } catch (error) {
+        console.log(error);
       }
     }
 
@@ -142,8 +142,8 @@ const getUptime = (proxyName?: string, instanceName?: string) => {
           return ms;
         }
         ms = (Date.now() - date.getTime()) * -1;
-      } catch (e) {
-        console.log(e);
+      } catch (error) {
+        console.log(error);
       }
     }
   }

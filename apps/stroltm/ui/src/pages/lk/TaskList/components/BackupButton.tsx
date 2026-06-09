@@ -1,18 +1,17 @@
-import { observer } from "mobx-react-lite";
-
 import { Button, Popconfirm } from "antd";
 
+import { observer } from "mobx-react-lite";
 import { useStores } from "stores";
 
 export interface BackupButtonProps {
-  proxyName?: string;
   instanceName?: string;
+  isDisabled: boolean;
+  proxyName?: string;
   serviceName?: string;
   taskName?: string;
-  isDisabled: boolean;
 }
 export const BackupButton: React.FC<BackupButtonProps> = observer(
-  ({ isDisabled, proxyName, instanceName, serviceName, taskName }) => {
+  ({ instanceName, isDisabled, proxyName, serviceName, taskName }) => {
     const { managerStore } = useStores();
 
     const status = managerStore.backupStatusMap.get(
@@ -39,14 +38,14 @@ export const BackupButton: React.FC<BackupButtonProps> = observer(
 
     return (
       <Popconfirm
-        title="Are you sure?"
+        disabled={isLoading || disabled}
+        okText="Yes"
         onConfirm={() =>
           managerStore.backup(instanceName || "", serviceName || "", taskName || "", proxyName)
         }
-        disabled={isLoading || disabled}
-        okText="Yes"
+        title="Are you sure?"
       >
-        <Button block loading={isLoading} disabled={disabled} size="small" danger>
+        <Button block danger disabled={disabled} loading={isLoading} size="small">
           Backup
         </Button>
       </Popconfirm>

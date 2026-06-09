@@ -1,3 +1,4 @@
+// Package env parses the Strolt Manager configuration from environment variables.
 package env
 
 import (
@@ -14,6 +15,7 @@ type config struct {
 
 var resultConfig config
 
+// Scan parses environment variables and applies the log level.
 func Scan() {
 	if err := env.Parse(&resultConfig); err != nil {
 		logger.New().Fatal(err)
@@ -30,18 +32,22 @@ func Scan() {
 	}
 }
 
+// Port returns the API server port.
 func Port() int {
 	return resultConfig.Port
 }
 
+// Host returns the API server host.
 func Host() string {
 	return resultConfig.Host
 }
 
+// IsDebug reports whether the debug or trace log level is enabled.
 func IsDebug() bool {
 	return resultConfig.LogLevel == logger.LogLevelDebug || resultConfig.LogLevel == logger.LogLevelTrace
 }
 
+// IsAPILogEnabled reports whether API request logging is enabled.
 func IsAPILogEnabled() bool {
 	return resultConfig.IsAPILogEnabled
 }

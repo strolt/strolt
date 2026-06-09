@@ -6,14 +6,115 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Fields map[string]interface{}
+// Fields is a map of structured log fields.
+type Fields map[string]any
 
+// Logger is a structured logger that wraps logrus with field support.
 type Logger struct {
 	fields Fields
 	logger *logrus.Logger
 }
 
 var globalFields = Fields{}
+
+// SetGlobalField sets a field that is included in every log entry.
+func SetGlobalField(filed string, value any) {
+	globalFields[filed] = value
+}
+
+// New creates a new Logger with empty fields.
+func New() *Logger {
+	return &Logger{
+		logger: logrus.New(),
+		fields: Fields{},
+	}
+}
+
+// WithFields returns a new Logger with the given fields merged in.
+func (l *Logger) WithFields(fields Fields) *Logger {
+	newFields := Fields{}
+
+	for key, value := range l.fields {
+		newFields[key] = value
+	}
+
+	for key, value := range fields {
+		newFields[key] = value
+	}
+
+	return &Logger{
+		logger: l.logger,
+		fields: newFields,
+	}
+}
+
+// WithField returns a new Logger with the given field merged in.
+func (l *Logger) WithField(field string, value any) *Logger {
+	fields := Fields{}
+	fields[field] = value
+
+	return l.WithFields(fields)
+}
+
+// Info logs a message at info level.
+func (l *Logger) Info(arg any) {
+	l.getLogger().Info(arg)
+}
+
+// Infof logs a formatted message at info level.
+func (l *Logger) Infof(format string, a ...any) {
+	l.Info(fmt.Sprintf(format, a...))
+}
+
+// Error logs a message at error level.
+func (l *Logger) Error(arg any) {
+	l.getLogger().Error(arg)
+}
+
+// Errorf logs a formatted message at error level.
+func (l *Logger) Errorf(format string, a ...any) {
+	l.Error(fmt.Sprintf(format, a...))
+}
+
+// Debug logs a message at debug level.
+func (l *Logger) Debug(arg any) {
+	l.getLogger().Debug(arg)
+}
+
+// Debugf logs a formatted message at debug level.
+func (l *Logger) Debugf(format string, a ...any) {
+	l.Debug(fmt.Sprintf(format, a...))
+}
+
+// Warn logs a message at warn level.
+func (l *Logger) Warn(arg any) {
+	l.getLogger().Warn(arg)
+}
+
+// Warnf logs a formatted message at warn level.
+func (l *Logger) Warnf(format string, a ...any) {
+	l.Warn(fmt.Sprintf(format, a...))
+}
+
+// Fatal logs a message at fatal level and exits.
+func (l *Logger) Fatal(arg any) {
+	l.getLogger().Fatal(arg)
+}
+
+// Fatalf logs a formatted message at fatal level and exits.
+func (l *Logger) Fatalf(format string, a ...any) {
+	l.Fatal(fmt.Sprintf(format, a...))
+}
+
+// Trace logs a message at trace level.
+func (l *Logger) Trace(arg any) {
+	l.getLogger().Trace(arg)
+}
+
+// Tracef logs a formatted message at trace level.
+func (l *Logger) Tracef(format string, a ...any) {
+	l.Trace(fmt.Sprintf(format, a...))
+}
 
 func (l *Logger) setLogLevel() {
 	switch logLevel {
@@ -40,41 +141,6 @@ func (l *Logger) setFormat() {
 	}
 }
 
-func SetGlobalField(filed string, value interface{}) {
-	globalFields[filed] = value
-}
-
-func New() *Logger {
-	return &Logger{
-		logger: logrus.New(),
-		fields: Fields{},
-	}
-}
-
-func (l *Logger) WithFields(fields Fields) *Logger {
-	newFields := Fields{}
-
-	for key, value := range l.fields {
-		newFields[key] = value
-	}
-
-	for key, value := range fields {
-		newFields[key] = value
-	}
-
-	return &Logger{
-		logger: l.logger,
-		fields: newFields,
-	}
-}
-
-func (l *Logger) WithField(field string, value interface{}) *Logger {
-	fields := Fields{}
-	fields[field] = value
-
-	return l.WithFields(fields)
-}
-
 func (l *Logger) getLogger() *logrus.Entry {
 	l.setLogLevel()
 	l.setFormat()
@@ -92,52 +158,4 @@ func (l *Logger) getLogger() *logrus.Entry {
 	logger := l.logger.WithFields(logrus.Fields(fields))
 
 	return logger
-}
-
-func (l *Logger) Info(arg interface{}) {
-	l.getLogger().Info(arg)
-}
-
-func (l *Logger) Infof(format string, a ...any) {
-	l.Info(fmt.Sprintf(format, a...))
-}
-
-func (l *Logger) Error(arg interface{}) {
-	l.getLogger().Error(arg)
-}
-
-func (l *Logger) Errorf(format string, a ...any) {
-	l.Error(fmt.Sprintf(format, a...))
-}
-
-func (l *Logger) Debug(arg interface{}) {
-	l.getLogger().Debug(arg)
-}
-
-func (l *Logger) Debugf(format string, a ...any) {
-	l.Debug(fmt.Sprintf(format, a...))
-}
-
-func (l *Logger) Warn(arg interface{}) {
-	l.getLogger().Warn(arg)
-}
-
-func (l *Logger) Warnf(format string, a ...any) {
-	l.Warn(fmt.Sprintf(format, a...))
-}
-
-func (l *Logger) Fatal(arg interface{}) {
-	l.getLogger().Fatal(arg)
-}
-
-func (l *Logger) Fatalf(format string, a ...any) {
-	l.Fatal(fmt.Sprintf(format, a...))
-}
-
-func (l *Logger) Trace(arg interface{}) {
-	l.getLogger().Trace(arg)
-}
-
-func (l *Logger) Tracef(format string, a ...any) {
-	l.Fatal(fmt.Sprintf(format, a...))
 }

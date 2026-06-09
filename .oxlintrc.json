@@ -1,0 +1,29 @@
+{
+  "$schema": "./.datamitsu/oxlint_configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "pedantic": "error",
+    "perf": "error",
+    "style": "warn",
+    "suspicious": "error"
+  },
+  "extends": ["./.datamitsu/.oxlintrc.json"],
+  "rules": {
+    "max-params": "off",
+    "max-statements": "off",
+    "no-duplicate-imports": "off",
+    "no-extra-boolean-cast": "off",
+    "no-implicit-coercion": "off",
+    "no-map-spread": "off",
+    "no-negated-condition": "off",
+    "no-unused-expressions": "off",
+    "no-unused-vars": "off",
+    "unicorn/explicit-length-check": "off",
+    "unicorn/prefer-array-flat-map": "off",
+    "unicorn/prefer-array-some": "off",
+    "unicorn/prefer-code-point": "off",
+    "unicorn/prefer-math-trunc": "off",
+    "unicorn/prefer-spread": "off",
+    "unicorn/prefer-top-level-await": "off"
+  }
+}
