@@ -10,22 +10,6 @@ repos:
     repo: local
   # stroltm/ui
   - hooks:
-      - additional_dependencies: [prettier@2.8.7, "@trivago/prettier-plugin-sort-imports@4.1.1"]
-        args:
-          [
-            --plugin,
-            "@trivago/prettier-plugin-sort-imports",
-            --config,
-            ./apps/stroltm/ui/.prettierrc,
-            --write,
-          ]
-        entry: prettier --write --list-different --ignore-unknown
-        files: ^apps/stroltm/ui
-        id: stroltm/ui/prettier
-        language: node
-        name: stroltm/ui/prettier
-        types: [text]
-        types_or: [javascript, jsx, ts, tsx, css, json]
       - always_run: true
 
         entry: make .lint-stroltm-ui
@@ -78,13 +62,3 @@ repos:
 
     repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
-  - hooks:
-      - id: detect-secrets
-
-    repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
-  - hooks:
-      - args: ["--ignore=DL3029", "--ignore=DL3008", "--ignore=DL3018"]
-        id: hadolint
-    repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0

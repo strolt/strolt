@@ -31,4 +31,3 @@ tasks:
 
     source: source_local
 watchChanges: true # app will stop if config or secret files will changed
-
