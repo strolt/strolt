@@ -71,16 +71,13 @@ for your distributed backup infrastructure.`,
 		signal.Notify(c, os.Interrupt)
 
 		{ // Api server
-			wg.Add(1)
-			go func() {
+			wg.Go(func() {
 				api.New().Run(ctx, cancel)
-				wg.Done()
-			}()
+			})
 		}
 
 		{ // Manager
-			wg.Add(1)
-			go func() {
+			wg.Go(func() {
 				// manager.Init().Watch(ctx, cancel)
 				instances := make([]strolt.ManagerInstanceInit, 0, len(config.Get().Strolt.Instances))
 				for instanceName, instance := range config.Get().Strolt.Instances {
@@ -92,8 +89,7 @@ for your distributed backup infrastructure.`,
 					})
 				}
 				strolt.ManagerInit(ctx, cancel, instances)
-				wg.Done()
-			}()
+			})
 		}
 
 		// Watch system exit code

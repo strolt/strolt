@@ -122,9 +122,7 @@ func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 		}(item)
 	}
 
-	wg.Add(1)
-
-	go func() {
+	wg.Go(func() {
 		stroltpResult := stroltp.ManagerBackupAll()
 
 		response.Lock()
@@ -148,8 +146,7 @@ func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response.Unlock()
-		wg.Done()
-	}()
+	})
 
 	wg.Wait()
 

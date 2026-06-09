@@ -1,6 +1,8 @@
 // Package logger provides a structured logging wrapper around logrus.
 package logger
 
+import "slices"
+
 // LogFormat is the output format of the logger.
 type LogFormat string
 
@@ -21,13 +23,7 @@ func GetAvailableLogFormat() []LogFormat {
 
 // IsLogFormatAvailable reports whether the given log format is supported.
 func IsLogFormatAvailable(logFormat LogFormat) bool {
-	for _, ll := range GetAvailableLogFormat() {
-		if logFormat == ll {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(GetAvailableLogFormat(), logFormat)
 }
 
 // GetLogFormat returns the current log format.

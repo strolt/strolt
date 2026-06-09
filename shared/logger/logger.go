@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"maps"
 
 	"github.com/sirupsen/logrus"
 )
@@ -34,13 +35,9 @@ func New() *Logger {
 func (l *Logger) WithFields(fields Fields) *Logger {
 	newFields := Fields{}
 
-	for key, value := range l.fields {
-		newFields[key] = value
-	}
+	maps.Copy(newFields, l.fields)
 
-	for key, value := range fields {
-		newFields[key] = value
-	}
+	maps.Copy(newFields, fields)
 
 	return &Logger{
 		logger: l.logger,
@@ -147,13 +144,9 @@ func (l *Logger) getLogger() *logrus.Entry {
 
 	fields := Fields{}
 
-	for field, value := range globalFields {
-		fields[field] = value
-	}
+	maps.Copy(fields, globalFields)
 
-	for field, value := range l.fields {
-		fields[field] = value
-	}
+	maps.Copy(fields, l.fields)
 
 	logger := l.logger.WithFields(logrus.Fields(fields))
 

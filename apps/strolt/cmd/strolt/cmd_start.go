@@ -37,32 +37,26 @@ var startpCmd = &cobra.Command{
 
 		{
 			// Api server
-			wg.Add(1)
-			go func() {
+			wg.Go(func() {
 				api.New().Run(ctx, cancel)
-				wg.Done()
-			}()
+			})
 		}
 
 		{
 			// Watch config
-			wg.Add(1)
-			go func() {
+			wg.Go(func() {
 				config.WatchConfigChanges(ctx, func() {
 					isConfigChanged = true
 					cancel()
 				})
-				wg.Done()
-			}()
+			})
 		}
 
 		{
 			// Schedule manager
-			wg.Add(1)
-			go func() {
+			wg.Go(func() {
 				schedule.Run(ctx)
-				wg.Done()
-			}()
+			})
 		}
 
 		{

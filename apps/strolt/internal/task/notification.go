@@ -40,16 +40,12 @@ func (t *Task) sendNotifications() {
 		return
 	}
 
-	notificationWaitGroup.Add(1)
-
-	go func() {
+	notificationWaitGroup.Go(func() {
 		if err := tCopy.SendNotifications(); err != nil {
 			log := logger.New()
 			log.Warnf("send notification error: %s", err)
 		}
-
-		notificationWaitGroup.Done()
-	}()
+	})
 }
 
 func (t *Task) eventOperationStart() {

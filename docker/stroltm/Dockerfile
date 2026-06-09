@@ -1,4 +1,4 @@
-FROM alpine:3.23.2 AS base
+FROM alpine:3.23.4 AS base
 WORKDIR /stroltm
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
@@ -6,7 +6,7 @@ ENV TZ=UTC
 FROM node:24.13.0-trixie-slim AS ui-base
 RUN apt-get update && apt-get -y install openjdk-21-jre-headless --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-FROM golang:1.24.11-alpine3.23 AS swagger-base
+FROM golang:1.26.4-alpine3.23 AS swagger-base
 RUN apk --update add --no-cache make curl
 
 FROM ui-base AS ui-deps
@@ -25,7 +25,7 @@ COPY ./apps/stroltm/ui .
 COPY --from=swagger /github.com/strolt/strolt/.swagger /github.com/strolt/strolt/.swagger
 RUN pnpm gen-api && pnpm build
 
-FROM golang:1.24.11-alpine3.23 AS builder
+FROM golang:1.26.4-alpine3.23 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/stroltm
 COPY ./apps/stroltm/go.mod .

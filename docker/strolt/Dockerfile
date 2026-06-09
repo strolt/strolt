@@ -1,10 +1,21 @@
-FROM alpine:3.23.2 AS fetch
+FROM alpine:3.23.4 AS fetch
+ARG TARGETARCH
+ARG RESTIC_VERSION=0.19.0
 
 RUN apk add --no-cache \
-		postgresql18-client=18.1-r0 \
-		mongodb-tools=100.13.0-r1 \
-		mariadb-client=11.4.9-r0 \
-		restic=0.18.1-r2
+		postgresql18-client=18.4-r0 \
+		mongodb-tools=100.13.0-r6 \
+		mariadb-client=11.4.12-r0
+
+# restic is fetched from official releases: alpine still packages 0.18.x
+RUN wget -q \
+		"https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/restic_${RESTIC_VERSION}_linux_${TARGETARCH}.bz2" \
+		"https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/SHA256SUMS" && \
+	grep "restic_${RESTIC_VERSION}_linux_${TARGETARCH}.bz2" SHA256SUMS > restic.sha256 && \
+	sha256sum -c restic.sha256 && \
+	bunzip2 "restic_${RESTIC_VERSION}_linux_${TARGETARCH}.bz2" && \
+	install -m 0755 "restic_${RESTIC_VERSION}_linux_${TARGETARCH}" /usr/bin/restic && \
+	rm -f SHA256SUMS restic.sha256 "restic_${RESTIC_VERSION}_linux_${TARGETARCH}"
 
 RUN rm -f \
 		/usr/bin/clusterdb \
@@ -25,7 +36,7 @@ RUN rm -f \
 
 RUN apk info -v > /apk-lock.txt
 
-FROM alpine:3.23.2 AS base
+FROM alpine:3.23.4 AS base
 ENV TZ=UTC
 WORKDIR /strolt
 
@@ -80,11 +91,11 @@ RUN \
 		ldd /usr/bin/mysqldump && \
 		ldd /usr/bin/mariadb && \
 		ldd /usr/bin/mongodump && \
-		ldd /usr/bin/mongorestore && \
-		ldd /usr/bin/restic
+		ldd /usr/bin/mongorestore
+# restic is excluded from the ldd check: official release binaries are static
 
 
-FROM golang:1.24.11-alpine3.23 AS builder
+FROM golang:1.26.4-alpine3.23 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/strolt
 COPY ./apps/strolt/go.mod .

@@ -72,16 +72,13 @@ monitoring their status, and coordinating backup operations across your infrastr
 		signal.Notify(c, os.Interrupt)
 
 		{ // Api server
-			wg.Add(1)
-			go func() {
+			wg.Go(func() {
 				api.New().Run(ctx, cancel)
-				wg.Done()
-			}()
+			})
 		}
 
 		{ // Strolt Manager
-			wg.Add(1)
-			go func() {
+			wg.Go(func() {
 				// manager.Init().Watch(ctx, cancel)
 				instances := make([]strolt.ManagerInstanceInit, 0, len(config.Get().Strolt.Instances))
 				for instanceName, instance := range config.Get().Strolt.Instances {
@@ -93,13 +90,11 @@ monitoring their status, and coordinating backup operations across your infrastr
 					})
 				}
 				strolt.ManagerInit(ctx, cancel, instances)
-				wg.Done()
-			}()
+			})
 		}
 
 		{ // Stroltp Manager
-			wg.Add(1)
-			go func() {
+			wg.Go(func() {
 				// manager.Init().Watch(ctx, cancel)
 				instances := make([]stroltp.ManagerInstanceInit, 0, len(config.Get().Stroltp.Instances))
 				for instanceName, instance := range config.Get().Stroltp.Instances {
@@ -111,8 +106,7 @@ monitoring their status, and coordinating backup operations across your infrastr
 					})
 				}
 				stroltp.ManagerInit(ctx, cancel, instances)
-				wg.Done()
-			}()
+			})
 		}
 
 		// Watch system exit code
