@@ -12,16 +12,17 @@ import (
 )
 
 // getStats godoc
-// @Id					 getStats
-// @Summary      Get stats
-// @Tags         services
-// @Security BasicAuth
-// @Param   serviceName         path    string     true        "Service name"
-// @Param   taskName            path    string     true        "Task name"
-// @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} getStatsResult
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats [get].
+//
+//	@Id			getStats
+//	@Summary	Get stats
+//	@Tags		services
+//	@Security	BasicAuth
+//	@Param		serviceName		path		string	true	"Service name"
+//	@Param		taskName		path		string	true	"Task name"
+//	@Param		destinationName	path		string	true	"Destination name"
+//	@success	200				{object}	getStatsResult
+//	@success	500				{object}	apiu.ResultError
+//	@Router		/api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats [get].
 func (s *Services) getStats(w http.ResponseWriter, r *http.Request) {
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")

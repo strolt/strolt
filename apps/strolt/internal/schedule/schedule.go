@@ -71,7 +71,6 @@ func Run(ctx ctx.Context) {
 func backup(serviceName string, taskName string) {
 	log := logger.New().WithField("serviceName", serviceName).WithField("taskName", taskName).WithField("trigger", sctxt.TSchedule)
 	t, err := task.New(serviceName, taskName, sctxt.TSchedule, sctxt.OpTypeBackup)
-
 	if err != nil {
 		log.Error(err)
 	}

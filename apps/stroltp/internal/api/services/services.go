@@ -4,8 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type Services struct {
-}
+type Services struct{}
 
 func New() *Services {
 	return &Services{}

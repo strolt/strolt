@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/@shibanet0/datamitsu-config/oxlint_configuration_schema.json",
+  "$schema": "./.datamitsu/oxlint_configuration_schema.json",
   "categories": {
     "correctness": "error",
     "pedantic": "error",
@@ -7,7 +7,6 @@
     "style": "warn",
     "suspicious": "error"
   },
-  "extends": ["./node_modules/@shibanet0/datamitsu-config/.oxlintrc.json"],
   "rules": {
     "max-params": "off",
     "no-unused-expressions": "off",
@@ -26,5 +25,8 @@
     "max-statements": "off",
     "unicorn/prefer-top-level-await": "off",
     "no-map-spread": "off"
-  }
+  },
+  "extends": [
+    "./.datamitsu/.oxlintrc.json"
+  ]
 }

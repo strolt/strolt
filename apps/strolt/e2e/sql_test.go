@@ -14,13 +14,11 @@ type User struct {
 	Password string `db:"password"`
 }
 
-var (
-	user = User{
-		ID:       1,
-		Username: "username",
-		Password: "password",
-	}
-)
+var user = User{
+	ID:       1,
+	Username: "username",
+	Password: "password",
+}
 
 type Conn struct {
 	db *sqlx.DB

@@ -8,7 +8,7 @@ type ManagerInfo struct {
 	Instances []ManagerInfoInstance `json:"instances"`
 	UpdatedAt string                `json:"updatedAt"`
 	Version   string                `json:"version"`
-} // @name ManagerInfo
+} //	@name	ManagerInfo
 
 type ManagerInfoInstance struct {
 	ProxyName       *string `json:"proxyName,omitempty"`
@@ -20,18 +20,18 @@ type ManagerInfoInstance struct {
 	IsOnline   bool                          `json:"isOnline"`
 	Config     ManagerInfoInstanceConfig     `json:"config"`
 	TaskStatus ManagerInfoInstanceTaskStatus `json:"taskStatus"`
-} // @name ManagerInfoInstance
+} //	@name	ManagerInfoInstance
 
 type ManagerInfoInstanceConfig struct {
 	IsInitialized bool   `json:"isInitialized"`
 	UpdatedAt     string `json:"updatedAt"`
-} // @name ManagerInfoInstanceConfig
+} //	@name	ManagerInfoInstanceConfig
 
 type ManagerInfoInstanceTaskStatus struct {
 	IsInitialized     bool   `json:"isInitialized"`
 	UpdatedAt         string `json:"updatedAt"`
 	UpdateRequestedAt string `json:"updateRequestedAt"`
-} // @name ManagerInfoInstanceTaskStatus
+} //	@name	ManagerInfoInstanceTaskStatus
 
 func (instance *ManagerInfoInstance) GetUpdatedAt() int64 {
 	var updatedAt int64 = 0

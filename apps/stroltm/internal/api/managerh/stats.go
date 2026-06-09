@@ -10,17 +10,18 @@ import (
 )
 
 // getStatsDirect godoc
-// @Id					 getStatsDirect
-// @Summary      Get stats
-// @Tags         manager-direct
-// @Security BasicAuth
-// @Param   instanceName        path    string     true        "Instance name"
-// @Param   serviceName         path    string     true        "Service name"
-// @Param   taskName            path    string     true        "Task name"
-// @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} strolt_models.ServicesGetStatsResult
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats [get].
+//
+//	@Id			getStatsDirect
+//	@Summary	Get stats
+//	@Tags		manager-direct
+//	@Security	BasicAuth
+//	@Param		instanceName	path		string	true	"Instance name"
+//	@Param		serviceName		path		string	true	"Service name"
+//	@Param		taskName		path		string	true	"Task name"
+//	@Param		destinationName	path		string	true	"Destination name"
+//	@success	200				{object}	strolt_models.ServicesGetStatsResult
+//	@success	500				{object}	apiu.ResultError
+//	@Router		/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats [get].
 func (s *ManagerHandlers) getStatsDirect(w http.ResponseWriter, r *http.Request) {
 	instanceName := chi.URLParam(r, "instanceName")
 	serviceName := chi.URLParam(r, "serviceName")
@@ -48,18 +49,19 @@ func (s *ManagerHandlers) getStatsDirect(w http.ResponseWriter, r *http.Request)
 }
 
 // getStatsProxy godoc
-// @Id					 getStatsProxy
-// @Summary      Get stats proxy
-// @Tags         manager-proxy
-// @Security BasicAuth
-// @Param   proxyName           path    string     true        "Proxy name"
-// @Param   instanceName        path    string     true        "Instance name"
-// @Param   serviceName         path    string     true        "Service name"
-// @Param   taskName            path    string     true        "Task name"
-// @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} strolt_models.ServicesGetStatsResult
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats [get].
+//
+//	@Id			getStatsProxy
+//	@Summary	Get stats proxy
+//	@Tags		manager-proxy
+//	@Security	BasicAuth
+//	@Param		proxyName		path		string	true	"Proxy name"
+//	@Param		instanceName	path		string	true	"Instance name"
+//	@Param		serviceName		path		string	true	"Service name"
+//	@Param		taskName		path		string	true	"Task name"
+//	@Param		destinationName	path		string	true	"Destination name"
+//	@success	200				{object}	strolt_models.ServicesGetStatsResult
+//	@success	500				{object}	apiu.ResultError
+//	@Router		/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/stats [get].
 func (s *ManagerHandlers) getStatsProxy(w http.ResponseWriter, r *http.Request) {
 	proxyName := chi.URLParam(r, "proxyName")
 	instanceName := chi.URLParam(r, "instanceName")

@@ -15,9 +15,9 @@ type Config struct {
 	DisableWatchChanges bool                     `json:"disableWatchChanges"`
 	Tags                []string                 `json:"tags"`
 	Services            map[string]ConfigService `json:"services"`
-} // @name Config
+} //	@name	Config
 
-type ConfigService map[string]ConfigServiceTask // @name ConfigService
+type ConfigService map[string]ConfigServiceTask //	@name	ConfigService
 
 type ConfigServiceTask struct {
 	Source        ConfigServiceTaskSource                 `json:"source"`
@@ -25,33 +25,34 @@ type ConfigServiceTask struct {
 	Notifications []ConfigServiceTaskNotification         `json:"notifications"`
 	Schedule      ConfigServiceTaskSchedule               `json:"schedule"`
 	Tags          []string                                `json:"tags"`
-} // @name ConfigServiceTask
+} //	@name	ConfigServiceTask
 
 type ConfigServiceTaskSource struct {
 	Driver string `json:"driver"`
-} // @name ConfigServiceTaskSource
+} //	@name	ConfigServiceTaskSource
 
 type ConfigServiceTaskSchedule struct {
 	Backup string `json:"backup"`
 	Prune  string `json:"prune"`
-} // @name ConfigServiceTaskSchedule
+} //	@name	ConfigServiceTaskSchedule
 
 type ConfigServiceTaskDestination struct {
 	Driver string `json:"driver"`
-} // @name ConfigServiceTaskDestination
+} //	@name	ConfigServiceTaskDestination
 
 type ConfigServiceTaskNotification struct {
 	Driver string            `json:"driver"`
 	Name   string            `json:"name"`
 	Events []sctxt.EventType `enums:"OPERATION_START,OPERATION_STOP,OPERATION_ERROR,SOURCE_START,SOURCE_STOP,SOURCE_ERROR,DESTINATION_START,DESTINATION_STOP,DESTINATION_ERROR" json:"events"`
-} // @name ConfigServiceTaskNotification
+} //	@name	ConfigServiceTaskNotification
 
 // getConfig godoc
-// @Id					 getConfig
-// @Summary      Show config
-// @Security BasicAuth
-// @success 200 {object} Config
-// @Router       /api/v1/config [get].
+//
+//	@Id			getConfig
+//	@Summary	Show config
+//	@Security	BasicAuth
+//	@success	200	{object}	Config
+//	@Router		/api/v1/config [get].
 func (api *API) getConfig(w http.ResponseWriter, r *http.Request) {
 	c := config.Get()
 

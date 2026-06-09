@@ -37,7 +37,6 @@ func (sdk *SDK) GetSnapshots(serviceName, taskName, destinationName string) (*se
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Services.GetSnapshots(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:errorlint
 		case *services.GetSnapshotsBadRequest:
@@ -56,7 +55,6 @@ func (sdk *SDK) Backup(serviceName, taskName string) (*services.BackupOK, error)
 	params.TaskName = taskName
 
 	result, err := sdk.client.Services.Backup(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *services.BackupInternalServerError:
@@ -74,7 +72,6 @@ func (sdk *SDK) GetSnapshotsForPrune(serviceName, taskName, destinationName stri
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Services.GetSnapshotsForPrune(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *services.GetSnapshotsForPruneInternalServerError:
@@ -92,7 +89,6 @@ func (sdk *SDK) Prune(serviceName, taskName, destinationName string) (*services.
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Services.Prune(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *services.PruneInternalServerError:
@@ -114,7 +110,6 @@ func (sdk *SDK) GetStats(serviceName, taskName, destinationName string) (*servic
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Services.GetStats(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *services.GetStatsInternalServerError:

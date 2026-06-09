@@ -53,7 +53,6 @@ var snapshotsCmd = &cobra.Command{
 		Printf("selected destination: %s", prompt.DestinationName)
 
 		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeSnapshots)
-
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -96,7 +95,7 @@ func printSnapshotsTable(snapshotList task.SnapshotList) {
 }
 
 func printSnapshotsJSON(snapshotList task.SnapshotList) {
-	var _snapshotList = []Snapshot{}
+	_snapshotList := []Snapshot{}
 
 	for _, snapshot := range snapshotList {
 		_snapshotList = append(_snapshotList, Snapshot{

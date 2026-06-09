@@ -10,12 +10,13 @@ import (
 )
 
 // getInfo godoc
-// @Id					 getInfo
-// @Summary      Get info
-// @Tags         info
-// @Security BasicAuth
-// @success 200 {object} common.ManagerInfo
-// @Router       /api/v1/info [get].
+//
+//	@Id			getInfo
+//	@Summary	Get info
+//	@Tags		info
+//	@Security	BasicAuth
+//	@success	200	{object}	common.ManagerInfo
+//	@Router		/api/v1/info [get].
 func (api *API) getInfo(w http.ResponseWriter, r *http.Request) {
 	apiu.RenderJSON200(w, r, strolt.ManagerGetInfo(ldflags.GetVersion()))
 }

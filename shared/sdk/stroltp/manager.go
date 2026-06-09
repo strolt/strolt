@@ -8,11 +8,9 @@ import (
 	"github.com/strolt/strolt/shared/sdk/common"
 )
 
-var (
-	manager = &Manager{
-		Instances: map[string]*Instance{},
-	}
-)
+var manager = &Manager{
+	Instances: map[string]*Instance{},
+}
 
 func ManagerInit(ctx context.Context, cancel func(), instances []ManagerInstanceInit) {
 	for _, instance := range instances {
@@ -20,7 +18,7 @@ func ManagerInit(ctx context.Context, cancel func(), instances []ManagerInstance
 			Name:                     instance.Name,
 			URL:                      instance.URL,
 			Username:                 instance.Username,
-			Password:                 instance.Password, //pragma: allowlist secret
+			Password:                 instance.Password, // pragma: allowlist secret
 			Watch:                    WatchItem{},
 			sdk:                      New(instance.URL, instance.Username, instance.Password),
 			log:                      logger.New().WithField("proxyInstanceName", instance.Name),

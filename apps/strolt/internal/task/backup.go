@@ -12,9 +12,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 )
 
-var (
-	ErrNotSupportedPipeMode = errors.New("source or one of destinations does not support pipe mode")
-)
+var ErrNotSupportedPipeMode = errors.New("source or one of destinations does not support pipe mode")
 
 func (t *Task) backupSourceToWorkDir() error {
 	sourceDriver, err := t.getSourceDriver()

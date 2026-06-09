@@ -4,9 +4,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 )
 
-var (
-	cliConfig config.CliConfig
-)
+var cliConfig config.CliConfig
 
 //nolint:gochecknoinits
 func init() {

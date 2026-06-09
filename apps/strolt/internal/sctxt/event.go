@@ -1,6 +1,6 @@
 package sctxt
 
-type EventType string // @name EventType
+type EventType string //	@name	EventType
 
 const (
 	EvOperationStart EventType = "OPERATION_START"

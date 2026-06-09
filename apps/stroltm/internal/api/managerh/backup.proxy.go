@@ -9,17 +9,18 @@ import (
 )
 
 // backupProxy godoc
-// @Id					 backupProxy
-// @Summary      Start backup proxy
-// @Tags         manager-proxy
-// @Security BasicAuth
-// @Param   proxyName           path    string     true        "Proxy name"
-// @Param   instanceName        path    string     true        "Instance name"
-// @Param   serviceName         path    string     true        "Service name"
-// @Param   taskName            path    string     true        "Task name"
-// @success 200 {object} apiu.ResultSuccess
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/backup [post].
+//
+//	@Id			backupProxy
+//	@Summary	Start backup proxy
+//	@Tags		manager-proxy
+//	@Security	BasicAuth
+//	@Param		proxyName		path		string	true	"Proxy name"
+//	@Param		instanceName	path		string	true	"Instance name"
+//	@Param		serviceName		path		string	true	"Service name"
+//	@Param		taskName		path		string	true	"Task name"
+//	@success	200				{object}	apiu.ResultSuccess
+//	@success	500				{object}	apiu.ResultError
+//	@Router		/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/backup [post].
 func (s *ManagerHandlers) backupProxy(w http.ResponseWriter, r *http.Request) {
 	proxyName := chi.URLParam(r, "proxyName")
 	instanceName := chi.URLParam(r, "instanceName")

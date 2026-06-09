@@ -7,9 +7,7 @@ import (
 	"github.com/go-chi/render"
 )
 
-var (
-	ErrTaskAlreadyWorking = errors.New("task already working")
-)
+var ErrTaskAlreadyWorking = errors.New("task already working")
 
 type ResultError struct {
 	Error string `json:"error"`

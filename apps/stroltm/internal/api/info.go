@@ -54,12 +54,13 @@ func getInfoInstances() ([]common.ManagerInfoInstance, int64) {
 }
 
 // getInfo godoc
-// @Id					 getInfo
-// @Summary      Get Info
-// @Tags         global
-// @Security BasicAuth
-// @success 200 {object} Info
-// @Router       /api/v1/info [get].
+//
+//	@Id			getInfo
+//	@Summary	Get Info
+//	@Tags		global
+//	@Security	BasicAuth
+//	@success	200	{object}	Info
+//	@Router		/api/v1/info [get].
 func (api *API) getInfo(w http.ResponseWriter, r *http.Request) {
 	// stroltInstances, stroltUpdatedAt := getStroltInstances()
 	// stroltpInstances, stroltpUpdatedAt := getStroltInstancesFromProxy()

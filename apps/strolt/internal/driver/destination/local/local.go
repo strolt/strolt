@@ -115,13 +115,13 @@ func (i *Local) BackupPipe(ctx context.Context, filename string) (io.WriteCloser
 	snapshotName := uuid.New().String()
 
 	dirpath := path.Join(i.config.Path, snapshotName)
-	if err := os.MkdirAll(dirpath, 0777); err != nil { //nolint:mnd
+	if err := os.MkdirAll(dirpath, 0o777); err != nil { //nolint:mnd
 		return nil, nil, err
 	}
 
 	filepath := path.Join(dirpath, filename)
 
-	writer, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644) //nolint:mnd
+	writer, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644) //nolint:mnd
 
 	return writer, func() error { return nil }, err
 }

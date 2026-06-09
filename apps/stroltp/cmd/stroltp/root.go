@@ -87,7 +87,7 @@ for your distributed backup infrastructure.`,
 						Name:     instanceName,
 						URL:      instance.URL,
 						Username: instance.Username,
-						Password: instance.Password, //pragma: allowlist secret
+						Password: instance.Password, // pragma: allowlist secret
 					})
 				}
 				strolt.ManagerInit(ctx, cancel, instances)

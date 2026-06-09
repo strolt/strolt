@@ -88,7 +88,7 @@ monitoring their status, and coordinating backup operations across your infrastr
 						Name:     instanceName,
 						URL:      instance.URL,
 						Username: instance.Username,
-						Password: instance.Password, //pragma: allowlist secret
+						Password: instance.Password, // pragma: allowlist secret
 					})
 				}
 				strolt.ManagerInit(ctx, cancel, instances)
@@ -106,7 +106,7 @@ monitoring their status, and coordinating backup operations across your infrastr
 						Name:     instanceName,
 						URL:      instance.URL,
 						Username: instance.Username,
-						Password: instance.Password, //pragma: allowlist secret
+						Password: instance.Password, // pragma: allowlist secret
 					})
 				}
 				stroltp.ManagerInit(ctx, cancel, instances)

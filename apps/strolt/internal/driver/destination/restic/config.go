@@ -10,11 +10,9 @@ import (
 	"strings"
 )
 
-type ResticConfigBackupFlags struct {
-}
+type ResticConfigBackupFlags struct{}
 
-type ResticConfigGlobalFlags struct {
-}
+type ResticConfigGlobalFlags struct{}
 
 type ResticConfigKeep struct {
 	Last    int `yaml:"last"`

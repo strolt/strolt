@@ -23,12 +23,12 @@ type ManagerTaskItem struct {
 	LastEndedAt time.Time           `json:"lastEndedAt"`
 	TriggerType sctxt.TriggerType   `json:"trigger"`
 	IsRunning   bool                `json:"isRunning"`
-} // @name ManagerTaskItem
+} //	@name	ManagerTaskItem
 
 type ManagerStatus struct {
 	Tasks         []ManagerTaskItem `json:"tasks"`
 	LastChangedAt string            `json:"lastChangedAt"`
-} // @name ManagerStatus
+} //	@name	ManagerStatus
 
 var managerVar = manager{
 	Tasks:         map[string]ManagerTaskItem{},

@@ -87,9 +87,9 @@ func (api *API) Run(ctx context.Context, cancel func()) {
 	api.log.Debug("api server was stopped")
 }
 
-// @version         1.0
-// @securityDefinitions.basic  BasicAuth
-// @title           Strolt API.
+// @version					1.0
+// @securityDefinitions.basic	BasicAuth
+// @title						Strolt API.
 func (api *API) handler() http.Handler {
 	r := chi.NewRouter()
 

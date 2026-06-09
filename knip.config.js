@@ -1,5 +1,3 @@
-import { config } from "@shibanet0/datamitsu-config/knip";
+import { defineConfig } from "./.datamitsu/knip.config.js";
 
-const internalConfig = { ...config };
-
-export default internalConfig;
+export default defineConfig();

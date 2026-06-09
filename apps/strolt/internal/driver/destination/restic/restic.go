@@ -62,7 +62,6 @@ func (i *Restic) SetLogger(logger *logger.Logger) {
 
 func startCmd(cmd *exec.Cmd) ([]byte, error) {
 	output, err := cmd.CombinedOutput()
-
 	if err != nil {
 		outputList := strings.Split(string(output), "\n")
 

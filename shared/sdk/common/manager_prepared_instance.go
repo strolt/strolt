@@ -10,4 +10,4 @@ type ManagerPreparedInstance struct {
 	Config     *strolt_models.Config        `json:"config"`
 	TaskStatus *strolt_models.ManagerStatus `json:"taskStatus"`
 	IsOnline   bool                         `json:"isOnline"`
-} // @name ManagerPreparedInstance
+} //	@name	ManagerPreparedInstance

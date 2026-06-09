@@ -17,9 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var (
-	loadedAt time.Time
-)
+var loadedAt time.Time
 
 func GetLoadedAt() time.Time {
 	return loadedAt

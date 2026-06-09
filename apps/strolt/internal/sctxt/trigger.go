@@ -1,6 +1,6 @@
 package sctxt
 
-type TriggerType string // @name TriggerType
+type TriggerType string //	@name	TriggerType
 
 const (
 	TSchedule TriggerType = "SCHEDULE"

@@ -15,13 +15,14 @@ type authValidateBody struct {
 }
 
 // authValidate godoc
-// @Id					 validate
-// @Summary      Validate user creds
-// @Tags         auth
-// @Param request body authValidateBody true "body"
-// @success 200 {object} apiu.ResultSuccess
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/auth/validate [post].
+//
+//	@Id			validate
+//	@Summary	Validate user creds
+//	@Tags		auth
+//	@Param		request	body		authValidateBody	true	"body"
+//	@success	200		{object}	apiu.ResultSuccess
+//	@success	500		{object}	apiu.ResultError
+//	@Router		/api/v1/auth/validate [post].
 func (api *API) authValidate(w http.ResponseWriter, r *http.Request) {
 	var body authValidateBody
 
@@ -36,7 +37,7 @@ func (api *API) authValidate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.Password != body.Password { //pragma: allowlist secret
+	if user.Password != body.Password { // pragma: allowlist secret
 		apiu.RenderJSON401(w, r)
 		return
 	}

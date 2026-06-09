@@ -1,11 +1,37 @@
+allowBuilds: { '@nestjs/core': false, '@openapitools/openapi-generator-cli': false, '@swc/core': false, core-js-pure: false, esbuild: false }
+audit: true
+auditLevel: high
+autoInstallPeers: true
+blockExoticSubdeps: true
+dangerouslyAllowAllBuilds: false
+dedupeDirectDeps: true
+dedupePeerDependents: true
 enableGlobalVirtualStore: true
 enablePrePostScripts: false
+engineStrict: true
 hoistPattern: []
 ignorePatchFailures: false
+lockfile: true
+minimumReleaseAge: 10080
 optimisticRepeatInstall: true
+packageManagerStrict: true
+packageManagerStrictVersion: true
 packages:
   - apps/*
   - website
   - apps/stroltm/ui
+preferFrozenLockfile: true
 resolutionMode: lowest-direct
+savePrefix: ""
+strictDepBuilds: true
+strictSsl: true
+trustLockfile: true
+trustPolicy: no-downgrade
+unsafePerm: false
+updateNotifier: false
 verifyDepsBeforeRun: install
+verifyStoreIntegrity: true
+minimumReleaseAgeExclude:
+  - "@datamitsu/*"
+  - "@ovineko/*"
+  - "@shibanet0/*"

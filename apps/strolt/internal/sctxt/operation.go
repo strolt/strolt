@@ -1,6 +1,6 @@
 package sctxt
 
-type OperationType string // @name OperationType
+type OperationType string //	@name	OperationType
 
 const (
 	OpTypeBackup    OperationType = "BACKUP"

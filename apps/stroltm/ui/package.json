@@ -6,11 +6,9 @@
   "scripts": {
     "build": "tsc && vite build",
     "dev": "vite",
-    "fix": "datamitsu fix",
     "format": "prettier --plugin @trivago/prettier-plugin-sort-imports --write",
     "format:all": "prettier --plugin @trivago/prettier-plugin-sort-imports --write \"**/*.{ts,tsx,md}\"",
     "gen-api": "pnpm exec openapi-generator-cli generate -i ../../../.swagger/stroltm/swagger.json -g typescript-axios -o ./src/api/generated",
-    "lint": "datamitsu lint",
     "preview": "vite preview",
     "typecheck": "tsc"
   },
@@ -31,7 +29,7 @@
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "2.25.2",
-    "@shibanet0/datamitsu-config": "0.0.2-alpha-2",
+    "@shibanet0/datamitsu-config": "0.1.0",
     "@types/node": "24.12.0",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
@@ -41,5 +39,7 @@
     "vite": "7.2.7",
     "vite-tsconfig-paths": "5.1.4"
   },
-  "packageManager": "pnpm@10.29.3"
+  "engines": {
+    "node": ">=22.12.0"
+  }
 }

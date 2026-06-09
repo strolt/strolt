@@ -37,11 +37,11 @@ func setupContainers() error {
 	ctx = context.Background()
 
 	// Ensure required directories exist
-	if err := os.MkdirAll(".temp/input", 0755); err != nil {
+	if err := os.MkdirAll(".temp/input", 0o755); err != nil {
 		return fmt.Errorf("failed to create .temp/input: %w", err)
 	}
 
-	if err := os.MkdirAll(".temp/workdir", 0755); err != nil {
+	if err := os.MkdirAll(".temp/workdir", 0o755); err != nil {
 		return fmt.Errorf("failed to create .temp/workdir: %w", err)
 	}
 

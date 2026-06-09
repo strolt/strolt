@@ -1,8 +1,6 @@
 package ldflags
 
-var (
-	version = "development"
-)
+var version = "development"
 
 func GetVersion() string {
 	return version

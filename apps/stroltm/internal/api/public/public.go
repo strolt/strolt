@@ -10,8 +10,7 @@ import (
 	"github.com/strolt/strolt/shared/apiu"
 )
 
-type Public struct {
-}
+type Public struct{}
 
 func New() *Public {
 	return &Public{}
@@ -28,22 +27,24 @@ func (s *Public) Router(r chi.Router) {
 }
 
 // prometheusMetrics godoc
-// @Tags         public
-// @Id           getMetrics
-// @Summary      Prometheus metrics
-// @Success      200  {string}  string.
-// @Router       /metrics [get].
+//
+//	@Tags		public
+//	@Id			getMetrics
+//	@Summary	Prometheus metrics
+//	@Success	200	{string}	string.
+//	@Router		/metrics [get].
 func (s *Public) prometheusMetrics(r chi.Router) {
 	r.Mount("/metrics", promhttp.Handler())
 }
 
 // debug godoc
-// @Tags         public
-// @Id           getDebug
-// @Description  Available only if env `STROLTM_LOG_LEVEL=DEBUG` or `STROLTM_LOG_LEVEL=TRACE`
-// @Summary      Go debug info
-// @Success      200  {string}  string.
-// @Router       /debug [get].
+//
+//	@Tags			public
+//	@Id				getDebug
+//	@Description	Available only if env `STROLTM_LOG_LEVEL=DEBUG` or `STROLTM_LOG_LEVEL=TRACE`
+//	@Summary		Go debug info
+//	@Success		200	{string}	string.
+//	@Router			/debug [get].
 func (s *Public) debug(r chi.Router) {
 	r.Mount("/debug", middleware.Profiler())
 }
@@ -53,11 +54,12 @@ type getPingResponse struct {
 }
 
 // ping godoc
-// @Tags         public
-// @Id           ping
-// @Summary      Ping
-// @success 200 {object} getPingResponse
-// @Router       /api/v1/ping [get].
+//
+//	@Tags		public
+//	@Id			ping
+//	@Summary	Ping
+//	@success	200	{object}	getPingResponse
+//	@Router		/api/v1/ping [get].
 func (s *Public) ping(w http.ResponseWriter, r *http.Request) {
 	apiu.RenderJSON200(w, r, getPingResponse{
 		Data: "pong",

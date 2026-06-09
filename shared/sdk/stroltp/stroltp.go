@@ -41,7 +41,6 @@ func (sdk *SDK) Backup(instanceName, serviceName, taskName string) (*managerc.Ba
 	params.TaskName = taskName
 
 	result, err := sdk.client.Manager.Backup(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.BackupInternalServerError:
@@ -64,7 +63,6 @@ func (sdk *SDK) GetSnapshots(instanceName, serviceName, taskName, destinationNam
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Manager.GetSnapshots(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.BackupInternalServerError:
@@ -83,7 +81,6 @@ func (sdk *SDK) GetStats(instanceName, serviceName, taskName, destinationName st
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Manager.GetStats(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.GetStatsInternalServerError:
@@ -102,7 +99,6 @@ func (sdk *SDK) GetSnapshotsForPrune(instanceName, serviceName, taskName, destin
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Manager.GetSnapshotsForPrune(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.GetSnapshotsForPruneInternalServerError:
@@ -121,7 +117,6 @@ func (sdk *SDK) Prune(instanceName, serviceName, taskName, destinationName strin
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Manager.Prune(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.PruneInternalServerError:

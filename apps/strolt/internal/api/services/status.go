@@ -12,12 +12,13 @@ type getStatusResult struct {
 }
 
 // getStatus godoc
-// @Id					 getStatus
-// @Summary      Get services status
-// @Tags         services
-// @Security BasicAuth
-// @success 200 {object} getStatusResult
-// @Router       /api/v1/services/status [get].
+//
+//	@Id			getStatus
+//	@Summary	Get services status
+//	@Tags		services
+//	@Security	BasicAuth
+//	@success	200	{object}	getStatusResult
+//	@Router		/api/v1/services/status [get].
 func (s *Services) getStatus(w http.ResponseWriter, r *http.Request) {
 	apiu.RenderJSON200(w, r, getStatusResult{Data: task.GetManagerStatus()})
 }

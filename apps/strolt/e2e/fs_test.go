@@ -13,26 +13,22 @@ type File struct {
 	Value string
 }
 
-var (
-	fsInputPath = "/e2e/input"
-)
+var fsInputPath = "/e2e/input"
 
-var (
-	files = []File{
-		{
-			Path:  filepath.Join(fsInputPath, "0.txt"),
-			Value: "0",
-		},
-		{
-			Path:  filepath.Join(fsInputPath, "1", "1.txt"),
-			Value: "1",
-		},
-		{
-			Path:  filepath.Join(fsInputPath, "1", "2", "2.txt"),
-			Value: "2",
-		},
-	}
-)
+var files = []File{
+	{
+		Path:  filepath.Join(fsInputPath, "0.txt"),
+		Value: "0",
+	},
+	{
+		Path:  filepath.Join(fsInputPath, "1", "1.txt"),
+		Value: "1",
+	},
+	{
+		Path:  filepath.Join(fsInputPath, "1", "2", "2.txt"),
+		Value: "2",
+	},
+}
 
 type Fs struct{}
 

@@ -71,7 +71,7 @@ func (cm *ContainerManager) StartStrolt() error {
 			{
 				HostFilePath:      absConfigPath,
 				ContainerFilePath: "/strolt/config.yml",
-				FileMode:          0644,
+				FileMode:          0o644,
 			},
 		},
 		Mounts: testcontainers.Mounts(
