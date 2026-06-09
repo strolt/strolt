@@ -41,8 +41,8 @@ export interface TaskListItemSource {
 
 const createTask = (instance: apiGenerated.ManagerPreparedInstance): TaskListItem => {
   const isOnline =
-    !!instance.name &&
-    !!infoStore.map.get(infoStore.getKey(instance.name, instance.proxyName))?.isOnline;
+    Boolean(instance.name) &&
+    Boolean(infoStore.map.get(infoStore.getKey(instance.name, instance.proxyName))?.isOnline);
 
   return {
     destinations: [],

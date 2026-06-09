@@ -141,7 +141,7 @@ const Task: FC<TaskProps> = observer(({ instanceName, proxyName, serviceName, ta
                     taskId: taskName,
                   }}
                   to={
-                    !!proxyName
+                    proxyName
                       ? "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxySnapshotList"
                       : "instances.instanceId.serviceId.taskId.destinationId.snapshotList"
                   }
@@ -246,7 +246,7 @@ const Instance: FC<InstanceProps> = observer(({ instance }) => {
         title={
           <>
             {[
-              !!instance.proxyName && `proxy: [${instance.proxyName}]`,
+              Boolean(instance.proxyName) && `proxy: [${instance.proxyName}]`,
               `instance: [${instance.name}]`,
               `version: ${instanceInfo?.version}`,
             ]

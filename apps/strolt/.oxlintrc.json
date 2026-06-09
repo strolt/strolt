@@ -7,8 +7,6 @@
     "style": "warn",
     "suspicious": "error"
   },
-  "rules": {
-    "typescript-eslint/consistent-type-imports": "off"
-  },
+  "rules": {},
   "extends": ["../../.datamitsu/.oxlintrc.json"]
 }

@@ -22,13 +22,13 @@ export const PrintSchedule: React.FC<TaskListItemSchedule> = (el) => {
 
   return (
     <>
-      {!!el.backup && (
+      {Boolean(el.backup) && (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <span>backup:</span>
           <PrintCron schedule={el.backup} />
         </div>
       )}
-      {!!el.prune && (
+      {Boolean(el.prune) && (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <span>prune:</span>
           <PrintCron schedule={el.prune} />

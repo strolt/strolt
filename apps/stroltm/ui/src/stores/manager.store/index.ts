@@ -53,7 +53,7 @@ export class ManagerStore {
     makeAutoObservable(this);
   }
   async backup(instanceName: string, serviceName: string, taskName: string, proxyName?: string) {
-    const request = !!proxyName
+    const request = proxyName
       ? fromPromise(api.managerProxy.backupProxy(proxyName, instanceName, serviceName, taskName))
       : fromPromise(api.managerDirect.backupDirect(instanceName, serviceName, taskName));
 
@@ -133,7 +133,7 @@ export class ManagerStore {
     proxyName?: string,
   ) {
     this.pruneStatus = fromPromise(
-      !!proxyName
+      proxyName
         ? api.managerProxy.pruneProxy(
             proxyName,
             instanceName,
@@ -169,7 +169,7 @@ export class ManagerStore {
     destinationName: string,
     proxyName?: string,
   ) {
-    this.snapshotsStatus = !!proxyName
+    this.snapshotsStatus = proxyName
       ? fromPromise(
           api.managerProxy.getSnapshotsProxy(
             proxyName,
@@ -210,7 +210,7 @@ export class ManagerStore {
     proxyName?: string,
   ) {
     this.snapshotsForPruneStatus = fromPromise(
-      !!proxyName
+      proxyName
         ? api.managerProxy.getSnapshotsForPruneProxy(
             proxyName,
             instanceName,
@@ -251,7 +251,7 @@ export class ManagerStore {
     proxyName?: string,
   ) {
     this.statsStatus = fromPromise(
-      !!proxyName
+      proxyName
         ? api.managerProxy.getStatsProxy(
             proxyName,
             instanceName,

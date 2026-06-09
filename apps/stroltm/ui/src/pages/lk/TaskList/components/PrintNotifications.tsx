@@ -20,7 +20,7 @@ export interface PrintNotificationsProps {
   list: TaskListItemNotification[];
 }
 export const PrintNotifications: React.FC<PrintNotificationsProps> = ({ list }) => {
-  if (!list.length) {
+  if (list.length === 0) {
     return <>-</>;
   }
 

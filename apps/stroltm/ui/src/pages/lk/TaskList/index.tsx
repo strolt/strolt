@@ -19,8 +19,8 @@ import { PrintVersion } from "./components/PrintVersion";
 
 const nameSorter = (field: keyof TaskListItem): CompareFn<TaskListItem> => {
   return (a, b, order) => {
-    const _a = (!!a?.[field] ? String(a?.[field]) : "").toLowerCase();
-    const _b = (!!b?.[field] ? String(b?.[field]) : "").toLowerCase();
+    const _a = (a?.[field] ? String(a?.[field]) : "").toLowerCase();
+    const _b = (b?.[field] ? String(b?.[field]) : "").toLowerCase();
 
     if (_a < _b) {
       return -1;
@@ -69,11 +69,11 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
         ),
         sorter: {
           compare: (a, b) => {
-            if (+a.isOnline < +b.isOnline) {
+            if (Number(a.isOnline) < Number(b.isOnline)) {
               return -1;
             }
 
-            if (+a.isOnline > +b.isOnline) {
+            if (Number(a.isOnline) > Number(b.isOnline)) {
               return 1;
             }
             return 0;
@@ -150,18 +150,15 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
       {
         dataIndex: "tags",
         filterResetToDefaultFilteredValue: true,
-        filters: deleteDuplicates(
-          list
-            .map((el) => el.tags)
-            .flat()
-            .map((el) => getTagKey(el)),
-        ).map((v) => ({
-          text: v,
-          value: v,
-        })),
+        filters: deleteDuplicates(list.flatMap((el) => el.tags).map((el) => getTagKey(el))).map(
+          (v) => ({
+            text: v,
+            value: v,
+          }),
+        ),
         key: "tags",
         onCell: () => ({ style: { maxWidth: "25rem" } }),
-        onFilter: (value, r) => !!r.tags.find((tag) => tag.startsWith(String(value))),
+        onFilter: (value, r) => Boolean(r.tags.find((tag) => tag.startsWith(String(value)))),
         render: (v) => <Print.TagList fallback={<>-</>} value={v} />,
         title: "tags",
       },
@@ -186,11 +183,11 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
       {
         dataIndex: "destinations",
         filterResetToDefaultFilteredValue: true,
-        filters: deleteDuplicates(list.map((el) => el.destinations.map((el) => el.driver)).flat())
+        filters: deleteDuplicates(list.flatMap((el) => el.destinations.map((el) => el.driver)))
           .filter(Boolean)
           .map((v) => ({ text: v, value: v })),
         key: "destinations",
-        onFilter: (value, r) => !!r.destinations.find((el) => el.driver === String(value)),
+        onFilter: (value, r) => Boolean(r.destinations.find((el) => el.driver === String(value))),
         render: (_, r) => (
           <PrintDestinations
             list={r.destinations.map((el) => ({
@@ -208,12 +205,12 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
       {
         dataIndex: "notifications",
         filterResetToDefaultFilteredValue: true,
-        filters: deleteDuplicates(list.map((el) => el.notifications.map((el) => el.driver)).flat())
+        filters: deleteDuplicates(list.flatMap((el) => el.notifications.map((el) => el.driver)))
           .filter(Boolean)
           .map((v) => ({ text: v, value: v })),
         key: "notifications",
         onCell: () => ({ style: { maxWidth: "20rem" } }),
-        onFilter: (value, r) => !!r.notifications.find((el) => el.driver === String(value)),
+        onFilter: (value, r) => Boolean(r.notifications.find((el) => el.driver === String(value))),
         render: (_, r) => <PrintNotifications list={r.notifications} />,
         title: "notifications",
       },

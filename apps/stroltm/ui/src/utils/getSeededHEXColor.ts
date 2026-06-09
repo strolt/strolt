@@ -10,7 +10,7 @@ const xmur3 = (str: string): number => {
   let h = 1_779_033_703 ^ str.length;
 
   for (let i = 0; i < str.length; i++) {
-    ((h = Math.imul(h ^ str.charCodeAt(i), 3_432_918_353)), (h = (h << 13) | (h >>> 19)));
+    ((h = Math.imul(h ^ str.codePointAt(i), 3_432_918_353)), (h = (h << 13) | (h >>> 19)));
   }
   h = Math.imul(h ^ (h >>> 16), 2_246_822_507);
   h = Math.imul(h ^ (h >>> 13), 3_266_489_909);
@@ -18,15 +18,14 @@ const xmur3 = (str: string): number => {
 };
 
 const _randomColor = (list: string, seed?: Seed): string => {
-  const seedNumber = seed ? xmur3(seed.toString()) : +(Math.random() * Date.now()).toFixed(0);
+  const seedNumber = seed
+    ? xmur3(seed.toString())
+    : Number((Math.random() * Date.now()).toFixed(0));
   const fixedSeedNumber = seedNumber % 1e6;
-  const arrayOfNumber = fixedSeedNumber
-    .toString()
-    .split("")
-    .map((n) => +n);
+  const arrayOfNumber = [...fixedSeedNumber.toString()].map((n) => Number(n));
 
   while (arrayOfNumber.length < 6) {
-    arrayOfNumber.push(+((seedNumber / arrayOfNumber.length) % 10).toFixed(0));
+    arrayOfNumber.push(Number(((seedNumber / arrayOfNumber.length) % 10).toFixed(0)));
   }
 
   const isRandom = list.length === random.length;
@@ -77,5 +76,5 @@ export const getSeededHEXColor = (seed?: Seed, mode?: "dark" | "light"): string 
     c = randomDarkColor(seed);
   }
 
-  return `#${c}`.split("").slice(0, 7).join("");
+  return [...`#${c}`].slice(0, 7).join("");
 };

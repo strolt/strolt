@@ -30,7 +30,7 @@ const Links: React.FC<LinksProps> = (params) => {
         params={linkParams}
         style={{ display: "block" }}
         to={
-          !!linkParams.proxyId
+          linkParams.proxyId
             ? "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxySnapshotList"
             : "instances.instanceId.serviceId.taskId.destinationId.snapshotList"
         }
@@ -44,7 +44,7 @@ const Links: React.FC<LinksProps> = (params) => {
         params={linkParams}
         style={{ display: "block" }}
         to={
-          !!linkParams.proxyId
+          linkParams.proxyId
             ? "instances.proxyId.instanceId.serviceId.taskId.destinationId.prune"
             : "instances.instanceId.serviceId.taskId.destinationId.prune"
         }
@@ -58,7 +58,7 @@ const Links: React.FC<LinksProps> = (params) => {
         params={linkParams}
         style={{ display: "block" }}
         to={
-          !!linkParams.proxyId
+          linkParams.proxyId
             ? "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxyStats"
             : "instances.instanceId.serviceId.taskId.destinationId.stats"
         }
@@ -93,7 +93,7 @@ export interface PrintDestinationsProps {
   list: TaskListItemDestinationProps[];
 }
 export const PrintDestinations: React.FC<PrintDestinationsProps> = ({ list }) => {
-  if (!list.length) {
+  if (list.length === 0) {
     return <>-</>;
   }
 

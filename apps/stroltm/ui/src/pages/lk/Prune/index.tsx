@@ -38,7 +38,7 @@ const PruneButton: FC<PruneButtonProps> = observer(
           loading={managerStore.pruneStatus?.state === "pending"}
           type="primary"
         >
-          Prune{!!count && ` (${count})`}
+          Prune{Boolean(count) && ` (${count})`}
         </Button>
       </Popconfirm>
     );

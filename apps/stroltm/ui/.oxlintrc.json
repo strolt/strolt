@@ -8,10 +8,17 @@
     "suspicious": "error"
   },
   "rules": {
-    "typescript-eslint/consistent-type-imports": "off",
+    "no-empty-interface": "off",
     "max-params": "off",
+    "no-shadow": "off",
     "no-unused-vars": "off",
-    "no-duplicate-imports": "off"
+    "no-map-spread": "off",
+    "no-duplicate-imports": "off",
+    "unicorn/prefer-native-coercion-functions": "off",
+    "no-nested-ternary": "off",
+    "unicorn/prefer-math-trunc": "off",
+    "unicorn/prefer-top-level-await": "off",
+    "no-unused-expressions": "off"
   },
   "extends": ["../../../.datamitsu/.oxlintrc.json"]
 }
