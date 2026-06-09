@@ -47,9 +47,7 @@ func (fs *Fs) scan() ([]File, error) {
 		return files, err
 	}
 
-	lines := strings.Split(string(o), "\n\n")
-
-	for _, line := range lines {
+	for line := range strings.SplitSeq(string(o), "\n\n") {
 		l := strings.Split(line, "\n")
 		path := strings.TrimSuffix(l[0], ":")
 

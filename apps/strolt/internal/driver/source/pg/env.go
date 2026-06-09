@@ -32,11 +32,16 @@ func (i *PgDump) getEnv() []string {
 	return env
 }
 
-func (i *PgDump) SetEnv(env interface{}) error {
+// SetEnv parses the driver environment variables.
+func (i *PgDump) SetEnv(env any) error {
 	data, err := yaml.Marshal(env)
 	if err != nil {
-		return err
+		return fmt.Errorf("marshal env: %w", err)
 	}
 
-	return yaml.Unmarshal(data, &i.env)
+	if err := yaml.Unmarshal(data, &i.env); err != nil {
+		return fmt.Errorf("unmarshal env: %w", err)
+	}
+
+	return nil
 }

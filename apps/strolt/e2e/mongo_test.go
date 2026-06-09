@@ -15,6 +15,7 @@ import (
 
 type MongoSuite struct {
 	suite.Suite
+
 	c *MongoConn
 }
 

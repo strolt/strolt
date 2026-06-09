@@ -1,3 +1,4 @@
+// Package public provides the unauthenticated HTTP API routes.
 package public
 
 import (
@@ -10,12 +11,15 @@ import (
 	"github.com/strolt/strolt/shared/apiu"
 )
 
+// Public groups the unauthenticated API handlers.
 type Public struct{}
 
+// New creates a Public handler group.
 func New() *Public {
 	return &Public{}
 }
 
+// Router mounts the public routes on the given router.
 func (s *Public) Router(r chi.Router) {
 	r.Get("/api/v1/ping", s.ping)
 

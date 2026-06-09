@@ -1,3 +1,4 @@
+// Package cmd implements the stroltm command-line interface.
 package cmd
 
 import (
@@ -82,7 +83,7 @@ monitoring their status, and coordinating backup operations across your infrastr
 			wg.Add(1)
 			go func() {
 				// manager.Init().Watch(ctx, cancel)
-				instances := []strolt.ManagerInstanceInit{}
+				instances := make([]strolt.ManagerInstanceInit, 0, len(config.Get().Strolt.Instances))
 				for instanceName, instance := range config.Get().Strolt.Instances {
 					instances = append(instances, strolt.ManagerInstanceInit{
 						Name:     instanceName,
@@ -100,7 +101,7 @@ monitoring their status, and coordinating backup operations across your infrastr
 			wg.Add(1)
 			go func() {
 				// manager.Init().Watch(ctx, cancel)
-				instances := []stroltp.ManagerInstanceInit{}
+				instances := make([]stroltp.ManagerInstanceInit, 0, len(config.Get().Stroltp.Instances))
 				for instanceName, instance := range config.Get().Stroltp.Instances {
 					instances = append(instances, stroltp.ManagerInstanceInit{
 						Name:     instanceName,
@@ -125,6 +126,7 @@ monitoring their status, and coordinating backup operations across your infrastr
 	},
 }
 
+// Execute runs the root command of the stroltm CLI.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		logger.New().Fatal(err)

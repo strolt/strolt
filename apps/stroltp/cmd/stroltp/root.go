@@ -1,3 +1,4 @@
+// Package cmd implements the stroltp command-line interface.
 package cmd
 
 import (
@@ -81,7 +82,7 @@ for your distributed backup infrastructure.`,
 			wg.Add(1)
 			go func() {
 				// manager.Init().Watch(ctx, cancel)
-				instances := []strolt.ManagerInstanceInit{}
+				instances := make([]strolt.ManagerInstanceInit, 0, len(config.Get().Strolt.Instances))
 				for instanceName, instance := range config.Get().Strolt.Instances {
 					instances = append(instances, strolt.ManagerInstanceInit{
 						Name:     instanceName,
@@ -106,6 +107,7 @@ for your distributed backup infrastructure.`,
 	},
 }
 
+// Execute runs the root command and exits on error.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		logger.New().Fatal(err)

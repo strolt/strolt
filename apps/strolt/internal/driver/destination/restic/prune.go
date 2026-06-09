@@ -1,7 +1,9 @@
 package restic
 
 import (
+	gocontext "context"
 	"encoding/json"
+	"fmt"
 	"os/exec"
 	"strings"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
 )
 
+// Prune runs restic forget with the configured retention policy and prunes removed data.
 func (i *Restic) Prune(ctx context.Context, isDryRun bool) ([]interfaces.Snapshot, error) {
 	var args []string
 	args = append(args, i.getGlobalFlags()...)
@@ -19,7 +22,7 @@ func (i *Restic) Prune(ctx context.Context, isDryRun bool) ([]interfaces.Snapsho
 		args = append(args, "--dry-run")
 	}
 
-	cmd := exec.Command(i.getBin(), args...)
+	cmd := exec.CommandContext(gocontext.Background(), i.getBin(), args...) //nolint:gosec // restic binary path and flags come from validated config
 
 	env, err := i.getEnv()
 	if err != nil {
@@ -44,7 +47,7 @@ func (i *Restic) Prune(ctx context.Context, isDryRun bool) ([]interfaces.Snapsho
 
 	var resticForgetOutput forgetOutput
 	if err := json.Unmarshal([]byte(outputList[0]), &resticForgetOutput); err != nil {
-		return []interfaces.Snapshot{}, err
+		return []interfaces.Snapshot{}, fmt.Errorf("unmarshal forget output: %w", err)
 	}
 
 	return resticForgetOutput.getSnapshotList(), nil

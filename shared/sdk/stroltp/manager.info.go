@@ -17,6 +17,7 @@ func getStroltInfo(list []*stroltp_models.ManagerInfoInstance, name string) *str
 	return nil
 }
 
+// ManagerGetInfo returns aggregated information about all managed instances.
 func ManagerGetInfo(version string) common.ManagerInfo {
 	manager.RLock()
 	defer manager.RUnlock()

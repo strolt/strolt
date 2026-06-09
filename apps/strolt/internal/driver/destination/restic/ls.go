@@ -1,8 +1,10 @@
 package restic
 
 import (
+	gocontext "context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -33,9 +35,9 @@ type lsNode struct {
 	Size        *uint64     `json:"size,omitempty"`
 	Mode        os.FileMode `json:"mode,omitempty"`
 	Permissions string      `json:"permissions,omitempty"`
-	ModTime     time.Time   `json:"mtime,omitempty"`
-	AccessTime  time.Time   `json:"atime,omitempty"`
-	ChangeTime  time.Time   `json:"ctime,omitempty"`
+	ModTime     time.Time   `json:"mtime,omitzero"`
+	AccessTime  time.Time   `json:"atime,omitzero"`
+	ChangeTime  time.Time   `json:"ctime,omitzero"`
 	// StructType  string      `json:"struct_type"` // "node"
 }
 
@@ -59,7 +61,7 @@ type lsItem struct {
 func parseLsItem(line string) (lsItem, error) {
 	var itemType lsType
 	if err := json.Unmarshal([]byte(line), &itemType); err != nil {
-		return lsItem{}, err
+		return lsItem{}, fmt.Errorf("unmarshal ls item type: %w", err)
 	}
 
 	switch itemType.StructType {
@@ -67,7 +69,7 @@ func parseLsItem(line string) (lsItem, error) {
 		var snapshot lsSnapshot
 
 		if err := json.Unmarshal([]byte(line), &snapshot); err != nil {
-			return lsItem{}, err
+			return lsItem{}, fmt.Errorf("unmarshal ls snapshot: %w", err)
 		}
 
 		return lsItem{
@@ -79,7 +81,7 @@ func parseLsItem(line string) (lsItem, error) {
 		var node lsNode
 
 		if err := json.Unmarshal([]byte(line), &node); err != nil {
-			return lsItem{}, err
+			return lsItem{}, fmt.Errorf("unmarshal ls node: %w", err)
 		}
 
 		return lsItem{
@@ -93,11 +95,13 @@ func parseLsItem(line string) (lsItem, error) {
 }
 
 func (i *Restic) ls(_ context.Context, snapshotID string, path string) ([]lsItem, error) {
-	var args []string
-	args = append(args, i.getGlobalFlags()...)
+	globalFlags := i.getGlobalFlags()
+
+	args := make([]string, 0, len(globalFlags)+3)
+	args = append(args, globalFlags...)
 	args = append(args, "ls", snapshotID, path)
 
-	cmd := exec.Command(i.getBin(), args...)
+	cmd := exec.CommandContext(gocontext.Background(), i.getBin(), args...) //nolint:gosec // restic binary path and flags come from validated config
 
 	env, err := i.getEnv()
 	if err != nil {
@@ -108,12 +112,12 @@ func (i *Restic) ls(_ context.Context, snapshotID string, path string) ([]lsItem
 
 	output, err := cmd.Output()
 	if err != nil {
-		return []lsItem{}, err
+		return []lsItem{}, fmt.Errorf("restic ls: %w", err)
 	}
 
 	list := []lsItem{}
 
-	for _, line := range strings.Split(string(output), "\n") {
+	for line := range strings.SplitSeq(string(output), "\n") {
 		if line == "" {
 			continue
 		}

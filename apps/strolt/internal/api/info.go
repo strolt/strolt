@@ -11,6 +11,7 @@ import (
 
 var startedAt = time.Now().Format(time.RFC3339)
 
+// GetInfoResponse is the response payload of the info endpoint.
 type GetInfoResponse struct {
 	Version               string `json:"version"`
 	StartedAt             string `json:"startedAt"`

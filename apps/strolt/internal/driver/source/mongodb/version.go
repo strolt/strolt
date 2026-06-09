@@ -8,7 +8,7 @@ import (
 )
 
 func (i *MongoDB) getMongoDumpVersion() string {
-	cmd := exec.Command(i.getBinMongoDump(), "--version")
+	cmd := exec.Command(i.getBinMongoDump(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -27,7 +27,7 @@ func (i *MongoDB) getMongoDumpVersion() string {
 }
 
 func (i *MongoDB) getMongoRestoreVersion() string {
-	cmd := exec.Command(i.getBinMongoRestore(), "--version")
+	cmd := exec.Command(i.getBinMongoRestore(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -45,6 +45,7 @@ func (i *MongoDB) getMongoRestoreVersion() string {
 	return str
 }
 
+// BinaryVersion returns versions of the mongodump and mongorestore binaries.
 func (i *MongoDB) BinaryVersion() ([]interfaces.DriverBinaryVersion, error) {
 	mongodumpVersion := i.getMongoDumpVersion()
 	mongorestoreVersion := i.getMongoRestoreVersion()

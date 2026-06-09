@@ -6,6 +6,7 @@ import (
 	"github.com/strolt/strolt/shared/sdk/common"
 )
 
+// ManagerGetInfo returns aggregated information about all managed instances.
 func ManagerGetInfo(version string) common.ManagerInfo {
 	manager.RLock()
 	defer manager.RUnlock()

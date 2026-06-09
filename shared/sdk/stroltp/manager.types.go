@@ -9,11 +9,14 @@ import (
 	"github.com/strolt/strolt/shared/sdk/stroltp/generated/stroltp_models"
 )
 
+// Manager keeps track of all configured strolt proxy instances.
 type Manager struct {
-	Instances map[string]*Instance
 	sync.RWMutex
+
+	Instances map[string]*Instance
 }
 
+// ManagerInstanceInit holds the parameters required to register a proxy instance in the manager.
 type ManagerInstanceInit struct {
 	Name     string
 	URL      string
@@ -21,7 +24,10 @@ type ManagerInstanceInit struct {
 	Password string
 }
 
+// Instance represents a single strolt proxy instance tracked by the manager.
 type Instance struct {
+	*sync.RWMutex
+
 	Name     string
 	URL      string
 	Username string
@@ -37,9 +43,9 @@ type Instance struct {
 	StroltInstancesUpdatedAt int64
 
 	log *logger.Logger
-	*sync.RWMutex
 }
 
+// WatchItem holds the ping state of a proxy instance.
 type WatchItem struct {
 	LatestPingAt            time.Time
 	LatestSuccessPingAt     time.Time

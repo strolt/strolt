@@ -4,6 +4,7 @@ import (
 	"github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_models"
 )
 
+// ManagerPreparedInstance describes a prepared instance with its config and task status.
 type ManagerPreparedInstance struct {
 	ProxyName  *string                      `json:"proxyName,omitempty"`
 	Name       string                       `json:"name"`

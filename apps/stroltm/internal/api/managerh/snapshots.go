@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/strolt/strolt/shared/apiu"
 	"github.com/strolt/strolt/shared/sdk/strolt"
-	_ "github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_models"
+	_ "github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_models" // register models for swagger docs
 	"github.com/strolt/strolt/shared/sdk/stroltp"
 )
 

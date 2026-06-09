@@ -16,13 +16,14 @@ func (i *PgDump) backup(ctx context.Context, isPipe bool) *exec.Cmd {
 		args = append(args, "--file="+i.getFileName())
 	}
 
-	cmd := exec.Command(i.getBinPgDump(), args...)
+	cmd := exec.Command(i.getBinPgDump(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
 	cmd.Dir = ctx.WorkDir
 	cmd.Env = i.getEnv()
 
 	return cmd
 }
 
+// Backup runs pg_dump and stores the dump in the working directory.
 func (i *PgDump) Backup(ctx context.Context) error {
 	cmd := i.backup(ctx, false)
 
@@ -42,7 +43,7 @@ func (i *PgDump) Backup(ctx context.Context) error {
 			return fmt.Errorf("%w (%v)", err, lastMessage)
 		}
 
-		return err
+		return fmt.Errorf("run pg_dump: %w", err)
 	}
 
 	if outputString != "" {
@@ -52,21 +53,23 @@ func (i *PgDump) Backup(ctx context.Context) error {
 	return nil
 }
 
+// BackupPipe runs pg_dump and returns its stdout as a backup stream.
 func (i *PgDump) BackupPipe(ctx context.Context) (io.ReadCloser, string, func() error, error) {
 	cmd := i.backup(ctx, true)
 
 	pipe, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, "", nil, err
+		return nil, "", nil, fmt.Errorf("get stdout pipe: %w", err)
 	}
 
 	if err := cmd.Start(); err != nil {
-		return nil, "", nil, err
+		return nil, "", nil, fmt.Errorf("start pg_dump: %w", err)
 	}
 
-	return pipe, i.getFileName(), cmd.Wait, err
+	return pipe, i.getFileName(), cmd.Wait, nil
 }
 
+// IsSupportedBackupPipe reports whether backing up as a stream is supported.
 func (i *PgDump) IsSupportedBackupPipe(_ context.Context) bool {
 	return i.config.Format != FormatDirectory
 }

@@ -1,3 +1,4 @@
+// Package public contains HTTP handlers that do not require authentication.
 package public
 
 import (
@@ -10,12 +11,15 @@ import (
 	"github.com/strolt/strolt/shared/apiu"
 )
 
+// Public groups HTTP handlers for public endpoints.
 type Public struct{}
 
+// New creates a Public handlers instance.
 func New() *Public {
 	return &Public{}
 }
 
+// Router registers the public endpoints on the given router.
 func (s *Public) Router(r chi.Router) {
 	r.Get("/api/v1/ping", s.ping)
 

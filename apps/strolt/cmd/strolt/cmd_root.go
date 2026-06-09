@@ -58,6 +58,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+// Execute runs the root command of the strolt CLI.
 func Execute() {
 	log := logger.New()
 
@@ -65,7 +66,7 @@ func Execute() {
 		log.Error(err)
 	}
 
-	rootCmd.Execute() //nolint:errcheck
+	_ = rootCmd.Execute()
 
 	if err := dir.RemoveTempDirectories(); err != nil {
 		log.Error(err)

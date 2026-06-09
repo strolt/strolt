@@ -12,6 +12,7 @@ var manager = &Manager{
 	Instances: map[string]*Instance{},
 }
 
+// ManagerInit initializes the manager with the given instances and starts watching them.
 func ManagerInit(ctx context.Context, cancel func(), instances []ManagerInstanceInit) {
 	for _, instance := range instances {
 		manager.Instances[instance.Name] = &Instance{
@@ -33,6 +34,7 @@ func ManagerInit(ctx context.Context, cancel func(), instances []ManagerInstance
 	manager.Watch(ctx, cancel)
 }
 
+// ManagerGetPreparedInstances returns a snapshot of all managed instances.
 func ManagerGetPreparedInstances() []common.ManagerPreparedInstance {
 	manager.RLock()
 	defer manager.RUnlock()
@@ -57,6 +59,7 @@ func ManagerGetPreparedInstances() []common.ManagerPreparedInstance {
 	return list
 }
 
+// ManagerGetSDKByInstanceName returns the SDK client for the named instance.
 func ManagerGetSDKByInstanceName(instanceName string) (*SDK, bool) {
 	instance, ok := manager.Instances[instanceName]
 	if !ok {

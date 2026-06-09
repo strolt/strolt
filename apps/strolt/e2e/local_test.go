@@ -8,6 +8,7 @@ import (
 
 type LocalSuite struct {
 	suite.Suite
+
 	fs *Fs
 }
 

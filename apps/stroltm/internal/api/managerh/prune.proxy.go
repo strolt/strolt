@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/strolt/strolt/shared/apiu"
-	_ "github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_models"
+	_ "github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_models" // register models for swagger docs
 )
 
 // getSnapshotsForPruneProxy godoc

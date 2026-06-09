@@ -7,15 +7,17 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/go-connections/nat"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/network"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 // ContainerManager manages all testcontainers for e2e tests.
 type ContainerManager struct {
-	ctx               context.Context
-	network           testcontainers.Network
+	ctx               context.Context //nolint:containedctx // test helper carries the suite context
+	network           *testcontainers.DockerNetwork
 	postgresContainer testcontainers.Container
 	mongoContainer    testcontainers.Container
 	mariadbContainer  testcontainers.Container
@@ -33,19 +35,19 @@ func NewContainerManager(ctx context.Context) (*ContainerManager, error) {
 
 // SetupNetwork creates a Docker network for containers.
 func (cm *ContainerManager) SetupNetwork() error {
-	network, err := testcontainers.GenericNetwork(cm.ctx, testcontainers.GenericNetworkRequest{
-		NetworkRequest: testcontainers.NetworkRequest{
-			Name:           "strolt",
-			CheckDuplicate: true,
-		},
-	})
+	nw, err := network.New(cm.ctx)
 	if err != nil {
 		return err
 	}
 
-	cm.network = network
+	cm.network = nw
 
 	return nil
+}
+
+// NetworkName returns the name of the Docker network shared by the containers.
+func (cm *ContainerManager) NetworkName() string {
+	return cm.network.Name
 }
 
 // StartStrolt starts the Strolt container.
@@ -74,12 +76,14 @@ func (cm *ContainerManager) StartStrolt() error {
 				FileMode:          0o644,
 			},
 		},
-		Mounts: testcontainers.Mounts(
-			testcontainers.BindMount(absStroltPath, "/strolt/.strolt"),
-			testcontainers.BindMount(absTempPath, "/e2e/input"),
-		),
-		Networks:       []string{"strolt"},
-		NetworkAliases: map[string][]string{"strolt": {"strolt"}},
+		HostConfigModifier: func(hostConfig *container.HostConfig) {
+			hostConfig.Binds = append(hostConfig.Binds,
+				absStroltPath+":/strolt/.strolt",
+				absTempPath+":/e2e/input",
+			)
+		},
+		Networks:       []string{cm.NetworkName()},
+		NetworkAliases: map[string][]string{cm.NetworkName(): {"strolt"}},
 		Entrypoint:     []string{"/bin/sh"},
 		Cmd:            []string{"-c", "sleep infinity"},
 		WaitingFor:     wait.ForExec([]string{"sh", "-c", "test -d /e2e/input"}).WithExitCodeMatcher(func(exitCode int) bool { return exitCode == 0 }),
@@ -278,8 +282,8 @@ func (cm *ContainerManager) startPostgres() (testcontainers.Container, error) {
 			"POSTGRES_PASSWORD": "strolt",
 			"POSTGRES_USER":     "strolt",
 		},
-		Networks:       []string{"strolt"},
-		NetworkAliases: map[string][]string{"strolt": {"postgres"}},
+		Networks:       []string{cm.NetworkName()},
+		NetworkAliases: map[string][]string{cm.NetworkName(): {"postgres"}},
 		WaitingFor: wait.ForSQL("5432/tcp", "postgres", func(host string, port nat.Port) string {
 			return "postgres://strolt:strolt@" + host + ":" + port.Port() + "/strolt?sslmode=disable"
 		}).WithQuery("SELECT 1").WithPollInterval(1 * time.Second).WithStartupTimeout(60 * time.Second),
@@ -299,8 +303,8 @@ func (cm *ContainerManager) startMongo() (testcontainers.Container, error) {
 			"PUID": "1000",
 			"PGID": "1000",
 		},
-		Networks:       []string{"strolt"},
-		NetworkAliases: map[string][]string{"strolt": {"mongo"}},
+		Networks:       []string{cm.NetworkName()},
+		NetworkAliases: map[string][]string{cm.NetworkName(): {"mongo"}},
 		WaitingFor:     wait.ForListeningPort("27017/tcp").WithStartupTimeout(30 * time.Second),
 	}
 
@@ -321,8 +325,8 @@ func (cm *ContainerManager) startMariaDB() (testcontainers.Container, error) {
 			"MYSQL_PASSWORD":      "strolt",
 			"MYSQL_ROOT_PASSWORD": "strolt",
 		},
-		Networks:       []string{"strolt"},
-		NetworkAliases: map[string][]string{"strolt": {"mariadb"}},
+		Networks:       []string{cm.NetworkName()},
+		NetworkAliases: map[string][]string{cm.NetworkName(): {"mariadb"}},
 		WaitingFor: wait.ForSQL("3306/tcp", "mysql", func(host string, port nat.Port) string {
 			return "strolt:strolt@tcp(" + host + ":" + port.Port() + ")/strolt"
 		}).WithQuery("SELECT 1").WithPollInterval(2 * time.Second).WithStartupTimeout(90 * time.Second),
@@ -345,8 +349,8 @@ func (cm *ContainerManager) startMySQL() (testcontainers.Container, error) {
 			"MYSQL_PASSWORD":      "strolt",
 			"MYSQL_ROOT_PASSWORD": "strolt",
 		},
-		Networks:       []string{"strolt"},
-		NetworkAliases: map[string][]string{"strolt": {"mysql"}},
+		Networks:       []string{cm.NetworkName()},
+		NetworkAliases: map[string][]string{cm.NetworkName(): {"mysql"}},
 		WaitingFor: wait.ForSQL("3306/tcp", "mysql", func(host string, port nat.Port) string {
 			return "strolt:strolt@tcp(" + host + ":" + port.Port() + ")/strolt"
 		}).WithQuery("SELECT 1").WithPollInterval(2 * time.Second).WithStartupTimeout(120 * time.Second),
@@ -367,8 +371,8 @@ func (cm *ContainerManager) startMinio() (testcontainers.Container, error) {
 			"MINIO_ROOT_USER":     "minioadmin",
 			"MINIO_ROOT_PASSWORD": "minioadmin",
 		},
-		Networks:       []string{"strolt"},
-		NetworkAliases: map[string][]string{"strolt": {"minio"}},
+		Networks:       []string{cm.NetworkName()},
+		NetworkAliases: map[string][]string{cm.NetworkName(): {"minio"}},
 		WaitingFor:     wait.ForHTTP("/minio/health/live").WithPort("9000/tcp").WithStartupTimeout(30 * time.Second),
 	}
 

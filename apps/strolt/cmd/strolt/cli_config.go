@@ -1,3 +1,4 @@
+// Package cmd implements the strolt command-line interface.
 package cmd
 
 import (

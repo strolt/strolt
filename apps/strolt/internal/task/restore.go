@@ -2,6 +2,7 @@ package task
 
 import (
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
@@ -33,6 +34,7 @@ func (t *Task) isAvailableRestorePipe() (bool, error) {
 	return true, nil
 }
 
+// RestoreDestinationToTemp restores a snapshot from the destination into the work directory.
 func (t *Task) RestoreDestinationToTemp(destinationName string, snapshotName string) error {
 	destination, ok := t.TaskConfig.Destinations[destinationName]
 	if !ok {
@@ -41,22 +43,31 @@ func (t *Task) RestoreDestinationToTemp(destinationName string, snapshotName str
 
 	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
 	if err != nil {
-		return err
+		return fmt.Errorf("get destination driver: %w", err)
 	}
 
-	return destinationDriver.Restore(t.Context, snapshotName)
+	if err := destinationDriver.Restore(t.Context, snapshotName); err != nil {
+		return fmt.Errorf("destination restore: %w", err)
+	}
+
+	return nil
 }
 
+// RestoreTempToSource restores data from the work directory into the source.
 func (t *Task) RestoreTempToSource() error {
 	sourceDriver, err := dmanager.GetSourceDriver(t.TaskConfig.Source.Driver, t.ServiceName, t.TaskName, t.TaskConfig.Source.Config, t.TaskConfig.Source.Env)
 	if err != nil {
-		return err
+		return fmt.Errorf("get source driver: %w", err)
 	}
 
-	return sourceDriver.Restore(t.Context)
+	if err := sourceDriver.Restore(t.Context); err != nil {
+		return fmt.Errorf("source restore: %w", err)
+	}
+
+	return nil
 }
 
-func (t *Task) retstorePipe(destinationName string, snapshotName string) error {
+func (t *Task) restorePipe(destinationName string, snapshotName string) error {
 	destinationDriver, err := t.getDestinationDriver(destinationName)
 	if err != nil {
 		return err
@@ -64,12 +75,12 @@ func (t *Task) retstorePipe(destinationName string, snapshotName string) error {
 
 	reader, filename, wait, err := destinationDriver.RestorePipe(t.Context, snapshotName)
 	if err != nil {
-		return err
+		return fmt.Errorf("destination restore pipe: %w", err)
 	}
 
 	defer func() {
-		reader.Close()
-		wait() //nolint: errcheck
+		_ = reader.Close()
+		_ = wait()
 	}()
 
 	sourceDriver, err := t.getSourceDriver()
@@ -79,12 +90,12 @@ func (t *Task) retstorePipe(destinationName string, snapshotName string) error {
 
 	writer, wait, err := sourceDriver.RestorePipe(t.Context, filename)
 	if err != nil {
-		return err
+		return fmt.Errorf("source restore pipe: %w", err)
 	}
 
 	defer func() {
-		writer.Close()
-		wait() //nolint: errcheck
+		_ = writer.Close()
+		_ = wait()
 	}()
 
 	exitError := make(chan error)
@@ -105,6 +116,7 @@ func (t *Task) restoreCopy(destinationName string, snapshotName string) error {
 	return t.RestoreTempToSource()
 }
 
+// Restore runs the restore operation in pipe or copy mode depending on the task config.
 func (t *Task) Restore(destinationName string, snapshotName string) error {
 	isAvailablePipe, err := t.isAvailableRestorePipe()
 	if err != nil {
@@ -121,11 +133,11 @@ func (t *Task) Restore(destinationName string, snapshotName string) error {
 			return ErrNotSupportedPipeMode
 		}
 
-		return t.retstorePipe(destinationName, snapshotName)
+		return t.restorePipe(destinationName, snapshotName)
 	}
 
 	if t.TaskConfig.OperationMode == config.OperationModePreferPipe && isAvailablePipe {
-		return t.retstorePipe(destinationName, snapshotName)
+		return t.restorePipe(destinationName, snapshotName)
 	}
 
 	return t.restoreCopy(destinationName, snapshotName)

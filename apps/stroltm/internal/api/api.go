@@ -1,3 +1,4 @@
+// Package api provides the HTTP API server for the Strolt Manager.
 package api
 
 import (
@@ -19,19 +20,20 @@ import (
 	"github.com/strolt/strolt/shared/logger"
 )
 
+// API is the HTTP API server of the Strolt Manager.
 type API struct {
 	addr       string
 	httpServer *http.Server
 	log        *logger.Logger
 }
 
+// New creates an API server configured from the environment.
 func New() *API {
 	addr := fmt.Sprintf("%s:%d", env.Host(), env.Port())
 
 	api := API{
-		addr:       addr,
-		httpServer: &http.Server{},
-		log:        logger.New(),
+		addr: addr,
+		log:  logger.New(),
 	}
 
 	api.httpServer = api.makeHTTPServer()
@@ -50,16 +52,6 @@ func (api *API) Shutdown() {
 		}
 
 		api.log.Debug("shutdown api server completed")
-	}
-}
-
-func (api *API) makeHTTPServer() *http.Server {
-	return &http.Server{
-		Addr:              api.addr,
-		Handler:           api.handler(),
-		ReadHeaderTimeout: 5 * time.Second,   //nolint:mnd
-		WriteTimeout:      120 * time.Second, //nolint:mnd
-		IdleTimeout:       30 * time.Second,  //nolint:mnd
 	}
 }
 
@@ -89,10 +81,22 @@ func (api *API) Run(ctx context.Context, cancel func()) {
 	api.log.Debug("api server was stopped")
 }
 
-// @version					1.0
-// @BasePath					/
-// @securityDefinitions.basic	BasicAuth
-// @title						Strolt Manager API.
+func (api *API) makeHTTPServer() *http.Server {
+	return &http.Server{
+		Addr:              api.addr,
+		Handler:           api.handler(),
+		ReadHeaderTimeout: 5 * time.Second,   //nolint:mnd
+		WriteTimeout:      120 * time.Second, //nolint:mnd
+		IdleTimeout:       30 * time.Second,  //nolint:mnd
+	}
+}
+
+// handler godoc
+//
+//	@version					1.0
+//	@BasePath					/
+//	@securityDefinitions.basic	BasicAuth
+//	@title						Strolt Manager API.
 func (api *API) handler() http.Handler {
 	r := chi.NewRouter()
 

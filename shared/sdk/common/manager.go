@@ -1,15 +1,18 @@
+// Package common contains shared manager types used by strolt SDKs.
 package common
 
 import (
 	"time"
 )
 
+// ManagerInfo describes the aggregated state of all managed instances.
 type ManagerInfo struct {
 	Instances []ManagerInfoInstance `json:"instances"`
 	UpdatedAt string                `json:"updatedAt"`
 	Version   string                `json:"version"`
 } //	@name	ManagerInfo
 
+// ManagerInfoInstance describes the state of a single managed instance.
 type ManagerInfoInstance struct {
 	ProxyName       *string `json:"proxyName,omitempty"`
 	Name            string  `json:"name"`
@@ -22,19 +25,22 @@ type ManagerInfoInstance struct {
 	TaskStatus ManagerInfoInstanceTaskStatus `json:"taskStatus"`
 } //	@name	ManagerInfoInstance
 
+// ManagerInfoInstanceConfig describes the configuration state of an instance.
 type ManagerInfoInstanceConfig struct {
 	IsInitialized bool   `json:"isInitialized"`
 	UpdatedAt     string `json:"updatedAt"`
 } //	@name	ManagerInfoInstanceConfig
 
+// ManagerInfoInstanceTaskStatus describes the task status state of an instance.
 type ManagerInfoInstanceTaskStatus struct {
 	IsInitialized     bool   `json:"isInitialized"`
 	UpdatedAt         string `json:"updatedAt"`
 	UpdateRequestedAt string `json:"updateRequestedAt"`
 } //	@name	ManagerInfoInstanceTaskStatus
 
+// GetUpdatedAt returns the latest update timestamp of the instance as a Unix time.
 func (instance *ManagerInfoInstance) GetUpdatedAt() int64 {
-	var updatedAt int64 = 0
+	var updatedAt int64
 
 	taskStatusUpdatedRequestedAt, err := time.Parse(time.RFC3339, instance.TaskStatus.UpdateRequestedAt)
 	if err == nil {

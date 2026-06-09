@@ -12,17 +12,19 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/shared/utils"
 
-	_ "time/tzdata"
+	_ "time/tzdata" // register embedded time zone data
 
 	"gopkg.in/yaml.v3"
 )
 
 var loadedAt time.Time
 
+// GetLoadedAt returns the time the configuration was last loaded.
 func GetLoadedAt() time.Time {
 	return loadedAt
 }
 
+// FileInfo describes a config file and the files it extends.
 type FileInfo struct {
 	Config Config
 
@@ -42,26 +44,26 @@ type loaded struct {
 func scan(pathname string) (*FileInfo, error) {
 	configPathname, err := filepath.Abs(pathname)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("resolve config path: %w", err)
 	}
 
 	fi := FileInfo{
 		ConfigPathname: configPathname,
 	}
 
-	configData, err := os.ReadFile(pathname)
+	configData, err := os.ReadFile(pathname) //nolint:gosec // path comes from user-provided configuration
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read config file: %w", err)
 	}
 
 	if err := yaml.Unmarshal(configData, &fi.Config); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse config file: %w", err)
 	}
 
 	for _, pathname := range fi.Config.Extends.Configs {
 		extendedConfigPathname, err := filepath.Abs(path.Join(path.Dir(configPathname), pathname))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("resolve extended config path: %w", err)
 		}
 
 		if configPathname == extendedConfigPathname {
@@ -81,7 +83,7 @@ func scan(pathname string) (*FileInfo, error) {
 	for _, pathname := range fi.Config.Extends.Secrets {
 		extendedSecretsPathname, err := filepath.Abs(path.Join(path.Dir(configPathname), pathname))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("resolve extended secrets path: %w", err)
 		}
 
 		fi.ExtendedSecretsPathnameList = append(fi.ExtendedSecretsPathnameList, extendedSecretsPathname)
@@ -119,14 +121,14 @@ func (fi *FileInfo) fileList(isMain bool) []string {
 func loadSecrets(pathname string) (*Secrets, error) {
 	s := Secrets{}
 
-	secretsData, err := os.ReadFile(pathname)
+	secretsData, err := os.ReadFile(pathname) //nolint:gosec // path comes from user-provided configuration
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read secrets file: %w", err)
 	}
 
 	err = yaml.Unmarshal(secretsData, &s)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse secrets file: %w", err)
 	}
 
 	return &s, nil
@@ -140,7 +142,7 @@ func (c *Config) setDefaults() error {
 
 		timeLocation, err := time.LoadLocation(c.TimeZone)
 		if err != nil {
-			return err
+			return fmt.Errorf("load time zone: %w", err)
 		}
 
 		c.timeLocation = timeLocation
@@ -210,6 +212,7 @@ func load(pathname string) (loaded, error) {
 	}, nil
 }
 
+// Load reads, merges, and validates the configuration from the given path.
 func Load(pathname string) error {
 	l, err := load(pathname)
 	if err != nil {

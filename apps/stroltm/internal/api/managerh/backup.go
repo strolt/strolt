@@ -2,6 +2,7 @@ package managerh
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"sync"
 
@@ -43,16 +44,17 @@ func backup(instanceName, serviceName, taskName string) error {
 	}
 
 	if _, err := sdk.Backup(serviceName, taskName); err != nil {
-		return err
+		return fmt.Errorf("start backup: %w", err)
 	}
 
 	return nil
 }
 
 type backupAllResponse struct {
+	*sync.Mutex
+
 	SuccessStarted []backupAllStatusItem `json:"successStarted"`
 	ErrorStarted   []backupAllStatusItem `json:"errorStarted"`
-	*sync.Mutex
 }
 
 type backupAllStatusItem struct {

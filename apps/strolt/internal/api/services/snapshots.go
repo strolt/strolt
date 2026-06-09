@@ -6,6 +6,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/shared/apiu"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -33,7 +34,11 @@ func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
 		apiu.RenderJSON500(w, r, err)
 		return
 	}
-	defer t.Close()
+	defer func() {
+		if err := t.Close(); err != nil {
+			logger.New().Error(err)
+		}
+	}()
 
 	if t.IsRunning() {
 		apiu.RenderJSON400(w, r, apiu.ErrTaskAlreadyWorking)

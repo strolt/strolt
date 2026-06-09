@@ -2,6 +2,7 @@ package managerh
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -42,7 +43,7 @@ func backupProxy(proxyName, instanceName, serviceName, taskName string) error {
 	}
 
 	if _, err := sdk.Backup(instanceName, serviceName, taskName); err != nil {
-		return err
+		return fmt.Errorf("start backup: %w", err)
 	}
 
 	return nil

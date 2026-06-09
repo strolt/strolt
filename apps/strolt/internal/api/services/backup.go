@@ -38,7 +38,11 @@ func (s *Services) backup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		defer t.Close()
+		defer func() {
+			if err := t.Close(); err != nil {
+				logger.New().Error(err)
+			}
+		}()
 
 		if err := t.Backup(); err != nil {
 			logger.New().Error(err)

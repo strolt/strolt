@@ -8,7 +8,7 @@ import (
 )
 
 func (i *MySQL) getMySQLVersion() string {
-	cmd := exec.Command(i.getBinMySQL(), "--version")
+	cmd := exec.Command(i.getBinMySQL(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -21,7 +21,7 @@ func (i *MySQL) getMySQLVersion() string {
 }
 
 func (i *MySQL) getMySQLDumpVersion() string {
-	cmd := exec.Command(i.getBinMySQLDump(), "--version")
+	cmd := exec.Command(i.getBinMySQLDump(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -33,6 +33,7 @@ func (i *MySQL) getMySQLDumpVersion() string {
 	return arr[2]
 }
 
+// BinaryVersion returns versions of the mysql and mysqldump binaries.
 func (i *MySQL) BinaryVersion() ([]interfaces.DriverBinaryVersion, error) {
 	mysqlVersion := i.getMySQLVersion()
 	mysqlDumpVersion := i.getMySQLDumpVersion()

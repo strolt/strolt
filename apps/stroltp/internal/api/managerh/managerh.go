@@ -1,3 +1,4 @@
+// Package managerh provides HTTP handlers for managing strolt instances.
 package managerh
 
 import (
@@ -6,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/strolt/strolt/shared/apiu"
-	_ "github.com/strolt/strolt/shared/sdk/common"
+	_ "github.com/strolt/strolt/shared/sdk/common" // register swagger models
 	"github.com/strolt/strolt/shared/sdk/strolt"
 )
 
@@ -19,12 +20,15 @@ func getSDK(instanceName string) (*strolt.SDK, error) {
 	return sdk, nil
 }
 
+// ManagerHandlers groups HTTP handlers for strolt instance management.
 type ManagerHandlers struct{}
 
+// New creates a ManagerHandlers instance.
 func New() *ManagerHandlers {
 	return &ManagerHandlers{}
 }
 
+// Router registers manager routes on the given router.
 func (s *ManagerHandlers) Router(r chi.Router) {
 	r.Get("/api/v1/manager/instances", s.getInstances)
 	r.Post("/api/v1/manager/instances/{instanceName}/{serviceName}/tasks/{taskName}/backup", s.backup)

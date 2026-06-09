@@ -5,7 +5,7 @@ import (
 
 	"github.com/strolt/strolt/apps/stroltp/internal/ldflags"
 	"github.com/strolt/strolt/shared/apiu"
-	_ "github.com/strolt/strolt/shared/sdk/common"
+	_ "github.com/strolt/strolt/shared/sdk/common" // register swagger models
 	"github.com/strolt/strolt/shared/sdk/strolt"
 )
 

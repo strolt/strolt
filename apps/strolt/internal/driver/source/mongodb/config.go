@@ -6,8 +6,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// ArchiveFileName is the name of the archive file produced by mongodump.
 const ArchiveFileName = "./strolt_driver_mongodb.gz"
 
+// Config describes the MongoDB source driver configuration.
 type Config struct {
 	BinPathMongoDump    string `yaml:"bin_path_mongodump"`
 	BinPathMongoRestore string `yaml:"bin_path_mongorestore"`
@@ -24,13 +26,18 @@ type Config struct {
 	CommonParams  string `yaml:"common_params"`
 }
 
-func (i *MongoDB) SetConfig(config interface{}) error {
+// SetConfig parses the driver configuration.
+func (i *MongoDB) SetConfig(config any) error {
 	data, err := yaml.Marshal(config)
 	if err != nil {
-		return err
+		return fmt.Errorf("marshal config: %w", err)
 	}
 
-	return yaml.Unmarshal(data, &i.config)
+	if err := yaml.Unmarshal(data, &i.config); err != nil {
+		return fmt.Errorf("unmarshal config: %w", err)
+	}
+
+	return nil
 }
 
 func (i *MongoDB) getCommonArgs() []string {

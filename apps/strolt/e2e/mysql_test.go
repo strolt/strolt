@@ -9,12 +9,13 @@ import (
 
 type MySQLSuite struct {
 	suite.Suite
+
 	c *Conn
 }
 
 func (s *MySQLSuite) SetupSuite() {
 	port, err := containerManager.GetMySQLPort()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	connStr := fmt.Sprintf("strolt:strolt@(localhost:%s)/strolt?timeout=60s", port)
 	c, err := sqlConnect("mysql", connStr)
@@ -38,7 +39,7 @@ func (s *MySQLSuite) AfterTest(suiteName, testName string) {
 }
 
 func (s *MySQLSuite) TestMySQL() {
-	s.NoError(strolt("backup", "--service", "e2e", "--task", "mysql", "--y"))
+	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "mysql", "--y"))
 
 	s.c.dropTable()
 

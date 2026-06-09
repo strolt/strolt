@@ -2,6 +2,7 @@ package restic
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 
@@ -27,6 +28,7 @@ type resticBackupOutput struct {
 	DryRun              bool    `json:"dry_run,omitempty"`
 }
 
+// Backup runs a restic backup of the working directory and returns its summary.
 func (i *Restic) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 	cmd, err := i.backupCmd(ctx, "", false)
 	if err != nil {
@@ -48,7 +50,7 @@ func (i *Restic) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 	var backupOutput resticBackupOutput
 	if err := json.Unmarshal([]byte(outputs[len(outputs)-2]), &backupOutput); err != nil {
 		i.logger.Error(err)
-		return sctxt.BackupOutput{}, err
+		return sctxt.BackupOutput{}, fmt.Errorf("unmarshal backup output: %w", err)
 	}
 
 	return sctxt.BackupOutput{
@@ -64,6 +66,7 @@ func (i *Restic) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 	}, nil
 }
 
+// BackupPipe returns a writer that streams data into a restic backup via stdin.
 func (i *Restic) BackupPipe(ctx context.Context, filename string) (io.WriteCloser, func() error, error) {
 	cmd, err := i.backupCmd(ctx, filename, true)
 	if err != nil {
@@ -72,16 +75,17 @@ func (i *Restic) BackupPipe(ctx context.Context, filename string) (io.WriteClose
 
 	writer, err := cmd.StdinPipe()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("open stdin pipe: %w", err)
 	}
 
 	if err := cmd.Start(); err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("start restic backup: %w", err)
 	}
 
 	return writer, cmd.Wait, nil
 }
 
+// IsSupportedBackupPipe reports whether piped backups are supported.
 func (i *Restic) IsSupportedBackupPipe(ctx context.Context) bool {
 	return true
 }

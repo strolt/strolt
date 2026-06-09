@@ -11,6 +11,7 @@ import (
 	"github.com/strolt/strolt/shared/sdk/stroltp"
 )
 
+// Info describes the manager state returned by the info endpoint.
 type Info struct {
 	Instances     []common.ManagerInfoInstance `json:"instances"`
 	UpdatedAt     string                       `json:"updatedAt"`
@@ -24,7 +25,7 @@ func getInfoInstances() ([]common.ManagerInfoInstance, int64) {
 
 	list := make([]common.ManagerInfoInstance, len(stroltInfo.Instances)+len(stroltpInfo.Instances))
 
-	var updatedAt int64 = 0
+	var updatedAt int64
 
 	i := 0
 

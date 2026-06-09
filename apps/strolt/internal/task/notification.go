@@ -1,6 +1,7 @@
 package task
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -12,12 +13,13 @@ import (
 
 var notificationWaitGroup = sync.WaitGroup{}
 
+// SendNotifications sends the current context event to all matching notification drivers.
 func (t *Task) SendNotifications() error {
 	for _, notification := range t.TaskConfig.Notifications {
 		if notification.IsAvailableEvent(t.Context.Event) {
 			driverNotification, err := dmanager.GetNotificationDriver(notification.Driver, t.ServiceName, t.TaskName, notification.Config)
 			if err != nil {
-				return err
+				return fmt.Errorf("get notification driver: %w", err)
 			}
 
 			driverNotification.Send(t.Context)

@@ -1,3 +1,4 @@
+// Package dir manages the strolt data and temporary directories.
 package dir
 
 import (
@@ -10,6 +11,7 @@ import (
 	"github.com/strolt/strolt/shared/logger"
 )
 
+// Directory builds paths for strolt data directories and creates them.
 type Directory struct {
 	serviceName string
 	taskName    string
@@ -20,43 +22,40 @@ type Directory struct {
 
 const prefix = "strolt-data"
 
+// New creates an empty Directory builder.
 func New() *Directory {
 	return &Directory{}
 }
 
+// SetServiceName sets the service name part of the directory path.
 func (d *Directory) SetServiceName(serviceName string) {
 	d.serviceName = serviceName
 }
 
+// SetTaskName sets the task name part of the directory path.
 func (d *Directory) SetTaskName(taskName string) {
 	d.taskName = taskName
 }
 
+// SetDriverName sets the driver name part of the directory path.
 func (d *Directory) SetDriverName(driverName string) {
 	d.driverName = driverName
 }
 
+// SetName sets the name part of the directory path.
 func (d *Directory) SetName(name string) {
 	d.name = name
 }
 
 func getBasePath(isTemp bool) (string, error) {
-	path := ""
+	base := env.PathData()
+	if base == "" {
+		base = filepath.Dir(os.Args[0])
+	}
 
-	if env.PathData() != "" {
-		p, err := filepath.Abs(env.PathData())
-		if err != nil {
-			return "", err
-		}
-
-		path = p
-	} else {
-		p, err := filepath.Abs(filepath.Dir(os.Args[0]))
-		if err != nil {
-			return "", err
-		}
-
-		path = p
+	path, err := filepath.Abs(base)
+	if err != nil {
+		return "", fmt.Errorf("resolve absolute path: %w", err)
 	}
 
 	parts := []string{path, prefix}
@@ -66,6 +65,17 @@ func getBasePath(isTemp bool) (string, error) {
 	}
 
 	return filepath.Join(parts...), nil
+}
+
+// CreateAsTmp creates the directory under the temporary base path.
+func (d *Directory) CreateAsTmp() (string, error) {
+	d.isTemp = true
+	return d.create()
+}
+
+// CreateAsPersist creates the directory under the persistent base path.
+func (d *Directory) CreateAsPersist() (string, error) {
+	return d.create()
 }
 
 func (d *Directory) path() (string, error) {
@@ -112,7 +122,7 @@ func (d *Directory) create() (string, error) {
 		log.Debug(fmt.Sprintf("error create directory '%s' - already exists", path))
 	} else {
 		if err := os.MkdirAll(path, 0o700); err != nil {
-			return "", err
+			return "", fmt.Errorf("create directory: %w", err)
 		}
 
 		log.Debug(fmt.Sprintf("created directory '%s'", path))
@@ -121,19 +131,16 @@ func (d *Directory) create() (string, error) {
 	return path, nil
 }
 
-func (d *Directory) CreateAsTmp() (string, error) {
-	d.isTemp = true
-	return d.create()
-}
-
-func (d *Directory) CreateAsPersist() (string, error) {
-	return d.create()
-}
-
+// Remove deletes the directory at the given path with all its contents.
 func Remove(path string) error {
-	return os.RemoveAll(path)
+	if err := os.RemoveAll(path); err != nil {
+		return fmt.Errorf("remove directory: %w", err)
+	}
+
+	return nil
 }
 
+// RemoveTempDirectories deletes the temporary base directory if it exists.
 func RemoveTempDirectories() error {
 	path, err := getBasePath(true)
 	if err != nil {
@@ -146,7 +153,9 @@ func RemoveTempDirectories() error {
 	}
 
 	if isExists {
-		return os.RemoveAll(path)
+		if err := os.RemoveAll(path); err != nil {
+			return fmt.Errorf("remove temp directory: %w", err)
+		}
 	}
 
 	return nil
@@ -162,13 +171,15 @@ func exists(path string) (bool, error) {
 		return false, nil
 	}
 
-	return false, err
+	return false, fmt.Errorf("stat: %w", err)
 }
 
+// IsNotADirectoryError reports whether the error means the path is not a directory.
 func IsNotADirectoryError(err error) bool {
 	return strings.HasSuffix(err.Error(), "not a directory")
 }
 
+// Exists reports whether the given path exists and is a directory.
 func Exists(path string) (bool, error) {
 	isExists, err := exists(path)
 	if err != nil {
@@ -185,7 +196,7 @@ func Exists(path string) (bool, error) {
 
 	fileInfo, err := os.Stat(path)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("stat: %w", err)
 	}
 
 	return fileInfo.IsDir(), nil

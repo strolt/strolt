@@ -58,7 +58,7 @@ func (c *Conn) dropTable() {
 func (c *Conn) checkValidData() error {
 	users := []User{}
 
-	if err := c.db.Select(&users, "SELECT * FROM users"); err != nil {
+	if err := c.db.Select(&users, "SELECT id, username, password FROM users"); err != nil {
 		return err
 	}
 

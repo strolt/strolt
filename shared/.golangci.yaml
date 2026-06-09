@@ -138,6 +138,8 @@ linters:
   settings:
     gocyclo:
       min-complexity: 20
+    gomoddirectives:
+      replace-local: true
     revive:
       rules:
         - name: blank-imports
