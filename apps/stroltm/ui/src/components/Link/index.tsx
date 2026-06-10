@@ -1,6 +1,5 @@
-import type { Params } from "react-router";
-import { Link as ReactRouterLink } from "react-router-dom";
-import type { LinkProps as ReactRouterLinkProps } from "react-router-dom";
+import type { Params, LinkProps as ReactRouterLinkProps } from "react-router";
+import { Link as ReactRouterLink } from "react-router";
 
 import type { ConstantsRouteType } from "boot/routes/constants";
 

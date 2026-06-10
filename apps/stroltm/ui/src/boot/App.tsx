@@ -1,5 +1,4 @@
-import { useRoutes } from "react-router";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, useRoutes } from "react-router";
 
 import { StoreProvider } from "contexts/storeProvider";
 import { observer, useStores } from "stores";

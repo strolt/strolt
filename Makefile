@@ -50,7 +50,7 @@ coverage:
 
 
 .swagger-stroltm-ui-generate-client: .install-stroltm-ui-node_modules
-	cd $(STROLTM_UI) && pnpm gen-api
+	cd $(STROLTM_UI) && pnpm codegen
 
 swagger: \
 	.clear-sdk \
@@ -76,7 +76,7 @@ swagger: \
 	cd ./shared && $(GOLANGCI_LINT) run ./... --fix --config=${PROJECT_DIR}/.golangci.yml
 
 .lint-stroltm-ui: .install-stroltm-ui-node_modules
-	cd $(STROLTM_UI) && pnpm typecheck
+	cd $(STROLTM_UI) && pnpm dm exec tsc
 
 .PHONY: lint
 lint: .lint-shared .lint-strolt .lint-stroltp .lint-stroltm .lint-stroltm-ui

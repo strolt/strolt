@@ -18,7 +18,7 @@ import { PrintUptime } from "./components/PrintUptime";
 import { PrintVersion } from "./components/PrintVersion";
 
 const nameSorter = (field: keyof TaskListItem): CompareFn<TaskListItem> => {
-  return (a, b, order) => {
+  return (a, b) => {
     const _a = (a?.[field] ? String(a?.[field]) : "").toLowerCase();
     const _b = (b?.[field] ? String(b?.[field]) : "").toLowerCase();
 

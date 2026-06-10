@@ -13,6 +13,7 @@ FROM ui-base AS ui-deps
 WORKDIR /github.com/strolt/strolt/apps/stroltm/ui
 COPY ./apps/stroltm/ui/package.json .
 COPY ./apps/stroltm/ui/pnpm-lock.yaml .
+COPY ./apps/stroltm/ui/pnpm-workspace.yaml .
 RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
 
 FROM swagger-base AS swagger
@@ -23,7 +24,7 @@ RUN make .swagger-strolt && make .swagger-shared-generate-client-strolt && make 
 FROM ui-deps AS ui-builder
 COPY ./apps/stroltm/ui .
 COPY --from=swagger /github.com/strolt/strolt/.swagger /github.com/strolt/strolt/.swagger
-RUN pnpm gen-api && pnpm build
+RUN pnpm codegen && pnpm build
 
 FROM golang:1.26.4-alpine3.23 AS builder
 ARG version

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { RouteObject } from "react-router";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "react-router";
 
 import * as layouts from "layouts";
 import * as pages from "pages";

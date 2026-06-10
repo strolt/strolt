@@ -33,8 +33,8 @@
     "@mdx-js/react": "3.1.1",
     "clsx": "2.1.1",
     "prism-react-renderer": "2.4.1",
-    "react": "19.2.1",
-    "react-dom": "19.2.1",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
     "redocusaurus": "2.5.0"
   },
   "devDependencies": {
@@ -42,7 +42,7 @@
     "@docusaurus/tsconfig": "3.9.2",
     "@docusaurus/types": "3.9.2",
     "@shibanet0/datamitsu-config": "0.1.0",
-    "@types/node": "24.12.0"
+    "@types/node": "24.12.4"
   },
   "engines": {
     "node": ">=22.12.0"

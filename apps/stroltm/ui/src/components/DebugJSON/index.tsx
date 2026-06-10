@@ -1,7 +1,8 @@
 import type { FC } from "react";
-import ReactJson from "react-json-view";
 
 import { Collapse } from "antd";
+
+import ReactJson from "@microlink/react-json-view";
 
 export interface DebugJSONProps {
   data: any;
