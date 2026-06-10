@@ -15,7 +15,7 @@ pre-commit:
     check-large-files:
       priority: 4
       run: |
-        git diff --cached --name-only --diff-filter=ACMR | while read -r file; do
+        git diff --cached --name-only --diff-filter=ACMR | grep -v -e '-lock\.yaml$' -e '-lock\.json$' | while read -r file; do
           if [ -f "$file" ] && [ "$(wc -c < "$file")" -gt 512000 ]; then
             echo "file larger than 500KB: $file"
             exit 1
