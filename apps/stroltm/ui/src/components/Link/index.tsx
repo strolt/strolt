@@ -1,16 +1,17 @@
-import { toNavigate, ConstantsRouteType } from "boot/routes/constants";
+import type { Params, LinkProps as ReactRouterLinkProps } from "react-router";
+import { Link as ReactRouterLink } from "react-router";
 
-import { Params } from "react-router";
-import { Link as ReactRouterLink } from "react-router-dom";
-import { LinkProps as ReactRouterLinkProps } from "react-router-dom";
+import type { ConstantsRouteType } from "boot/routes/constants";
+
+import { toNavigate } from "boot/routes/constants";
 
 export interface LinkProps extends Omit<ReactRouterLinkProps, "to"> {
-  to?: ConstantsRouteType;
-  params?: Params;
   href?: string;
+  params?: Params;
   styled?: boolean;
+  to?: ConstantsRouteType;
 }
-export const Link: React.FC<LinkProps> = ({ to, params, href, ...props }) => {
+export const Link: React.FC<LinkProps> = ({ href, params, to, ...props }) => {
   if (href) {
     return <a {...props} href={href} />;
   }

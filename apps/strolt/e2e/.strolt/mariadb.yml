@@ -1,15 +1,30 @@
 services:
   e2e:
     mariadb:
-      source:
-        driver: mysql
-        config:
-          host: mariadb
-          database: "{{.MYSQL_MARIADB_DATABASE}}"
-          username: "{{.MYSQL_MARIADB_USER}}"
-          password: "{{.MYSQL_MARIADB_PASSWORD}}"
       destinations:
         restic-mariadb:
-          extends: restic_base
           env:
             RESTIC_REPOSITORY: "s3:http://minio:9000/restic-mariadb"
+          extends: restic_base
+      source:
+        config:
+          database: "{{.MYSQL_MARIADB_DATABASE}}"
+          host: mariadb
+          password: "{{.MYSQL_MARIADB_PASSWORD}}"
+          username: "{{.MYSQL_MARIADB_USER}}"
+        driver: mysql
+  e2e-copy:
+    mariadb:
+      destinations:
+        restic-mariadb:
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/copy/restic-mariadb"
+          extends: restic_base
+      operationMode: copy
+      source:
+        config:
+          database: "{{.MYSQL_MARIADB_DATABASE}}"
+          host: mariadb
+          password: "{{.MYSQL_MARIADB_PASSWORD}}"
+          username: "{{.MYSQL_MARIADB_USER}}"
+        driver: mysql

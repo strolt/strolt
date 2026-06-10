@@ -1,27 +1,28 @@
 package managerh
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/strolt/strolt/shared/apiu"
-	_ "github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_models"
+	_ "github.com/strolt/strolt/shared/sdk/strolt/generated/strolt_models" // register models for swagger docs
 )
 
 // getSnapshotsForPruneProxy godoc
-// @Id					 getSnapshotsForPruneProxy
-// @Summary      Get snapshots for prune
-// @Tags         manager-proxy
-// @Security BasicAuth
-// @Param   proxyName           path    string     true        "Proxy name"
-// @Param   instanceName        path    string     true        "Instance name"
-// @Param   serviceName         path    string     true        "Service name"
-// @Param   taskName            path    string     true        "Task name"
-// @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} strolt_models.ServicesGetPruneResult
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune/snapshots [get].
+//
+//	@Id			getSnapshotsForPruneProxy
+//	@Summary	Get snapshots for prune
+//	@Tags		manager-proxy
+//	@Security	BasicAuth
+//	@Param		proxyName		path		string	true	"Proxy name"
+//	@Param		instanceName	path		string	true	"Instance name"
+//	@Param		serviceName		path		string	true	"Service name"
+//	@Param		taskName		path		string	true	"Task name"
+//	@Param		destinationName	path		string	true	"Destination name"
+//	@success	200				{object}	strolt_models.ServicesGetPruneResult
+//	@success	500				{object}	apiu.ResultError
+//	@Router		/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune/snapshots [get].
 func (s *ManagerHandlers) getSnapshotsForPruneProxy(w http.ResponseWriter, r *http.Request) {
 	proxyName := chi.URLParam(r, "proxyName")
 	instanceName := chi.URLParam(r, "instanceName")
@@ -42,7 +43,7 @@ func (s *ManagerHandlers) getSnapshotsForPruneProxy(w http.ResponseWriter, r *ht
 	}
 
 	if result == nil || result.Payload == nil {
-		apiu.RenderJSON500(w, r, fmt.Errorf("response is empty"))
+		apiu.RenderJSON500(w, r, errors.New("response is empty"))
 		return
 	}
 
@@ -50,18 +51,19 @@ func (s *ManagerHandlers) getSnapshotsForPruneProxy(w http.ResponseWriter, r *ht
 }
 
 // pruneProxy godoc
-// @Id					 pruneProxy
-// @Summary      Prune
-// @Tags         manager-proxy
-// @Security BasicAuth
-// @Param   proxyName           path    string     true        "Proxy name"
-// @Param   instanceName        path    string     true        "Instance name"
-// @Param   serviceName         path    string     true        "Service name"
-// @Param   taskName            path    string     true        "Task name"
-// @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} strolt_models.ServicesGetPruneResult
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune [post].
+//
+//	@Id			pruneProxy
+//	@Summary	Prune
+//	@Tags		manager-proxy
+//	@Security	BasicAuth
+//	@Param		proxyName		path		string	true	"Proxy name"
+//	@Param		instanceName	path		string	true	"Instance name"
+//	@Param		serviceName		path		string	true	"Service name"
+//	@Param		taskName		path		string	true	"Task name"
+//	@Param		destinationName	path		string	true	"Destination name"
+//	@success	200				{object}	strolt_models.ServicesGetPruneResult
+//	@success	500				{object}	apiu.ResultError
+//	@Router		/api/v1/manager/instances/{proxyName}/{instanceName}/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune [post].
 func (s *ManagerHandlers) pruneProxy(w http.ResponseWriter, r *http.Request) {
 	proxyName := chi.URLParam(r, "proxyName")
 	instanceName := chi.URLParam(r, "instanceName")
@@ -82,7 +84,7 @@ func (s *ManagerHandlers) pruneProxy(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if result == nil || result.Payload == nil {
-		apiu.RenderJSON500(w, r, fmt.Errorf("response is empty"))
+		apiu.RenderJSON500(w, r, errors.New("response is empty"))
 		return
 	}
 

@@ -10,9 +10,10 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 )
 
+// Backup runs mysqldump and stores the dump in the working directory.
 func (i *MySQL) Backup(ctx context.Context) error {
 	args := i.getBackupArgs()
-	cmd := exec.Command(i.getBinMySQLDump(), args...)
+	cmd := exec.Command(i.getBinMySQLDump(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
 	cmd.Dir = ctx.WorkDir
 
 	outputByte, err := cmd.CombinedOutput()
@@ -31,7 +32,7 @@ func (i *MySQL) Backup(ctx context.Context) error {
 			return fmt.Errorf("%w (%v)", err, lastMessage)
 		}
 
-		return err
+		return fmt.Errorf("run mysqldump: %w", err)
 	}
 
 	if outputString != "" {
@@ -41,10 +42,12 @@ func (i *MySQL) Backup(ctx context.Context) error {
 	return nil
 }
 
+// BackupPipe is not supported by the MySQL driver.
 func (i *MySQL) BackupPipe(_ context.Context) (io.ReadCloser, string, func() error, error) {
 	return nil, "", func() error { return nil }, errors.New("not support pipe")
 }
 
+// IsSupportedBackupPipe reports whether backing up as a stream is supported.
 func (i *MySQL) IsSupportedBackupPipe(_ context.Context) bool {
 	return false
 }

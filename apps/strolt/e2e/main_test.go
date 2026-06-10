@@ -1,42 +1,166 @@
 package e2e_test
 
 import (
+	"context"
+	"fmt"
+	"log"
+	"os"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
+	"time"
 )
 
-func TestMain(t *testing.T) {
-	tt := timeTook("docker compose down")
+const initRetries = 3
 
-	assert.NoError(t, dockerComposeDown())
-	tt.stop()
+var (
+	containerManager *ContainerManager
+	ctx              context.Context
+)
 
-	tt = timeTook("docker compose up")
+// It sets up containers once and reuses them across all tests.
+func TestMain(m *testing.M) {
+	if err := setupContainers(); err != nil {
+		if cleanupErr := cleanupContainers(); cleanupErr != nil {
+			log.Printf("Failed to cleanup containers after setup failure: %v", cleanupErr)
+		}
 
-	assert.NoError(t, dockerComposeUp("minio", "postgres", "mongo", "mariadb", "mysql"))
-	tt.stop()
+		log.Fatalf("Failed to setup containers: %v", err)
+	}
 
-	tt = timeTook("strolt up")
+	exitCode := m.Run()
 
-	assert.NoError(t, dockerComposeUpStrolt())
+	if err := cleanupContainers(); err != nil {
+		log.Printf("Failed to cleanup containers: %v", err)
+	}
+
+	os.Exit(exitCode)
+}
+
+func setupContainers() error {
+	ctx = context.Background()
+
+	// Start from a clean slate: leftovers from a previous run are a source
+	// of false test results.
+	if err := os.RemoveAll(".temp"); err != nil {
+		return fmt.Errorf("failed to clean .temp: %w", err)
+	}
+
+	if err := os.MkdirAll(".temp/input", 0o755); err != nil {
+		return fmt.Errorf("failed to create .temp/input: %w", err)
+	}
+
+	tt := timeTook("setup containers")
+
+	cm, err := NewContainerManager(ctx)
+	if err != nil {
+		return err
+	}
+
+	containerManager = cm
+
+	if err := cm.SetupNetwork(); err != nil {
+		return err
+	}
+
+	if err := cm.StartAllContainers(); err != nil {
+		return err
+	}
+
+	// Start Strolt containers after databases are ready
+	if err := cm.StartStrolt(); err != nil {
+		return err
+	}
+
+	if err := cm.StartStroltDaemon(); err != nil {
+		return err
+	}
+
 	tt.stop()
 
 	tt = timeTook("strolt init")
+	defer tt.stop()
 
-	assert.NoError(t, strolt("init"))
-	tt.stop()
+	log.Println("Initializing strolt repositories...")
 
-	LocalSuiteTest(t)
-	PruneSuiteTest(t)
+	if err := stroltInit(); err != nil {
+		return err
+	}
 
-	PostgresqlSuiteTest(t)
-	MongoSuiteTest(t)
-	MySQLSuiteTest(t)
-	MariaDBSuiteTest(t)
+	log.Println("Strolt initialization successful")
 
-	tt = timeTook("docker compose down")
+	return nil
+}
 
-	assert.NoError(t, dockerComposeDown())
-	tt.stop()
+// stroltInit initializes the restic repositories, retrying to absorb
+// transient object-storage hiccups right after MinIO startup.
+func stroltInit() error {
+	var err error
+
+	for attempt := 1; attempt <= initRetries; attempt++ {
+		if err = strolt("init"); err == nil {
+			return nil
+		}
+
+		log.Printf("strolt init attempt %d/%d failed: %v", attempt, initRetries, err)
+		time.Sleep(2 * time.Second)
+	}
+
+	return fmt.Errorf("strolt init failed after %d attempts: %w", initRetries, err)
+}
+
+func cleanupContainers() error {
+	if containerManager == nil {
+		return nil
+	}
+
+	tt := timeTook("cleanup containers")
+	defer tt.stop()
+
+	return containerManager.Cleanup()
+}
+
+// TestE2E runs all e2e test suites.
+//
+// The filesystem group runs sequentially: Local, Prune and Daemon all mutate
+// the shared /e2e/input directory. The database suites are independent of
+// the filesystem and of each other, so they run in parallel.
+func TestE2E(t *testing.T) {
+	t.Run("Filesystem", func(t *testing.T) {
+		t.Run("Local", func(t *testing.T) {
+			LocalSuiteTest(t)
+		})
+
+		t.Run("Prune", func(t *testing.T) {
+			PruneSuiteTest(t)
+		})
+
+		t.Run("Daemon", func(t *testing.T) {
+			DaemonSuiteTest(t)
+		})
+	})
+
+	t.Run("Databases", func(t *testing.T) {
+		t.Run("PostgreSQL", func(t *testing.T) {
+			t.Parallel()
+			PostgresqlSuiteTest(t)
+		})
+
+		t.Run("MongoDB", func(t *testing.T) {
+			t.Parallel()
+			MongoSuiteTest(t)
+		})
+
+		t.Run("MariaDB", func(t *testing.T) {
+			t.Parallel()
+			MariaDBSuiteTest(t)
+		})
+
+		t.Run("MySQL", func(t *testing.T) {
+			t.Parallel()
+			MySQLSuiteTest(t)
+		})
+	})
+
+	t.Run("Negative", func(t *testing.T) {
+		NegativeSuiteTest(t)
+	})
 }

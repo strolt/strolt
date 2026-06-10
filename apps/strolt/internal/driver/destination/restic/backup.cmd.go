@@ -1,6 +1,7 @@
 package restic
 
 import (
+	gocontext "context"
 	"fmt"
 	"os/exec"
 
@@ -35,12 +36,12 @@ func (i *Restic) backupCmd(ctx context.Context, filename string, isPipe bool) (*
 	args = append(args, i.getBackupFlags()...)
 
 	if isPipe {
-		args = append(args, "--stdin", fmt.Sprintf("--stdin-filename=%s", filename))
+		args = append(args, "--stdin", "--stdin-filename="+filename)
 	} else {
 		args = append(args, ".")
 	}
 
-	cmd := exec.Command(i.getBin(), args...)
+	cmd := exec.CommandContext(gocontext.Background(), i.getBin(), args...) //nolint:gosec // restic binary path and flags come from validated config
 	cmd.Dir = ctx.WorkDir
 
 	env, err := i.getEnv()

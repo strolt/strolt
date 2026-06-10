@@ -1,37 +1,36 @@
 package e2e_test
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
-	"path/filepath"
+	"maps"
+	"path"
+	"slices"
 	"strings"
-
-	_ "github.com/lib/pq"
 )
 
-type File struct {
-	Path  string
-	Value string
+const fsInputPath = "/e2e/input"
+
+// Text fixtures: relative path -> content (a trailing newline is added on
+// write). Names exercise unicode, emoji and spaces; the empty file checks
+// zero-length handling.
+var textFiles = map[string]string{
+	"0.txt":                              "0",
+	"1/1.txt":                            "1",
+	"1/2/2.txt":                          "2",
+	"unicode/файл-🚀.txt":                 "привет мир",
+	"dir with space/file with space.txt": "space",
+	"empty/empty.txt":                    "",
 }
 
-var (
-	fsInputPath = "/e2e/input"
-)
-
-var (
-	files = []File{
-		{
-			Path:  filepath.Join(fsInputPath, "0.txt"),
-			Value: "0",
-		},
-		{
-			Path:  filepath.Join(fsInputPath, "1", "1.txt"),
-			Value: "1",
-		},
-		{
-			Path:  filepath.Join(fsInputPath, "1", "2", "2.txt"),
-			Value: "2",
-		},
-	}
+// Binary fixtures created inside the container; their content is reproduced
+// in Go by expectedManifest, so corruption is detected end to end.
+const (
+	zerosPath = "bin/zeros.bin"
+	zerosSize = 65536
+	seqPath   = "bin/seq.txt"
+	seqCount  = 10000
 )
 
 type Fs struct{}
@@ -40,88 +39,111 @@ func fs() *Fs {
 	return &Fs{}
 }
 
-func (fs *Fs) isFile(path string) (bool, string) {
-	o, err := runDockerComposeBash(fmt.Sprintf("cat %s", path))
-	return err == nil, strings.Join(strings.Split(string(o), "\n")[:1], "\n")
-}
-
-func (fs *Fs) scan() ([]File, error) {
-	o, err := runDockerComposeBash(fmt.Sprintf("ls -R1 %s", fsInputPath))
-	if err != nil {
-		return files, err
-	}
-
-	lines := strings.Split(string(o), "\n\n")
-
-	for _, line := range lines {
-		l := strings.Split(line, "\n")
-		path := strings.TrimSuffix(l[0], ":")
-
-		for _, f := range l[1:] {
-			_path := filepath.Join(path, f)
-
-			isFile, fileValue := fs.isFile(_path)
-			if isFile {
-				files = append(files, File{
-					Path:  filepath.Join(path, f),
-					Value: fileValue,
-				})
-			}
-		}
-	}
-
-	return files, err
-}
-
 func (fs *Fs) createData() error {
-	for _, file := range files {
-		if _, err := runDockerComposeBash(fmt.Sprintf("mkdir -p %s", filepath.Dir(file.Path))); err != nil {
-			fmt.Println(err) //nolint:forbidigo
-			return err
+	for rel, content := range textFiles {
+		abs := fsInputPath + "/" + rel
+
+		cmd := fmt.Sprintf("mkdir -p '%s' && ", path.Dir(abs))
+		if content == "" {
+			cmd += fmt.Sprintf(": > '%s'", abs)
+		} else {
+			cmd += fmt.Sprintf("printf '%%s\\n' '%s' > '%s'", content, abs)
 		}
 
-		if _, err := runDockerComposeBash(fmt.Sprintf("echo \"%s\" > %s", file.Value, file.Path)); err != nil {
+		if _, err := execInStrolt(cmd); err != nil {
 			return err
 		}
+	}
+
+	cmd := fmt.Sprintf("mkdir -p '%s/bin' && head -c %d /dev/zero > '%s/%s' && seq 0 %d > '%s/%s'",
+		fsInputPath, zerosSize, fsInputPath, zerosPath, seqCount-1, fsInputPath, seqPath)
+	if _, err := execInStrolt(cmd); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (fs *Fs) dropData() error {
-	_, err := runDockerComposeBash(fmt.Sprintf("rm -rf %s/*", fsInputPath))
-	if err != nil {
+	if _, err := execInStrolt(fmt.Sprintf("rm -rf %s/* 2>/dev/null; true", fsInputPath)); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (file File) exists() (bool, File) {
-	for _, _file := range files {
-		if file.Path == _file.Path {
-			return true, _file
+// hashAll returns the sha256 manifest (relative path -> hash) of every file
+// currently present under fsInputPath, computed inside the container.
+func (fs *Fs) hashAll() (map[string]string, error) {
+	o, err := execInStrolt(fmt.Sprintf("cd '%s' && find . -type f -exec sha256sum {} +", fsInputPath))
+	if err != nil {
+		return nil, err
+	}
+
+	manifest := map[string]string{}
+
+	for line := range strings.SplitSeq(string(o), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		hash, p, ok := strings.Cut(line, "  ")
+		if !ok {
+			return nil, fmt.Errorf("unexpected sha256sum output line: %q", line)
+		}
+
+		manifest[strings.TrimPrefix(p, "./")] = hash
+	}
+
+	return manifest, nil
+}
+
+// expectedManifest reproduces the fixture content in Go, so the comparison
+// does not depend on any state captured inside the container.
+func expectedManifest() map[string]string {
+	manifest := map[string]string{}
+
+	for rel, content := range textFiles {
+		if content == "" {
+			manifest[rel] = sha256Hex(nil)
+		} else {
+			manifest[rel] = sha256Hex([]byte(content + "\n"))
 		}
 	}
 
-	return false, File{}
+	manifest[zerosPath] = sha256Hex(make([]byte, zerosSize))
+
+	var seq strings.Builder
+	for i := range seqCount {
+		fmt.Fprintf(&seq, "%d\n", i)
+	}
+
+	manifest[seqPath] = sha256Hex([]byte(seq.String()))
+
+	return manifest
 }
 
+func sha256Hex(data []byte) string {
+	sum := sha256.Sum256(data)
+
+	return hex.EncodeToString(sum[:])
+}
+
+// checkValidData verifies the input directory matches the fixture set
+// exactly: every fixture file exists with the right content and nothing
+// extra is present.
 func (fs *Fs) checkValidData() error {
-	scannedFiles, err := fs.scan()
+	got, err := fs.hashAll()
 	if err != nil {
 		return err
 	}
 
-	for _, scannedFile := range scannedFiles {
-		isExists, _file := scannedFile.exists()
-		if !isExists {
-			return fmt.Errorf("'%s' not exists in mock", scannedFile.Path)
-		}
+	want := expectedManifest()
 
-		if _file.Value != scannedFile.Value {
-			return fmt.Errorf("'%s' different content", scannedFile.Path)
-		}
+	if !maps.Equal(got, want) {
+		return fmt.Errorf("input directory differs from fixtures:\nwant files: %v\ngot files: %v",
+			slices.Sorted(maps.Keys(want)), slices.Sorted(maps.Keys(got)))
 	}
 
 	return nil

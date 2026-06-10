@@ -1,6 +1,7 @@
 package task
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -12,17 +13,23 @@ import (
 func (t *Task) prune(destinationName string, isDryRun bool) ([]interfaces.Snapshot, error) {
 	destination, ok := t.TaskConfig.Destinations[destinationName]
 	if !ok {
-		return []interfaces.Snapshot{}, fmt.Errorf("destination not exits")
+		return []interfaces.Snapshot{}, errors.New("destination not exits")
 	}
 
 	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
 	if err != nil {
-		return []interfaces.Snapshot{}, err
+		return []interfaces.Snapshot{}, fmt.Errorf("get destination driver: %w", err)
 	}
 
-	return destinationDriver.Prune(t.Context, isDryRun)
+	snapshots, err := destinationDriver.Prune(t.Context, isDryRun)
+	if err != nil {
+		return []interfaces.Snapshot{}, fmt.Errorf("destination prune: %w", err)
+	}
+
+	return snapshots, nil
 }
 
+// Prune removes outdated snapshots from the given destination.
 func (t *Task) Prune(destinationName string, isDryRun bool) ([]interfaces.Snapshot, error) {
 	if err := t.managerStart(sctxt.OpTypePrune); err != nil {
 		return []interfaces.Snapshot{}, err
@@ -50,6 +57,7 @@ func (t *Task) Prune(destinationName string, isDryRun bool) ([]interfaces.Snapsh
 	return snapshotList, err
 }
 
+// PruneAll removes outdated snapshots from all configured destinations.
 func (t *Task) PruneAll() error {
 	var resultError error
 

@@ -6,6 +6,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/shared/apiu"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -15,31 +16,33 @@ type getPruneResult struct {
 }
 
 // getSnapshotsForPrune godoc
-// @Id					 getSnapshotsForPrune
-// @Summary      Get snapshots for prune
-// @Tags         services
-// @Security BasicAuth
-// @Param   serviceName         path    string     true        "Service name"
-// @Param   taskName            path    string     true        "Task name"
-// @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} getPruneResult
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots/prune [get].
+//
+//	@Id			getSnapshotsForPrune
+//	@Summary	Get snapshots for prune
+//	@Tags		services
+//	@Security	BasicAuth
+//	@Param		serviceName		path		string	true	"Service name"
+//	@Param		taskName		path		string	true	"Task name"
+//	@Param		destinationName	path		string	true	"Destination name"
+//	@success	200				{object}	getPruneResult
+//	@success	500				{object}	apiu.ResultError
+//	@Router		/api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots/prune [get].
 func (s *Services) getSnapshotsForPrune(w http.ResponseWriter, r *http.Request) {
 	prune(w, r, true)
 }
 
 // prune godoc
-// @Id					 prune
-// @Summary      Prune snapshots
-// @Tags         services
-// @Security BasicAuth
-// @Param   serviceName         path    string     true        "Service name"
-// @Param   taskName            path    string     true        "Task name"
-// @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} getPruneResult
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune [post].
+//
+//	@Id			prune
+//	@Summary	Prune snapshots
+//	@Tags		services
+//	@Security	BasicAuth
+//	@Param		serviceName		path		string	true	"Service name"
+//	@Param		taskName		path		string	true	"Task name"
+//	@Param		destinationName	path		string	true	"Destination name"
+//	@success	200				{object}	getPruneResult
+//	@success	500				{object}	apiu.ResultError
+//	@Router		/api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune [post].
 func (s *Services) prune(w http.ResponseWriter, r *http.Request) {
 	prune(w, r, false)
 }
@@ -54,7 +57,11 @@ func prune(w http.ResponseWriter, r *http.Request, idDryRun bool) {
 		apiu.RenderJSON500(w, r, err)
 		return
 	}
-	defer t.Close()
+	defer func() {
+		if err := t.Close(); err != nil {
+			logger.New().Error(err)
+		}
+	}()
 
 	if t.IsRunning() {
 		apiu.RenderJSON400(w, r, apiu.ErrTaskAlreadyWorking)

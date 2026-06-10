@@ -1,26 +1,25 @@
-import { FC, useEffect, useState } from "react";
-
+import type { FC } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 
-import { Button, Popconfirm, Table, Tag, Typography } from "antd";
-import { ColumnsType } from "antd/es/table";
+import { Button, Popconfirm, Table, Typography } from "antd";
+
+import type { ColumnsType } from "antd/es/table";
+import type { Snapshot } from "api/generated";
 
 import { DebugJSON, Print, TagColored } from "components";
-
-import { Snapshot } from "api/generated";
-
 import { observer, useStores } from "stores";
 
 interface PruneButtonProps {
+  count?: number;
+  destinationId?: string;
   instanceId?: string;
+  proxyId?: string;
   serviceId?: string;
   taskId?: string;
-  destinationId?: string;
-  count?: number;
-  proxyId?: string;
 }
 const PruneButton: FC<PruneButtonProps> = observer(
-  ({ proxyId, instanceId, serviceId, taskId, destinationId, count }) => {
+  ({ count, destinationId, instanceId, proxyId, serviceId, taskId }) => {
     const { managerStore } = useStores();
 
     const handleClick = async () => {
@@ -32,14 +31,14 @@ const PruneButton: FC<PruneButtonProps> = observer(
     };
 
     return (
-      <Popconfirm title="Are you sure?" onConfirm={handleClick} okText="Yes">
+      <Popconfirm okText="Yes" onConfirm={handleClick} title="Are you sure?">
         <Button
-          disabled={!count}
-          type="primary"
           danger
+          disabled={!count}
           loading={managerStore.pruneStatus?.state === "pending"}
+          type="primary"
         >
-          Prune{!!count && ` (${count})`}
+          Prune{Boolean(count) && ` (${count})`}
         </Button>
       </Popconfirm>
     );
@@ -48,17 +47,16 @@ const PruneButton: FC<PruneButtonProps> = observer(
 
 const columns: ColumnsType<Snapshot> = [
   {
-    title: "Short ID",
     dataIndex: "shortId",
     key: "shortId",
+    title: "Short ID",
   },
   {
-    title: "ID",
     dataIndex: "id",
     key: "id",
+    title: "ID",
   },
   {
-    title: "Tags",
     dataIndex: "tags",
     key: "tags",
     render: (tags: string[]) => (
@@ -68,23 +66,24 @@ const columns: ColumnsType<Snapshot> = [
         ))}
       </>
     ),
+    title: "Tags",
   },
   {
-    title: "Time",
     dataIndex: "time",
     key: "time",
     render: (v) => <Print.Time value={v} withTime />,
+    title: "Time",
   },
 ];
 
 const Prune = observer(() => {
   const { managerStore } = useStores();
   const params = useParams<{
-    proxyId?: string;
+    destinationId: string;
     instanceId: string;
+    proxyId?: string;
     serviceId: string;
     taskId: string;
-    destinationId: string;
   }>();
 
   const [expandedKey, setExpandedKey] = useState("");
@@ -115,36 +114,30 @@ const Prune = observer(() => {
       </Typography.Title>
 
       <PruneButton
-        proxyId={params.proxyId}
+        count={managerStore.snapshotsForPrune?.data?.length}
+        destinationId={params.destinationId}
         instanceId={params.instanceId}
+        proxyId={params.proxyId}
         serviceId={params.serviceId}
         taskId={params.taskId}
-        destinationId={params.destinationId}
-        count={managerStore.snapshotsForPrune?.data?.length}
       />
 
       <Table
-        dataSource={managerStore.snapshotsForPrune?.data}
         columns={columns}
-        loading={managerStore.snapshotsForPruneStatus?.state === "pending"}
-        rowKey="id"
-        pagination={false}
-        scroll={{
-          x: "max-content",
-        }}
+        dataSource={managerStore.snapshotsForPrune?.data}
         expandable={{
           expandedRowKeys: expandedKey ? [expandedKey] : [],
-          expandedRowRender: (data) => (
+          expandedRowRender: (data: Snapshot) => (
             <>
               <b>paths:</b>
               <ul>
-                {data.paths?.map((path) => (
+                {data.paths?.map((path: string) => (
                   <li key={path}>{path}</li>
                 ))}
               </ul>
             </>
           ),
-          onExpand: (expanded, record) => {
+          onExpand: (expanded: boolean, record: Snapshot) => {
             if (expanded && record.id) {
               setExpandedKey(record.id);
             } else {
@@ -153,6 +146,12 @@ const Prune = observer(() => {
           },
         }}
         footer={() => <b>Total: {managerStore.snapshotsForPrune?.data?.length || 0}</b>}
+        loading={managerStore.snapshotsForPruneStatus?.state === "pending"}
+        pagination={false}
+        rowKey="id"
+        scroll={{
+          x: "max-content",
+        }}
       />
 
       <br />

@@ -9,6 +9,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/api"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/schedule"
+	"github.com/strolt/strolt/apps/strolt/internal/util/dir"
 	"github.com/strolt/strolt/shared"
 	"github.com/strolt/strolt/shared/logger"
 
@@ -28,6 +29,14 @@ var startpCmd = &cobra.Command{
 		ctx, cancel := ctx.WithCancel(ctx.Background())
 		log := logger.New()
 
+		// GC work directories left over from crashed runs. This lives in the
+		// daemon startup (not in every CLI invocation) so concurrent strolt
+		// processes sharing the data directory do not wipe each other's
+		// in-flight work directories.
+		if err := dir.RemoveTempDirectories(); err != nil {
+			log.Error(err)
+		}
+
 		wg := sync.WaitGroup{}
 		c := make(chan os.Signal, 1)
 		defer close(c)
@@ -37,32 +46,26 @@ var startpCmd = &cobra.Command{
 
 		{
 			// Api server
-			wg.Add(1)
-			go func() {
+			wg.Go(func() {
 				api.New().Run(ctx, cancel)
-				wg.Done()
-			}()
+			})
 		}
 
 		{
 			// Watch config
-			wg.Add(1)
-			go func() {
+			wg.Go(func() {
 				config.WatchConfigChanges(ctx, func() {
 					isConfigChanged = true
 					cancel()
 				})
-				wg.Done()
-			}()
+			})
 		}
 
 		{
 			// Schedule manager
-			wg.Add(1)
-			go func() {
+			wg.Go(func() {
 				schedule.Run(ctx)
-				wg.Done()
-			}()
+			})
 		}
 
 		{

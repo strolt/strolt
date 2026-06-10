@@ -1,8 +1,8 @@
+import { Popover } from "antd";
+
+import type { TaskListItemSchedule } from "stores/manager.store/taskList";
+
 import cronstrue from "cronstrue";
-
-import { Popover, Space } from "antd";
-
-import { TaskListItemSchedule } from "stores/manager.store/taskList";
 
 interface PrintCronProps {
   schedule: string;
@@ -22,13 +22,13 @@ export const PrintSchedule: React.FC<TaskListItemSchedule> = (el) => {
 
   return (
     <>
-      {!!el.backup && (
+      {Boolean(el.backup) && (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <span>backup:</span>
           <PrintCron schedule={el.backup} />
         </div>
       )}
-      {!!el.prune && (
+      {Boolean(el.prune) && (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <span>prune:</span>
           <PrintCron schedule={el.prune} />

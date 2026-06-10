@@ -1,6 +1,8 @@
+// Package stroltp provides an SDK and instance manager for the strolt proxy API.
 package stroltp
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/go-openapi/runtime"
@@ -11,11 +13,13 @@ import (
 	managerc "github.com/strolt/strolt/shared/sdk/stroltp/generated/stroltp_client/manager"
 )
 
+// SDK is a client for the strolt proxy API.
 type SDK struct {
 	client   *stroltp_client.StroltProxyAPI
 	authInfo runtime.ClientAuthInfoWriter
 }
 
+// New creates an SDK client for the given host using basic auth credentials.
 func New(host, username, password string) *SDK {
 	cfg := stroltp_client.DefaultTransportConfig().WithHost(host)
 	c := stroltp_client.NewHTTPClientWithConfig(nil, cfg)
@@ -26,14 +30,27 @@ func New(host, username, password string) *SDK {
 	}
 }
 
+// GetInfo returns information about the strolt proxy instance.
 func (sdk *SDK) GetInfo() (*info.GetInfoOK, error) {
-	return sdk.client.Info.GetInfo(nil, sdk.authInfo)
+	result, err := sdk.client.Info.GetInfo(nil, sdk.authInfo)
+	if err != nil {
+		return nil, fmt.Errorf("get info: %w", err)
+	}
+
+	return result, nil
 }
 
+// GetInstances returns the list of strolt instances managed by the proxy.
 func (sdk *SDK) GetInstances() (*managerc.GetInstancesOK, error) {
-	return sdk.client.Manager.GetInstances(nil, sdk.authInfo)
+	result, err := sdk.client.Manager.GetInstances(nil, sdk.authInfo)
+	if err != nil {
+		return nil, fmt.Errorf("get instances: %w", err)
+	}
+
+	return result, nil
 }
 
+// Backup starts a backup for the given instance, service and task.
 func (sdk *SDK) Backup(instanceName, serviceName, taskName string) (*managerc.BackupOK, error) {
 	params := managerc.NewBackupParams()
 	params.InstanceName = instanceName
@@ -41,21 +58,29 @@ func (sdk *SDK) Backup(instanceName, serviceName, taskName string) (*managerc.Ba
 	params.TaskName = taskName
 
 	result, err := sdk.client.Manager.Backup(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.BackupInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
+
+		return result, fmt.Errorf("backup: %w", err)
 	}
 
-	return result, err
+	return result, nil
 }
 
+// BackupAll starts a backup for all instances managed by the proxy.
 func (sdk *SDK) BackupAll() (*managerc.BackupAllOK, error) {
-	return sdk.client.Manager.BackupAll(nil, sdk.authInfo)
+	result, err := sdk.client.Manager.BackupAll(nil, sdk.authInfo)
+	if err != nil {
+		return nil, fmt.Errorf("backup all: %w", err)
+	}
+
+	return result, nil
 }
 
+// GetSnapshots returns snapshots for the given instance, service, task and destination.
 func (sdk *SDK) GetSnapshots(instanceName, serviceName, taskName, destinationName string) (*managerc.GetSnapshotsOK, error) {
 	params := managerc.NewGetSnapshotsParams()
 	params.InstanceName = instanceName
@@ -64,17 +89,19 @@ func (sdk *SDK) GetSnapshots(instanceName, serviceName, taskName, destinationNam
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Manager.GetSnapshots(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.BackupInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
+
+		return result, fmt.Errorf("get snapshots: %w", err)
 	}
 
-	return result, err
+	return result, nil
 }
 
+// GetStats returns statistics for the given instance, service, task and destination.
 func (sdk *SDK) GetStats(instanceName, serviceName, taskName, destinationName string) (*managerc.GetStatsOK, error) {
 	params := managerc.NewGetStatsParams()
 	params.InstanceName = instanceName
@@ -83,17 +110,19 @@ func (sdk *SDK) GetStats(instanceName, serviceName, taskName, destinationName st
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Manager.GetStats(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.GetStatsInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
+
+		return result, fmt.Errorf("get stats: %w", err)
 	}
 
-	return result, err
+	return result, nil
 }
 
+// GetSnapshotsForPrune returns the snapshots that would be removed by a prune operation.
 func (sdk *SDK) GetSnapshotsForPrune(instanceName, serviceName, taskName, destinationName string) (*managerc.GetSnapshotsForPruneOK, error) {
 	params := managerc.NewGetSnapshotsForPruneParams()
 	params.InstanceName = instanceName
@@ -102,17 +131,19 @@ func (sdk *SDK) GetSnapshotsForPrune(instanceName, serviceName, taskName, destin
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Manager.GetSnapshotsForPrune(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.GetSnapshotsForPruneInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
+
+		return result, fmt.Errorf("get snapshots for prune: %w", err)
 	}
 
-	return result, err
+	return result, nil
 }
 
+// Prune removes outdated snapshots for the given instance, service, task and destination.
 func (sdk *SDK) Prune(instanceName, serviceName, taskName, destinationName string) (*managerc.PruneOK, error) {
 	params := managerc.NewPruneParams()
 	params.InstanceName = instanceName
@@ -121,13 +152,14 @@ func (sdk *SDK) Prune(instanceName, serviceName, taskName, destinationName strin
 	params.DestinationName = destinationName
 
 	result, err := sdk.client.Manager.Prune(params, sdk.authInfo)
-
 	if err != nil {
 		switch errResponse := err.(type) { //nolint:gocritic,errorlint
 		case *managerc.PruneInternalServerError:
-			return result, fmt.Errorf(errResponse.Payload.Error)
+			return result, errors.New(errResponse.Payload.Error)
 		}
+
+		return result, fmt.Errorf("prune: %w", err)
 	}
 
-	return result, err
+	return result, nil
 }

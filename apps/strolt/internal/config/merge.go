@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"maps"
+	"slices"
 	"time"
 
 	"github.com/imdario/mergo"
@@ -55,8 +58,11 @@ func mergeTimeZone(base string, override string) (string, *time.Location, error)
 	}
 
 	timezone, err := time.LoadLocation(zone)
+	if err != nil {
+		return zone, timezone, fmt.Errorf("load time zone: %w", err)
+	}
 
-	return zone, timezone, err
+	return zone, timezone, nil
 }
 
 func uniqueStringSlice(stringSlice []string) []string {
@@ -87,9 +93,7 @@ func mergeTags(base []string, override []string) []string {
 func mergeSecrets(base Secrets, override Secrets) Secrets {
 	secrets := base
 
-	for key, value := range override {
-		secrets[key] = value
-	}
+	maps.Copy(secrets, override)
 
 	return secrets
 }
@@ -97,8 +101,8 @@ func mergeSecrets(base Secrets, override Secrets) Secrets {
 func mergeSecretsForFile(base []Secrets, override Secrets) Secrets {
 	secrets := Secrets{}
 
-	for i := len(base) - 1; i >= 0; i-- {
-		secrets = mergeSecrets(secrets, base[i])
+	for _, baseSecrets := range slices.Backward(base) {
+		secrets = mergeSecrets(secrets, baseSecrets)
 	}
 
 	secrets = mergeSecrets(secrets, override)
@@ -137,7 +141,7 @@ func mergeDefinitionsDestinations(base map[string]DriverDestinationConfig, overr
 
 	err := mergo.Merge(&definitions, override, mergo.WithOverride)
 	if err != nil {
-		return map[string]DriverDestinationConfig{}, err
+		return map[string]DriverDestinationConfig{}, fmt.Errorf("merge destination definitions: %w", err)
 	}
 
 	return definitions, nil
@@ -148,7 +152,7 @@ func mergeDefinitionsNotifications(base map[string]DriverNotificationConfig, ove
 
 	err := mergo.Merge(&definitions, override, mergo.WithOverride)
 	if err != nil {
-		return map[string]DriverNotificationConfig{}, err
+		return map[string]DriverNotificationConfig{}, fmt.Errorf("merge notification definitions: %w", err)
 	}
 
 	return definitions, nil
@@ -159,7 +163,7 @@ func mergeServices(base map[string]Service, override map[string]Service) (map[st
 
 	err := mergo.Merge(&services, override, mergo.WithOverride)
 	if err != nil {
-		return map[string]Service{}, err
+		return map[string]Service{}, fmt.Errorf("merge services: %w", err)
 	}
 
 	return services, nil
@@ -200,7 +204,7 @@ func mergeDestinationExtends(mapDestinations map[string]DriverDestinationConfig,
 	override.Config = config
 
 	if err := mergo.Merge(&override.Env, destinationDefinition.Env); err != nil {
-		return DriverDestinationConfig{}, err
+		return DriverDestinationConfig{}, fmt.Errorf("merge destination env: %w", err)
 	}
 
 	if destinationDefinition.Driver != "" {
@@ -212,17 +216,17 @@ func mergeDestinationExtends(mapDestinations map[string]DriverDestinationConfig,
 	return override, nil
 }
 
-func mergeDestinationExtendsConfig(base interface{}, extends interface{}) (interface{}, error) {
-	_base := map[string]interface{}{
+func mergeDestinationExtendsConfig(base any, extends any) (any, error) {
+	_base := map[string]any{
 		"data": base,
 	}
 
-	_extends := map[string]interface{}{
+	_extends := map[string]any{
 		"data": extends,
 	}
 
 	if err := mergo.Merge(&_base, _extends); err != nil {
-		return base, err
+		return base, fmt.Errorf("merge destination config: %w", err)
 	}
 
 	return _base["data"], nil
@@ -233,7 +237,7 @@ func mergeAPI(base API, override API) (API, error) {
 
 	err := mergo.Merge(&api, override, mergo.WithOverride)
 	if err != nil {
-		return API{}, err
+		return API{}, fmt.Errorf("merge api: %w", err)
 	}
 
 	return api, nil

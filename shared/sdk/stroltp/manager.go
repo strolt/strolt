@@ -8,19 +8,18 @@ import (
 	"github.com/strolt/strolt/shared/sdk/common"
 )
 
-var (
-	manager = &Manager{
-		Instances: map[string]*Instance{},
-	}
-)
+var manager = &Manager{
+	Instances: map[string]*Instance{},
+}
 
+// ManagerInit registers the given proxy instances in the manager and starts watching them.
 func ManagerInit(ctx context.Context, cancel func(), instances []ManagerInstanceInit) {
 	for _, instance := range instances {
 		manager.Instances[instance.Name] = &Instance{
 			Name:                     instance.Name,
 			URL:                      instance.URL,
 			Username:                 instance.Username,
-			Password:                 instance.Password, //pragma: allowlist secret
+			Password:                 instance.Password, // pragma: allowlist secret
 			Watch:                    WatchItem{},
 			sdk:                      New(instance.URL, instance.Username, instance.Password),
 			log:                      logger.New().WithField("proxyInstanceName", instance.Name),
@@ -35,6 +34,7 @@ func ManagerInit(ctx context.Context, cancel func(), instances []ManagerInstance
 	manager.Watch(ctx, cancel)
 }
 
+// ManagerGetPreparedInstances returns the prepared strolt instances of all managed proxies.
 func ManagerGetPreparedInstances() []common.ManagerPreparedInstance {
 	manager.RLock()
 	defer manager.RUnlock()
@@ -86,6 +86,7 @@ func ManagerGetPreparedInstances() []common.ManagerPreparedInstance {
 	return list
 }
 
+// ManagerGetSDKByInstanceName returns the SDK client for the named instance, if it exists.
 func ManagerGetSDKByInstanceName(instanceName string) (*SDK, bool) {
 	instance, ok := manager.Instances[instanceName]
 	if !ok {

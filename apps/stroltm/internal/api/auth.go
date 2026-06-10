@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
 
 	"github.com/strolt/strolt/apps/stroltm/internal/config"
@@ -15,18 +15,19 @@ type authValidateBody struct {
 }
 
 // authValidate godoc
-// @Id					 validate
-// @Summary      Validate user creds
-// @Tags         auth
-// @Param request body authValidateBody true "body"
-// @success 200 {object} apiu.ResultSuccess
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/auth/validate [post].
+//
+//	@Id			validate
+//	@Summary	Validate user creds
+//	@Tags		auth
+//	@Param		request	body		authValidateBody	true	"body"
+//	@success	200		{object}	apiu.ResultSuccess
+//	@success	500		{object}	apiu.ResultError
+//	@Router		/api/v1/auth/validate [post].
 func (api *API) authValidate(w http.ResponseWriter, r *http.Request) {
 	var body authValidateBody
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		apiu.RenderJSON400(w, r, fmt.Errorf("invalid body"))
+		apiu.RenderJSON400(w, r, errors.New("invalid body"))
 		return
 	}
 
@@ -36,7 +37,7 @@ func (api *API) authValidate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.Password != body.Password { //pragma: allowlist secret
+	if user.Password != body.Password { // pragma: allowlist secret
 		apiu.RenderJSON401(w, r)
 		return
 	}

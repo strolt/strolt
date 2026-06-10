@@ -1,3 +1,4 @@
+// Package context provides the operation context shared between task drivers.
 package context
 
 import (
@@ -10,21 +11,26 @@ import (
 	"github.com/strolt/strolt/shared/logger"
 )
 
+// Time holds the start and stop timestamps of an operation.
 type Time struct {
 	Start time.Time `json:"start"`
 	Stop  time.Time `json:"stop"`
 }
 
+// Operation describes the timing and error state of a single operation phase.
 type Operation struct {
 	Time  Time   `json:"time"`
 	Error string `json:"errorMessage"`
 }
 
+// DestinationOperation extends Operation with the backup output of a destination.
 type DestinationOperation struct {
 	Operation
+
 	BackupOutput sctxt.BackupOutput `json:"backupOutput"`
 }
 
+// Context carries the state of a task operation across source and destinations.
 type Context struct {
 	Trigger        sctxt.TriggerType   `json:"trigger"`
 	ServiceName    string              `json:"serviceName"`
@@ -42,6 +48,37 @@ type Context struct {
 	Tags []string `json:"tags"`
 
 	SourceLocalPath string `json:"sourceLocalPath"`
+}
+
+// New creates a Context for the given task operation and prepares its work directory.
+func New(trigger sctxt.TriggerType, serviceName string, taskName string, opertationType sctxt.OperationType, sourceLocalPath string) (Context, error) {
+	ctx := Context{
+		Trigger:        trigger,
+		ServiceName:    serviceName,
+		TaskName:       taskName,
+		OpertationType: opertationType,
+		Destination:    make(map[string]DestinationOperation),
+		Event:          sctxt.EvOperationStart,
+
+		SourceLocalPath: sourceLocalPath,
+	}
+
+	if err := ctx.setWorkDir(); err != nil {
+		return Context{}, err
+	}
+
+	return ctx, nil
+}
+
+// Close removes the temporary work directory if one was created.
+func (ctx *Context) Close() error {
+	if ctx.IsWorkDirTmp {
+		if err := dir.Remove(ctx.WorkDir); err != nil {
+			return fmt.Errorf("remove work dir: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func (ctx *Context) setWorkDir() error {
@@ -62,7 +99,7 @@ func (ctx *Context) setWorkDir() error {
 
 		tempDirPath, err := d.CreateAsTmp()
 		if err != nil {
-			return err
+			return fmt.Errorf("create temp work dir: %w", err)
 		}
 
 		ctx.WorkDir = tempDirPath
@@ -70,7 +107,7 @@ func (ctx *Context) setWorkDir() error {
 	} else {
 		absPath, err := filepath.Abs(ctx.SourceLocalPath)
 		if err != nil {
-			return err
+			return fmt.Errorf("resolve source local path: %w", err)
 		}
 
 		ctx.WorkDir = absPath
@@ -78,33 +115,6 @@ func (ctx *Context) setWorkDir() error {
 	}
 
 	log.Debug(fmt.Sprintf("work dir path '%s'", ctx.WorkDir))
-
-	return nil
-}
-
-func New(trigger sctxt.TriggerType, serviceName string, taskName string, opertationType sctxt.OperationType, sourceLocalPath string) (Context, error) {
-	ctx := Context{
-		Trigger:        trigger,
-		ServiceName:    serviceName,
-		TaskName:       taskName,
-		OpertationType: opertationType,
-		Destination:    make(map[string]DestinationOperation),
-		Event:          sctxt.EvOperationStart,
-
-		SourceLocalPath: sourceLocalPath,
-	}
-
-	if err := ctx.setWorkDir(); err != nil {
-		return Context{}, err
-	}
-
-	return ctx, nil
-}
-
-func (ctx *Context) Close() error {
-	if ctx.IsWorkDirTmp {
-		return dir.Remove(ctx.WorkDir)
-	}
 
 	return nil
 }

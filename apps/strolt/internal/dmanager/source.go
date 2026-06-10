@@ -2,6 +2,7 @@ package dmanager
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/source/local"
@@ -11,8 +12,10 @@ import (
 	"github.com/strolt/strolt/shared/logger"
 )
 
+// Source is the name of a source driver.
 type Source string
 
+// Supported source drivers.
 const (
 	DriverSourceLocal   Source = "local"
 	DriverSourceMysql   Source = "mysql"
@@ -20,6 +23,7 @@ const (
 	DriverSourceMongodb Source = "mongodb"
 )
 
+// GetAvailableDriverSource returns the supported source drivers.
 func GetAvailableDriverSource() []Source {
 	return []Source{
 		DriverSourceLocal,
@@ -29,17 +33,13 @@ func GetAvailableDriverSource() []Source {
 	}
 }
 
+// IsAvailableDriverSource reports whether the source driver is supported.
 func IsAvailableDriverSource(driver Source) bool {
-	for _, d := range GetAvailableDriverSource() {
-		if driver == d {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(GetAvailableDriverSource(), driver)
 }
 
-func GetSourceDriver(driver Source, serviceName string, taskName string, driverConfig interface{}, driverEnv interface{}) (interfaces.DriverSourceInterface, error) {
+// GetSourceDriver creates and configures the requested source driver.
+func GetSourceDriver(driver Source, serviceName string, taskName string, driverConfig any, driverEnv any) (interfaces.DriverSourceInterface, error) {
 	sourceDrivers := map[Source]interfaces.DriverSourceInterface{
 		DriverSourceLocal:   local.New(),
 		DriverSourcePg:      pg.New(),
@@ -61,11 +61,11 @@ func GetSourceDriver(driver Source, serviceName string, taskName string, driverC
 	d.SetLogger(logger.New().WithFields(loggerFields))
 
 	if err := d.SetConfig(driverConfig); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("set source driver config: %w", err)
 	}
 
 	if err := d.SetEnv(driverEnv); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("set source driver env: %w", err)
 	}
 
 	return d, nil

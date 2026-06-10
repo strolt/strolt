@@ -2,10 +2,12 @@ package cmd
 
 import "fmt"
 
-func Print(arg interface{}) {
+// Print writes the given value to stdout followed by a newline.
+func Print(arg any) {
 	fmt.Println(arg) //nolint:forbidigo
 }
 
-func Printf(format string, args ...interface{}) {
+// Printf writes the formatted message to stdout followed by a newline.
+func Printf(format string, args ...any) {
 	fmt.Println(fmt.Sprintf(format, args...)) //nolint:forbidigo
 }

@@ -7,6 +7,19 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// TLS modes supported by the driver.
+const (
+	// TLSModeDisabled disables TLS entirely (`--skip-ssl`).
+	TLSModeDisabled = "disabled"
+	// TLSModeSkipVerify uses TLS but does not verify the server certificate
+	// (`--skip-ssl-verify-server-cert`). Required for MySQL servers with
+	// auto-generated self-signed certificates: the MariaDB client verifies
+	// certificates by default since 11.4 and can do so automatically only
+	// against MariaDB servers.
+	TLSModeSkipVerify = "skip-verify"
+)
+
+// Config describes the MySQL source driver configuration.
 type Config struct {
 	BinPathMySQL     string `yaml:"bin_path_mysql"`
 	BinPathMySQLDump string `yaml:"bin_path_mysqldump"`
@@ -16,27 +29,41 @@ type Config struct {
 	Database string `yaml:"database"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
+	TLS      string `yaml:"tls"`
 }
 
-func (i *MySQL) SetConfig(config interface{}) error {
+// SetConfig parses and validates the driver configuration.
+func (i *MySQL) SetConfig(config any) error {
 	data, err := yaml.Marshal(config)
 	if err != nil {
-		return err
+		return fmt.Errorf("marshal config: %w", err)
 	}
 
 	if err := yaml.Unmarshal(data, &i.config); err != nil {
-		return err
+		return fmt.Errorf("unmarshal config: %w", err)
 	}
 
 	return i.validateConfig()
 }
 
 func (i *MySQL) validateConfig() error {
-	return nil
+	switch i.config.TLS {
+	case "", TLSModeDisabled, TLSModeSkipVerify:
+		return nil
+	default:
+		return fmt.Errorf("unsupported tls mode %q, expected %q or %q", i.config.TLS, TLSModeDisabled, TLSModeSkipVerify)
+	}
 }
 
 func (i *MySQL) getCommonArgs() []string {
 	args := []string{}
+
+	switch i.config.TLS {
+	case TLSModeDisabled:
+		args = append(args, "--skip-ssl")
+	case TLSModeSkipVerify:
+		args = append(args, "--skip-ssl-verify-server-cert")
+	}
 
 	if i.config.Host != "" {
 		args = append(args, "-h", i.config.Host)
@@ -51,7 +78,7 @@ func (i *MySQL) getCommonArgs() []string {
 	}
 
 	if i.config.Password != "" {
-		args = append(args, fmt.Sprintf("-p%s", i.config.Password))
+		args = append(args, "-p"+i.config.Password)
 	}
 
 	return args
@@ -64,7 +91,7 @@ func (i *MySQL) getBackupArgs() []string {
 
 	args = append(args, "--no-tablespaces")
 
-	args = append(args, fmt.Sprintf("--result-file=%s", i.getFileName()))
+	args = append(args, "--result-file="+i.getFileName())
 
 	if i.config.Database != "" {
 		args = append(args, i.config.Database)
@@ -74,13 +101,14 @@ func (i *MySQL) getBackupArgs() []string {
 }
 
 func (i *MySQL) getRestoreArgs() []string {
-	args := []string{}
+	commonArgs := i.getCommonArgs()
 
-	args = append(args, i.getCommonArgs()...)
+	args := make([]string, 0, len(commonArgs)+4)
+	args = append(args, commonArgs...)
 
 	args = append(args, "-D", i.config.Database)
 
-	args = append(args, "-e", fmt.Sprintf("source %s", i.getFileName()))
+	args = append(args, "-e", "source "+i.getFileName())
 
 	return args
 }
@@ -90,7 +118,7 @@ func (i *MySQL) getBinMySQLDump() string {
 		return i.config.BinPathMySQLDump
 	}
 
-	return "/usr/bin/mysqldump"
+	return "/usr/bin/mariadb-dump"
 }
 
 func (i *MySQL) getBinMySQL() string {
@@ -98,5 +126,5 @@ func (i *MySQL) getBinMySQL() string {
 		return i.config.BinPathMySQL
 	}
 
-	return "/usr/bin/mysql"
+	return "/usr/bin/mariadb"
 }

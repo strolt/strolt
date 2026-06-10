@@ -8,7 +8,7 @@ import (
 )
 
 func (i *PgDump) getPgDumpVersion() string {
-	cmd := exec.Command(i.getBinPgDump(), "--version")
+	cmd := exec.Command(i.getBinPgDump(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -21,7 +21,7 @@ func (i *PgDump) getPgDumpVersion() string {
 }
 
 func (i *PgDump) getPgRestoreVersion() string {
-	cmd := exec.Command(i.getBinPgRestore(), "--version")
+	cmd := exec.Command(i.getBinPgRestore(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -34,7 +34,7 @@ func (i *PgDump) getPgRestoreVersion() string {
 }
 
 func (i *PgDump) getPsqlVersion() string {
-	cmd := exec.Command(i.getBinPSQL(), "--version")
+	cmd := exec.Command(i.getBinPSQL(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -46,6 +46,7 @@ func (i *PgDump) getPsqlVersion() string {
 	return arr[len(arr)-1]
 }
 
+// BinaryVersion returns versions of the pg_dump, pg_restore and psql binaries.
 func (i *PgDump) BinaryVersion() ([]interfaces.DriverBinaryVersion, error) {
 	pgDumpVersion := i.getPgDumpVersion()
 	pgRestoreVersion := i.getPgRestoreVersion()

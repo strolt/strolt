@@ -15,7 +15,7 @@ driver: slack
 ```yaml
 definitions:
   notifications:
-    {notification name}:
+    { notification name }:
       driver: slack
       config:
         teamId: Txxxxxxxxxx

@@ -84,7 +84,7 @@ func (schedule *Schedule) validate(serviceName string, taskName string) error {
 	return nil
 }
 
-func (source *DriverSourceConfig) validate(serviceName string, taskName string) error {
+func (source DriverSourceConfig) validate(serviceName string, taskName string) error {
 	if source.Driver == "" {
 		return fmt.Errorf("service '%s' task '%s' source driver must be fill", serviceName, taskName)
 	}
@@ -101,7 +101,7 @@ func (source *DriverSourceConfig) validate(serviceName string, taskName string) 
 	return nil
 }
 
-func (destination *DriverDestinationConfig) validate(serviceName string, taskName string, destinationName string) error {
+func (destination DriverDestinationConfig) validate(serviceName string, taskName string, destinationName string) error {
 	if destination.Driver == "" {
 		return fmt.Errorf("service '%s' task '%s' destination '%s' driver must be fill", serviceName, taskName, destinationName)
 	}

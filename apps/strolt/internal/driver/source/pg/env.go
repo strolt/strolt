@@ -14,11 +14,11 @@ func (i *PgDump) getEnv() []string {
 	}
 
 	if i.config.Username != "" {
-		env = append(env, fmt.Sprintf("PGUSER=%s", i.config.Username))
+		env = append(env, "PGUSER="+i.config.Username)
 	}
 
 	if i.config.Password != "" {
-		env = append(env, fmt.Sprintf("PGPASSWORD=%s", i.config.Password))
+		env = append(env, "PGPASSWORD="+i.config.Password)
 	}
 
 	if i.config.Port != 0 {
@@ -26,17 +26,22 @@ func (i *PgDump) getEnv() []string {
 	}
 
 	if i.config.Host != "" {
-		env = append(env, fmt.Sprintf("PGHOST=%s", i.config.Host))
+		env = append(env, "PGHOST="+i.config.Host)
 	}
 
 	return env
 }
 
-func (i *PgDump) SetEnv(env interface{}) error {
+// SetEnv parses the driver environment variables.
+func (i *PgDump) SetEnv(env any) error {
 	data, err := yaml.Marshal(env)
 	if err != nil {
-		return err
+		return fmt.Errorf("marshal env: %w", err)
 	}
 
-	return yaml.Unmarshal(data, &i.env)
+	if err := yaml.Unmarshal(data, &i.env); err != nil {
+		return fmt.Errorf("unmarshal env: %w", err)
+	}
+
+	return nil
 }

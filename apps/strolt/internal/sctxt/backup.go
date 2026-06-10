@@ -1,5 +1,7 @@
+// Package sctxt defines shared context types for operations, events and triggers.
 package sctxt
 
+// BackupOutput holds the summary statistics produced by a backup run.
 type BackupOutput struct {
 	FilesNew            uint   `json:"files_new"`
 	FilesChanged        uint   `json:"files_changed"`

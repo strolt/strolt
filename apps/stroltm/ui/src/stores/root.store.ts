@@ -6,6 +6,6 @@ export type RootStoreModel = typeof RootStore;
 
 export const RootStore = {
   authStore,
-  managerStore,
   infoStore,
+  managerStore,
 };

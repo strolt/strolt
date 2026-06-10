@@ -1,18 +1,19 @@
-FROM alpine:3.18.0 AS base
+FROM alpine:3.23.4 AS base
 WORKDIR /stroltm
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
-FROM node:24.11.1-trixie-slim as ui-base
-RUN apt-get update && apt-get -y install openjdk21 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+FROM node:24.13.0-trixie-slim AS ui-base
+RUN apt-get update && apt-get -y install openjdk-21-jre-headless --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-FROM golang:1.20.4-alpine3.18 AS swagger-base
+FROM golang:1.26.4-alpine3.23 AS swagger-base
 RUN apk --update add --no-cache make curl
 
-FROM ui-base as ui-deps
+FROM ui-base AS ui-deps
 WORKDIR /github.com/strolt/strolt/apps/stroltm/ui
 COPY ./apps/stroltm/ui/package.json .
 COPY ./apps/stroltm/ui/pnpm-lock.yaml .
+COPY ./apps/stroltm/ui/pnpm-workspace.yaml .
 RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
 
 FROM swagger-base AS swagger
@@ -20,12 +21,12 @@ WORKDIR /github.com/strolt/strolt
 COPY . .
 RUN make .swagger-strolt && make .swagger-shared-generate-client-strolt && make .swagger-stroltp && make .swagger-shared-generate-client-stroltp && make .swagger-stroltm
 
-FROM ui-deps as ui-builder
+FROM ui-deps AS ui-builder
 COPY ./apps/stroltm/ui .
 COPY --from=swagger /github.com/strolt/strolt/.swagger /github.com/strolt/strolt/.swagger
-RUN pnpm gen-api && pnpm build
+RUN pnpm codegen && pnpm build
 
-FROM golang:1.20.4-alpine3.18 AS builder
+FROM golang:1.26.4-alpine3.23 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/stroltm
 COPY ./apps/stroltm/go.mod .
@@ -44,11 +45,11 @@ FROM base
 ARG GITHUB_SHA
 
 LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
-      org.opencontainers.image.description="Strolt manager" \
-      org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.source="https://github.com/strolt/strolt.git" \
-      org.opencontainers.image.title="Stroltm" \
-      org.opencontainers.image.revision="${GITHUB_SHA}"
+			org.opencontainers.image.description="Strolt manager" \
+			org.opencontainers.image.licenses="MIT" \
+			org.opencontainers.image.source="https://github.com/strolt/strolt.git" \
+			org.opencontainers.image.title="Stroltm" \
+			org.opencontainers.image.revision="${GITHUB_SHA}"
 
 COPY --from=builder /go/src/github.com/strolt/strolt/apps/stroltm/stroltm ./bin/stroltm
 

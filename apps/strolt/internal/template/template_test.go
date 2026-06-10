@@ -1,6 +1,7 @@
 package template
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -64,7 +65,7 @@ func TestNew(t *testing.T) {
 				TaskName:       taskName,
 				OpertationType: sctxt.OpTypeBackup,
 				Operation: context.Operation{
-					Error: fmt.Errorf("error").Error(),
+					Error: errors.New("error").Error(),
 				},
 			})
 
@@ -89,7 +90,7 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, header, tmpl.Header)
 
 		body := fmt.Sprintf(`Event: %s`, sctxt.EvOperationStart)
-		body += fmt.Sprintf("\nStart: %s", startTime.Format(time.RFC3339))
+		body += "\nStart: " + startTime.Format(time.RFC3339)
 		assert.Equal(t, body, tmpl.Body)
 	})
 
@@ -110,15 +111,15 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, header, tmpl.Header)
 
 		body := fmt.Sprintf(`Event: %s`, sctxt.EvOperationStart)
-		body += fmt.Sprintf("\nStart: %s", startTime.Format(time.RFC3339))
-		body += fmt.Sprintf("\nStop: %s", stopTime.Format(time.RFC3339))
+		body += "\nStart: " + startTime.Format(time.RFC3339)
+		body += "\nStop: " + stopTime.Format(time.RFC3339)
 		body += fmt.Sprintf("\nDuration: %s", stopTime.Sub(startTime))
 
 		assert.Equal(t, body, tmpl.Body)
 	})
 
 	t.Run(string(sctxt.EvOperationError), func(t *testing.T) {
-		err := fmt.Errorf("error")
+		err := errors.New("error")
 		tmpl := New("", context.Context{
 			TaskName:       taskName,
 			OpertationType: sctxt.OpTypeBackup,
@@ -136,8 +137,8 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, header, tmpl.Header)
 
 		body := fmt.Sprintf(`Event: %s`, sctxt.EvOperationError)
-		body += fmt.Sprintf("\nStart: %s", startTime.Format(time.RFC3339))
-		body += fmt.Sprintf("\nStop: %s", stopTime.Format(time.RFC3339))
+		body += "\nStart: " + startTime.Format(time.RFC3339)
+		body += "\nStop: " + stopTime.Format(time.RFC3339)
 		body += fmt.Sprintf("\nDuration: %s", stopTime.Sub(startTime))
 		body += fmt.Sprintf("\n\nError: %s", err)
 

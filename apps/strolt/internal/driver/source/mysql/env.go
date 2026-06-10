@@ -1,5 +1,6 @@
 package mysql
 
-func (i *MySQL) SetEnv(env interface{}) error {
+// SetEnv parses the driver environment variables.
+func (i *MySQL) SetEnv(env any) error {
 	return nil
 }

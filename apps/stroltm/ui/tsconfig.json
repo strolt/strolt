@@ -1,22 +1,27 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src",
-    "target": "ESNext",
-    "useDefineForClassFields": true,
+    "erasableSyntaxOnly": false,
+    "exactOptionalPropertyTypes": false,
+    "jsx": "react-jsx",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "allowJs": false,
-    "skipLibCheck": true,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "paths": {
+      "api/*": ["./src/api/*"],
+      "boot/*": ["./src/boot/*"],
+      "components": ["./src/components"],
+      "components/*": ["./src/components/*"],
+      "contexts/*": ["./src/contexts/*"],
+      "env": ["./src/env"],
+      "env/*": ["./src/env/*"],
+      "layouts": ["./src/layouts"],
+      "pages": ["./src/pages"],
+      "stores": ["./src/stores"],
+      "stores/*": ["./src/stores/*"],
+      "utils": ["./src/utils"],
+      "utils/*": ["./src/utils/*"]
+    },
+    "rootDir": "."
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "extends": "@shibanet0/datamitsu-config/tsconfig/base.json",
+  "include": ["src", "vite.config.ts"]
 }

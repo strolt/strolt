@@ -1,6 +1,7 @@
 package task
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -9,11 +10,13 @@ import (
 )
 
 type manager struct {
+	*sync.RWMutex
+
 	Tasks         map[string]ManagerTaskItem
 	LastChangedAt time.Time
-	*sync.RWMutex
 }
 
+// ManagerTaskItem describes the manager state of a single task.
 type ManagerTaskItem struct {
 	ServiceName string              `json:"serviceName"`
 	TaskName    string              `json:"taskName"`
@@ -22,12 +25,13 @@ type ManagerTaskItem struct {
 	LastEndedAt time.Time           `json:"lastEndedAt"`
 	TriggerType sctxt.TriggerType   `json:"trigger"`
 	IsRunning   bool                `json:"isRunning"`
-} // @name ManagerTaskItem
+} //	@name	ManagerTaskItem
 
+// ManagerStatus is a snapshot of all tasks tracked by the manager.
 type ManagerStatus struct {
 	Tasks         []ManagerTaskItem `json:"tasks"`
 	LastChangedAt string            `json:"lastChangedAt"`
-} // @name ManagerStatus
+} //	@name	ManagerStatus
 
 var managerVar = manager{
 	Tasks:         map[string]ManagerTaskItem{},
@@ -93,6 +97,7 @@ func (t *Task) managerStop() {
 	managerVar.Unlock()
 }
 
+// IsRunning reports whether the task is currently running.
 func (t *Task) IsRunning() bool {
 	managerVar.RLock()
 	defer managerVar.RUnlock()
@@ -107,6 +112,7 @@ func (t *Task) IsRunning() bool {
 	return taskItem.IsRunning
 }
 
+// GetLastChangedManager returns the time of the last manager state change.
 func GetLastChangedManager() time.Time {
 	managerVar.RLock()
 	defer managerVar.RUnlock()
@@ -114,13 +120,14 @@ func GetLastChangedManager() time.Time {
 	return managerVar.LastChangedAt
 }
 
+// GetManagerStatus returns a snapshot of all tasks tracked by the manager.
 func GetManagerStatus() ManagerStatus {
 	status := ManagerStatus{}
-	list := []ManagerTaskItem{}
 
 	managerVar.RLock()
 	status.LastChangedAt = managerVar.LastChangedAt.Format(time.RFC3339)
 
+	list := make([]ManagerTaskItem, 0, len(managerVar.Tasks))
 	for _, taskItem := range managerVar.Tasks {
 		list = append(list, taskItem)
 	}
@@ -139,7 +146,7 @@ func (t *Task) managerCreateErrorIsRunning() error {
 
 	taskItem, ok := managerVar.Tasks[taskKey]
 	if !ok {
-		return fmt.Errorf("task not found in manager")
+		return errors.New("task not found in manager")
 	}
 
 	return fmt.Errorf("task '%s' for service '%s' already started '%s' with operation '%s' - trigger '%s'", t.TaskName, t.Context.ServiceName, taskItem.StartedAt.Format(time.RFC3339), taskItem.Opeation, taskItem.TriggerType)

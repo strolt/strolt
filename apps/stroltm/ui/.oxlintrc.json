@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../.datamitsu/oxlint_configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "pedantic": "error",
+    "perf": "error",
+    "style": "warn",
+    "suspicious": "error"
+  },
+  "extends": ["../../../.datamitsu/.oxlintrc.json"],
+  "rules": {
+    "max-params": "off",
+    "no-duplicate-imports": "off",
+    "no-empty-interface": "off",
+    "no-map-spread": "off",
+    "no-nested-ternary": "off",
+    "no-shadow": "off",
+    "no-unused-expressions": "off",
+    "no-unused-vars": "off",
+    "unicorn/prefer-math-trunc": "off",
+    "unicorn/prefer-native-coercion-functions": "off",
+    "unicorn/prefer-top-level-await": "off"
+  }
+}

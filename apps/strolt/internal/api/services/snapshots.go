@@ -6,22 +6,24 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/shared/apiu"
+	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/go-chi/chi/v5"
 )
 
 // getSnapshots godoc
-// @Id					 getSnapshots
-// @Summary      Get snapshots
-// @Tags         services
-// @Security BasicAuth
-// @Param   serviceName         path    string     true        "Service name"
-// @Param   taskName            path    string     true        "Task name"
-// @Param   destinationName     path    string     true        "Destination name"
-// @success 200 {object} getSnapshotsResult
-// @success 400 {object} apiu.ResultError
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots [get].
+//
+//	@Id			getSnapshots
+//	@Summary	Get snapshots
+//	@Tags		services
+//	@Security	BasicAuth
+//	@Param		serviceName		path		string	true	"Service name"
+//	@Param		taskName		path		string	true	"Task name"
+//	@Param		destinationName	path		string	true	"Destination name"
+//	@success	200				{object}	getSnapshotsResult
+//	@success	400				{object}	apiu.ResultError
+//	@success	500				{object}	apiu.ResultError
+//	@Router		/api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots [get].
 func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")
@@ -32,7 +34,11 @@ func (s *Services) getSnapshots(w http.ResponseWriter, r *http.Request) {
 		apiu.RenderJSON500(w, r, err)
 		return
 	}
-	defer t.Close()
+	defer func() {
+		if err := t.Close(); err != nil {
+			logger.New().Error(err)
+		}
+	}()
 
 	if t.IsRunning() {
 		apiu.RenderJSON400(w, r, apiu.ErrTaskAlreadyWorking)

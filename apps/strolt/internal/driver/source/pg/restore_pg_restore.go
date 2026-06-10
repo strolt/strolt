@@ -17,7 +17,7 @@ func (i *PgDump) restoreWithPgRestoreCmd(ctx context.Context, filename string, i
 		args = append(args, filename)
 	}
 
-	cmd := exec.Command(i.getBinPgRestore(), args...)
+	cmd := exec.Command(i.getBinPgRestore(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
 	cmd.Dir = ctx.WorkDir
 	cmd.Env = i.getEnv()
 
@@ -43,7 +43,7 @@ func (i *PgDump) restoreWithPgRestoreCopy(ctx context.Context, filename string) 
 			return fmt.Errorf("%w (%v)", err, lastMessage)
 		}
 
-		return err
+		return fmt.Errorf("run pg_restore: %w", err)
 	}
 
 	if outputString != "" {
@@ -58,12 +58,12 @@ func (i *PgDump) restoreWithPgRestorePipe(ctx context.Context, filename string) 
 
 	writer, err := cmd.StdinPipe()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("get stdin pipe: %w", err)
 	}
 
 	if err := cmd.Start(); err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("start pg_restore: %w", err)
 	}
 
-	return writer, cmd.Wait, err
+	return writer, cmd.Wait, nil
 }

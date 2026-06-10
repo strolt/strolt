@@ -1,13 +1,26 @@
 services:
   e2e:
     mongo:
-      source:
-        driver: mongodb
-        config:
-          host: mongo
-          database: strolt
       destinations:
         restic-mongo:
-          extends: restic_base
           env:
             RESTIC_REPOSITORY: "s3:http://minio:9000/restic-mongo"
+          extends: restic_base
+      source:
+        config:
+          database: strolt
+          host: mongo
+        driver: mongodb
+  e2e-copy:
+    mongo:
+      destinations:
+        restic-mongo:
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/copy/restic-mongo"
+          extends: restic_base
+      operationMode: copy
+      source:
+        config:
+          database: strolt
+          host: mongo
+        driver: mongodb

@@ -10,52 +10,60 @@ import (
 	"github.com/strolt/strolt/shared/apiu"
 )
 
+// Config is the API representation of the strolt configuration.
 type Config struct {
 	TimeZone            string                   `json:"timezone"`
 	DisableWatchChanges bool                     `json:"disableWatchChanges"`
 	Tags                []string                 `json:"tags"`
 	Services            map[string]ConfigService `json:"services"`
-} // @name Config
+} //	@name	Config
 
-type ConfigService map[string]ConfigServiceTask // @name ConfigService
+// ConfigService maps task names to their task configuration.
+type ConfigService map[string]ConfigServiceTask //	@name	ConfigService
 
+// ConfigServiceTask describes a single task configuration.
 type ConfigServiceTask struct {
 	Source        ConfigServiceTaskSource                 `json:"source"`
 	Destinations  map[string]ConfigServiceTaskDestination `json:"destinations"`
 	Notifications []ConfigServiceTaskNotification         `json:"notifications"`
 	Schedule      ConfigServiceTaskSchedule               `json:"schedule"`
 	Tags          []string                                `json:"tags"`
-} // @name ConfigServiceTask
+} //	@name	ConfigServiceTask
 
+// ConfigServiceTaskSource describes the source driver of a task.
 type ConfigServiceTaskSource struct {
 	Driver string `json:"driver"`
-} // @name ConfigServiceTaskSource
+} //	@name	ConfigServiceTaskSource
 
+// ConfigServiceTaskSchedule describes the backup and prune schedules of a task.
 type ConfigServiceTaskSchedule struct {
 	Backup string `json:"backup"`
 	Prune  string `json:"prune"`
-} // @name ConfigServiceTaskSchedule
+} //	@name	ConfigServiceTaskSchedule
 
+// ConfigServiceTaskDestination describes a destination driver of a task.
 type ConfigServiceTaskDestination struct {
 	Driver string `json:"driver"`
-} // @name ConfigServiceTaskDestination
+} //	@name	ConfigServiceTaskDestination
 
+// ConfigServiceTaskNotification describes a notification driver of a task.
 type ConfigServiceTaskNotification struct {
 	Driver string            `json:"driver"`
 	Name   string            `json:"name"`
-	Events []sctxt.EventType `json:"events" enums:"OPERATION_START,OPERATION_STOP,OPERATION_ERROR,SOURCE_START,SOURCE_STOP,SOURCE_ERROR,DESTINATION_START,DESTINATION_STOP,DESTINATION_ERROR"`
-} // @name ConfigServiceTaskNotification
+	Events []sctxt.EventType `enums:"OPERATION_START,OPERATION_STOP,OPERATION_ERROR,SOURCE_START,SOURCE_STOP,SOURCE_ERROR,DESTINATION_START,DESTINATION_STOP,DESTINATION_ERROR" json:"events"`
+} //	@name	ConfigServiceTaskNotification
 
 // getConfig godoc
-// @Id					 getConfig
-// @Summary      Show config
-// @Security BasicAuth
-// @success 200 {object} Config
-// @Router       /api/v1/config [get].
+//
+//	@Id			getConfig
+//	@Summary	Show config
+//	@Security	BasicAuth
+//	@success	200	{object}	Config
+//	@Router		/api/v1/config [get].
 func (api *API) getConfig(w http.ResponseWriter, r *http.Request) {
 	c := config.Get()
 
-	tags := []string{}
+	tags := make([]string, 0, len(c.Tags))
 	tags = append(tags, c.Tags...)
 
 	services := map[string]ConfigService{}
@@ -80,7 +88,7 @@ func (api *API) getConfig(w http.ResponseWriter, r *http.Request) {
 				})
 			}
 
-			tags := []string{}
+			tags := make([]string, 0, len(task.Tags))
 			tags = append(tags, task.Tags...)
 
 			destinations := map[string]ConfigServiceTaskDestination{}

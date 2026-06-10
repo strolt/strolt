@@ -1,6 +1,5 @@
 import { LatestVersionLink } from "components";
-
-import { useStores, observer } from "stores";
+import { observer, useStores } from "stores";
 
 export const Footer = observer(() => {
   const { infoStore } = useStores();

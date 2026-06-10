@@ -17,6 +17,7 @@ func getStroltInfo(list []*stroltp_models.ManagerInfoInstance, name string) *str
 	return nil
 }
 
+// ManagerGetInfo returns aggregated information about all managed instances.
 func ManagerGetInfo(version string) common.ManagerInfo {
 	manager.RLock()
 	defer manager.RUnlock()
@@ -67,7 +68,7 @@ func ManagerGetInfo(version string) common.ManagerInfo {
 				LastestOnlineAt: latestOnlineAt,
 			}
 
-			if time.Now().Unix() > instance.Watch.LatestSuccessPingAt.Add(time.Second*15).Unix() { //nolint:gomnd
+			if time.Now().Unix() > instance.Watch.LatestSuccessPingAt.Add(time.Second*15).Unix() { //nolint:mnd
 				infoItem.IsOnline = false
 			}
 

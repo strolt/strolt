@@ -1,13 +1,16 @@
 package pg
 
 import (
+	"errors"
 	"fmt"
 
 	"gopkg.in/yaml.v3"
 )
 
+// Format is a pg_dump output format identifier.
 type Format string
 
+// Supported pg_dump output formats.
 const (
 	FormatCustom    Format = "c"
 	FormatDirectory Format = "d"
@@ -15,6 +18,9 @@ const (
 	FormatPlainText Format = "p"
 )
 
+// PgDumpConfig describes the PostgreSQL source driver configuration.
+//
+//nolint:revive // keep existing exported name for backward compatibility
 type PgDumpConfig struct {
 	BinPathPgDump    string `yaml:"bin_path_pg_dump"`
 	BinPathPgRestore string `yaml:"bin_path_pg_restore"`
@@ -32,14 +38,15 @@ type PgDumpConfig struct {
 	CommonParams  string `yaml:"common_params"`
 }
 
-func (i *PgDump) SetConfig(config interface{}) error {
+// SetConfig parses and validates the driver configuration.
+func (i *PgDump) SetConfig(config any) error {
 	data, err := yaml.Marshal(config)
 	if err != nil {
-		return err
+		return fmt.Errorf("marshal config: %w", err)
 	}
 
 	if err := yaml.Unmarshal(data, &i.config); err != nil {
-		return err
+		return fmt.Errorf("unmarshal config: %w", err)
 	}
 
 	return i.validateConfig()
@@ -51,7 +58,7 @@ func (i *PgDump) validateConfig() error {
 			i.config.Format != FormatTar &&
 			i.config.Format != FormatDirectory &&
 			i.config.Format != FormatPlainText {
-			return fmt.Errorf("not available format. available [c|t|p|d]")
+			return errors.New("not available format. available [c|t|p|d]")
 		}
 	}
 
@@ -68,7 +75,7 @@ func (i *PgDump) getCommonArgs() []string {
 	args = append(args, "--no-password")
 
 	if i.config.Database != "" {
-		args = append(args, fmt.Sprintf("--dbname=%s", i.config.Database))
+		args = append(args, "--dbname="+i.config.Database)
 	}
 
 	// if i.config.Host != "" {

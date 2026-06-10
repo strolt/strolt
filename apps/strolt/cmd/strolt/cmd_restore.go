@@ -55,7 +55,7 @@ var restoreCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer t.Close()
+		defer func() { _ = t.Close() }()
 
 		isSourceEmpty, err := t.IsSourceEmpty()
 		if err != nil {

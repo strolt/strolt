@@ -1,0 +1,12 @@
+services:
+  e2e:
+    daemon:
+      destinations:
+        restic-daemon:
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-daemon"
+          extends: restic_base
+      source:
+        config:
+          path: "/e2e/input"
+        driver: local

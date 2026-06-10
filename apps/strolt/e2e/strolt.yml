@@ -1,21 +1,21 @@
-name: strolt-e2e
-
 api:
   users:
     admin: "{{.API_ADMIN_PASSWORD}}"
 
-timezone: UTC
-
 extends:
-  secrets:
-    - .strolt/secrets.yml
   configs:
     - .strolt/base.yml
 
     - .strolt/local.yml
     - .strolt/prune.yml
+    - .strolt/retention.yml
+    - .strolt/daemon.yml
 
     - .strolt/pg.yml
     - .strolt/mongo.yml
     - .strolt/mysql.yml
     - .strolt/mariadb.yml
+  secrets:
+    - .strolt/secrets.yml
+name: strolt-e2e
+timezone: UTC

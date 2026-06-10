@@ -1,3 +1,4 @@
+// Package main is the entry point of the stroltp binary.
 package main
 
 import (

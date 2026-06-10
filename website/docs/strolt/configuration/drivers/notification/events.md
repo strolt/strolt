@@ -7,8 +7,8 @@ sidebar_position: 1
 ```yaml
 definitions:
   notifications:
-    {notification name}:
-      driver: {driver name}
+    { notification name }:
+      driver: { driver name }
       config:
       events:
         - OPERATION_START
@@ -23,6 +23,5 @@ definitions:
         - DESTINATION_STOP
         - DESTINATION_ERROR
 ```
-
 
 `DEFAULT: OPERATION_STOP, OPERATION_ERROR`

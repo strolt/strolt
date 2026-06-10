@@ -1,6 +1,7 @@
 package e2e_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -8,12 +9,18 @@ import (
 
 type MySQLSuite struct {
 	suite.Suite
+
 	c *Conn
 }
 
 func (s *MySQLSuite) SetupSuite() {
-	c, err := sqlConnect("mysql", "strolt:strolt@(localhost:9005)/strolt?timeout=60s")
-	s.NoError(err)
+	port, err := containerManager.GetMySQLPort()
+	s.Require().NoError(err)
+
+	// MySQL 8.4 enables TLS with an auto-generated self-signed certificate.
+	connStr := fmt.Sprintf("strolt:strolt@(localhost:%s)/strolt?timeout=60s&tls=skip-verify", port)
+	c, err := sqlConnect("mysql", connStr)
+	s.Require().NoError(err)
 	s.c = c
 }
 
@@ -22,10 +29,10 @@ func (s *MySQLSuite) TearDownSuite() {
 }
 
 func (s *MySQLSuite) BeforeTest(suiteName, testName string) {
-	s.c.dropTable()
-	s.c.createTable()
-	s.c.insertData(true)
-	s.NoError(s.c.checkValidData())
+	s.c.dropSchema()
+	s.c.createSchema()
+	s.c.insertData()
+	s.Require().NoError(s.c.checkValidData())
 }
 
 func (s *MySQLSuite) AfterTest(suiteName, testName string) {
@@ -33,14 +40,11 @@ func (s *MySQLSuite) AfterTest(suiteName, testName string) {
 }
 
 func (s *MySQLSuite) TestMySQL() {
-	s.NoError(strolt("backup", "--service", "e2e", "--task", "mysql", "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e", "mysql", "restic-mysql")
+}
 
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e", "mysql", "restic-mysql")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e", "--task", "mysql", "--destination", "restic-mysql", "--snapshot", latestSnapshotID, "--y"))
+func (s *MySQLSuite) TestMySQL_copy() {
+	sqlRoundTrip(&s.Suite, s.c, "e2e-copy", "mysql", "restic-mysql")
 }
 
 //nolint:thelper

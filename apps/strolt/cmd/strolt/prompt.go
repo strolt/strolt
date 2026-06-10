@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 )
 
+// Prompt collects service, task, destination and snapshot names from flags or interactive prompts.
 type Prompt struct {
 	ServiceName     string
 	TaskName        string
@@ -21,12 +23,14 @@ type Prompt struct {
 	cmd *cobra.Command
 }
 
+// NewPrompt creates a Prompt bound to the given command.
 func NewPrompt(cmd *cobra.Command) *Prompt {
 	return &Prompt{
 		cmd: cmd,
 	}
 }
 
+// ScanServiceName resolves the service name from the flag or an interactive prompt.
 func (p *Prompt) ScanServiceName() error {
 	c := config.Get()
 	serviceName, err := p.cmd.Flags().GetString("service")
@@ -40,7 +44,7 @@ func (p *Prompt) ScanServiceName() error {
 
 		_, result, err := prompt.Run()
 		if err != nil {
-			return err
+			return fmt.Errorf("select service prompt: %w", err)
 		}
 
 		serviceName = result
@@ -55,9 +59,10 @@ func (p *Prompt) ScanServiceName() error {
 	return nil
 }
 
+// ScanTaskName resolves the task name from the flag or an interactive prompt.
 func (p *Prompt) ScanTaskName() error {
 	if p.ServiceName == "" {
-		return fmt.Errorf("serviceName is empty")
+		return errors.New("serviceName is empty")
 	}
 
 	c := config.Get()
@@ -72,7 +77,7 @@ func (p *Prompt) ScanTaskName() error {
 
 		_, result, err := prompt.Run()
 		if err != nil {
-			return err
+			return fmt.Errorf("select task prompt: %w", err)
 		}
 
 		taskName = result
@@ -87,13 +92,14 @@ func (p *Prompt) ScanTaskName() error {
 	return nil
 }
 
+// ScanDestinationName resolves the destination name from the flag or an interactive prompt.
 func (p *Prompt) ScanDestinationName() error {
 	if p.ServiceName == "" {
-		return fmt.Errorf("serviceName is empty")
+		return errors.New("serviceName is empty")
 	}
 
 	if p.TaskName == "" {
-		return fmt.Errorf("taskName is empty")
+		return errors.New("taskName is empty")
 	}
 
 	destinationName, _ := p.cmd.Flags().GetString("destination")
@@ -106,7 +112,7 @@ func (p *Prompt) ScanDestinationName() error {
 
 		_, result, err := prompt.Run()
 		if err != nil {
-			return err
+			return fmt.Errorf("select destination prompt: %w", err)
 		}
 
 		destinationName = result
@@ -116,9 +122,9 @@ func (p *Prompt) ScanDestinationName() error {
 
 	t, err := task.New(p.ServiceName, p.TaskName, sctxt.TManual, sctxt.OpTypeSnapshots)
 	if err != nil {
-		return err
+		return fmt.Errorf("create task: %w", err)
 	}
-	defer t.Close()
+	defer func() { _ = t.Close() }()
 
 	if !t.IsAvailableDestinationName(p.DestinationName) {
 		return fmt.Errorf("does not exists destination - %s", p.DestinationName)
@@ -127,33 +133,34 @@ func (p *Prompt) ScanDestinationName() error {
 	return nil
 }
 
+// ScanSnapshotName resolves the snapshot name from the flag or an interactive prompt.
 func (p *Prompt) ScanSnapshotName() error {
 	if p.ServiceName == "" {
-		return fmt.Errorf("serviceName is empty")
+		return errors.New("serviceName is empty")
 	}
 
 	if p.TaskName == "" {
-		return fmt.Errorf("taskName is empty")
+		return errors.New("taskName is empty")
 	}
 
 	if p.DestinationName == "" {
-		return fmt.Errorf("destinationName is empty")
+		return errors.New("destinationName is empty")
 	}
 
 	t, err := task.New(p.ServiceName, p.TaskName, sctxt.TManual, sctxt.OpTypeRestore)
 	if err != nil {
-		return err
+		return fmt.Errorf("create task: %w", err)
 	}
-	defer t.Close()
+	defer func() { _ = t.Close() }()
 
 	snapshotList, err := t.GetSnapshotList(p.DestinationName)
 	if err != nil {
-		return err
+		return fmt.Errorf("get snapshot list: %w", err)
 	}
 
 	snapshotName, err := p.cmd.Flags().GetString("snapshot")
 	if err != nil {
-		return err
+		return fmt.Errorf("get snapshot flag: %w", err)
 	}
 
 	items := make([]string, len(snapshotList))
@@ -176,14 +183,14 @@ func (p *Prompt) ScanSnapshotName() error {
 
 		i, _, err := prompt.Run()
 		if err != nil {
-			return err
+			return fmt.Errorf("select snapshot prompt: %w", err)
 		}
 
 		snapshotName = snapshotList[i].ID
 	}
 
 	if !snapshotList.IsAvailable(snapshotName) {
-		return fmt.Errorf("snapshot not exists")
+		return errors.New("snapshot not exists")
 	}
 
 	p.SnapshotName = snapshotName
@@ -191,6 +198,7 @@ func (p *Prompt) ScanSnapshotName() error {
 	return nil
 }
 
+// AskIsConfirm asks the user for confirmation and reports whether it was given.
 func (p *Prompt) AskIsConfirm() bool {
 	prompt := promptui.Prompt{
 		HideEntered: true,

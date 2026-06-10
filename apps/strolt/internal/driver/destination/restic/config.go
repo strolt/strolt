@@ -1,6 +1,8 @@
 package restic
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,13 +11,14 @@ import (
 	"strings"
 )
 
-type ResticConfigBackupFlags struct {
-}
+// ResticConfigBackupFlags describes restic backup command flags.
+type ResticConfigBackupFlags struct{} //nolint:revive // keep existing exported name
 
-type ResticConfigGlobalFlags struct {
-}
+// ResticConfigGlobalFlags describes restic global command flags.
+type ResticConfigGlobalFlags struct{} //nolint:revive // keep existing exported name
 
-type ResticConfigKeep struct {
+// ResticConfigKeep describes the snapshot retention policy for the restic forget command.
+type ResticConfigKeep struct { //nolint:revive // keep existing exported name
 	Last    int `yaml:"last"`
 	Hourly  int `yaml:"hourly"`
 	Weekly  int `yaml:"weekly"`
@@ -24,6 +27,7 @@ type ResticConfigKeep struct {
 	Daily   int `yaml:"daily"`
 }
 
+// Config describes the restic destination driver configuration.
 type Config struct {
 	BinPath string `yaml:"binPath"`
 
@@ -174,19 +178,19 @@ func (i *Restic) validateConfigBinPath() error {
 	if i.config.BinPath != "" {
 		_, err := os.Stat(i.config.BinPath)
 		if os.IsNotExist(err) {
-			return fmt.Errorf("bin not exists")
+			return errors.New("bin not exists")
 		}
 
 		binPathAbs, err := filepath.Abs(i.config.BinPath)
 		if err != nil {
-			return err
+			return fmt.Errorf("resolve absolute bin path: %w", err)
 		}
 
 		i.config.BinPath = binPathAbs
 	}
 
 	if !i.isExistsBin() {
-		return fmt.Errorf("bin not exists")
+		return errors.New("bin not exists")
 	}
 
 	return nil
@@ -196,7 +200,7 @@ func (i *Restic) validateConfigGlobalFlags() error {
 	if i.config.Cacert != "" {
 		abs, err := filepath.Abs(i.config.Cacert)
 		if err != nil {
-			return err
+			return fmt.Errorf("resolve absolute cacert path: %w", err)
 		}
 
 		i.config.Cacert = abs
@@ -205,7 +209,7 @@ func (i *Restic) validateConfigGlobalFlags() error {
 	if i.config.TLSClientCert != "" {
 		abs, err := filepath.Abs(i.config.TLSClientCert)
 		if err != nil {
-			return err
+			return fmt.Errorf("resolve absolute tls client cert path: %w", err)
 		}
 
 		i.config.TLSClientCert = abs
@@ -256,7 +260,7 @@ func (i *Restic) validateConfig() error {
 }
 
 func (i *Restic) isExistsBin() bool {
-	cmd := exec.Command(i.getBin(), "version")
+	cmd := exec.CommandContext(context.Background(), i.getBin(), "version") //nolint:gosec // restic binary path comes from validated config
 
 	if _, err := cmd.Output(); err != nil {
 		return false

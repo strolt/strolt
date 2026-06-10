@@ -1,13 +1,12 @@
 import { makeAutoObservable, runInAction } from "mobx";
-
 import { themeMode } from "utils/storage";
 
 class AppConfigStore {
+  mode: "dark" | "light" = "light";
+
   constructor() {
     makeAutoObservable(this);
   }
-
-  mode: "dark" | "light" = "light";
 
   toggleMode() {
     if (this.mode === "dark") {

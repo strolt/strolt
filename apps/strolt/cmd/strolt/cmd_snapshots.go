@@ -14,11 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Snapshot describes a snapshot entry rendered by the snapshots command.
 type Snapshot struct {
-	ID      string `json:"id"`
-	ShortID string `json:"shortId"`
-	Date    string `json:"date"`
-	Tags    []string
+	ID      string   `json:"id"`
+	ShortID string   `json:"shortId"`
+	Date    string   `json:"date"`
+	Tags    []string `json:"tags"`
 }
 
 //nolint:gochecknoinits
@@ -53,12 +54,11 @@ var snapshotsCmd = &cobra.Command{
 		Printf("selected destination: %s", prompt.DestinationName)
 
 		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeSnapshots)
-
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		defer t.Close()
+		defer func() { _ = t.Close() }()
 
 		snapshotList, err := t.GetSnapshotList(prompt.DestinationName)
 		if err != nil {
@@ -85,7 +85,7 @@ func printSnapshotsTable(snapshotList task.SnapshotList) {
 			snapshotID = snapshot.ID
 		}
 
-		tbl.AppendRow([]interface{}{snapshotID, snapshot.Time.Format(time.RFC3339), strings.Join(snapshot.Tags, "\n")})
+		tbl.AppendRow([]any{snapshotID, snapshot.Time.Format(time.RFC3339), strings.Join(snapshot.Tags, "\n")})
 
 		if i < len(snapshotList)-1 {
 			tbl.AppendSeparator()
@@ -96,7 +96,7 @@ func printSnapshotsTable(snapshotList task.SnapshotList) {
 }
 
 func printSnapshotsJSON(snapshotList task.SnapshotList) {
-	var _snapshotList = []Snapshot{}
+	_snapshotList := make([]Snapshot, 0, len(snapshotList))
 
 	for _, snapshot := range snapshotList {
 		_snapshotList = append(_snapshotList, Snapshot{

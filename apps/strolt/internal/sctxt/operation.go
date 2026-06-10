@@ -1,7 +1,9 @@
 package sctxt
 
-type OperationType string // @name OperationType
+// OperationType identifies the kind of operation performed by a task.
+type OperationType string //	@name	OperationType
 
+// Supported operation types.
 const (
 	OpTypeBackup    OperationType = "BACKUP"
 	OpTypePrune     OperationType = "PRUNE"

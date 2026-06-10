@@ -8,7 +8,6 @@
   </a>
 </div>
 
-
 ## Features
 
 - Run scheduled operations (cron)

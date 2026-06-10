@@ -12,15 +12,16 @@ import (
 )
 
 // backup godoc
-// @Id					 backup
-// @Summary      Start backup
-// @Tags         services
-// @Security BasicAuth
-// @Param   serviceName         path    string     true        "Service name"
-// @Param   taskName            path    string     true        "Task name"
-// @success 200 {object} apiu.ResultSuccess
-// @success 500 {object} apiu.ResultError
-// @Router       /api/v1/services/{serviceName}/tasks/{taskName}/backup [post].
+//
+//	@Id			backup
+//	@Summary	Start backup
+//	@Tags		services
+//	@Security	BasicAuth
+//	@Param		serviceName	path		string	true	"Service name"
+//	@Param		taskName	path		string	true	"Task name"
+//	@success	200			{object}	apiu.ResultSuccess
+//	@success	500			{object}	apiu.ResultError
+//	@Router		/api/v1/services/{serviceName}/tasks/{taskName}/backup [post].
 func (s *Services) backup(w http.ResponseWriter, r *http.Request) {
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")
@@ -37,7 +38,11 @@ func (s *Services) backup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		defer t.Close()
+		defer func() {
+			if err := t.Close(); err != nil {
+				logger.New().Error(err)
+			}
+		}()
 
 		if err := t.Backup(); err != nil {
 			logger.New().Error(err)
