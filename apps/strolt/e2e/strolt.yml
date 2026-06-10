@@ -8,6 +8,7 @@ extends:
 
     - .strolt/local.yml
     - .strolt/prune.yml
+    - .strolt/retention.yml
     - .strolt/daemon.yml
 
     - .strolt/pg.yml

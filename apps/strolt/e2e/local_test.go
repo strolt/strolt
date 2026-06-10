@@ -49,8 +49,7 @@ func (s *LocalSuite) TestLocal() {
 func (s *LocalSuite) TestRepositoryIntegrity() {
 	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "local", "--y"))
 
-	_, err := execInStrolt("AWS_ACCESS_KEY_ID=minioadmin AWS_SECRET_ACCESS_KEY=minioadmin RESTIC_PASSWORD=secret " +
-		"/usr/bin/restic -r 's3:http://minio:9000/restic-local' check")
+	_, err := resticExec("s3:http://minio:9000/restic-local", "check")
 	s.NoError(err)
 }
 

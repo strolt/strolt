@@ -11,10 +11,13 @@ import (
 	tcexec "github.com/testcontainers/testcontainers-go/exec"
 )
 
+// Snapshot covers both serializations of a snapshot: the CLI emits the
+// timestamp as "date", the HTTP API as "time" (both RFC3339).
 type Snapshot struct {
 	ID      string `json:"id"`
 	ShortID string `json:"shortId"`
 	Date    string `json:"date"`
+	Time    string `json:"time"`
 }
 
 // execInStrolt runs a shell command inside the long-running strolt container.
@@ -52,6 +55,16 @@ func strolt(args ...string) error {
 	_, err := stroltWithResponse(args...)
 
 	return err
+}
+
+// resticExec runs the restic binary inside the strolt container directly
+// against the given repository, bypassing the strolt CLI. Used where tests
+// need restic features strolt does not expose (integrity check, backdated
+// snapshots).
+func resticExec(repository string, args string) ([]byte, error) {
+	return execInStrolt(fmt.Sprintf(
+		"AWS_ACCESS_KEY_ID=minioadmin AWS_SECRET_ACCESS_KEY=minioadmin RESTIC_PASSWORD=secret /usr/bin/restic -r '%s' %s",
+		repository, args))
 }
 
 func stroltWithResponse(args ...string) ([]byte, error) {
