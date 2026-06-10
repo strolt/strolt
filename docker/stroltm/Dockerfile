@@ -3,10 +3,13 @@ WORKDIR /stroltm
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
-FROM node:24.13.0-trixie-slim AS ui-base
+# The ui and swagger stages produce architecture-independent artifacts
+# (static dist and generated code), so they run on the build host platform;
+# node images also ship no linux/arm/v7 variant.
+FROM --platform=$BUILDPLATFORM node:24.13.0-trixie-slim AS ui-base
 RUN apt-get update && apt-get -y install openjdk-21-jre-headless --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-FROM golang:1.26.4-alpine3.23 AS swagger-base
+FROM --platform=$BUILDPLATFORM golang:1.26.4-alpine3.23 AS swagger-base
 RUN apk --update add --no-cache make curl
 
 FROM ui-base AS ui-deps
