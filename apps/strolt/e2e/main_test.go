@@ -65,8 +65,12 @@ func setupContainers() error {
 		return err
 	}
 
-	// Start Strolt container after databases are ready
+	// Start Strolt containers after databases are ready
 	if err := cm.StartStrolt(); err != nil {
+		return err
+	}
+
+	if err := cm.StartStroltDaemon(); err != nil {
 		return err
 	}
 
@@ -115,24 +119,48 @@ func cleanupContainers() error {
 }
 
 // TestE2E runs all e2e test suites.
+//
+// The filesystem group runs sequentially: Local, Prune and Daemon all mutate
+// the shared /e2e/input directory. The database suites are independent of
+// the filesystem and of each other, so they run in parallel.
 func TestE2E(t *testing.T) {
-	t.Run("Local", func(t *testing.T) {
-		LocalSuiteTest(t)
+	t.Run("Filesystem", func(t *testing.T) {
+		t.Run("Local", func(t *testing.T) {
+			LocalSuiteTest(t)
+		})
+
+		t.Run("Prune", func(t *testing.T) {
+			PruneSuiteTest(t)
+		})
+
+		t.Run("Daemon", func(t *testing.T) {
+			DaemonSuiteTest(t)
+		})
 	})
 
-	t.Run("Prune", func(t *testing.T) {
-		PruneSuiteTest(t)
+	t.Run("Databases", func(t *testing.T) {
+		t.Run("PostgreSQL", func(t *testing.T) {
+			t.Parallel()
+			PostgresqlSuiteTest(t)
+		})
+
+		t.Run("MongoDB", func(t *testing.T) {
+			t.Parallel()
+			MongoSuiteTest(t)
+		})
+
+		t.Run("MariaDB", func(t *testing.T) {
+			t.Parallel()
+			MariaDBSuiteTest(t)
+		})
+
+		t.Run("MySQL", func(t *testing.T) {
+			t.Parallel()
+			MySQLSuiteTest(t)
+		})
 	})
 
-	t.Run("PostgreSQL", func(t *testing.T) {
-		PostgresqlSuiteTest(t)
-	})
-
-	t.Run("MongoDB", func(t *testing.T) {
-		MongoSuiteTest(t)
-	})
-
-	t.Run("MariaDB", func(t *testing.T) {
-		MariaDBSuiteTest(t)
+	t.Run("Negative", func(t *testing.T) {
+		NegativeSuiteTest(t)
 	})
 }

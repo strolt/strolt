@@ -26,6 +26,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/mariadb v0.42.0
 	github.com/testcontainers/testcontainers-go/modules/minio v0.42.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.42.0
+	github.com/testcontainers/testcontainers-go/modules/mysql v0.42.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.42.0
 	go.mongodb.org/mongo-driver v1.17.4
 	go.uber.org/goleak v1.3.0

@@ -11,6 +11,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/mariadb"
 	"github.com/testcontainers/testcontainers-go/modules/minio"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
+	"github.com/testcontainers/testcontainers-go/modules/mysql"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/network"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -24,6 +25,7 @@ const (
 	postgresImage = "postgres:18.4-alpine3.23"
 	mongoImage    = "mongo:8.0.23"
 	mariadbImage  = "mariadb:11.4.12"
+	mysqlImage    = "mysql:8.4.9"
 	minioImage    = "minio/minio:RELEASE.2025-09-07T16-13-09Z"
 	stroltImage   = "strolt/strolt:development"
 
@@ -34,13 +36,15 @@ const (
 
 // ContainerManager manages all testcontainers for e2e tests.
 type ContainerManager struct {
-	ctx               context.Context //nolint:containedctx // test helper carries the suite context
-	network           *testcontainers.DockerNetwork
-	postgresContainer testcontainers.Container
-	mongoContainer    testcontainers.Container
-	mariadbContainer  testcontainers.Container
-	minioContainer    testcontainers.Container
-	stroltContainer   testcontainers.Container
+	ctx                   context.Context //nolint:containedctx // test helper carries the suite context
+	network               *testcontainers.DockerNetwork
+	postgresContainer     testcontainers.Container
+	mongoContainer        testcontainers.Container
+	mariadbContainer      testcontainers.Container
+	mysqlContainer        testcontainers.Container
+	minioContainer        testcontainers.Container
+	stroltContainer       testcontainers.Container
+	stroltDaemonContainer testcontainers.Container
 }
 
 // NewContainerManager creates a new container manager.
@@ -125,6 +129,79 @@ func (cm *ContainerManager) StartStrolt() error {
 	return nil
 }
 
+// StartStroltDaemon starts strolt in daemon mode (`start --json`) with the
+// HTTP API exposed, mirroring how the image runs in production.
+func (cm *ContainerManager) StartStroltDaemon() error {
+	absConfigPath, err := filepath.Abs("./strolt.yml")
+	if err != nil {
+		return err
+	}
+
+	absStroltPath, err := filepath.Abs("./.strolt")
+	if err != nil {
+		return err
+	}
+
+	absTempPath, err := filepath.Abs("./.temp/input")
+	if err != nil {
+		return err
+	}
+
+	req := testcontainers.ContainerRequest{
+		Image: stroltImage,
+		Files: []testcontainers.ContainerFile{
+			{
+				HostFilePath:      absConfigPath,
+				ContainerFilePath: "/strolt/config.yml",
+				FileMode:          0o644,
+			},
+		},
+		HostConfigModifier: func(hostConfig *container.HostConfig) {
+			hostConfig.Binds = append(hostConfig.Binds,
+				absStroltPath+":/strolt/.strolt",
+				absTempPath+":/e2e/input",
+			)
+		},
+		Networks:       []string{cm.NetworkName()},
+		NetworkAliases: map[string][]string{cm.NetworkName(): {"strolt-daemon"}},
+		ExposedPorts:   []string{"8080/tcp"},
+		Cmd:            []string{"start", "--json"},
+		WaitingFor: wait.ForHTTP("/api/v1/ping").
+			WithPort("8080/tcp").
+			WithStartupTimeout(60 * time.Second),
+	}
+
+	daemonContainer, err := testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	if err != nil {
+		if daemonContainer != nil {
+			_ = daemonContainer.Terminate(cm.ctx)
+		}
+
+		return err
+	}
+
+	cm.stroltDaemonContainer = daemonContainer
+
+	return nil
+}
+
+// GetDaemonAPIPort returns the mapped port of the strolt daemon HTTP API.
+func (cm *ContainerManager) GetDaemonAPIPort() (string, error) {
+	if cm.stroltDaemonContainer == nil {
+		return "", errors.New("strolt daemon container not started")
+	}
+
+	mappedPort, err := cm.stroltDaemonContainer.MappedPort(cm.ctx, "8080")
+	if err != nil {
+		return "", err
+	}
+
+	return mappedPort.Port(), nil
+}
+
 // GetPostgresPort returns the mapped port for PostgreSQL.
 func (cm *ContainerManager) GetPostgresPort() (string, error) {
 	if cm.postgresContainer == nil {
@@ -167,6 +244,20 @@ func (cm *ContainerManager) GetMariaDBPort() (string, error) {
 	return mappedPort.Port(), nil
 }
 
+// GetMySQLPort returns the mapped port for MySQL.
+func (cm *ContainerManager) GetMySQLPort() (string, error) {
+	if cm.mysqlContainer == nil {
+		return "", errors.New("mysql container not started")
+	}
+
+	mappedPort, err := cm.mysqlContainer.MappedPort(cm.ctx, "3306")
+	if err != nil {
+		return "", err
+	}
+
+	return mappedPort.Port(), nil
+}
+
 // GetStroltContainer returns the Strolt container.
 func (cm *ContainerManager) GetStroltContainer() testcontainers.Container {
 	return cm.stroltContainer
@@ -182,9 +273,11 @@ func (cm *ContainerManager) Cleanup() error {
 
 	containers := []testcontainers.Container{
 		cm.stroltContainer,
+		cm.stroltDaemonContainer,
 		cm.postgresContainer,
 		cm.mongoContainer,
 		cm.mariadbContainer,
+		cm.mysqlContainer,
 		cm.minioContainer,
 	}
 
@@ -224,6 +317,12 @@ func (cm *ContainerManager) StartAllContainers() error {
 	g.Go(func() error {
 		c, err := cm.startMariaDB()
 		cm.mariadbContainer = c
+
+		return err
+	})
+	g.Go(func() error {
+		c, err := cm.startMySQL()
+		cm.mysqlContainer = c
 
 		return err
 	})
@@ -282,6 +381,25 @@ func (cm *ContainerManager) startMariaDB() (testcontainers.Container, error) {
 		mariadb.WithPassword(dbPassword),
 		testcontainers.WithEnv(map[string]string{"TZ": "UTC"}),
 		network.WithNetwork([]string{"mariadb"}, cm.network),
+	)
+	if err != nil {
+		if c != nil {
+			_ = c.Terminate(cm.ctx)
+		}
+
+		return nil, err
+	}
+
+	return c, nil
+}
+
+func (cm *ContainerManager) startMySQL() (testcontainers.Container, error) {
+	c, err := mysql.Run(cm.ctx, mysqlImage,
+		mysql.WithDatabase(dbName),
+		mysql.WithUsername(dbUser),
+		mysql.WithPassword(dbPassword),
+		testcontainers.WithEnv(map[string]string{"TZ": "UTC"}),
+		network.WithNetwork([]string{"mysql"}, cm.network),
 	)
 	if err != nil {
 		if c != nil {

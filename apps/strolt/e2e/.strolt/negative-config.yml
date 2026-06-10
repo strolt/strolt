@@ -1,0 +1,70 @@
+# Standalone config for negative e2e scenarios. Deliberately NOT included in
+# the main strolt.yml extends list: `strolt init` must never run against it
+# (e.g. the wrong-password destination points at an already-initialized repo).
+name: strolt-e2e-negative
+timezone: UTC
+
+services:
+  negative:
+    bad-password:
+      destinations:
+        restic-bad-password:
+          config:
+            keep:
+              last: 1
+          driver: restic
+          env:
+            AWS_ACCESS_KEY_ID: minioadmin
+            AWS_SECRET_ACCESS_KEY: minioadmin #pragma: allowlist secret
+            RESTIC_PASSWORD: definitely-wrong-password #pragma: allowlist secret
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-local"
+      source:
+        config:
+          path: "/e2e/input"
+        driver: local
+    bad-host:
+      destinations:
+        restic-bad-host:
+          config:
+            keep:
+              last: 1
+          driver: restic
+          env:
+            AWS_ACCESS_KEY_ID: minioadmin
+            AWS_SECRET_ACCESS_KEY: minioadmin #pragma: allowlist secret
+            RESTIC_PASSWORD: secret #pragma: allowlist secret
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-negative"
+      # copy mode: the dump runs (and fails) before restic ever starts, so
+      # the test does not depend on restic's ~15min backend retry loop
+      # against the nonexistent repository
+      operationMode: copy
+      source:
+        config:
+          database: strolt
+          # minio resolves on the e2e network but refuses connections on
+          # 5432, so the failure is immediate and DNS-independent
+          host: minio
+          password: strolt
+          username: strolt
+        driver: pg
+    pipe-unsupported:
+      destinations:
+        restic-pipe-unsupported:
+          config:
+            keep:
+              last: 1
+          driver: restic
+          env:
+            AWS_ACCESS_KEY_ID: minioadmin
+            AWS_SECRET_ACCESS_KEY: minioadmin #pragma: allowlist secret
+            RESTIC_PASSWORD: secret #pragma: allowlist secret
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-negative-pipe"
+      operationMode: pipe
+      source:
+        config:
+          database: strolt
+          host: mysql
+          password: strolt
+          tls: skip-verify
+          username: strolt
+        driver: mysql

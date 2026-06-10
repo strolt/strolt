@@ -5,7 +5,8 @@ ARG RESTIC_VERSION=0.19.0
 RUN apk add --no-cache \
 		postgresql18-client=18.4-r0 \
 		mongodb-tools=100.13.0-r6 \
-		mariadb-client=11.4.12-r0
+		mariadb-client=11.4.12-r0 \
+		mariadb-connector-c=3.4.6-r0
 
 # restic is fetched from official releases: alpine still packages 0.18.x
 RUN wget -q \
@@ -61,9 +62,11 @@ COPY --from=fetch /usr/bin/psql       /usr/bin/
 COPY --from=fetch /usr/bin/pg_dump    /usr/bin/
 COPY --from=fetch /usr/bin/pg_restore /usr/bin/
 
-# MariaDB
+# MariaDB. The client auth plugins (caching_sha2_password and friends) are
+# required to connect to MySQL 8+ servers.
 COPY --from=fetch /usr/bin/mysqldump  /usr/bin/
 COPY --from=fetch /usr/bin/mariadb    /usr/bin/
+COPY --from=fetch /usr/lib/mariadb/plugin/ /usr/lib/mariadb/plugin/
 RUN ln -s /usr/bin/mysqldump /usr/bin/mariadb-dump
 
 # MongoDB tools

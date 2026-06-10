@@ -6,7 +6,6 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/env"
 	"github.com/strolt/strolt/apps/strolt/internal/metrics"
-	"github.com/strolt/strolt/apps/strolt/internal/util/dir"
 	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/spf13/cobra"
@@ -59,16 +58,12 @@ var rootCmd = &cobra.Command{
 }
 
 // Execute runs the root command of the strolt CLI.
+//
+// The shared temp directory is deliberately NOT wiped here: several strolt
+// processes can share one data directory (the daemon plus CLI invocations
+// inside the same container), and a blanket cleanup on every CLI run deletes
+// the work directories of operations still in flight. Leftover GC happens on
+// daemon startup instead; each task removes its own work directory on Close.
 func Execute() {
-	log := logger.New()
-
-	if err := dir.RemoveTempDirectories(); err != nil {
-		log.Error(err)
-	}
-
 	_ = rootCmd.Execute()
-
-	if err := dir.RemoveTempDirectories(); err != nil {
-		log.Error(err)
-	}
 }

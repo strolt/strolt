@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
@@ -142,53 +143,7 @@ func (t *Task) backupPipe() error {
 
 	t.eventOperationStart()
 
-	sourceDriver, err := t.getSourceDriver()
-	if err != nil {
-		return err
-	}
-
-	reader, filename, wait, err := sourceDriver.BackupPipe(t.Context)
-	if err != nil {
-		return fmt.Errorf("source backup pipe: %w", err)
-	}
-
-	defer func() {
-		_ = reader.Close()
-		_ = wait()
-	}()
-
-	writerList := []io.Writer{}
-
-	for destinationName := range t.TaskConfig.Destinations {
-		destinationDriver, err := t.getDestinationDriver(destinationName)
-		if err != nil {
-			return err
-		}
-
-		writer, wait, err := destinationDriver.BackupPipe(t.Context, filename)
-		if err != nil {
-			return fmt.Errorf("destination backup pipe: %w", err)
-		}
-
-		defer func() {
-			_ = writer.Close()
-			_ = wait()
-		}()
-
-		writerList = append(writerList, writer)
-	}
-
-	mw := io.MultiWriter(writerList...)
-
-	exitError := make(chan error)
-
-	go func() {
-		_, err := io.Copy(mw, reader)
-
-		exitError <- err
-	}()
-
-	err = <-exitError
+	err := t.runBackupPipe()
 
 	if err != nil {
 		t.eventOperationError(err)
@@ -199,6 +154,81 @@ func (t *Task) backupPipe() error {
 	notificationWaitGroup.Wait()
 
 	return err
+}
+
+// runBackupPipe streams the source dump into every destination. The exit
+// status of the source and destination processes must fail the backup: a
+// crashed dump with a closed stream would otherwise turn into a
+// "successful" empty snapshot.
+func (t *Task) runBackupPipe() error {
+	sourceDriver, err := t.getSourceDriver()
+	if err != nil {
+		return err
+	}
+
+	reader, filename, sourceWait, err := sourceDriver.BackupPipe(t.Context)
+	if err != nil {
+		return fmt.Errorf("source backup pipe: %w", err)
+	}
+
+	waitSource := sync.OnceValue(sourceWait)
+
+	defer func() {
+		_ = reader.Close()
+		_ = waitSource()
+	}()
+
+	writers := make([]io.Writer, 0, len(t.TaskConfig.Destinations))
+	closers := make([]io.Closer, 0, len(t.TaskConfig.Destinations))
+	destinationWaits := make([]func() error, 0, len(t.TaskConfig.Destinations))
+
+	defer func() {
+		for _, closer := range closers {
+			_ = closer.Close()
+		}
+
+		for _, wait := range destinationWaits {
+			_ = wait()
+		}
+	}()
+
+	for destinationName := range t.TaskConfig.Destinations {
+		destinationDriver, err := t.getDestinationDriver(destinationName)
+		if err != nil {
+			return err
+		}
+
+		writer, destinationWait, err := destinationDriver.BackupPipe(t.Context, filename)
+		if err != nil {
+			return fmt.Errorf("destination backup pipe: %w", err)
+		}
+
+		writers = append(writers, writer)
+		closers = append(closers, writer)
+		destinationWaits = append(destinationWaits, sync.OnceValue(destinationWait))
+	}
+
+	_, copyErr := io.Copy(io.MultiWriter(writers...), reader)
+
+	errs := []error{copyErr}
+
+	if err := waitSource(); err != nil {
+		errs = append(errs, fmt.Errorf("source process: %w", err))
+	}
+
+	// Close the writers so the destinations see EOF before their exit
+	// status is collected.
+	for _, closer := range closers {
+		errs = append(errs, closer.Close())
+	}
+
+	for _, wait := range destinationWaits {
+		if err := wait(); err != nil {
+			errs = append(errs, fmt.Errorf("destination process: %w", err))
+		}
+	}
+
+	return errors.Join(errs...)
 }
 
 // Backup runs the backup operation in pipe or manual mode depending on the task config.

@@ -1,8 +1,10 @@
 package e2e_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -12,6 +14,34 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+const mongoIndexName = "idx_name"
+
+// MongoDoc exercises what mongodump/mongorestore must preserve: unicode,
+// arrays, nested documents and raw binary data.
+type MongoDoc struct {
+	ID      int      `bson:"_id"`
+	Name    string   `bson:"name"`
+	Tags    []string `bson:"tags"`
+	Meta    Meta     `bson:"meta"`
+	Payload []byte   `bson:"payload"`
+}
+
+type Meta struct {
+	Lang  string `bson:"lang"`
+	Stars int    `bson:"stars"`
+}
+
+var mongoDoc = MongoDoc{
+	ID:   1,
+	Name: "üñîçødé-документ-🚀",
+	Tags: []string{"backup", "restore", "проверка"},
+	Meta: Meta{
+		Lang:  "go",
+		Stars: 42,
+	},
+	Payload: binaryPayload(),
+}
 
 type MongoSuite struct {
 	suite.Suite
@@ -47,14 +77,24 @@ func (s *MongoSuite) AfterTest(suiteName, testName string) {
 }
 
 func (s *MongoSuite) TestMongo() {
-	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "mongo", "--y"))
+	s.roundTrip("e2e")
+}
+
+func (s *MongoSuite) TestMongo_copy() {
+	s.roundTrip("e2e-copy")
+}
+
+func (s *MongoSuite) roundTrip(serviceName string) {
+	s.T().Helper()
+
+	s.Require().NoError(strolt("backup", "--service", serviceName, "--task", "mongo", "--y"))
 
 	s.Require().NoError(s.c.drop())
 
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e", "mongo", "restic-mongo")
+	latestSnapshotID, err := stroltGetLatestSnapshotID(serviceName, "mongo", "restic-mongo")
 	s.Require().NoError(err)
 
-	s.NoError(strolt("restore", "--service", "e2e", "--task", "mongo", "--destination", "restic-mongo", "--snapshot", latestSnapshotID, "--y"))
+	s.NoError(strolt("restore", "--service", serviceName, "--task", "mongo", "--destination", "restic-mongo", "--snapshot", latestSnapshotID, "--y"))
 }
 
 //nolint:thelper
@@ -104,12 +144,23 @@ func (c *MongoConn) drop() error {
 }
 
 func (c *MongoConn) createCollection() error {
-	return c.client.Database(c.database).CreateCollection(ctx, c.collection)
+	if err := c.client.Database(c.database).CreateCollection(ctx, c.collection); err != nil {
+		return err
+	}
+
+	// A named secondary index verifies that mongorestore brings back index
+	// definitions, not only documents.
+	_, err := c.client.Database(c.database).Collection(c.collection).Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys:    bson.D{{Key: "name", Value: 1}},
+		Options: options.Index().SetName(mongoIndexName),
+	})
+
+	return err
 }
 
 func (c *MongoConn) insertData() error {
 	collection := c.client.Database(c.database).Collection(c.collection)
-	if _, err := collection.InsertOne(ctx, user); err != nil {
+	if _, err := collection.InsertOne(ctx, mongoDoc); err != nil {
 		return err
 	}
 
@@ -119,27 +170,53 @@ func (c *MongoConn) insertData() error {
 func (c *MongoConn) checkValidData() error {
 	collection := c.client.Database(c.database).Collection(c.collection)
 
-	cur, err := collection.Find(ctx, bson.D{})
+	count, err := collection.CountDocuments(ctx, bson.D{})
 	if err != nil {
 		return err
 	}
 
-	var users []User
-	if err := cur.All(ctx, &users); err != nil {
+	if count != 1 {
+		return fmt.Errorf("expected 1 document, got %d", count)
+	}
+
+	var doc MongoDoc
+	if err := collection.FindOne(ctx, bson.D{{Key: "_id", Value: mongoDoc.ID}}).Decode(&doc); err != nil {
 		return err
 	}
 
-	if len(users) == 0 {
-		return errors.New("not found records")
+	if doc.Name != mongoDoc.Name || doc.Meta != mongoDoc.Meta || len(doc.Tags) != len(mongoDoc.Tags) {
+		return fmt.Errorf("document mismatch: want %+v, got %+v", mongoDoc, doc)
 	}
 
-	if len(users) != 1 {
-		return errors.New("count records > 1")
+	for i, tag := range mongoDoc.Tags {
+		if doc.Tags[i] != tag {
+			return fmt.Errorf("document tags mismatch: want %v, got %v", mongoDoc.Tags, doc.Tags)
+		}
 	}
 
-	if users[0].Username != user.Username || users[0].Password != user.Password || users[0].ID != user.ID {
-		return errors.New("record not match with mock")
+	if !bytes.Equal(doc.Payload, mongoDoc.Payload) {
+		return errors.New("document binary payload corrupted by backup/restore")
 	}
 
-	return nil
+	return c.checkIndex()
+}
+
+func (c *MongoConn) checkIndex() error {
+	cur, err := c.client.Database(c.database).Collection(c.collection).Indexes().List(ctx)
+	if err != nil {
+		return err
+	}
+
+	var indexes []bson.M
+	if err := cur.All(ctx, &indexes); err != nil {
+		return err
+	}
+
+	for _, index := range indexes {
+		if index["name"] == mongoIndexName {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("index %q not found after restore, indexes: %v", mongoIndexName, indexes)
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
@@ -67,20 +68,26 @@ func (t *Task) RestoreTempToSource() error {
 	return nil
 }
 
+// restorePipe streams a snapshot from the destination directly into the
+// source. The exit status of both processes must fail the restore: a crashed
+// reader or writer with a closed stream would otherwise look like a
+// successful restore of truncated data.
 func (t *Task) restorePipe(destinationName string, snapshotName string) error {
 	destinationDriver, err := t.getDestinationDriver(destinationName)
 	if err != nil {
 		return err
 	}
 
-	reader, filename, wait, err := destinationDriver.RestorePipe(t.Context, snapshotName)
+	reader, filename, destinationWait, err := destinationDriver.RestorePipe(t.Context, snapshotName)
 	if err != nil {
 		return fmt.Errorf("destination restore pipe: %w", err)
 	}
 
+	waitDestination := sync.OnceValue(destinationWait)
+
 	defer func() {
 		_ = reader.Close()
-		_ = wait()
+		_ = waitDestination()
 	}()
 
 	sourceDriver, err := t.getSourceDriver()
@@ -88,24 +95,35 @@ func (t *Task) restorePipe(destinationName string, snapshotName string) error {
 		return err
 	}
 
-	writer, wait, err := sourceDriver.RestorePipe(t.Context, filename)
+	writer, sourceWait, err := sourceDriver.RestorePipe(t.Context, filename)
 	if err != nil {
 		return fmt.Errorf("source restore pipe: %w", err)
 	}
 
+	waitSource := sync.OnceValue(sourceWait)
+
 	defer func() {
 		_ = writer.Close()
-		_ = wait()
+		_ = waitSource()
 	}()
 
-	exitError := make(chan error)
+	_, copyErr := io.Copy(writer, reader)
 
-	go func() {
-		_, err := io.Copy(writer, reader)
-		exitError <- err
-	}()
+	errs := []error{copyErr}
 
-	return <-exitError
+	if err := waitDestination(); err != nil {
+		errs = append(errs, fmt.Errorf("destination process: %w", err))
+	}
+
+	// Close the writer so the source process sees EOF before its exit
+	// status is collected.
+	errs = append(errs, writer.Close())
+
+	if err := waitSource(); err != nil {
+		errs = append(errs, fmt.Errorf("source process: %w", err))
+	}
+
+	return errors.Join(errs...)
 }
 
 func (t *Task) restoreCopy(destinationName string, snapshotName string) error {

@@ -8,10 +8,11 @@ extends:
 
     - .strolt/local.yml
     - .strolt/prune.yml
+    - .strolt/daemon.yml
 
     - .strolt/pg.yml
     - .strolt/mongo.yml
-    # - .strolt/mysql.yml
+    - .strolt/mysql.yml
     - .strolt/mariadb.yml
   secrets:
     - .strolt/secrets.yml

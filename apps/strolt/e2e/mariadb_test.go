@@ -28,10 +28,10 @@ func (s *MariaDBSuite) TearDownSuite() {
 }
 
 func (s *MariaDBSuite) BeforeTest(suiteName, testName string) {
-	s.c.dropTable()
-	s.c.createTable()
-	s.c.insertData(true)
-	s.NoError(s.c.checkValidData())
+	s.c.dropSchema()
+	s.c.createSchema()
+	s.c.insertData()
+	s.Require().NoError(s.c.checkValidData())
 }
 
 func (s *MariaDBSuite) AfterTest(suiteName, testName string) {
@@ -39,14 +39,11 @@ func (s *MariaDBSuite) AfterTest(suiteName, testName string) {
 }
 
 func (s *MariaDBSuite) TestMariaDB() {
-	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "mariadb", "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e", "mariadb", "restic-mariadb")
+}
 
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e", "mariadb", "restic-mariadb")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e", "--task", "mariadb", "--destination", "restic-mariadb", "--snapshot", latestSnapshotID, "--y"))
+func (s *MariaDBSuite) TestMariaDB_copy() {
+	sqlRoundTrip(&s.Suite, s.c, "e2e-copy", "mariadb", "restic-mariadb")
 }
 
 //nolint:thelper

@@ -1,0 +1,32 @@
+name: e2e
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/ci-e2e.yml"
+      - "apps/strolt/**"
+      - "shared/**"
+      - "docker/strolt/**"
+      - "Makefile"
+      - "!**.md"
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-strolt:
+    name: e2e (strolt)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/strolt/go.mod
+          cache-dependency-path: apps/strolt/go.sum
+
+      - name: run e2e suite
+        run: make e2e

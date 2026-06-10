@@ -28,10 +28,10 @@ func (s *PostgresqlSuite) TearDownSuite() {
 }
 
 func (s *PostgresqlSuite) BeforeTest(suiteName, testName string) {
-	s.c.dropTable()
-	s.c.createTable()
-	s.c.insertData(false)
-	s.NoError(s.c.checkValidData())
+	s.c.dropSchema()
+	s.c.createSchema()
+	s.c.insertData()
+	s.Require().NoError(s.c.checkValidData())
 }
 
 func (s *PostgresqlSuite) AfterTest(suiteName, testName string) {
@@ -39,102 +39,39 @@ func (s *PostgresqlSuite) AfterTest(suiteName, testName string) {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_t() {
-	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "pg-t", "--y"))
-
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e", "pg-t", "restic-pg-t")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e", "--task", "pg-t", "--destination", "restic-pg-t", "--snapshot", latestSnapshotID, "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e", "pg-t", "restic-pg-t")
 }
 
 func (s *PostgresqlSuite) TestPostgresql_d() {
-	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "pg-d", "--y"))
-
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e", "pg-d", "restic-pg-d")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e", "--task", "pg-d", "--destination", "restic-pg-d", "--snapshot", latestSnapshotID, "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e", "pg-d", "restic-pg-d")
 }
 
 func (s *PostgresqlSuite) TestPostgresql_p() {
-	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "pg-p", "--y"))
-
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e", "pg-p", "restic-pg-p")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e", "--task", "pg-p", "--destination", "restic-pg-p", "--snapshot", latestSnapshotID, "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e", "pg-p", "restic-pg-p")
 }
 
 func (s *PostgresqlSuite) TestPostgresql_c() {
-	s.Require().NoError(strolt("backup", "--service", "e2e", "--task", "pg-c", "--y"))
-
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e", "pg-c", "restic-pg-c")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e", "--task", "pg-c", "--destination", "restic-pg-c", "--snapshot", latestSnapshotID, "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e", "pg-c", "restic-pg-c")
 }
 
 func (s *PostgresqlSuite) TestPostgresql_copy_t() {
-	s.Require().NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-t", "--y"))
-
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e-copy", "pg-t", "restic-pg-t")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e-copy", "--task", "pg-t", "--destination", "restic-pg-t", "--snapshot", latestSnapshotID, "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e-copy", "pg-t", "restic-pg-t")
 }
 
 func (s *PostgresqlSuite) TestPostgresql_copy_d() {
-	s.Require().NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-d", "--y"))
-
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e-copy", "pg-d", "restic-pg-d")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e-copy", "--task", "pg-d", "--destination", "restic-pg-d", "--snapshot", latestSnapshotID, "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e-copy", "pg-d", "restic-pg-d")
 }
 
 func (s *PostgresqlSuite) TestPostgresql_copy_p() {
-	s.Require().NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-p", "--y"))
-
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e-copy", "pg-p", "restic-pg-p")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e-copy", "--task", "pg-p", "--destination", "restic-pg-p", "--snapshot", latestSnapshotID, "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e-copy", "pg-p", "restic-pg-p")
 }
 
 func (s *PostgresqlSuite) TestPostgresql_copy_c() {
-	s.Require().NoError(strolt("backup", "--service", "e2e-copy", "--task", "pg-c", "--y"))
-
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e-copy", "pg-c", "restic-pg-c")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e-copy", "--task", "pg-c", "--destination", "restic-pg-c", "--snapshot", latestSnapshotID, "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e-copy", "pg-c", "restic-pg-c")
 }
 
 func (s *PostgresqlSuite) TestPostgresql_pipe_t() {
-	s.Require().NoError(strolt("backup", "--service", "e2e-pipe", "--task", "pg-t", "--y"))
-
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e-pipe", "pg-t", "restic-pg-t")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e-pipe", "--task", "pg-t", "--destination", "restic-pg-t", "--snapshot", latestSnapshotID, "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e-pipe", "pg-t", "restic-pg-t")
 }
 
 func (s *PostgresqlSuite) TestPostgresql_pipe_d() {
@@ -142,25 +79,11 @@ func (s *PostgresqlSuite) TestPostgresql_pipe_d() {
 }
 
 func (s *PostgresqlSuite) TestPostgresql_pipe_p() {
-	s.Require().NoError(strolt("backup", "--service", "e2e-pipe", "--task", "pg-p", "--y"))
-
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e-pipe", "pg-p", "restic-pg-p")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e-pipe", "--task", "pg-p", "--destination", "restic-pg-p", "--snapshot", latestSnapshotID, "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e-pipe", "pg-p", "restic-pg-p")
 }
 
 func (s *PostgresqlSuite) TestPostgresql_pipe_c() {
-	s.Require().NoError(strolt("backup", "--service", "e2e-pipe", "--task", "pg-c", "--y"))
-
-	s.c.dropTable()
-
-	latestSnapshotID, err := stroltGetLatestSnapshotID("e2e-pipe", "pg-c", "restic-pg-c")
-	s.NoError(err)
-
-	s.NoError(strolt("restore", "--service", "e2e-pipe", "--task", "pg-c", "--destination", "restic-pg-c", "--snapshot", latestSnapshotID, "--y"))
+	sqlRoundTrip(&s.Suite, s.c, "e2e-pipe", "pg-c", "restic-pg-c")
 }
 
 //nolint:thelper

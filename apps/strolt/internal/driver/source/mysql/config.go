@@ -7,6 +7,18 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// TLS modes supported by the driver.
+const (
+	// TLSModeDisabled disables TLS entirely (`--skip-ssl`).
+	TLSModeDisabled = "disabled"
+	// TLSModeSkipVerify uses TLS but does not verify the server certificate
+	// (`--skip-ssl-verify-server-cert`). Required for MySQL servers with
+	// auto-generated self-signed certificates: the MariaDB client verifies
+	// certificates by default since 11.4 and can do so automatically only
+	// against MariaDB servers.
+	TLSModeSkipVerify = "skip-verify"
+)
+
 // Config describes the MySQL source driver configuration.
 type Config struct {
 	BinPathMySQL     string `yaml:"bin_path_mysql"`
@@ -17,6 +29,7 @@ type Config struct {
 	Database string `yaml:"database"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
+	TLS      string `yaml:"tls"`
 }
 
 // SetConfig parses and validates the driver configuration.
@@ -34,11 +47,23 @@ func (i *MySQL) SetConfig(config any) error {
 }
 
 func (i *MySQL) validateConfig() error {
-	return nil
+	switch i.config.TLS {
+	case "", TLSModeDisabled, TLSModeSkipVerify:
+		return nil
+	default:
+		return fmt.Errorf("unsupported tls mode %q, expected %q or %q", i.config.TLS, TLSModeDisabled, TLSModeSkipVerify)
+	}
 }
 
 func (i *MySQL) getCommonArgs() []string {
 	args := []string{}
+
+	switch i.config.TLS {
+	case TLSModeDisabled:
+		args = append(args, "--skip-ssl")
+	case TLSModeSkipVerify:
+		args = append(args, "--skip-ssl-verify-server-cert")
+	}
 
 	if i.config.Host != "" {
 		args = append(args, "-h", i.config.Host)
