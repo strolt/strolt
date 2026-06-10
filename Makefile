@@ -9,7 +9,7 @@ GO_SWAGGER_TEMPLATES = $(PROJECT_DIR)/.go-swagger/templates
 	[ -f $(PROJECT_BIN)/swagger-client ] || curl -sSfL "https://github.com/go-swagger/go-swagger/releases/download/v0.33.1/swagger_$(shell sh ./scripts/get_platform.sh)" > $(PROJECT_BIN)/swagger-client && chmod +x $(PROJECT_BIN)/swagger-client
 
 .install-golangci-lint:
-	[ -f $(PROJECT_BIN)/golangci-lint ] || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(PROJECT_BIN) v1.64.8
+	[ -f $(PROJECT_BIN)/golangci-lint ] || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(PROJECT_BIN) v2.12.2
 
 .install-stroltm-ui-node_modules:
 	[ -d $(STROLTM_UI)/node_modules ] || (cd $(STROLTM_UI) && pnpm install --frozen-lockfile)
@@ -64,16 +64,16 @@ swagger: \
 
 ##### LINT #####
 .lint-strolt: .install-golangci-lint
-	cd ./apps/strolt && $(GOLANGCI_LINT) run ./... --fix --config=${PROJECT_DIR}/.golangci.yml
+	cd ./apps/strolt && $(GOLANGCI_LINT) run ./... --fix
 
 .lint-stroltm: .install-golangci-lint
-	cd ./apps/stroltm && $(GOLANGCI_LINT) run ./... --fix --config=${PROJECT_DIR}/.golangci.yml
+	cd ./apps/stroltm && $(GOLANGCI_LINT) run ./... --fix
 
 .lint-stroltp: .install-golangci-lint
-	cd ./apps/stroltp && $(GOLANGCI_LINT) run ./... --fix --config=${PROJECT_DIR}/.golangci.yml
+	cd ./apps/stroltp && $(GOLANGCI_LINT) run ./... --fix
 
 .lint-shared: .install-golangci-lint
-	cd ./shared && $(GOLANGCI_LINT) run ./... --fix --config=${PROJECT_DIR}/.golangci.yml
+	cd ./shared && $(GOLANGCI_LINT) run ./... --fix
 
 .lint-stroltm-ui: .install-stroltm-ui-node_modules
 	cd $(STROLTM_UI) && pnpm dm exec tsc
