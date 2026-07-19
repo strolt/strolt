@@ -3,6 +3,7 @@ package task
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/context"
@@ -33,6 +34,12 @@ type Task struct {
 	TaskConfig              config.TaskConfig `json:"taskConfig"`
 	log                     *logger.Logger
 	isNotificationsDisabled bool
+
+	// notificationWaitGroup tracks the in-flight notification goroutines of this
+	// task only. It must be per-task: a package-global would let one task's Add
+	// race another task's Wait, corrupting the barrier and risking a
+	// "WaitGroup misuse" panic when tasks run concurrently.
+	notificationWaitGroup *sync.WaitGroup
 }
 
 // TaskOperation identifies the kind of operation a task performs.

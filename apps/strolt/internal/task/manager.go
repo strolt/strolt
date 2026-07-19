@@ -1,7 +1,6 @@
 package task
 
 import (
-	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -42,11 +41,19 @@ var managerVar = manager{
 func (t *Task) managerStart(operation sctxt.OperationType) error {
 	taskKey := t.mangerGetKeyForTask()
 
-	if t.IsRunning() {
-		return t.managerCreateErrorIsRunning()
-	}
-
+	// The running check and the running-flag update must happen inside a single
+	// critical section. Splitting them (check under RLock, set under Lock) leaves
+	// a TOCTOU window in which two goroutines starting the same task both observe
+	// "not running" and both proceed — defeating the whole purpose of the manager.
 	managerVar.Lock()
+	defer managerVar.Unlock()
+
+	if taskItem, ok := managerVar.Tasks[taskKey]; ok && taskItem.IsRunning {
+		return fmt.Errorf(
+			"task '%s' for service '%s' already started '%s' with operation '%s' - trigger '%s'",
+			t.TaskName, t.Context.ServiceName, taskItem.StartedAt.Format(time.RFC3339), taskItem.Opeation, taskItem.TriggerType,
+		)
+	}
 
 	item := ManagerTaskItem{
 		ServiceName: t.Context.ServiceName,
@@ -58,16 +65,13 @@ func (t *Task) managerStart(operation sctxt.OperationType) error {
 		TriggerType: t.Trigger,
 	}
 
-	taskItem, ok := managerVar.Tasks[taskKey]
-	if ok {
+	if taskItem, ok := managerVar.Tasks[taskKey]; ok {
 		item.LastEndedAt = taskItem.LastEndedAt
 	}
 
 	managerVar.Tasks[taskKey] = item
 
 	managerVar.LastChangedAt = time.Now()
-
-	managerVar.Unlock()
 
 	return nil
 }
@@ -136,20 +140,6 @@ func GetManagerStatus() ManagerStatus {
 	status.Tasks = list
 
 	return status
-}
-
-func (t *Task) managerCreateErrorIsRunning() error {
-	managerVar.RLock()
-	defer managerVar.RUnlock()
-
-	taskKey := t.mangerGetKeyForTask()
-
-	taskItem, ok := managerVar.Tasks[taskKey]
-	if !ok {
-		return errors.New("task not found in manager")
-	}
-
-	return fmt.Errorf("task '%s' for service '%s' already started '%s' with operation '%s' - trigger '%s'", t.TaskName, t.Context.ServiceName, taskItem.StartedAt.Format(time.RFC3339), taskItem.Opeation, taskItem.TriggerType)
 }
 
 func (t *Task) mangerGetKeyForTask() string {
