@@ -85,10 +85,13 @@ func validateEnv(_ Env) error {
 }
 
 // Backup performs a backup of the configured local path.
+//
+// It is intentionally a no-op: for a local source the task work directory is the
+// source path itself (context.setWorkDir sets WorkDir = abs(SourceLocalPath)),
+// so the destination driver reads directly from the source path and there is
+// nothing to copy into a separate work directory. Copying here (WorkDir ==
+// config.Path) would copy the directory onto itself.
 func (i *Local) Backup(_ context.Context) error {
-	// if err := copy.Copy(i.config.Path, ctx.WorkDir); err != nil {
-	// 	return err
-	// }
 	return nil
 }
 
@@ -126,10 +129,13 @@ func (i *Local) IsSupportedBackupPipe(_ context.Context) bool {
 }
 
 // Restore restores a backup to the configured local path.
+//
+// It is intentionally a no-op: for a local source the task work directory is the
+// source path itself (context.setWorkDir sets WorkDir = abs(SourceLocalPath)),
+// so the destination driver restores the snapshot directly into the source path
+// (restic runs `restore --target WorkDir`). Copying here (WorkDir ==
+// config.Path) would copy the directory onto itself.
 func (i *Local) Restore(_ context.Context) error {
-	// if err := copy.Copy(ctx.WorkDir, i.config.Path); err != nil {
-	// 	return err
-	// }
 	return nil
 }
 

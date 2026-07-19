@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
@@ -12,9 +14,23 @@ import (
 
 // Restore runs the mysql client to load the dump from the working directory.
 func (i *MySQL) Restore(ctx context.Context) error {
+	dumpPath := filepath.Join(ctx.WorkDir, i.getFileName())
+
+	dump, err := os.Open(dumpPath) //nolint:gosec // path is built from the driver's own dump file name inside the work dir
+	if err != nil {
+		return fmt.Errorf("open dump file: %w", err)
+	}
+
+	defer func() {
+		_ = dump.Close()
+	}()
+
 	args := i.getRestoreArgs()
 	cmd := exec.Command(i.getBinMySQL(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
 	cmd.Dir = ctx.WorkDir
+	// Feed the dump on stdin so the client runs in batch mode and aborts on the
+	// first failing statement with a non-zero exit code.
+	cmd.Stdin = dump
 
 	outputByte, err := cmd.CombinedOutput()
 	outputString := string(outputByte)

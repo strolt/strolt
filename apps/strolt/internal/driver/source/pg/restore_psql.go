@@ -18,6 +18,11 @@ func (i *PgDump) restoreWithPSQLCmd(ctx context.Context, filename string, isPipe
 
 	args := i.getCommonArgs()
 
+	// Abort on the first SQL error so a partial restore returns a non-zero exit
+	// code instead of psql's default of continuing past errors and exiting 0,
+	// which would be reported as a successful restore.
+	args = append(args, "-v", "ON_ERROR_STOP=1")
+
 	if !isPipe {
 		args = append(args, "--file="+filename)
 	}
