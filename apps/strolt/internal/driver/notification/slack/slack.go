@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
+	"github.com/strolt/strolt/apps/strolt/internal/driver/notification/notifyutil"
 	"github.com/strolt/strolt/shared/logger"
 
 	"gopkg.in/yaml.v3"
@@ -77,7 +78,9 @@ func (i *Slack) Send(ctx context.Context) {
 
 	resp, err := http.Post(i.getWebhook(), "application/json", body) //nolint:noctx
 	if err != nil {
-		i.logger.Error(err)
+		// The transport error embeds the request URL, which is the secret
+		// webhook; redact it before logging.
+		i.logger.Error(notifyutil.RedactURLError(err))
 		return
 	}
 
