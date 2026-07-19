@@ -60,7 +60,11 @@ monitoring their status, and coordinating backup operations across your infrastr
 	Run: func(cmd *cobra.Command, args []string) {
 		log := logger.New()
 
-		log.Info(config.Get())
+		cfg := config.Get()
+		log.Infof(
+			"config loaded: %d api user(s), %d strolt instance(s), %d stroltp instance(s)",
+			len(cfg.API.Users), len(cfg.Strolt.Instances), len(cfg.Stroltp.Instances),
+		)
 
 		ctx, cancel := context.WithCancel(context.Background())
 

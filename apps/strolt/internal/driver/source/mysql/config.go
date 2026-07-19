@@ -103,12 +103,15 @@ func (i *MySQL) getBackupArgs() []string {
 func (i *MySQL) getRestoreArgs() []string {
 	commonArgs := i.getCommonArgs()
 
-	args := make([]string, 0, len(commonArgs)+4)
+	args := make([]string, 0, len(commonArgs)+2)
 	args = append(args, commonArgs...)
 
+	// The dump is fed to the client on stdin (see Restore) rather than through
+	// the client-side `source` builtin: in non-interactive batch mode the client
+	// aborts on the first failing statement and returns a non-zero exit code,
+	// while `-e "source ..."` swallows per-statement errors and can exit 0 on a
+	// partial restore.
 	args = append(args, "-D", i.config.Database)
-
-	args = append(args, "-e", "source "+i.getFileName())
 
 	return args
 }

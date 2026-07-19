@@ -11,7 +11,16 @@ import (
 	"github.com/strolt/strolt/shared/logger"
 )
 
-var notificationWaitGroup = sync.WaitGroup{}
+// notifyWaitGroup returns this task's notification WaitGroup, creating it on
+// first use. It is only ever accessed from the task's own operation goroutine
+// (events are emitted sequentially), so the lazy initialization needs no lock.
+func (t *Task) notifyWaitGroup() *sync.WaitGroup {
+	if t.notificationWaitGroup == nil {
+		t.notificationWaitGroup = &sync.WaitGroup{}
+	}
+
+	return t.notificationWaitGroup
+}
 
 // SendNotifications sends the current context event to all matching notification drivers.
 func (t *Task) SendNotifications() error {
@@ -40,7 +49,7 @@ func (t *Task) sendNotifications() {
 		return
 	}
 
-	notificationWaitGroup.Go(func() {
+	t.notifyWaitGroup().Go(func() {
 		if err := tCopy.SendNotifications(); err != nil {
 			log := logger.New()
 			log.Warnf("send notification error: %s", err)

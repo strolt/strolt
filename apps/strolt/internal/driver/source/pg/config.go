@@ -118,6 +118,11 @@ func (i *PgDump) getRestoreArgs() []string {
 
 	args = append(args, i.getCommonArgs()...)
 
+	// Abort on the first error so a partial restore (truncated dump, restoring
+	// into a non-empty/mismatched database) fails with a non-zero exit code
+	// instead of silently exiting 0 and being reported as successful.
+	args = append(args, "--exit-on-error")
+
 	return args
 }
 

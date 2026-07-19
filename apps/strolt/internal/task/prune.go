@@ -52,7 +52,7 @@ func (t *Task) Prune(destinationName string, isDryRun bool) ([]interfaces.Snapsh
 		t.eventOperationStop()
 	}
 
-	notificationWaitGroup.Wait()
+	t.notifyWaitGroup().Wait()
 
 	return snapshotList, err
 }
@@ -96,7 +96,7 @@ func (t *Task) PruneAll() error {
 		t.eventOperationStop()
 	}
 
-	notificationWaitGroup.Wait()
+	t.notifyWaitGroup().Wait()
 
 	return resultError
 }

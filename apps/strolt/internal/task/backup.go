@@ -130,7 +130,7 @@ func (t *Task) backupManual() error {
 		t.eventOperationStop()
 	}
 
-	notificationWaitGroup.Wait()
+	t.notifyWaitGroup().Wait()
 
 	return resultError
 }
@@ -151,7 +151,7 @@ func (t *Task) backupPipe() error {
 		t.eventOperationStop()
 	}
 
-	notificationWaitGroup.Wait()
+	t.notifyWaitGroup().Wait()
 
 	return err
 }

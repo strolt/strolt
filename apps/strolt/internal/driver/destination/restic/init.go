@@ -25,8 +25,6 @@ func (i *Restic) Init() error {
 
 	i.logger.Debug(cmd.String())
 
-	i.logger.Debug(cmd.Env)
-
 	output, err := cmd.CombinedOutput()
 	i.logger.Debug(string(output))
 
