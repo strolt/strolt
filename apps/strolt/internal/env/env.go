@@ -47,8 +47,6 @@ func Scan() {
 	default:
 		logger.SetLogLevel(logger.LogLevelInfo)
 	}
-
-	logger.SetLogLevel(logger.LogLevelTrace)
 }
 
 // Port returns the configured API port.

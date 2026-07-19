@@ -59,7 +59,11 @@ for your distributed backup infrastructure.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log := logger.New()
 
-		log.Info(config.Get())
+		cfg := config.Get()
+		log.Infof(
+			"config loaded: %d api user(s), %d strolt instance(s)",
+			len(cfg.API.Users), len(cfg.Strolt.Instances),
+		)
 
 		ctx, cancel := context.WithCancel(context.Background())
 
