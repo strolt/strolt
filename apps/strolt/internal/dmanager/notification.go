@@ -8,6 +8,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/driver/notification/console"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/notification/slack"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/notification/telegram"
+	"github.com/strolt/strolt/apps/strolt/internal/driver/notification/webhook"
 	"github.com/strolt/strolt/shared/logger"
 )
 
@@ -17,18 +18,18 @@ type Notification string
 // Supported notification drivers.
 const (
 	DriverNotificationConsole  Notification = "console"
-	DriverNotificationEmail    Notification = "email"
 	DriverNotificationSlack    Notification = "slack"
 	DriverNotificationTelegram Notification = "telegram"
+	DriverNotificationWebhook  Notification = "webhook"
 )
 
 // GetAvailableDriverNotification returns the supported notification drivers.
 func GetAvailableDriverNotification() []Notification {
 	return []Notification{
 		DriverNotificationConsole,
-		DriverNotificationEmail,
 		DriverNotificationSlack,
 		DriverNotificationTelegram,
+		DriverNotificationWebhook,
 	}
 }
 
@@ -43,6 +44,7 @@ func GetNotificationDriver(driver Notification, serviceName string, taskName str
 		DriverNotificationConsole:  console.New(),
 		DriverNotificationSlack:    slack.New(slack.Params{}),
 		DriverNotificationTelegram: telegram.New(telegram.Params{}),
+		DriverNotificationWebhook:  webhook.New(),
 	}
 
 	d, ok := notificationDrivers[driver]
