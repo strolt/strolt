@@ -4,6 +4,7 @@ package strolt
 import (
 	"errors"
 	"fmt"
+	"net/url"
 
 	"github.com/go-openapi/runtime"
 	runtimeClient "github.com/go-openapi/runtime/client"
@@ -20,8 +21,19 @@ type SDK struct {
 }
 
 // New creates an SDK client for the given host with basic auth credentials.
+//
+// host may be a bare "host:port" (defaults to the http scheme, preserving
+// backwards compatibility) or a full URL such as "https://host:port" to enable
+// TLS. Without this, basic-auth credentials would always be sent in cleartext.
 func New(host, username, password string) *SDK {
-	cfg := strolt_client.DefaultTransportConfig().WithHost(host)
+	cfg := strolt_client.DefaultTransportConfig()
+
+	if u, err := url.Parse(host); err == nil && u.Host != "" && (u.Scheme == "http" || u.Scheme == "https") {
+		cfg = cfg.WithHost(u.Host).WithSchemes([]string{u.Scheme})
+	} else {
+		cfg = cfg.WithHost(host)
+	}
+
 	c := strolt_client.NewHTTPClientWithConfig(nil, cfg)
 
 	return &SDK{
