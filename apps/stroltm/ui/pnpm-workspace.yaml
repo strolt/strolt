@@ -3,6 +3,8 @@
 # do not apply there. Keep policy decisions in sync with the root
 # pnpm-workspace.yaml.
 allowBuilds: {"@nestjs/core": false, "@openapitools/openapi-generator-cli": false, esbuild: false}
+catalog:
+  "@shibanet0/datamitsu-config": 0.1.7
 minimumReleaseAgeExclude:
   - "@datamitsu/*"
   - "@ovineko/*"
