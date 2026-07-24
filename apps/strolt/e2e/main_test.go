@@ -120,9 +120,9 @@ func cleanupContainers() error {
 
 // TestE2E runs all e2e test suites.
 //
-// The filesystem group runs sequentially: Local, Prune and Daemon all mutate
-// the shared /e2e/input directory. The database suites are independent of
-// the filesystem and of each other, so they run in parallel.
+// The filesystem group runs sequentially: Local, Prune, Forget and Daemon all
+// mutate the shared /e2e/input directory. The database suites are independent
+// of the filesystem and of each other, so they run in parallel.
 func TestE2E(t *testing.T) {
 	t.Run("Filesystem", func(t *testing.T) {
 		t.Run("Local", func(t *testing.T) {
@@ -131,6 +131,10 @@ func TestE2E(t *testing.T) {
 
 		t.Run("Prune", func(t *testing.T) {
 			PruneSuiteTest(t)
+		})
+
+		t.Run("Forget", func(t *testing.T) {
+			ForgetSuiteTest(t)
 		})
 
 		t.Run("Daemon", func(t *testing.T) {

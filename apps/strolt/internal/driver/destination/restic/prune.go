@@ -14,7 +14,13 @@ import (
 // Prune runs restic forget with the configured retention policy and prunes removed data.
 func (i *Restic) Prune(ctx context.Context, isDryRun bool) ([]interfaces.Snapshot, error) {
 	var args []string
-	args = append(args, i.getGlobalFlags()...)
+
+	if isDryRun {
+		args = append(args, i.getGlobalFlags()...)
+	} else {
+		args = append(args, i.getGlobalFlagsWithLock()...)
+	}
+
 	args = append(args, "forget", "--group-by=", "--prune")
 	args = append(args, i.getKeepFlags()...)
 

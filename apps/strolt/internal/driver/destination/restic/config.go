@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -142,6 +143,17 @@ func (i *Restic) getGlobalFlags() []string {
 	flags = append(flags, "--json")
 
 	return flags
+}
+
+// getGlobalFlagsWithLock returns the global flags for commands that have to
+// hold a repository lock. restic aborts a real (non dry-run) forget when
+// --no-lock is set ("--no-lock is only applicable in combination with
+// --dry-run for forget command"), so the flag is dropped rather than failing
+// the whole operation for repositories configured with 'no-lock: true'.
+func (i *Restic) getGlobalFlagsWithLock() []string {
+	return slices.DeleteFunc(i.getGlobalFlags(), func(flag string) bool {
+		return flag == "--no-lock"
+	})
 }
 
 func (i *Restic) getKeepFlags() []string {

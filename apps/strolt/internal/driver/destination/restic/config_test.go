@@ -78,3 +78,37 @@ func TestGetKeepFlagsCombined(t *testing.T) {
 		}
 	}
 }
+
+func TestGetGlobalFlagsWithLockDropsNoLock(t *testing.T) {
+	t.Parallel()
+
+	i := &Restic{config: Config{NoLock: true, NoCache: true}}
+
+	if flags := i.getGlobalFlags(); !slices.Contains(flags, "--no-lock") {
+		t.Fatalf("getGlobalFlags() = %v, want --no-lock", flags)
+	}
+
+	flags := i.getGlobalFlagsWithLock()
+
+	if slices.Contains(flags, "--no-lock") {
+		t.Fatalf("getGlobalFlagsWithLock() = %v, want no --no-lock", flags)
+	}
+
+	for _, flag := range []string{"--no-cache", "--json"} {
+		if !slices.Contains(flags, flag) {
+			t.Fatalf("getGlobalFlagsWithLock() = %v, missing %s", flags, flag)
+		}
+	}
+}
+
+func TestGetGlobalFlagsWithLockKeepsOriginal(t *testing.T) {
+	t.Parallel()
+
+	i := &Restic{config: Config{NoLock: true}}
+
+	_ = i.getGlobalFlagsWithLock()
+
+	if flags := i.getGlobalFlags(); !slices.Contains(flags, "--no-lock") {
+		t.Fatalf("getGlobalFlags() after getGlobalFlagsWithLock() = %v, want --no-lock", flags)
+	}
+}

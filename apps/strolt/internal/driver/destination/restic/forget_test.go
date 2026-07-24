@@ -60,6 +60,34 @@ func TestForgetOutputGetSnapshotList(t *testing.T) {
 	}
 }
 
+func TestIsSnapshotNotFound(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name   string
+		output string
+		want   bool
+	}{
+		{
+			name:   "warning for unknown id",
+			output: "Ignoring \"deadbeef\": no matching ID found for prefix \"deadbeef\"\n",
+			want:   true,
+		},
+		{name: "silent success", output: "", want: false},
+		{name: "prune progress", output: "[0:00] 100.00%  3 / 3 packs deleted\n", want: false},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := isSnapshotNotFound([]byte(tc.output)); got != tc.want {
+				t.Fatalf("isSnapshotNotFound(%q) = %v, want %v", tc.output, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestForgetOutputGetSnapshotListEmpty(t *testing.T) {
 	t.Parallel()
 
