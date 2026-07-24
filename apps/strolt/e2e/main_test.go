@@ -137,6 +137,10 @@ func TestE2E(t *testing.T) {
 			ForgetSuiteTest(t)
 		})
 
+		t.Run("Tuning", func(t *testing.T) {
+			TuningSuiteTest(t)
+		})
+
 		t.Run("Daemon", func(t *testing.T) {
 			DaemonSuiteTest(t)
 		})

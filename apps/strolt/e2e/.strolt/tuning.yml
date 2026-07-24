@@ -1,0 +1,33 @@
+# Exercises every tuning knob of the restic driver at once, so the e2e run
+# proves the flags strolt builds are accepted by restic. RESTIC_PASSWORD is
+# deliberately passed through env_extra only: the repository is unreadable
+# unless those pairs reach the restic process.
+services:
+  e2e:
+    tuning:
+      destinations:
+        restic-tuning:
+          config:
+            env_extra:
+              RESTIC_PASSWORD: "{{.RESTIC_PASSWORD}}"
+            extra_backup_args:
+              - --exclude-caches
+            extra_restore_args:
+              - --verify
+            keep:
+              last: 3
+            no-scan: true
+            options:
+              - s3.connections=3
+            pack-size: 16
+            read-concurrency: 4
+            restore-target: /e2e/restore-target
+          driver: restic
+          env:
+            AWS_ACCESS_KEY_ID: "{{.RESTIC_AWS_ACCESS_KEY_ID}}"
+            AWS_SECRET_ACCESS_KEY: "{{.RESTIC_AWS_SECRET_ACCESS_KEY}}"
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-tuning"
+      source:
+        config:
+          path: "/e2e/input"
+        driver: local

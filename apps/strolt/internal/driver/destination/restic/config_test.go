@@ -79,6 +79,52 @@ func TestGetKeepFlagsCombined(t *testing.T) {
 	}
 }
 
+func TestGetBackupFlagsWithoutTuning(t *testing.T) {
+	t.Parallel()
+
+	i := &Restic{}
+
+	if flags := i.getBackupFlags(); len(flags) != 0 {
+		t.Fatalf("getBackupFlags() with empty config = %v, want none", flags)
+	}
+}
+
+func TestGetBackupFlagsTuning(t *testing.T) {
+	t.Parallel()
+
+	i := &Restic{config: Config{ReadConcurrency: 8, NoScan: true, PackSize: 64}}
+
+	want := []string{"--read-concurrency", "8", "--no-scan", "--pack-size", "64"}
+
+	if flags := i.getBackupFlags(); !slices.Equal(flags, want) {
+		t.Fatalf("getBackupFlags() = %v, want %v", flags, want)
+	}
+}
+
+// Zero means "not configured": restic keeps its own defaults instead of being
+// passed a nonsensical --read-concurrency 0.
+func TestGetBackupFlagsIgnoresNonPositiveCounts(t *testing.T) {
+	t.Parallel()
+
+	i := &Restic{config: Config{ReadConcurrency: -1, PackSize: 0}}
+
+	if flags := i.getBackupFlags(); len(flags) != 0 {
+		t.Fatalf("getBackupFlags() = %v, want none", flags)
+	}
+}
+
+func TestGetGlobalFlagsOptions(t *testing.T) {
+	t.Parallel()
+
+	i := &Restic{config: Config{Options: []string{"rest.connections=10", "s3.connections=20"}}}
+
+	want := []string{"-o", "rest.connections=10", "-o", "s3.connections=20", "--json"}
+
+	if flags := i.getGlobalFlags(); !slices.Equal(flags, want) {
+		t.Fatalf("getGlobalFlags() = %v, want %v", flags, want)
+	}
+}
+
 func TestGetGlobalFlagsWithLockDropsNoLock(t *testing.T) {
 	t.Parallel()
 

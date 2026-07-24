@@ -3,6 +3,8 @@ package restic
 import (
 	"errors"
 	"fmt"
+	"maps"
+	"slices"
 
 	"github.com/strolt/strolt/apps/strolt/internal/util/dir"
 )
@@ -92,6 +94,13 @@ func (i *Restic) getEnv() ([]string, error) {
 		env = append(env, "RESTIC_CACHE_DIR="+path)
 	}
 
+	return append(env, i.getEnvPairs()...), nil
+}
+
+// getEnvPairs returns the configured environment variables in NAME=value form.
+func (i *Restic) getEnvPairs() []string {
+	env := []string{}
+
 	pairs := []struct {
 		name  string
 		value string
@@ -140,5 +149,11 @@ func (i *Restic) getEnv() ([]string, error) {
 		}
 	}
 
-	return env, nil
+	// Appended last, in a stable order: os/exec keeps the last occurrence of a
+	// duplicated variable, so env_extra overrides the typed fields above.
+	for _, name := range slices.Sorted(maps.Keys(i.config.ExtraEnv)) {
+		env = append(env, name+"="+i.config.ExtraEnv[name])
+	}
+
+	return env
 }
