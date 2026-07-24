@@ -10,17 +10,18 @@ import (
 
 //nolint:gochecknoinits
 func init() {
-	pruneCmd.Flags().String("service", "", "service name")
-	pruneCmd.Flags().String("task", "", "task name")
-	pruneCmd.Flags().String("destination", "", "destination name")
-	pruneCmd.Flags().BoolVar(&isSkipConfirmation, "y", false, "skip confirmation")
+	forgetCmd.Flags().String("service", "", "service name")
+	forgetCmd.Flags().String("task", "", "task name")
+	forgetCmd.Flags().String("destination", "", "destination name")
+	forgetCmd.Flags().String("snapshot", "", "snapshot id / name")
+	forgetCmd.Flags().BoolVar(&isSkipConfirmation, "y", false, "skip confirmation")
 
-	rootCmd.AddCommand(pruneCmd)
+	rootCmd.AddCommand(forgetCmd)
 }
 
-var pruneCmd = &cobra.Command{
-	Use:   "prune",
-	Short: "Clean up snapshots",
+var forgetCmd = &cobra.Command{
+	Use:   "forget",
+	Short: "Delete a single snapshot, ignoring the retention policy",
 	Run: func(cmd *cobra.Command, args []string) {
 		initConfig()
 		log := logger.New()
@@ -41,7 +42,12 @@ var pruneCmd = &cobra.Command{
 		}
 		Printf("selected destination: %s", prompt.DestinationName)
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypePrune)
+		if err := prompt.ScanSnapshotName(); err != nil {
+			log.Fatal(err)
+		}
+		Printf("selected snapshot: %s", prompt.SnapshotName)
+
+		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeForget)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -51,9 +57,10 @@ var pruneCmd = &cobra.Command{
 			return
 		}
 
-		_, err = t.Prune(prompt.DestinationName, false)
-		if err != nil {
+		if err := t.Forget(prompt.DestinationName, prompt.SnapshotName); err != nil {
 			log.Fatal(err)
 		}
+
+		Printf("snapshot removed: %s", prompt.SnapshotName)
 	},
 }

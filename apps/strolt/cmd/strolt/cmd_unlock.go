@@ -8,19 +8,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var isRemoveAllLocks = false
+
 //nolint:gochecknoinits
 func init() {
-	pruneCmd.Flags().String("service", "", "service name")
-	pruneCmd.Flags().String("task", "", "task name")
-	pruneCmd.Flags().String("destination", "", "destination name")
-	pruneCmd.Flags().BoolVar(&isSkipConfirmation, "y", false, "skip confirmation")
+	unlockCmd.Flags().String("service", "", "service name")
+	unlockCmd.Flags().String("task", "", "task name")
+	unlockCmd.Flags().String("destination", "", "destination name")
+	unlockCmd.Flags().BoolVar(&isRemoveAllLocks, "remove-all", false, "remove all locks, including those held by running operations")
 
-	rootCmd.AddCommand(pruneCmd)
+	rootCmd.AddCommand(unlockCmd)
 }
 
-var pruneCmd = &cobra.Command{
-	Use:   "prune",
-	Short: "Clean up snapshots",
+var unlockCmd = &cobra.Command{
+	Use:   "unlock",
+	Short: "Remove locks from the destination repository",
 	Run: func(cmd *cobra.Command, args []string) {
 		initConfig()
 		log := logger.New()
@@ -41,19 +43,16 @@ var pruneCmd = &cobra.Command{
 		}
 		Printf("selected destination: %s", prompt.DestinationName)
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypePrune)
+		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeUnlock)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer func() { _ = t.Close() }()
 
-		if !isSkipConfirmation && !prompt.AskIsConfirm() {
-			return
-		}
-
-		_, err = t.Prune(prompt.DestinationName, false)
-		if err != nil {
+		if err := t.Unlock(prompt.DestinationName, isRemoveAllLocks); err != nil {
 			log.Fatal(err)
 		}
+
+		Printf("destination unlocked: %s", prompt.DestinationName)
 	},
 }

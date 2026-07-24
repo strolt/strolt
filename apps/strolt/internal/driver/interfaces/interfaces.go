@@ -91,6 +91,8 @@ type DriverDestinationInterface interface { //nolint:interfacebloat // the drive
 	IsSupportedRestorePipe(ctx context.Context) bool
 
 	Prune(ctx context.Context, isDryRun bool) ([]Snapshot, error)
+	Forget(snapshotID string) error
+	Unlock(isRemoveAll bool) error
 	Stats() (Stats, error)
 	Snapshots() ([]Snapshot, error)
 	BinaryVersion() ([]DriverBinaryVersion, error)

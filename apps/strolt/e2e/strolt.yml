@@ -6,6 +6,7 @@ extends:
     - .strolt/base.yml
     - .strolt/local.yml
     - .strolt/prune.yml
+    - .strolt/forget.yml
     - .strolt/retention.yml
     - .strolt/daemon.yml
     - .strolt/pg.yml

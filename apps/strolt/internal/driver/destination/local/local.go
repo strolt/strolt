@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"slices"
 	"time"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
@@ -194,6 +195,39 @@ func (i *Local) Prune(_ context.Context, isDryRun bool) ([]interfaces.Snapshot, 
 	}
 
 	return []interfaces.Snapshot{}, nil
+}
+
+// Forget removes a single snapshot directory from the destination. The
+// snapshot ID is matched against the stored snapshots first: it comes from user
+// input and is joined into a filesystem path, so an unchecked value could point
+// outside the destination directory.
+func (i *Local) Forget(snapshotID string) error {
+	snapshots, err := i.Snapshots()
+	if err != nil {
+		return err
+	}
+
+	isKnown := slices.ContainsFunc(snapshots, func(snapshot interfaces.Snapshot) bool {
+		return snapshot.ID == snapshotID
+	})
+
+	if !isKnown {
+		return fmt.Errorf("snapshot '%s' not found in destination", snapshotID)
+	}
+
+	if err := os.RemoveAll(path.Join(i.config.Path, snapshotID)); err != nil {
+		return fmt.Errorf("remove snapshot directory: %w", err)
+	}
+
+	return nil
+}
+
+// Unlock does nothing: the local destination stores snapshots as plain
+// directories and never takes repository locks.
+func (i *Local) Unlock(_ bool) error {
+	i.logger.Debug("unlock: nothing to do for the local destination")
+
+	return nil
 }
 
 // Stats returns statistics for the destination.

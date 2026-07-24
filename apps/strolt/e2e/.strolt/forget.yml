@@ -1,0 +1,40 @@
+definitions:
+  notifications:
+    # The console driver logs the whole operation context, which lets the e2e
+    # suite assert the operation type reported to notification drivers.
+    console-forget:
+      driver: console
+      events:
+        - OPERATION_START
+        - OPERATION_STOP
+        - OPERATION_ERROR
+services:
+  e2e:
+    forget:
+      destinations:
+        restic-forget:
+          config:
+            keep:
+              last: 3
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-forget"
+          extends: restic_base
+        # restic refuses a real forget when --no-lock is set, so the flag has to
+        # be dropped for destinations configured with 'no-lock: true'.
+        restic-forget-nolock:
+          config:
+            keep:
+              last: 3
+            no-lock: true
+          driver: restic
+          env:
+            AWS_ACCESS_KEY_ID: "{{.RESTIC_AWS_ACCESS_KEY_ID}}"
+            AWS_SECRET_ACCESS_KEY: "{{.RESTIC_AWS_SECRET_ACCESS_KEY}}"
+            RESTIC_PASSWORD: "{{.RESTIC_PASSWORD}}"
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-forget-nolock"
+      notifications:
+        - console-forget
+      source:
+        config:
+          path: "/e2e/input"
+        driver: local
