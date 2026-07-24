@@ -7,6 +7,7 @@ extends:
     - .strolt/local.yml
     - .strolt/prune.yml
     - .strolt/forget.yml
+    - .strolt/tuning.yml
     - .strolt/retention.yml
     - .strolt/daemon.yml
     - .strolt/pg.yml

@@ -33,13 +33,14 @@ type Config struct {
 	BinPath string `yaml:"binPath"`
 
 	// GlobalFlags
-	Cacert        string `yaml:"cacert"`          // --cacert                     file to load root certificates from (default: use system certificates)
-	CleanupCache  bool   `yaml:"cleanup-cache"`   // --cleanup-cache              auto remove old cache directories
-	LimitDownload int    `yaml:"limit-download"`  // --limit-download int         limits downloads to a maximum rate in KiB/s. (default: unlimited)
-	LimitUpload   int    `yaml:"limit-upload"`    // --limit-upload int           limits uploads to a maximum rate in KiB/s. (default: unlimited)
-	NoCache       bool   `yaml:"no-cache"`        //  --no-cache                   do not use a local cache
-	NoLock        bool   `yaml:"no-lock"`         //  --no-lock                    do not lock the repository, this allows some operations on read-only repositories
-	TLSClientCert string `yaml:"tls-client-cert"` // --tls-client-cert file       path to a file containing PEM encoded TLS client certificate and private key
+	Cacert        string   `yaml:"cacert"`          // --cacert                     file to load root certificates from (default: use system certificates)
+	CleanupCache  bool     `yaml:"cleanup-cache"`   // --cleanup-cache              auto remove old cache directories
+	LimitDownload int      `yaml:"limit-download"`  // --limit-download int         limits downloads to a maximum rate in KiB/s. (default: unlimited)
+	LimitUpload   int      `yaml:"limit-upload"`    // --limit-upload int           limits uploads to a maximum rate in KiB/s. (default: unlimited)
+	NoCache       bool     `yaml:"no-cache"`        //  --no-cache                   do not use a local cache
+	NoLock        bool     `yaml:"no-lock"`         //  --no-lock                    do not lock the repository, this allows some operations on read-only repositories
+	TLSClientCert string   `yaml:"tls-client-cert"` // --tls-client-cert file       path to a file containing PEM encoded TLS client certificate and private key
+	Options       []string `yaml:"options"`         // -o key=value                 extended options, e.g. 'rest.connections=10' to parallelize pack transfers (can be specified multiple times)
 
 	// BackupFlags
 	ExcludePattern    []string `yaml:"exclude"`             // --exclude pattern                        exclude a pattern (can be specified multiple times)
@@ -54,9 +55,23 @@ type Config struct {
 	Tags              []string `yaml:"tags"`                // --tag tags                               add tags for the new snapshot in the format `tag[,tag,...]` (can be specified multiple times) (default [])
 	WithATime         bool     `yaml:"with-atime"`          // --with-atime                             store the atime for all files and directories
 	Compression       string   `yaml:"compression"`         //  --compression mode                      compression mode (only available for repository format version 2), one of (auto|off|max) (default auto)
+	ReadConcurrency   int      `yaml:"read-concurrency"`    // --read-concurrency n                     read n files concurrently (restic default: 2, too low for high-latency sources such as FUSE or S3)
+	NoScan            bool     `yaml:"no-scan"`             // --no-scan                                do not walk the tree upfront to estimate the backup size; saves a LIST/HEAD storm on high-latency sources
+	PackSize          int      `yaml:"pack-size"`           // --pack-size n                            target pack size in MiB; larger packs mean fewer objects in the repository
 
 	// Forget Flags
 	Keep ResticConfigKeep `yaml:"keep"`
+
+	// RestoreFlags
+	RestoreTarget string `yaml:"restore-target"` // --target dir  restore into this directory instead of the task work directory
+
+	// Escape hatches for flags and environment variables the fields above do not
+	// cover. ExtraEnv lives here rather than in Env because the destination
+	// 'env' block of the strolt config is a flat map[string]string and cannot
+	// carry a nested mapping.
+	ExtraBackupArgs  []string          `yaml:"extra_backup_args"`
+	ExtraRestoreArgs []string          `yaml:"extra_restore_args"`
+	ExtraEnv         map[string]string `yaml:"env_extra"`
 }
 
 func (i *Restic) getBackupFlags() []string {
@@ -106,6 +121,18 @@ func (i *Restic) getBackupFlags() []string {
 		flags = append(flags, "--with-atime")
 	}
 
+	if i.config.ReadConcurrency > 0 {
+		flags = append(flags, "--read-concurrency", strconv.Itoa(i.config.ReadConcurrency))
+	}
+
+	if i.config.NoScan {
+		flags = append(flags, "--no-scan")
+	}
+
+	if i.config.PackSize > 0 {
+		flags = append(flags, "--pack-size", strconv.Itoa(i.config.PackSize))
+	}
+
 	return flags
 }
 
@@ -138,6 +165,10 @@ func (i *Restic) getGlobalFlags() []string {
 
 	if i.config.TLSClientCert != "" {
 		flags = append(flags, "--tls-client-cert", i.config.TLSClientCert)
+	}
+
+	for _, option := range i.config.Options {
+		flags = append(flags, "-o", option)
 	}
 
 	flags = append(flags, "--json")
