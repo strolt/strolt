@@ -2,7 +2,6 @@ api:
   users:
     admin:
       password: admin #pragma: allowlist secret
-
 strolt:
   instances:
     test1:

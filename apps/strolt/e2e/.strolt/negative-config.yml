@@ -2,26 +2,8 @@
 # the main strolt.yml extends list: `strolt init` must never run against it
 # (e.g. the wrong-password destination points at an already-initialized repo).
 name: strolt-e2e-negative
-timezone: UTC
-
 services:
   negative:
-    bad-password:
-      destinations:
-        restic-bad-password:
-          config:
-            keep:
-              last: 1
-          driver: restic
-          env:
-            AWS_ACCESS_KEY_ID: minioadmin
-            AWS_SECRET_ACCESS_KEY: minioadmin #pragma: allowlist secret
-            RESTIC_PASSWORD: definitely-wrong-password #pragma: allowlist secret
-            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-local"
-      source:
-        config:
-          path: "/e2e/input"
-        driver: local
     bad-host:
       destinations:
         restic-bad-host:
@@ -47,6 +29,22 @@ services:
           password: strolt
           username: strolt
         driver: pg
+    bad-password:
+      destinations:
+        restic-bad-password:
+          config:
+            keep:
+              last: 1
+          driver: restic
+          env:
+            AWS_ACCESS_KEY_ID: minioadmin
+            AWS_SECRET_ACCESS_KEY: minioadmin #pragma: allowlist secret
+            RESTIC_PASSWORD: definitely-wrong-password #pragma: allowlist secret
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-local"
+      source:
+        config:
+          path: "/e2e/input"
+        driver: local
     pipe-unsupported:
       destinations:
         restic-pipe-unsupported:
@@ -68,3 +66,4 @@ services:
           tls: skip-verify
           username: strolt
         driver: mysql
+timezone: UTC

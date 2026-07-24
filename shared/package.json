@@ -6,9 +6,8 @@
   "license": "MIT",
   "author": "Alexander Svinarev <shibanet0@gmail.com> (shibanet0.com)",
   "type": "module",
-  "scripts": {},
   "devDependencies": {
-    "@shibanet0/datamitsu-config": "0.1.0"
+    "@shibanet0/datamitsu-config": "catalog:"
   },
   "engines": {
     "node": ">=22.12.0"

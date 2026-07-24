@@ -2,7 +2,6 @@ destinations:
   destination_local:
     config:
       path: "./example/destination"
-
     driver: local # [local, restic]
 # notifications:
 #   slack:
@@ -11,12 +10,10 @@ destinations:
 extendConfig:
   - ./notifications.yml
 name: strolt
-
 sources:
   source_local:
     config:
       path: "./example/source"
-
     driver: local # [local, mongodb, mysql, postgresql]
 tasks:
   task_local:
@@ -28,6 +25,5 @@ tasks:
       backup: "*/1 * * * *"
       forget: "*/1 * * * *"
       prune: "*/1 * * * *"
-
     source: source_local
 watchChanges: true # app will stop if config or secret files will changed

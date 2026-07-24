@@ -6,44 +6,35 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: 1.26.4
-
       - uses: actions/checkout@v3
-
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-
       - name: enable corepack (pnpm)
         run: corepack enable
-
       - name: generate swagger
         run: |
           make .swagger-strolt .swagger-shared-generate-client-strolt .swagger-stroltp .swagger-shared-generate-client-stroltp .swagger-stroltm .swagger-stroltm-ui-generate-client
-
       - name: golangci-lint (strolt)
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.12.2
           working-directory: apps/strolt
-
       - name: golangci-lint (stroltm)
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.12.2
           working-directory: apps/stroltm
-
       - name: golangci-lint (stroltp)
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.12.2
           working-directory: apps/stroltp
-
       - name: golangci-lint (shared)
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.12.2
           working-directory: shared
-
 name: lint
 on:
   pull_request:

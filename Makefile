@@ -76,7 +76,7 @@ swagger: \
 	cd ./shared && $(GOLANGCI_LINT) run ./... --fix
 
 .lint-stroltm-ui: .install-stroltm-ui-node_modules
-	cd $(STROLTM_UI) && pnpm dm exec tsc
+	cd $(STROLTM_UI)
 
 .PHONY: lint
 lint: .lint-shared .lint-strolt .lint-stroltp .lint-stroltm .lint-stroltm-ui

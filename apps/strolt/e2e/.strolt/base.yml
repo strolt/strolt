@@ -1,7 +1,6 @@
 api:
   users:
     base_user: base_user_password
-
 definitions:
   destinations:
     restic_base:

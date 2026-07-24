@@ -41,7 +41,7 @@
     "@docusaurus/module-type-aliases": "3.9.2",
     "@docusaurus/tsconfig": "3.9.2",
     "@docusaurus/types": "3.9.2",
-    "@shibanet0/datamitsu-config": "0.1.0",
+    "@shibanet0/datamitsu-config": "catalog:",
     "@types/node": "24.12.4"
   },
   "engines": {

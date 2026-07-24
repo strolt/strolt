@@ -10,7 +10,7 @@
     "prepare": "datamitsu init"
   },
   "devDependencies": {
-    "@shibanet0/datamitsu-config": "0.1.0"
+    "@shibanet0/datamitsu-config": "catalog:"
   },
   "packageManager": "pnpm@11.5.0",
   "engines": {

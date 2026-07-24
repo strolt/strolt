@@ -2,20 +2,15 @@ jobs:
   strolt-build-images:
     name: Build Strolt Docker images
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-
       - name: set up QEMU
         uses: docker/setup-qemu-action@v2
-
       - id: buildx
         name: set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-
       - name: available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
-
       - if: ${{ github.ref != 'refs/heads/main' }}
         name: build docker image without pushing (only outside main)
         run: |
@@ -23,20 +18,17 @@ jobs:
               --platform linux/amd64 \
               -f ./docker/strolt/Dockerfile\
               ./
-
       - env:
           GITHUB_PACKAGE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.actor }}
         name: Login to Github
         run: |
           echo ${GITHUB_PACKAGE_TOKEN} | docker login ghcr.io -u ${USERNAME} --password-stdin
-
       - env:
           DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
         name: Login to Docker Hub
         run: |
           echo ${DOCKER_HUB_TOKEN} | docker login -u strolt --password-stdin
-
       - env:
           GITHUB_REF: ${{ github.ref }}
           GITHUB_SHA: ${{ github.sha }}
@@ -52,24 +44,18 @@ jobs:
               -t strolt/strolt:${ref} -t strolt/strolt:latest \
               -f ./docker/strolt/Dockerfile\
               ./
-
   stroltm-build-images:
     name: Build Stroltm Docker images
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-
       - name: set up QEMU
         uses: docker/setup-qemu-action@v2
-
       - id: buildx
         name: set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-
       - name: available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
-
       - if: ${{ github.ref != 'refs/heads/main' }}
         name: build docker image without pushing (only outside main)
         run: |
@@ -77,20 +63,17 @@ jobs:
               --platform linux/amd64 \
               -f ./docker/stroltm/Dockerfile\
               ./
-
       - env:
           GITHUB_PACKAGE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.actor }}
         name: Login to Github
         run: |
           echo ${GITHUB_PACKAGE_TOKEN} | docker login ghcr.io -u ${USERNAME} --password-stdin
-
       - env:
           DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
         name: Login to Docker Hub
         run: |
           echo ${DOCKER_HUB_TOKEN} | docker login -u strolt --password-stdin
-
       - env:
           GITHUB_REF: ${{ github.ref }}
           GITHUB_SHA: ${{ github.sha }}
@@ -106,24 +89,18 @@ jobs:
               -t strolt/stroltm:${ref} -t strolt/stroltm:latest \
               -f ./docker/stroltm/Dockerfile \
               ./
-
   stroltp-build-images:
     name: Build Stroltp Docker images
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-
       - name: set up QEMU
         uses: docker/setup-qemu-action@v2
-
       - id: buildx
         name: set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-
       - name: available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
-
       - if: ${{ github.ref != 'refs/heads/main' }}
         name: build docker image without pushing (only outside main)
         run: |
@@ -131,20 +108,17 @@ jobs:
               --platform linux/amd64 \
               -f ./docker/stroltp/Dockerfile\
               ./
-
       - env:
           GITHUB_PACKAGE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.actor }}
         name: Login to Github
         run: |
           echo ${GITHUB_PACKAGE_TOKEN} | docker login ghcr.io -u ${USERNAME} --password-stdin
-
       - env:
           DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
         name: Login to Docker Hub
         run: |
           echo ${DOCKER_HUB_TOKEN} | docker login -u strolt --password-stdin
-
       - env:
           GITHUB_REF: ${{ github.ref }}
           GITHUB_SHA: ${{ github.sha }}

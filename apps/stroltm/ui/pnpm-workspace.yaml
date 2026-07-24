@@ -2,7 +2,7 @@
 # the Docker build copies only this directory, so the root workspace settings
 # do not apply there. Keep policy decisions in sync with the root
 # pnpm-workspace.yaml.
-allowBuilds: { "@nestjs/core": false, "@openapitools/openapi-generator-cli": false, esbuild: false }
+allowBuilds: {"@nestjs/core": false, "@openapitools/openapi-generator-cli": false, esbuild: false}
 minimumReleaseAgeExclude:
   - "@datamitsu/*"
   - "@ovineko/*"

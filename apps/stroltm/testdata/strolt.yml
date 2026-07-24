@@ -1,7 +1,6 @@
 api:
   users:
     admin: admin
-
 definitions:
   destinations:
     restic_base:
@@ -12,7 +11,6 @@ definitions:
       env:
         AWS_ACCESS_KEY_ID: minioadmin
         AWS_SECRET_ACCESS_KEY: minioadmin #pragma: allowlist secret
-
         RESTIC_PASSWORD: strolt #pragma: allowlist secret
         RESTIC_REPOSITORY: s3:http://minio:9000/restic-pg-t
   notifications:
@@ -47,8 +45,8 @@ services:
         driver: pg
       tags:
         - tag_from_task_config
-      # notifications:
-      #   - terminal
+        # notifications:
+        #   - terminal
   e2e2:
     pg-t:
       destinations:
@@ -74,7 +72,6 @@ services:
           extends: restic_base
       notifications:
         - terminal
-
       source:
         config:
           database: strolt
@@ -85,5 +82,4 @@ services:
         driver: pg
 tags:
   - tag_from_root_config
-
 timezone: UTC

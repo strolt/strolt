@@ -2,7 +2,6 @@ api:
   users:
     admin:
       password: admin #pragma: allowlist secret
-
 strolt:
   instances:
     # test:
@@ -11,7 +10,6 @@ strolt:
     #   password: admin #pragma: allowlist secret
     test:
       password: admin #pragma: allowlist secret
-
       url: 127.0.0.1:8081
       username: admin
 stroltp:
