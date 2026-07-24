@@ -10,6 +10,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 
+	"github.com/dustin/go-humanize"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -141,6 +142,46 @@ func TestNew(t *testing.T) {
 		body += "\nStop: " + stopTime.Format(time.RFC3339)
 		body += fmt.Sprintf("\nDuration: %s", stopTime.Sub(startTime))
 		body += fmt.Sprintf("\n\nError: %s", err)
+
+		assert.Equal(t, body, tmpl.Body)
+	})
+
+	t.Run("destination block with restic summary and streamed size", func(t *testing.T) {
+		const streamedBytes = uint64(44040192)
+
+		tmpl := New("", context.Context{
+			TaskName:       taskName,
+			OpertationType: sctxt.OpTypeBackup,
+			Event:          sctxt.EvOperationStop,
+			Operation: context.Operation{
+				Time: context.Time{
+					Start: startTime,
+					Stop:  stopTime,
+				},
+			},
+			Destination: map[string]context.DestinationOperation{
+				"main": {
+					BackupOutput: sctxt.BackupOutput{
+						FilesNew:            1,
+						TotalFilesProcessed: 1,
+						TotalBytesProcessed: streamedBytes,
+						SnapshotID:          "a1b2c3d4",
+						TotalBytesStreamed:  streamedBytes,
+					},
+				},
+			},
+		})
+
+		body := fmt.Sprintf(`Event: %s`, sctxt.EvOperationStop)
+		body += "\nStart: " + startTime.Format(time.RFC3339)
+		body += "\nStop: " + stopTime.Format(time.RFC3339)
+		body += fmt.Sprintf("\nDuration: %s", stopTime.Sub(startTime))
+		body += "\n\n[destination] main:"
+		body += "\n    snapshot_id: a1b2c3d4"
+		body += "\n    files_new: " + commaUint(1)
+		body += "\n    total_files_processed: " + commaUint(1)
+		body += "\n    total_size_processed: " + humanize.Bytes(streamedBytes)
+		body += "\n    streamed_size: " + humanize.Bytes(streamedBytes)
 
 		assert.Equal(t, body, tmpl.Body)
 	})

@@ -125,7 +125,9 @@ func (i *Local) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 }
 
 // BackupPipe returns a writer that stores the piped backup in a new snapshot directory.
-func (i *Local) BackupPipe(ctx context.Context, filename string) (io.WriteCloser, func() error, error) {
+// The local driver produces no restic-style summary, so its wait func returns an
+// empty BackupOutput; the streamed byte count is filled in by the caller.
+func (i *Local) BackupPipe(ctx context.Context, filename string) (io.WriteCloser, func() (sctxt.BackupOutput, error), error) {
 	snapshotName := uuid.New().String()
 
 	dirpath := path.Join(i.config.Path, snapshotName)
@@ -140,7 +142,7 @@ func (i *Local) BackupPipe(ctx context.Context, filename string) (io.WriteCloser
 		return nil, nil, fmt.Errorf("open snapshot file: %w", err)
 	}
 
-	return writer, func() error { return nil }, nil
+	return writer, func() (sctxt.BackupOutput, error) { return sctxt.BackupOutput{}, nil }, nil
 }
 
 // IsSupportedBackupPipe reports whether piped backups are supported.
