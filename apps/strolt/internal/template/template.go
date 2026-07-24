@@ -139,6 +139,10 @@ func New(driver string, ctx context.Context) Template { //nolint:revive // ctx i
 		if destination.BackupOutput.TotalBytesProcessed != 0 {
 			t.Body += "\n    total_size_processed: " + humanize.Bytes(destination.BackupOutput.TotalBytesProcessed)
 		}
+
+		if destination.BackupOutput.TotalBytesStreamed != 0 {
+			t.Body += "\n    streamed_size: " + humanize.Bytes(destination.BackupOutput.TotalBytesStreamed)
+		}
 	}
 
 	return t

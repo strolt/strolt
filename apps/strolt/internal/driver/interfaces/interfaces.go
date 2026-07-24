@@ -83,7 +83,7 @@ type DriverDestinationInterface interface { //nolint:interfacebloat // the drive
 	SetDriverName(driverName string)
 
 	Backup(ctx context.Context) (sctxt.BackupOutput, error)
-	BackupPipe(ctx context.Context, filename string) (writer io.WriteCloser, wait func() error, err error)
+	BackupPipe(ctx context.Context, filename string) (writer io.WriteCloser, wait func() (sctxt.BackupOutput, error), err error)
 	IsSupportedBackupPipe(ctx context.Context) bool
 
 	Restore(ctx context.Context, snapshotName string) error

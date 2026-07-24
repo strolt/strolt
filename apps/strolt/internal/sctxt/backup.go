@@ -12,4 +12,8 @@ type BackupOutput struct {
 	TotalFilesProcessed uint   `json:"total_files_processed"`
 	TotalBytesProcessed uint64 `json:"total_bytes_processed"`
 	SnapshotID          string `json:"snapshot_id"`
+	// TotalBytesStreamed is the number of input bytes streamed into the
+	// destination in pipe mode. It is destination-agnostic (restic and local)
+	// and stays zero for manual/filesystem backups.
+	TotalBytesStreamed uint64 `json:"total_bytes_streamed"`
 }

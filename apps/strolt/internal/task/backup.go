@@ -156,10 +156,41 @@ func (t *Task) backupPipe() error {
 	return err
 }
 
+// countingWriter wraps an io.Writer and records how many bytes were written to
+// it. io.Copy into an io.MultiWriter writes serially in a single goroutine, so a
+// plain counter is race-free without synchronization.
+type countingWriter struct {
+	w       io.Writer
+	written uint64
+}
+
+func (c *countingWriter) Write(p []byte) (int, error) {
+	n, err := c.w.Write(p)
+	c.written += uint64(n) //nolint:gosec // Write never reports a negative count
+	//nolint:wrapcheck // io.Writer contract: the underlying error must pass through unchanged (io.Copy inspects it)
+	return n, err
+}
+
+// destinationPipe holds the per-destination pipe state while a piped backup is
+// streaming. Kept in a slice so streaming and cleanup order stay stable and
+// independent of map iteration order.
+type destinationPipe struct {
+	name     string
+	counter  *countingWriter
+	closer   io.Closer
+	wait     func() (sctxt.BackupOutput, error)
+	closeErr error
+}
+
 // runBackupPipe streams the source dump into every destination. The exit
 // status of the source and destination processes must fail the backup: a
 // crashed dump with a closed stream would otherwise turn into a
 // "successful" empty snapshot.
+//
+// It also emits the per-destination start/stop/error events so the report
+// includes a destination block, and it records the streamed byte count and the
+// restic summary (snapshot_id, file counts, processed size) in each
+// destination's BackupOutput.
 func (t *Task) runBackupPipe() error {
 	sourceDriver, err := t.getSourceDriver()
 	if err != nil {
@@ -178,17 +209,12 @@ func (t *Task) runBackupPipe() error {
 		_ = waitSource()
 	}()
 
-	writers := make([]io.Writer, 0, len(t.TaskConfig.Destinations))
-	closers := make([]io.Closer, 0, len(t.TaskConfig.Destinations))
-	destinationWaits := make([]func() error, 0, len(t.TaskConfig.Destinations))
+	destinations := make([]destinationPipe, 0, len(t.TaskConfig.Destinations))
 
 	defer func() {
-		for _, closer := range closers {
-			_ = closer.Close()
-		}
-
-		for _, wait := range destinationWaits {
-			_ = wait()
+		for idx := range destinations {
+			_ = destinations[idx].closer.Close()
+			_, _ = destinations[idx].wait()
 		}
 	}()
 
@@ -203,28 +229,68 @@ func (t *Task) runBackupPipe() error {
 			return fmt.Errorf("destination backup pipe: %w", err)
 		}
 
-		writers = append(writers, writer)
-		closers = append(closers, writer)
-		destinationWaits = append(destinationWaits, sync.OnceValue(destinationWait))
+		destinations = append(destinations, destinationPipe{
+			name:    destinationName,
+			counter: &countingWriter{w: writer},
+			closer:  writer,
+			wait:    sync.OnceValues(destinationWait),
+		})
+	}
+
+	// All pipes are established; announce every destination before streaming.
+	writers := make([]io.Writer, 0, len(destinations))
+
+	for idx := range destinations {
+		t.eventDestinationStart(destinations[idx].name)
+		writers = append(writers, destinations[idx].counter)
 	}
 
 	_, copyErr := io.Copy(io.MultiWriter(writers...), reader)
 
 	errs := []error{copyErr}
 
-	if err := waitSource(); err != nil {
-		errs = append(errs, fmt.Errorf("source process: %w", err))
+	sourceErr := waitSource()
+	if sourceErr != nil {
+		errs = append(errs, fmt.Errorf("source process: %w", sourceErr))
 	}
 
-	// Close the writers so the destinations see EOF before their exit
-	// status is collected.
-	for _, closer := range closers {
-		errs = append(errs, closer.Close())
+	// The source dump governs trust in the whole backup: a crashed dump yields a
+	// truncated stream that restic would still turn into a snapshot, so a source
+	// failure must fail every destination too.
+	streamErr := copyErr
+	if streamErr == nil {
+		streamErr = sourceErr
 	}
 
-	for _, wait := range destinationWaits {
-		if err := wait(); err != nil {
-			errs = append(errs, fmt.Errorf("destination process: %w", err))
+	// Close every writer first so the destinations see EOF and finalize in
+	// parallel, then collect their exit status and summary.
+	for idx := range destinations {
+		closeErr := destinations[idx].closer.Close()
+		destinations[idx].closeErr = closeErr
+
+		if closeErr != nil {
+			errs = append(errs, closeErr)
+		}
+	}
+
+	for idx := range destinations {
+		destination := &destinations[idx]
+
+		output, waitErr := destination.wait()
+		if waitErr != nil {
+			errs = append(errs, fmt.Errorf("destination process: %w", waitErr))
+		}
+
+		switch {
+		case destination.closeErr != nil || waitErr != nil:
+			t.eventDestinationError(destination.name, errors.Join(destination.closeErr, waitErr))
+
+		case streamErr != nil:
+			t.eventDestinationError(destination.name, streamErr)
+
+		default:
+			output.TotalBytesStreamed = destination.counter.written
+			t.eventDestinationStop(destination.name, output)
 		}
 	}
 
