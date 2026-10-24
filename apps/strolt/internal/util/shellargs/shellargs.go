@@ -104,19 +104,24 @@ func (t *tokenizer) consumeDoubleQuoted(runes []rune, i int) int {
 // consumeUnquoted handles one rune outside quotes: whitespace ends the
 // current argument, quotes open a group, a backslash escapes the next rune.
 func (t *tokenizer) consumeUnquoted(r rune) {
-	switch {
-	case r == ' ' || r == '\t' || r == '\n' || r == '\r':
+	switch r {
+	case ' ', '\t', '\n', '\r':
 		t.flush()
-	case r == '\'':
+	case '\'', '"':
 		t.hasToken = true
-		t.state = quoteSingle
-	case r == '"':
-		t.hasToken = true
-		t.state = quoteDouble
+		t.state = quoteStateFor(r)
 	default:
 		t.hasToken = true
 		t.current = append(t.current, r)
 	}
+}
+
+func quoteStateFor(r rune) quoteState {
+	if r == '\'' {
+		return quoteSingle
+	}
+
+	return quoteDouble
 }
 
 // consumeEscaped appends the rune after a backslash outside quotes.
