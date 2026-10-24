@@ -3,13 +3,16 @@ package e2e_test
 import (
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/moby/moby/api/types/container"
 	"github.com/testcontainers/testcontainers-go"
+	tcexec "github.com/testcontainers/testcontainers-go/exec"
 	"github.com/testcontainers/testcontainers-go/modules/mariadb"
-	"github.com/testcontainers/testcontainers-go/modules/minio"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
@@ -26,12 +29,21 @@ const (
 	mongoImage    = "mongo:8.0.23"
 	mariadbImage  = "mariadb:11.4.12"
 	mysqlImage    = "mysql:8.4.9"
-	minioImage    = "minio/minio:RELEASE.2025-09-07T16-13-09Z"
-	stroltImage   = "strolt/strolt:development"
+	// Garage replaces MinIO: the MinIO community images were pulled from
+	// Docker Hub and quay, and restic's S3 backend works against Garage.
+	// The container is aliased "minio" so task configs keep their
+	// s3:http://minio:9000 endpoints.
+	garageImage = "dxflrs/garage:v2.5.0"
+	stroltImage = "strolt/strolt:development"
 
 	dbName     = "strolt"
 	dbUser     = "strolt"
 	dbPassword = "strolt" // pragma: allowlist secret
+
+	// Fixed S3 credentials imported into Garage; .strolt/secrets.yml and
+	// resticExec use the same pair.
+	s3AccessKeyID     = "GK6d6e2e2a0c1b4f9d8a7e3c5b1d9f0a2e"                               // pragma: allowlist secret
+	s3SecretAccessKey = "4c7d1f8a3b6e9c2d5f0a1b4e7c8d3f6a9b2e5d8c1f4a7b0e3d6c9f2a5b8e1d4c" // pragma: allowlist secret
 )
 
 // ContainerManager manages all testcontainers for e2e tests.
@@ -42,7 +54,7 @@ type ContainerManager struct {
 	mongoContainer        testcontainers.Container
 	mariadbContainer      testcontainers.Container
 	mysqlContainer        testcontainers.Container
-	minioContainer        testcontainers.Container
+	garageContainer       testcontainers.Container
 	stroltContainer       testcontainers.Container
 	stroltDaemonContainer testcontainers.Container
 }
@@ -278,7 +290,7 @@ func (cm *ContainerManager) Cleanup() error {
 		cm.mongoContainer,
 		cm.mariadbContainer,
 		cm.mysqlContainer,
-		cm.minioContainer,
+		cm.garageContainer,
 	}
 
 	for _, c := range containers {
@@ -327,8 +339,8 @@ func (cm *ContainerManager) StartAllContainers() error {
 		return err
 	})
 	g.Go(func() error {
-		c, err := cm.startMinio()
-		cm.minioContainer = c
+		c, err := cm.startGarage()
+		cm.garageContainer = c
 
 		return err
 	})
@@ -412,19 +424,134 @@ func (cm *ContainerManager) startMySQL() (testcontainers.Container, error) {
 	return c, nil
 }
 
-// startMinio starts MinIO via the official testcontainers module. The module
-// defaults to minioadmin/minioadmin credentials, matching .strolt/secrets.yml.
-func (cm *ContainerManager) startMinio() (testcontainers.Container, error) {
-	c, err := minio.Run(cm.ctx, minioImage,
-		network.WithNetwork([]string{"minio"}, cm.network),
-	)
-	if err != nil {
-		if c != nil {
-			_ = c.Terminate(cm.ctx)
-		}
+// startGarage starts Garage, the S3-compatible object store that replaced
+// MinIO (whose community images no longer exist on any registry). The
+// container keeps the "minio" network alias and port 9000 so existing task
+// configs work unchanged; after startup the single-node layout is applied
+// and the fixed key from .strolt/secrets.yml is imported with permission to
+// create buckets (every task provisions its own repository).
+func (cm *ContainerManager) startGarage() (testcontainers.Container, error) {
+	req := testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			Image:        garageImage,
+			Cmd:          []string{"/garage", "server"},
+			ExposedPorts: []string{"9000/tcp"},
+			// Attach explicitly by network name and register the "minio"
+			// alias in the same declaration: an aliases-only attach proved
+			// unreliable on CI runners (intermittent "lookup minio: no such
+			// host" mid-suite, which restic turns into minutes of retries).
+			Networks:       []string{cm.network.Name},
+			NetworkAliases: map[string][]string{cm.network.Name: {"minio"}},
+			Files: []testcontainers.ContainerFile{
+				{
+					HostFilePath:      "garage.toml",
+					ContainerFilePath: "/etc/garage.toml",
+				},
+			},
+			WaitingFor: wait.ForHTTP("/").
+				WithPort("9000/tcp").
+				WithStatusCodeMatcher(func(status int) bool { return status == 200 || status == 403 }),
+		},
+		Started: true,
+	}
 
+	c, err := testcontainers.GenericContainer(cm.ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := cm.provisionGarage(c); err != nil {
+		_ = c.Terminate(cm.ctx)
 		return nil, err
 	}
 
 	return c, nil
+}
+
+// provisionGarage applies the storage layout and imports the fixed S3 key.
+func (cm *ContainerManager) provisionGarage(c testcontainers.Container) error {
+	statusOut, err := execInGarage(cm, c, "status")
+	if err != nil {
+		return err
+	}
+
+	nodeID := garageNodeID(statusOut)
+	if nodeID == "" {
+		return fmt.Errorf("garage status: node id not found, output was %q", statusOut)
+	}
+
+	steps := [][]string{
+		{"layout", "assign", "-z", "dc1", "-c", "1G", nodeID},
+		{"layout", "apply", "--version", "1"},
+		{"key", "import", s3AccessKeyID, s3SecretAccessKey, "--yes", "-n", "e2e"},
+		{"key", "allow", "--create-bucket", s3AccessKeyID},
+	}
+
+	for _, args := range steps {
+		if _, err := execInGarage(cm, c, args...); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func execInGarage(cm *ContainerManager, c testcontainers.Container, args ...string) (string, error) {
+	cmd := append([]string{"/garage"}, args...)
+
+	code, reader, err := c.Exec(cm.ctx, cmd, tcexec.Multiplexed())
+	if err != nil {
+		return "", fmt.Errorf("garage %s: %w", strings.Join(args, " "), err)
+	}
+
+	out, readErr := io.ReadAll(reader)
+	if readErr != nil {
+		return "", fmt.Errorf("garage %s: read output: %w", strings.Join(args, " "), readErr)
+	}
+
+	if code != 0 {
+		return "", fmt.Errorf("garage %s exited with %d: %s", strings.Join(args, " "), code, strings.TrimSpace(string(out)))
+	}
+
+	return string(out), nil
+}
+
+// garageNodeID extracts the node id from `garage status` output: the first
+// hexadecimal token in the table below the HEALTHY NODES header.
+func garageNodeID(status string) string {
+	inTable := false
+
+	for line := range strings.SplitSeq(status, "\n") {
+		if strings.HasPrefix(line, "==== HEALTHY NODES") {
+			inTable = true
+			continue
+		}
+
+		if !inTable {
+			continue
+		}
+
+		fields := strings.Fields(line)
+		if len(fields) > 1 && isGarageNodeID(fields[0]) {
+			return fields[0]
+		}
+	}
+
+	return ""
+}
+
+// isGarageNodeID reports whether the token looks like a Garage node id
+// (16 lowercase hex characters).
+func isGarageNodeID(token string) bool {
+	if len(token) != 16 {
+		return false
+	}
+
+	for _, r := range token {
+		if !strings.ContainsRune("0123456789abcdef", r) {
+			return false
+		}
+	}
+
+	return true
 }

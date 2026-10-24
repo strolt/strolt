@@ -247,6 +247,15 @@ func (t *Task) runBackupPipe() error {
 
 	_, copyErr := io.Copy(io.MultiWriter(writers...), reader)
 
+	if copyErr != nil {
+		// A destination died mid-stream, so the source is now blocked writing
+		// into its stdout pipe that nobody drains anymore. Close our read end
+		// first: the source then sees EPIPE and exits, and waitSource below
+		// returns. Waiting first would block forever with zero CPU (the same
+		// deadlock shape copyPipe documents for restores).
+		_ = reader.Close()
+	}
+
 	errs := []error{copyErr}
 
 	sourceErr := waitSource()

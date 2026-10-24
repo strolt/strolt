@@ -1,0 +1,17 @@
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "lmdb"
+replication_factor = 1
+consistency_mode = "dangerous"
+rpc_bind_addr = "[::]:3901"
+rpc_public_addr = "127.0.0.1:3901"
+# Test-only secret for the e2e single-node cluster.
+rpc_secret = "9e2d7ba4bd11169d0a072c0e1a5b2a2e0e5b6b0f4a8e6c0aa0a51e4e8d9e2f7b"
+
+[s3_api]
+s3_region = "us-east-1"
+api_bind_addr = "[::]:9000"
+root_domain = ".s3.garage"
+
+[s3_admin]
+admin_bind_addr = "[::]:3903"

@@ -160,6 +160,17 @@ func (i *Local) Restore(ctx context.Context, snapshotName string) error {
 	return nil
 }
 
+// sizedReadCloser exposes the stat'ed file size so the restore progress can
+// show a percentage without changing the driver interface.
+type sizedReadCloser struct {
+	io.ReadCloser
+
+	size uint64
+}
+
+// Size returns the total size of the streamed file.
+func (r *sizedReadCloser) Size() (uint64, bool) { return r.size, true }
+
 // RestorePipe returns a reader for the single file stored in a snapshot.
 func (i *Local) RestorePipe(ctx context.Context, snapshotName string) (io.ReadCloser, string, func() error, error) {
 	list, err := i.ls(snapshotName)
@@ -178,7 +189,13 @@ func (i *Local) RestorePipe(ctx context.Context, snapshotName string) (io.ReadCl
 		return nil, "", nil, fmt.Errorf("open snapshot file: %w", err)
 	}
 
-	return reader, filename, func() error { return nil }, nil
+	stat, err := reader.Stat()
+	if err != nil {
+		_ = reader.Close()
+		return nil, "", nil, fmt.Errorf("stat snapshot file: %w", err)
+	}
+
+	return &sizedReadCloser{ReadCloser: reader, size: uint64(max(stat.Size(), 0))}, filename, func() error { return nil }, nil
 }
 
 // IsSupportedRestorePipe reports whether piped restores are supported.

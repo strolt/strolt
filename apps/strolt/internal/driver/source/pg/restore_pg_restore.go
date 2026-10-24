@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
+	"github.com/strolt/strolt/apps/strolt/internal/util/bufcap"
 )
 
 func (i *PgDump) restoreWithPgRestoreCmd(ctx context.Context, filename string, isPipe bool) *exec.Cmd {
@@ -56,6 +57,9 @@ func (i *PgDump) restoreWithPgRestoreCopy(ctx context.Context, filename string) 
 func (i *PgDump) restoreWithPgRestorePipe(ctx context.Context, filename string) (io.WriteCloser, func() error, error) {
 	cmd := i.restoreWithPgRestoreCmd(ctx, filename, true)
 
+	stderr := bufcap.New(stderrTailCap)
+	cmd.Stderr = stderr
+
 	writer, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, nil, fmt.Errorf("get stdin pipe: %w", err)
@@ -65,5 +69,5 @@ func (i *PgDump) restoreWithPgRestorePipe(ctx context.Context, filename string) 
 		return nil, nil, fmt.Errorf("start pg_restore: %w", err)
 	}
 
-	return writer, cmd.Wait, nil
+	return writer, waitWithStderr(cmd, stderr), nil
 }

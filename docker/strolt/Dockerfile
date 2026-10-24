@@ -3,9 +3,9 @@ ARG TARGETARCH
 ARG RESTIC_VERSION=0.19.0
 
 RUN apk add --no-cache \
-		postgresql18-client=18.4-r0 \
+		postgresql18-client=18.6-r0 \
 		mongodb-tools=100.13.0-r6 \
-		mariadb-client=11.4.12-r0 \
+		mariadb-client=11.4.13-r0 \
 		mariadb-connector-c=3.4.6-r0
 
 # restic is fetched from official releases: alpine still packages 0.18.x

@@ -1,6 +1,7 @@
 package e2e_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,12 +25,20 @@ type Snapshot struct {
 // Reusing one container instead of spawning `docker run` per CLI call keeps
 // the strolt working directory stable and avoids host docker CLI dependency.
 func execInStrolt(command string) ([]byte, error) {
+	return execInStroltCtx(ctx, command)
+}
+
+// execInStroltCtx is execInStrolt with a caller-owned context. Tests that
+// exercise failure paths of streamed operations must bound the exec: before
+// the pipe deadlock was fixed, a restore whose source aborted mid-stream
+// never returned and hung the suite forever.
+func execInStroltCtx(execCtx context.Context, command string) ([]byte, error) {
 	if containerManager == nil || containerManager.GetStroltContainer() == nil {
 		return nil, errors.New("strolt container not initialized")
 	}
 
 	exitCode, reader, err := containerManager.GetStroltContainer().Exec(
-		ctx,
+		execCtx,
 		[]string{"/bin/sh", "-c", command},
 		tcexec.Multiplexed(),
 	)
@@ -63,7 +72,7 @@ func strolt(args ...string) error {
 // snapshots).
 func resticExec(repository string, args string) ([]byte, error) {
 	return execInStrolt(fmt.Sprintf(
-		"AWS_ACCESS_KEY_ID=minioadmin AWS_SECRET_ACCESS_KEY=minioadmin RESTIC_PASSWORD=secret /usr/bin/restic -r '%s' %s",
+		"AWS_ACCESS_KEY_ID=GK6d6e2e2a0c1b4f9d8a7e3c5b1d9f0a2e AWS_SECRET_ACCESS_KEY=4c7d1f8a3b6e9c2d5f0a1b4e7c8d3f6a9b2e5d8c1f4a7b0e3d6c9f2a5b8e1d4c RESTIC_PASSWORD=secret /usr/bin/restic -r '%s' %s",
 		repository, args))
 }
 

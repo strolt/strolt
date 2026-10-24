@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
+	"github.com/strolt/strolt/apps/strolt/internal/util/bufcap"
 )
 
 func (i *PgDump) backup(ctx context.Context, isPipe bool) *exec.Cmd {
@@ -57,6 +58,9 @@ func (i *PgDump) Backup(ctx context.Context) error {
 func (i *PgDump) BackupPipe(ctx context.Context) (io.ReadCloser, string, func() error, error) {
 	cmd := i.backup(ctx, true)
 
+	stderr := bufcap.New(stderrTailCap)
+	cmd.Stderr = stderr
+
 	pipe, err := cmd.StdoutPipe()
 	if err != nil {
 		return nil, "", nil, fmt.Errorf("get stdout pipe: %w", err)
@@ -66,7 +70,7 @@ func (i *PgDump) BackupPipe(ctx context.Context) (io.ReadCloser, string, func() 
 		return nil, "", nil, fmt.Errorf("start pg_dump: %w", err)
 	}
 
-	return pipe, i.getFileName(), cmd.Wait, nil
+	return pipe, i.getFileName(), waitWithStderr(cmd, stderr), nil
 }
 
 // IsSupportedBackupPipe reports whether backing up as a stream is supported.
