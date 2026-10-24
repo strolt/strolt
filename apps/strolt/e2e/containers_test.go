@@ -436,13 +436,18 @@ func (cm *ContainerManager) startGarage() (testcontainers.Container, error) {
 			Image:        garageImage,
 			Cmd:          []string{"/garage", "server"},
 			ExposedPorts: []string{"9000/tcp"},
+			// Attach explicitly by network name and register the "minio"
+			// alias in the same declaration: an aliases-only attach proved
+			// unreliable on CI runners (intermittent "lookup minio: no such
+			// host" mid-suite, which restic turns into minutes of retries).
+			Networks:       []string{cm.network.Name},
+			NetworkAliases: map[string][]string{cm.network.Name: {"minio"}},
 			Files: []testcontainers.ContainerFile{
 				{
 					HostFilePath:      "garage.toml",
 					ContainerFilePath: "/etc/garage.toml",
 				},
 			},
-			NetworkAliases: map[string][]string{cm.network.Name: {"minio"}},
 			WaitingFor: wait.ForHTTP("/").
 				WithPort("9000/tcp").
 				WithStatusCodeMatcher(func(status int) bool { return status == 200 || status == 403 }),
