@@ -130,11 +130,11 @@ func (p *restoreProgress) Start() {
 
 				if p.hasTotal {
 					p.logf("restore in progress: %s / %s (%.1f%%), %s",
-						humanize.IBytes(uint64(written)), humanize.IBytes(p.total),
+						humanize.IBytes(uint64(max(written, 0))), humanize.IBytes(p.total),
 						100*float64(written)/float64(p.total), iBytesPerSec(speed))
 				} else {
 					p.logf("restore in progress: %s, %s",
-						humanize.IBytes(uint64(written)), iBytesPerSec(speed))
+						humanize.IBytes(uint64(max(written, 0))), iBytesPerSec(speed))
 				}
 			}
 		}
@@ -158,12 +158,12 @@ func (p *restoreProgress) Finish(startedAt time.Time, err error) {
 
 	if err != nil {
 		p.logf("restore stream aborted after %s of data (%.1fs, average %s): %v",
-			humanize.IBytes(uint64(written)), elapsed.Seconds(), iBytesPerSec(avg), err)
+			humanize.IBytes(uint64(max(written, 0))), elapsed.Seconds(), iBytesPerSec(avg), err)
 		return
 	}
 
 	p.logf("restore stream complete: %s in %.1fs (average %s)",
-		humanize.IBytes(uint64(written)), elapsed.Seconds(), iBytesPerSec(avg))
+		humanize.IBytes(uint64(max(written, 0))), elapsed.Seconds(), iBytesPerSec(avg))
 }
 
 func iBytesPerSec(bps float64) string {

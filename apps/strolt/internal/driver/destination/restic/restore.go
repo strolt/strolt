@@ -34,6 +34,7 @@ func (i *Restic) Restore(ctx context.Context, snapshotID string) error {
 // interface. Drivers without size knowledge stay unchanged.
 type sizedReadCloser struct {
 	io.ReadCloser
+
 	size    uint64
 	hasSize bool
 }

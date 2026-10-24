@@ -30,75 +30,109 @@ const (
 	quoteDouble
 )
 
+type tokenizer struct {
+	args     []string
+	current  []rune
+	hasToken bool
+	state    quoteState
+}
+
 // Split tokenizes s. Callers that validated their input earlier use
 // MustSplit instead.
 func Split(s string) ([]string, error) {
 	runes := []rune(s)
-
-	var (
-		args     []string
-		current  []rune
-		hasToken bool
-		state    quoteState
-	)
-
-	flush := func() {
-		if hasToken {
-			args = append(args, string(current))
-			current = nil
-			hasToken = false
-		}
-	}
+	t := &tokenizer{}
 
 	for i := 0; i < len(runes); i++ {
 		r := runes[i]
 
-		switch state {
+		switch t.state {
 		case quoteSingle:
-			if r == '\'' {
-				state = quoteNone
+			t.consumeSingleQuoted(r)
+		case quoteDouble:
+			i = t.consumeDoubleQuoted(runes, i)
+		case quoteNone:
+			if r == '\\' && i+1 < len(runes) {
+				t.consumeEscaped(runes[i+1])
+				i++
 				continue
 			}
 
-			current = append(current, r)
-		case quoteDouble:
-			switch {
-			case r == '"':
-				state = quoteNone
-			case r == '\\' && i+1 < len(runes) && (runes[i+1] == '"' || runes[i+1] == '\\'):
-				i++
-				current = append(current, runes[i])
-			default:
-				current = append(current, r)
-			}
-		default:
-			switch {
-			case r == ' ' || r == '\t' || r == '\n' || r == '\r':
-				flush()
-			case r == '\'':
-				hasToken = true
-				state = quoteSingle
-			case r == '"':
-				hasToken = true
-				state = quoteDouble
-			case r == '\\' && i+1 < len(runes):
-				hasToken = true
-				i++
-				current = append(current, runes[i])
-			default:
-				hasToken = true
-				current = append(current, r)
-			}
+			t.consumeUnquoted(r)
 		}
 	}
 
-	if state != quoteNone {
-		return nil, fmt.Errorf("unterminated %s quote", quoteName(state))
+	if t.state != quoteNone {
+		return nil, fmt.Errorf("unterminated %s quote", quoteName(t.state))
 	}
 
-	flush()
+	t.flush()
 
-	return args, nil
+	return t.args, nil
+}
+
+// consumeSingleQuoted appends r literally; only the closing quote changes
+// the state.
+func (t *tokenizer) consumeSingleQuoted(r rune) {
+	if r == '\'' {
+		t.state = quoteNone
+		return
+	}
+
+	t.current = append(t.current, r)
+}
+
+// consumeDoubleQuoted handles one rune inside double quotes and returns the
+// (possibly advanced) rune index: a backslash may consume the escaped rune
+// next to it.
+func (t *tokenizer) consumeDoubleQuoted(runes []rune, i int) int {
+	r := runes[i]
+
+	switch {
+	case r == '"':
+		t.state = quoteNone
+	case r == '\\' && i+1 < len(runes) && (runes[i+1] == '"' || runes[i+1] == '\\'):
+		t.current = append(t.current, runes[i+1])
+		return i + 1
+	default:
+		t.current = append(t.current, r)
+	}
+
+	return i
+}
+
+// consumeUnquoted handles one rune outside quotes: whitespace ends the
+// current argument, quotes open a group, a backslash escapes the next rune.
+func (t *tokenizer) consumeUnquoted(r rune) {
+	switch {
+	case r == ' ' || r == '\t' || r == '\n' || r == '\r':
+		t.flush()
+	case r == '\'':
+		t.hasToken = true
+		t.state = quoteSingle
+	case r == '"':
+		t.hasToken = true
+		t.state = quoteDouble
+	default:
+		t.hasToken = true
+		t.current = append(t.current, r)
+	}
+}
+
+// consumeEscaped appends the rune after a backslash outside quotes.
+func (t *tokenizer) consumeEscaped(r rune) {
+	t.hasToken = true
+	t.current = append(t.current, r)
+}
+
+// flush commits the current argument; an explicitly quoted empty value has
+// hasToken set without any content and must survive as an empty argument.
+func (t *tokenizer) flush() {
+	if t.hasToken {
+		t.args = append(t.args, string(t.current))
+		t.current = nil
+		t.hasToken = false
+	}
 }
 
 // MustSplit is Split for input already validated at configuration load time.

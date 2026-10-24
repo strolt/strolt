@@ -164,6 +164,7 @@ func (i *Local) Restore(ctx context.Context, snapshotName string) error {
 // show a percentage without changing the driver interface.
 type sizedReadCloser struct {
 	io.ReadCloser
+
 	size uint64
 }
 
@@ -194,7 +195,7 @@ func (i *Local) RestorePipe(ctx context.Context, snapshotName string) (io.ReadCl
 		return nil, "", nil, fmt.Errorf("stat snapshot file: %w", err)
 	}
 
-	return &sizedReadCloser{ReadCloser: reader, size: uint64(stat.Size())}, filename, func() error { return nil }, nil
+	return &sizedReadCloser{ReadCloser: reader, size: uint64(max(stat.Size(), 0))}, filename, func() error { return nil }, nil
 }
 
 // IsSupportedRestorePipe reports whether piped restores are supported.

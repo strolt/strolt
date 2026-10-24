@@ -80,14 +80,14 @@ func TestRealBinary_acceptsSplitRestoreParams(t *testing.T) {
 	d.config.RestoreParams = "--no-owner --no-privileges"
 
 	// The pre-fix argv: params as one element.
-	oldCmd := exec.Command(bin, d.config.RestoreParams, "--no-password", "--exit-on-error", "/dev/null") //nolint:gosec // fixed system binary, args from the test
+	oldCmd := exec.Command(bin, d.config.RestoreParams, "--no-password", "--exit-on-error", "/dev/null")
 	oldOut, err := oldCmd.CombinedOutput()
 	require.Error(t, err, "the old argv must fail")
 	assert.Contains(t, string(oldOut), "unrecognized option",
 		"the pre-fix single-element argv is rejected by the real pg_restore")
 
 	// The argv strolt builds now: params split into elements.
-	newCmd := exec.Command(bin, append(d.getRestoreArgs(), "/dev/null")...) //nolint:gosec // fixed system binary, args from the test
+	newCmd := exec.Command(bin, append(d.getRestoreArgs(), "/dev/null")...)
 	newOut, err := newCmd.CombinedOutput()
 	require.Error(t, err, "reading /dev/null as an archive must fail")
 	assert.NotContains(t, string(newOut), "unrecognized option",

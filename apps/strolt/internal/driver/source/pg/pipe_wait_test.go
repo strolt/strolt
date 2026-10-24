@@ -20,7 +20,7 @@ func TestWaitWithStderr(t *testing.T) {
 	}
 
 	t.Run("appends stderr tail to a non-zero exit", func(t *testing.T) {
-		cmd := exec.Command("sh", "-c", `echo 'psql:<stdin>:23: ERROR:  relation "t" already exists' >&2; exit 3`) //nolint:gosec // fixed test command
+		cmd := exec.Command("sh", "-c", `echo 'psql:<stdin>:23: ERROR:  relation "t" already exists' >&2; exit 3`)
 		stderr := bufcap.New(stderrTailCap)
 		cmd.Stderr = stderr
 		require.NoError(t, cmd.Start())
@@ -32,7 +32,7 @@ func TestWaitWithStderr(t *testing.T) {
 	})
 
 	t.Run("returns nil exit unchanged on success", func(t *testing.T) {
-		cmd := exec.Command("sh", "-c", "echo note >&2") //nolint:gosec // fixed test command
+		cmd := exec.Command("sh", "-c", "echo note >&2")
 		stderr := bufcap.New(stderrTailCap)
 		cmd.Stderr = stderr
 		require.NoError(t, cmd.Start())
@@ -41,7 +41,7 @@ func TestWaitWithStderr(t *testing.T) {
 	})
 
 	t.Run("empty stderr keeps the plain exit error", func(t *testing.T) {
-		cmd := exec.Command("sh", "-c", "exit 9") //nolint:gosec // fixed test command
+		cmd := exec.Command("sh", "-c", "exit 9")
 		stderr := bufcap.New(stderrTailCap)
 		cmd.Stderr = stderr
 		require.NoError(t, cmd.Start())
@@ -52,7 +52,7 @@ func TestWaitWithStderr(t *testing.T) {
 	})
 
 	t.Run("tail is bounded", func(t *testing.T) {
-		cmd := exec.Command("sh", "-c", "yes line | head -n 5000 >&2; exit 2") //nolint:gosec // fixed test command
+		cmd := exec.Command("sh", "-c", "yes line | head -n 5000 >&2; exit 2")
 		stderr := bufcap.New(stderrTailCap)
 		cmd.Stderr = stderr
 		require.NoError(t, cmd.Start())

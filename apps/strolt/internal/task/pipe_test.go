@@ -25,14 +25,14 @@ func TestCopyPipe_writerDiesEarly(t *testing.T) {
 
 	// The reader side produces an endless stream, far more than any pipe
 	// buffer holds, exactly like `restic dump` streaming a large dump.
-	readerCmd := exec.Command("sh", "-c", "yes 0123456789") //nolint:gosec // fixed test command
+	readerCmd := exec.Command("sh", "-c", "yes 0123456789")
 	reader, err := readerCmd.StdoutPipe()
 	require.NoError(t, err)
 	require.NoError(t, readerCmd.Start())
 
 	// The writer side consumes a little and then aborts, exactly like
 	// pg_restore exiting on the first SQL error mid-restore.
-	writerCmd := exec.Command("sh", "-c", "head -c 4096 >/dev/null; exit 3") //nolint:gosec // fixed test command
+	writerCmd := exec.Command("sh", "-c", "head -c 4096 >/dev/null; exit 3")
 	writer, err := writerCmd.StdinPipe()
 	require.NoError(t, err)
 	require.NoError(t, writerCmd.Start())
@@ -79,12 +79,12 @@ func TestCopyPipe_streamsUntilEof(t *testing.T) {
 		t.Skip("sh not available")
 	}
 
-	readerCmd := exec.Command("sh", "-c", "printf 'payload-1234567890'") //nolint:gosec // fixed test command
+	readerCmd := exec.Command("sh", "-c", "printf 'payload-1234567890'")
 	reader, err := readerCmd.StdoutPipe()
 	require.NoError(t, err)
 	require.NoError(t, readerCmd.Start())
 
-	writerCmd := exec.Command("sh", "-c", "cat") //nolint:gosec // fixed test command
+	writerCmd := exec.Command("sh", "-c", "cat")
 	writer, err := writerCmd.StdinPipe()
 	require.NoError(t, err)
 	require.NoError(t, writerCmd.Start())
@@ -113,12 +113,12 @@ func TestCopyPipe_readerDiesEarly(t *testing.T) {
 		t.Skip("sh not available")
 	}
 
-	readerCmd := exec.Command("sh", "-c", "printf 'partial'; exit 4") //nolint:gosec // fixed test command
+	readerCmd := exec.Command("sh", "-c", "printf 'partial'; exit 4")
 	reader, err := readerCmd.StdoutPipe()
 	require.NoError(t, err)
 	require.NoError(t, readerCmd.Start())
 
-	writerCmd := exec.Command("sh", "-c", "cat") //nolint:gosec // fixed test command
+	writerCmd := exec.Command("sh", "-c", "cat")
 	writer, err := writerCmd.StdinPipe()
 	require.NoError(t, err)
 	require.NoError(t, writerCmd.Start())
@@ -144,12 +144,12 @@ func TestCopyPipe_zeroByteStream(t *testing.T) {
 		t.Skip("sh not available")
 	}
 
-	readerCmd := exec.Command("sh", "-c", "true") //nolint:gosec // fixed test command
+	readerCmd := exec.Command("sh", "-c", "true")
 	reader, err := readerCmd.StdoutPipe()
 	require.NoError(t, err)
 	require.NoError(t, readerCmd.Start())
 
-	writerCmd := exec.Command("sh", "-c", "cat") //nolint:gosec // fixed test command
+	writerCmd := exec.Command("sh", "-c", "cat")
 	writer, err := writerCmd.StdinPipe()
 	require.NoError(t, err)
 	require.NoError(t, writerCmd.Start())
@@ -170,6 +170,7 @@ func TestCopyPipe_zeroByteStream(t *testing.T) {
 // sizedTestReader is a sizeAwareReader stub for the progress reporter tests.
 type sizedTestReader struct {
 	io.Reader
+
 	size uint64
 }
 
@@ -325,7 +326,7 @@ func TestProgressWriter_closeDelegatesToWrappedCloser(t *testing.T) {
 		t.Skip("sh not available")
 	}
 
-	cmd := exec.Command("sh", "-c", "cat") //nolint:gosec // fixed test command
+	cmd := exec.Command("sh", "-c", "cat")
 	writer, err := cmd.StdinPipe()
 	require.NoError(t, err)
 	require.NoError(t, cmd.Start())
