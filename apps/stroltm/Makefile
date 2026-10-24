@@ -9,3 +9,16 @@ run-debug:
 .PHONY: run
 run:
 	go build -ldflags "-X github.com/strolt/strolt/apps/stroltm/internal/ui.mode=proxy" && STROLTM_PORT=8090 ./stroltm --config=./testdata/stroltm.yml
+
+.PHONY: all
+all: build
+
+.PHONY: clean
+clean:
+	rm -f ./stroltm
+	rm -rf ./internal/ui/build/dist
+	cd ./ui && rm -rf ./dist
+
+.PHONY: test
+test:
+	go test ./...

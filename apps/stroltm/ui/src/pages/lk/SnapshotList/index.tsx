@@ -66,7 +66,7 @@ const SnapshotList = observer(() => {
     return () => {
       managerStore.resetSnapshots();
     };
-  }, [params]);
+  }, [params, managerStore]);
 
   return (
     <div>

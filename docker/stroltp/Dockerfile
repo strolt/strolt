@@ -1,13 +1,17 @@
+# droast global ignore=DF020 reason="proxy runs as root by design" expires=2026-12-31
 FROM alpine:3.23.4 AS base
 WORKDIR /stroltp
+# droast ignore=DF052 reason="versions follow the pinned alpine base image" expires=2026-12-31
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
 FROM golang:1.26.4-alpine3.23 AS swagger-base
+# droast ignore=DF052 reason="build stage follows the pinned alpine base image" expires=2026-12-31
 RUN apk --update add --no-cache make curl
 
 FROM swagger-base AS swagger
 WORKDIR /github.com/strolt/strolt
+# droast ignore=DF007 reason="swagger codegen needs full repo context across apps and shared" expires=2026-12-31
 COPY . .
 RUN make .swagger-strolt && make .swagger-shared-generate-client-strolt
 
@@ -36,6 +40,8 @@ LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
 			org.opencontainers.image.revision="${GITHUB_SHA}"
 
 COPY --from=builder /go/src/github.com/strolt/strolt/apps/stroltp/stroltp ./bin/stroltp
+
+EXPOSE 8080
 
 ENTRYPOINT ["/stroltp/bin/stroltp", "--config", "/stroltp/config.yml"]
 

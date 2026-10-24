@@ -12,7 +12,7 @@ import type { ConfigServiceTask, ManagerPreparedInstance } from "api/generated";
 import { DebugJSON, LatestVersionLink, Link, TagColored } from "components";
 import { observer, useStores } from "stores";
 
-export interface BackupButtonProps {
+interface BackupButtonProps {
   instanceName: string;
   proxyName?: string;
   serviceName: string;
@@ -54,7 +54,7 @@ const BackupAll: FC = observer(() => {
 
   useEffect(() => {
     return () => managerStore.resetBackupAll();
-  }, []);
+  }, [managerStore]);
 
   const handleClick = async () => {
     const data = await managerStore.backupAll();
@@ -81,7 +81,7 @@ const BackupAll: FC = observer(() => {
   );
 });
 
-export interface TaskProps {
+interface TaskProps {
   instanceName: string;
   proxyName?: string;
   serviceName: string;
@@ -199,7 +199,7 @@ const Task: FC<TaskProps> = observer(({ instanceName, proxyName, serviceName, ta
   );
 });
 
-export interface ServiceProps {
+interface ServiceProps {
   instanceName: string;
   proxyName?: string;
   service: Record<string, ConfigServiceTask>;
@@ -224,7 +224,7 @@ const Service: FC<ServiceProps> = observer(({ instanceName, proxyName, service, 
   );
 });
 
-export interface InstanceProps {
+interface InstanceProps {
   instance: ManagerPreparedInstance;
 }
 const Instance: FC<InstanceProps> = observer(({ instance }) => {

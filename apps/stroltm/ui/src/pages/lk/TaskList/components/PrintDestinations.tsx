@@ -69,8 +69,8 @@ const Links: React.FC<LinksProps> = (params) => {
   );
 };
 
-export interface TaskListItemDestinationProps extends LinksProps, TaskListItemDestination {}
-export const PrintDestination: React.FC<TaskListItemDestinationProps> = (el) => {
+interface TaskListItemDestinationProps extends LinksProps, TaskListItemDestination {}
+const PrintDestination: React.FC<TaskListItemDestinationProps> = (el) => {
   return (
     <Space direction="vertical">
       <Space wrap>

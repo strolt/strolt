@@ -14,13 +14,13 @@ const xmur3 = (str: string): number => {
   }
   h = Math.imul(h ^ (h >>> 16), 2_246_822_507);
   h = Math.imul(h ^ (h >>> 13), 3_266_489_909);
-  return (h ^= h >>> 16) >>> 0;
+  return (h ^ (h >>> 16)) >>> 0;
 };
 
 const _randomColor = (list: string, seed?: Seed): string => {
   const seedNumber = seed
     ? xmur3(seed.toString())
-    : Number((Math.random() * Date.now()).toFixed(0));
+    : (crypto.getRandomValues(new Uint32Array(1))[0] ?? 0);
   const fixedSeedNumber = seedNumber % 1e6;
   const arrayOfNumber = [...fixedSeedNumber.toString()].map(Number);
 
@@ -57,8 +57,8 @@ const _randomColor = (list: string, seed?: Seed): string => {
 
   let hexResult = "";
 
-  for (let i = 0; i < indexColor.length; i++) {
-    const n = indexColor[i] ?? -1;
+  for (const [i, element] of indexColor.entries()) {
+    const n = element ?? -1;
     hexResult += (i % 2 ? random[n] : list[n]) || "a";
   }
   return hexResult;

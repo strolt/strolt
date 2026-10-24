@@ -10,7 +10,7 @@ export const BackupAllButton = observer(() => {
 
   useEffect(() => {
     return () => managerStore.resetBackupAll();
-  }, []);
+  }, [managerStore]);
 
   const handleClick = async () => {
     const data = await managerStore.backupAll();

@@ -16,7 +16,7 @@ const setApiAuthorization = (username: string, password: string) => {
   };
 };
 
-export class AuthStore {
+class AuthStore {
   isAuthorized = false;
 
   password = "";

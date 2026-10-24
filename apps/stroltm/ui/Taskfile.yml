@@ -1,0 +1,7 @@
+tasks:
+  codegen:
+    cmds:
+      - pnpm exec openapi-generator-cli generate -i ../../../.swagger/stroltm/swagger.json -g typescript-axios -o ./src/api/generated
+      - node ./scripts/fix-generated-api.mjs
+    desc: Generate and fix the OpenAPI API client
+version: "3"

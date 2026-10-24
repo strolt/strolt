@@ -3,7 +3,8 @@ import type { RouteObject } from "react-router";
 import { Navigate } from "react-router";
 
 import * as layouts from "layouts";
-import * as pages from "pages";
+import { Login } from "pages/auth";
+import { InstanceList, Prune, SnapshotList, Stats, TaskList } from "pages/lk";
 
 import type { ConstantsRouteType } from "./constants";
 
@@ -15,20 +16,20 @@ const r = (c: ConstantsRouteType, element: ReactNode) => ({
 });
 
 const instances = [
-  r("instances.main", <pages.lk.TaskList />),
-  r("instances.old", <pages.lk.InstanceList />),
-  r("instances.instanceId.serviceId.taskId.destinationId.snapshotList", <pages.lk.SnapshotList />),
+  r("instances.main", <TaskList />),
+  r("instances.old", <InstanceList />),
+  r("instances.instanceId.serviceId.taskId.destinationId.snapshotList", <SnapshotList />),
   r(
     "instances.proxyId.instanceId.serviceId.taskId.destinationId.proxySnapshotList",
-    <pages.lk.SnapshotList />,
+    <SnapshotList />,
   ),
-  r("instances.proxyId.instanceId.serviceId.taskId.destinationId.prune", <pages.lk.Prune />),
-  r("instances.instanceId.serviceId.taskId.destinationId.prune", <pages.lk.Prune />),
-  r("instances.instanceId.serviceId.taskId.destinationId.stats", <pages.lk.Stats />),
-  r("instances.proxyId.instanceId.serviceId.taskId.destinationId.proxyStats", <pages.lk.Stats />),
+  r("instances.proxyId.instanceId.serviceId.taskId.destinationId.prune", <Prune />),
+  r("instances.instanceId.serviceId.taskId.destinationId.prune", <Prune />),
+  r("instances.instanceId.serviceId.taskId.destinationId.stats", <Stats />),
+  r("instances.proxyId.instanceId.serviceId.taskId.destinationId.proxyStats", <Stats />),
 ];
 
-const auth = [r("auth.login", <pages.auth.Login />)];
+const auth = [r("auth.login", <Login />)];
 
 const routesLayoutLk = {
   children: [...instances],

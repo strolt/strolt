@@ -10,7 +10,7 @@ import * as api from "../api";
 import { authStore } from "./auth.store";
 import { managerStore } from "./manager.store";
 
-export class InfoStore {
+class InfoStore {
   latestVersion = "";
 
   map = new Map<string, apiGenerated.ManagerInfoInstance>();

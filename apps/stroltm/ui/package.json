@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc && vite build",
-    "codegen": "pnpm exec openapi-generator-cli generate -i ../../../.swagger/stroltm/swagger.json -g typescript-axios -o ./src/api/generated",
+    "codegen": "pnpm dm exec task -- codegen",
     "dev": "vite"
   },
   "dependencies": {

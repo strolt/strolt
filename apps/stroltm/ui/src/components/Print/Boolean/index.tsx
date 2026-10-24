@@ -51,12 +51,12 @@ const iconUnCheck = (square?: boolean, size?: number | string) => {
   );
 };
 
-export interface BooleanProps {
+export interface BooleanIconProps {
   size?: number | string;
   square?: boolean;
   value?: boolean | number | string;
 }
-export const Boolean: FC<BooleanProps> = ({ size, square, value }) => {
+export const BooleanIcon: FC<BooleanIconProps> = ({ size, square, value }) => {
   if (!value) {
     return iconUnCheck(square, size);
   }

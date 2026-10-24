@@ -14,7 +14,11 @@ GO_SWAGGER_TEMPLATES = $(PROJECT_DIR)/.go-swagger/templates
 .install-stroltm-ui-node_modules:
 	[ -d $(STROLTM_UI)/node_modules ] || (cd $(STROLTM_UI) && pnpm install --frozen-lockfile)
 
+.PHONY: all
 all: .install-stroltm-ui-node_modules .install-swagger-client .install-swag
+
+.PHONY: clean
+clean: .clear-sdk
 
 .PHONY: coverage
 coverage:
@@ -52,7 +56,7 @@ coverage:
 .swagger-stroltm-ui-generate-client: .install-stroltm-ui-node_modules
 	cd $(STROLTM_UI) && pnpm codegen
 
-swagger: \
+SWAGGER_STEPS = \
 	.clear-sdk \
 	.swagger-strolt \
 	.swagger-shared-generate-client-strolt \
@@ -60,6 +64,9 @@ swagger: \
 	.swagger-shared-generate-client-stroltp \
 	.swagger-stroltm \
 	.swagger-stroltm-ui-generate-client
+
+.PHONY: swagger
+swagger: $(SWAGGER_STEPS)
 
 
 ##### LINT #####
