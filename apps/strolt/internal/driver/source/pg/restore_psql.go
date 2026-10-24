@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
+	"github.com/strolt/strolt/apps/strolt/internal/util/bufcap"
 )
 
 func (i *PgDump) isRestoreWithPSQL(filename string) bool {
@@ -66,6 +67,9 @@ func (i *PgDump) restoreWithPSQLCopy(ctx context.Context, filename string) error
 func (i *PgDump) restoreWithPSQLPipe(ctx context.Context, filename string) (io.WriteCloser, func() error, error) {
 	cmd := i.restoreWithPSQLCmd(ctx, filename, true)
 
+	stderr := bufcap.New(stderrTailCap)
+	cmd.Stderr = stderr
+
 	writer, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, nil, fmt.Errorf("get stdin pipe: %w", err)
@@ -75,5 +79,5 @@ func (i *PgDump) restoreWithPSQLPipe(ctx context.Context, filename string) (io.W
 		return nil, nil, fmt.Errorf("start psql: %w", err)
 	}
 
-	return writer, cmd.Wait, nil
+	return writer, waitWithStderr(cmd, stderr), nil
 }

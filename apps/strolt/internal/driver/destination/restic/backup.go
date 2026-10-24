@@ -11,6 +11,7 @@ import (
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
+	"github.com/strolt/strolt/apps/strolt/internal/util/bufcap"
 )
 
 const messageTypeSummary = "summary"
@@ -120,12 +121,19 @@ func (i *Restic) BackupPipe(ctx context.Context, filename string) (io.WriteClose
 	var stdout bytes.Buffer
 	cmd.Stdout = &stdout
 
+	stderr := bufcap.New(stderrTailCap)
+	cmd.Stderr = stderr
+
 	if err := cmd.Start(); err != nil {
 		return nil, nil, fmt.Errorf("start restic backup: %w", err)
 	}
 
 	wait := func() (sctxt.BackupOutput, error) {
 		if err := cmd.Wait(); err != nil {
+			if tail := strings.TrimSpace(stderr.Tail()); tail != "" {
+				return sctxt.BackupOutput{}, fmt.Errorf("wait restic backup: %w: %s", err, tail)
+			}
+
 			return sctxt.BackupOutput{}, fmt.Errorf("wait restic backup: %w", err)
 		}
 

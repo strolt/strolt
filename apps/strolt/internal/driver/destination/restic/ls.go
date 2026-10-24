@@ -133,17 +133,22 @@ func (i *Restic) ls(_ context.Context, snapshotID string, path string) ([]lsItem
 	return list, nil
 }
 
-func (i *Restic) getFilenameForRestorePipe(ctx context.Context, snapshotID string) (string, string, error) {
+func (i *Restic) getFilenameForRestorePipe(ctx context.Context, snapshotID string) (string, string, uint64, bool, error) {
 	list, err := i.ls(ctx, snapshotID, "/")
 	if err != nil {
-		return "", "", err
+		return "", "", 0, false, err
 	}
 
 	for _, item := range list {
 		if item.Type == lsItemTypeNode && item.Node.Type == lsNodeTypeFile {
-			return item.Node.Name, item.Node.Path, nil
+			var size uint64
+			hasSize := false
+			if item.Node.Size != nil {
+				size, hasSize = *item.Node.Size, true
+			}
+			return item.Node.Name, item.Node.Path, size, hasSize, nil
 		}
 	}
 
-	return "", "", errors.New("not found file")
+	return "", "", 0, false, errors.New("not found file")
 }

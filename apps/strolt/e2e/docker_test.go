@@ -1,6 +1,7 @@
 package e2e_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,12 +25,20 @@ type Snapshot struct {
 // Reusing one container instead of spawning `docker run` per CLI call keeps
 // the strolt working directory stable and avoids host docker CLI dependency.
 func execInStrolt(command string) ([]byte, error) {
+	return execInStroltCtx(ctx, command)
+}
+
+// execInStroltCtx is execInStrolt with a caller-owned context. Tests that
+// exercise failure paths of streamed operations must bound the exec: before
+// the pipe deadlock was fixed, a restore whose source aborted mid-stream
+// never returned and hung the suite forever.
+func execInStroltCtx(execCtx context.Context, command string) ([]byte, error) {
 	if containerManager == nil || containerManager.GetStroltContainer() == nil {
 		return nil, errors.New("strolt container not initialized")
 	}
 
 	exitCode, reader, err := containerManager.GetStroltContainer().Exec(
-		ctx,
+		execCtx,
 		[]string{"/bin/sh", "-c", command},
 		tcexec.Multiplexed(),
 	)

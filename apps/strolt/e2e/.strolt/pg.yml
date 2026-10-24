@@ -12,6 +12,7 @@ services:
           format: c
           host: postgres
           password: "{{.PG_PASSWORD}}"
+          restore_params: "--no-owner --no-privileges"
           username: "{{.PG_USER}}"
         driver: pg
     pg-d:
@@ -70,6 +71,7 @@ services:
           format: c
           host: postgres
           password: "{{.PG_PASSWORD}}"
+          restore_params: "--no-owner --no-privileges"
           username: "{{.PG_USER}}"
         driver: pg
     pg-d:
@@ -131,6 +133,7 @@ services:
           format: c
           host: postgres
           password: "{{.PG_PASSWORD}}"
+          restore_params: "--no-owner --no-privileges"
           username: "{{.PG_USER}}"
         driver: pg
     pg-p:

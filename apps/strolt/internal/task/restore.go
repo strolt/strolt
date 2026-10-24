@@ -3,8 +3,8 @@ package task
 import (
 	"errors"
 	"fmt"
-	"io"
 	"sync"
+	"time"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
@@ -107,23 +107,15 @@ func (t *Task) restorePipe(destinationName string, snapshotName string) error {
 		_ = waitSource()
 	}()
 
-	_, copyErr := io.Copy(writer, reader)
+	progress := newRestoreProgress(reader, t.log.Infof)
+	countingWriter := &progressWriter{p: progress, underlying: writer}
+	startedAt := time.Now()
+	progress.Start()
 
-	errs := []error{copyErr}
+	err = copyPipe(reader, countingWriter, waitDestination, waitSource)
+	progress.Finish(startedAt, err)
 
-	if err := waitDestination(); err != nil {
-		errs = append(errs, fmt.Errorf("destination process: %w", err))
-	}
-
-	// Close the writer so the source process sees EOF before its exit
-	// status is collected.
-	errs = append(errs, writer.Close())
-
-	if err := waitSource(); err != nil {
-		errs = append(errs, fmt.Errorf("source process: %w", err))
-	}
-
-	return errors.Join(errs...)
+	return err
 }
 
 func (t *Task) restoreCopy(destinationName string, snapshotName string) error {
