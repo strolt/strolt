@@ -11,6 +11,7 @@ import (
 
 	"github.com/moby/moby/api/types/container"
 	"github.com/testcontainers/testcontainers-go"
+	tcexec "github.com/testcontainers/testcontainers-go/exec"
 	"github.com/testcontainers/testcontainers-go/modules/mariadb"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
@@ -432,8 +433,9 @@ func (cm *ContainerManager) startMySQL() (testcontainers.Container, error) {
 func (cm *ContainerManager) startGarage() (testcontainers.Container, error) {
 	req := testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
-			Image: garageImage,
-			Cmd:   []string{"server"},
+			Image:        garageImage,
+			Cmd:          []string{"/garage", "server"},
+			ExposedPorts: []string{"9000/tcp"},
 			Files: []testcontainers.ContainerFile{
 				{
 					HostFilePath:      "garage.toml",
@@ -470,7 +472,7 @@ func (cm *ContainerManager) provisionGarage(c testcontainers.Container) error {
 
 	nodeID := garageNodeID(statusOut)
 	if nodeID == "" {
-		return errors.New("garage status: node id not found")
+		return fmt.Errorf("garage status: node id not found, output was %q", statusOut)
 	}
 
 	steps := [][]string{
@@ -492,7 +494,7 @@ func (cm *ContainerManager) provisionGarage(c testcontainers.Container) error {
 func execInGarage(cm *ContainerManager, c testcontainers.Container, args ...string) (string, error) {
 	cmd := append([]string{"/garage"}, args...)
 
-	code, reader, err := c.Exec(cm.ctx, cmd)
+	code, reader, err := c.Exec(cm.ctx, cmd, tcexec.Multiplexed())
 	if err != nil {
 		return "", fmt.Errorf("garage %s: %w", strings.Join(args, " "), err)
 	}
