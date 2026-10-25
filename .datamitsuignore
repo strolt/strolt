@@ -5,4 +5,3 @@
 
 website/**/*: tsc
 
-**/*: actionlint, dotenv-linter, gitleaks, golangci-lint, hadolint, pinact, dclint

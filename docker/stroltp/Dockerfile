@@ -2,11 +2,13 @@
 FROM alpine:3.23.4 AS base
 WORKDIR /stroltp
 # droast ignore=DF052 reason="versions follow the pinned alpine base image" expires=2026-12-31
+# hadolint ignore=DL3018
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
 FROM golang:1.26.4-alpine3.23 AS swagger-base
 # droast ignore=DF052 reason="build stage follows the pinned alpine base image" expires=2026-12-31
+# hadolint ignore=DL3018
 RUN apk --update add --no-cache make curl
 
 FROM swagger-base AS swagger
@@ -45,6 +47,6 @@ EXPOSE 8080
 
 ENTRYPOINT ["/stroltp/bin/stroltp", "--config", "/stroltp/config.yml"]
 
-HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost:8080/api/v1/ping || exit 1
+HEALTHCHECK --interval=30s --timeout=3s CMD ["curl", "--fail", "http://localhost:8080/api/v1/ping"]
 
 CMD ["start", "--json"]

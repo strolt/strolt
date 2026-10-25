@@ -101,7 +101,7 @@ const config: Config = {
 
   themeConfig: {
     algolia: {
-      apiKey: "643d73c08ff386e3da20a56e59319785", // pragma: allowlist secret
+      apiKey: "643d73c08ff386e3da20a56e59319785", // pragma: allowlist secret; gitleaks:allow — public Algolia DocSearch key
       appId: "FF83SZ9CDS",
       contextualSearch: true,
       indexName: "strolt-shibanet0",

@@ -45,6 +45,7 @@ WORKDIR /strolt
 COPY --from=fetch /apk-lock.txt /apk-lock.txt
 
 # droast ignore=DF052 reason="runtime libs follow the pinned alpine base; fetch stage pins exact versions" expires=2026-12-31
+# hadolint ignore=DL3018
 RUN apk add --no-cache \
 		curl \
 		tzdata\
@@ -129,6 +130,6 @@ EXPOSE 8080
 
 ENTRYPOINT ["/strolt/bin/strolt", "--config", "/strolt/config.yml"]
 
-HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost:8080/api/v1/ping || exit 1
+HEALTHCHECK --interval=30s --timeout=3s CMD ["curl", "--fail", "http://localhost:8080/api/v1/ping"]
 
 CMD ["start", "--json"]

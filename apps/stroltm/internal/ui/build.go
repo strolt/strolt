@@ -53,11 +53,8 @@ func assetHandler() http.Handler {
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	url, _ := url.Parse("http://127.0.0.1:5080")
 
-	proxy := httputil.ReverseProxy{Director: func(r *http.Request) {
-		r.URL.Scheme = url.Scheme
-		r.URL.Host = url.Host
-		r.URL.Path = url.Path + r.URL.Path
-		r.Host = url.Host
+	proxy := httputil.ReverseProxy{Rewrite: func(pr *httputil.ProxyRequest) {
+		pr.SetURL(url)
 	}}
 	proxy.ServeHTTP(w, r)
 }

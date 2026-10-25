@@ -2,6 +2,7 @@
 FROM alpine:3.23.4 AS base
 WORKDIR /stroltm
 # droast ignore=DF052 reason="versions follow the pinned alpine base image" expires=2026-12-31
+# hadolint ignore=DL3018
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
@@ -10,10 +11,12 @@ ENV TZ=UTC
 # node images also ship no linux/arm/v7 variant.
 FROM --platform=$BUILDPLATFORM node:24.13.0-trixie-slim AS ui-base
 # droast ignore=DF005 reason="openjdk version managed by the debian repo; exact pin adds churn" expires=2026-12-31
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get -y install openjdk-21-jre-headless --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 FROM --platform=$BUILDPLATFORM golang:1.26.4-alpine3.23 AS swagger-base
 # droast ignore=DF052 reason="build stage follows the pinned alpine base image" expires=2026-12-31
+# hadolint ignore=DL3018
 RUN apk --update add --no-cache make curl
 
 FROM ui-base AS ui-deps
@@ -65,6 +68,6 @@ EXPOSE 8080
 
 ENTRYPOINT ["/stroltm/bin/stroltm", "--config", "/stroltm/config.yml"]
 
-HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost:8080/api/v1/ping || exit 1
+HEALTHCHECK --interval=30s --timeout=3s CMD ["curl", "--fail", "http://localhost:8080/api/v1/ping"]
 
 CMD ["--json"]
