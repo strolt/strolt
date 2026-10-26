@@ -64,19 +64,115 @@ func (s *DaemonSuite) TestAPIRequiresAuth() {
 }
 
 func (s *DaemonSuite) TestBackupViaAPI() {
-	status, body, err := s.request(http.MethodPost, "/api/v1/services/e2e/tasks/daemon/backup", true)
-	s.Require().NoError(err)
-	s.Require().Equal(http.StatusOK, status, "backup request failed: %s", body)
-
-	// The backup endpoint is asynchronous: poll until the snapshot shows up.
-	snapshot, err := s.waitForSnapshot()
-	s.Require().NoError(err)
+	snapshot := s.backupViaAPIAndAwait()
 
 	// Round-trip: wipe the input and restore from the API-created snapshot
 	// via the CLI container.
 	s.Require().NoError(s.fs.dropData())
 	s.Require().NoError(strolt("restore", "--service", "e2e", "--task", "daemon", "--destination", "restic-daemon", "--snapshot", snapshot.ID, "--y"))
 	s.NoError(s.fs.checkValidData())
+}
+
+func (s *DaemonSuite) TestInfoViaAPI() {
+	status, body, err := s.request(http.MethodGet, "/api/v1/info", true)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusOK, status, "info request failed: %s", body)
+
+	var info struct {
+		Version         string `json:"version"`
+		StartedAt       string `json:"startedAt"`
+		ConfigUpdatedAt string `json:"configUpdatedAt"`
+	}
+
+	s.Require().NoError(json.Unmarshal(body, &info), "info payload is not valid JSON: %s", body)
+	s.NotEmpty(info.Version)
+	s.NotEmpty(info.StartedAt)
+}
+
+func (s *DaemonSuite) TestConfigViaAPI() {
+	status, body, err := s.request(http.MethodGet, "/api/v1/config", true)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusOK, status, "config request failed: %s", body)
+
+	var cfg map[string]any
+
+	s.Require().NoError(json.Unmarshal(body, &cfg), "config payload is not valid JSON: %s", body)
+	s.Contains(cfg, "services")
+}
+
+func (s *DaemonSuite) TestStatusViaAPI() {
+	status, body, err := s.request(http.MethodGet, "/api/v1/services/status", true)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusOK, status, "status request failed: %s", body)
+	s.Contains(string(body), "e2e")
+}
+
+func (s *DaemonSuite) TestStatsViaAPI() {
+	// Self-contained: create this test's own snapshot instead of relying on
+	// other tests (testify does not guarantee declaration order).
+	s.backupViaAPIAndAwait()
+
+	status, body, err := s.request(http.MethodGet, "/api/v1/services/e2e/tasks/daemon/destinations/restic-daemon/stats", true)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusOK, status, "stats request failed: %s", body)
+
+	var result struct {
+		Data struct {
+			SnapshotsCount int `json:"snapshotsCount"`
+		} `json:"data"`
+	}
+
+	s.Require().NoError(json.Unmarshal(body, &result), "stats payload is not valid JSON: %s", body)
+	s.Positive(result.Data.SnapshotsCount)
+}
+
+// TestPruneViaAPI seeds more snapshots than the fixture's keep.last: 3
+// retention allows, checks the preview lists exactly the surplus seeded
+// snapshots and verifies that the executed prune actually reduced the
+// repository to the retained set.
+func (s *DaemonSuite) TestPruneViaAPI() {
+	const (
+		seededSnapshots = 5
+		retainedCount   = 3
+	)
+
+	seeded := map[string]bool{}
+
+	for range seededSnapshots {
+		snapshot := s.backupViaAPIAndAwait()
+		seeded[snapshot.ID] = true
+	}
+
+	// The repository is shared across the whole suite, so the prune surplus
+	// contains this test's seeds plus any earlier tests' snapshots.
+	before := s.snapshotIDs()
+
+	totalBefore := len(before)
+
+	status, body, err := s.request(http.MethodGet, "/api/v1/services/e2e/tasks/daemon/destinations/restic-daemon/snapshots/prune", true)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusOK, status, "snapshots-for-prune request failed: %s", body)
+
+	var preview struct {
+		Data []struct {
+			ID string `json:"id"`
+		} `json:"data"`
+	}
+
+	s.Require().NoError(json.Unmarshal(body, &preview), "prune preview payload is not valid JSON: %s", body)
+	s.Require().Len(preview.Data, totalBefore-retainedCount, "prune preview candidates: %v", preview.Data)
+
+	for _, candidate := range preview.Data {
+		s.True(before[candidate.ID], "preview candidate %s did not exist before the prune", candidate.ID)
+	}
+
+	status, body, err = s.request(http.MethodPost, "/api/v1/services/e2e/tasks/daemon/destinations/restic-daemon/prune", true)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusOK, status, "prune request failed: %s", body)
+
+	s.Eventually(func() bool {
+		return len(s.snapshotIDs()) == retainedCount
+	}, snapshotPollTimeout, snapshotPollInterval, "expected %d snapshots after prune", retainedCount)
 }
 
 func (s *DaemonSuite) request(method, path string, withAuth bool) (int, []byte, error) {
@@ -103,23 +199,6 @@ func (s *DaemonSuite) request(method, path string, withAuth bool) (int, []byte, 
 	return resp.StatusCode, body, err
 }
 
-func (s *DaemonSuite) waitForSnapshot() (Snapshot, error) {
-	deadline := time.Now().Add(snapshotPollTimeout)
-
-	for {
-		snapshots, err := s.snapshotsViaAPI()
-		if err == nil && len(snapshots) > 0 {
-			return snapshots[0], nil
-		}
-
-		if time.Now().After(deadline) {
-			return Snapshot{}, fmt.Errorf("no snapshot appeared within %s, last error: %w", snapshotPollTimeout, err)
-		}
-
-		time.Sleep(snapshotPollInterval)
-	}
-}
-
 func (s *DaemonSuite) snapshotsViaAPI() ([]Snapshot, error) {
 	status, body, err := s.request(http.MethodGet, "/api/v1/services/e2e/tasks/daemon/destinations/restic-daemon/snapshots", true)
 	if err != nil {
@@ -143,6 +222,66 @@ func (s *DaemonSuite) snapshotsViaAPI() ([]Snapshot, error) {
 	}
 
 	return result.Items, nil
+}
+
+// backupViaAPIAndAwait triggers a backup over the API and waits until a
+// snapshot that did not exist before the POST shows up. Retrying POSTs and
+// waiting for a new ID are both required: the API rejects requests with 400
+// while the task is still running, and pre-existing snapshots would
+// otherwise make an ID check pass instantly.
+func (s *DaemonSuite) backupViaAPIAndAwait() Snapshot {
+	before := s.snapshotIDs()
+
+	var status int
+	var body []byte
+
+	s.Eventually(func() bool {
+		var err error
+
+		status, body, err = s.request(http.MethodPost, "/api/v1/services/e2e/tasks/daemon/backup", true)
+		if err != nil {
+			return false
+		}
+
+		if status == http.StatusBadRequest {
+			return false // task still busy with a previous operation
+		}
+
+		return true
+	}, snapshotPollTimeout, snapshotPollInterval, "backup POST never succeeded, last status %d: %s", status, body)
+
+	deadline := time.Now().Add(snapshotPollTimeout)
+
+	for {
+		// Snapshot listing is itself a task and returns 400 while the backup
+		// is running, so treat listing errors as "not ready yet".
+		snapshots, err := s.snapshotsViaAPI()
+		if err == nil {
+			for _, snapshot := range snapshots {
+				if !before[snapshot.ID] {
+					return snapshot
+				}
+			}
+		}
+
+		if time.Now().After(deadline) {
+			s.Require().Failf("no new snapshot appeared within %s", snapshotPollTimeout.String())
+		}
+
+		time.Sleep(snapshotPollInterval)
+	}
+}
+
+func (s *DaemonSuite) snapshotIDs() map[string]bool {
+	snapshots, err := s.snapshotsViaAPI()
+	s.Require().NoError(err)
+
+	ids := make(map[string]bool, len(snapshots))
+	for _, snapshot := range snapshots {
+		ids[snapshot.ID] = true
+	}
+
+	return ids
 }
 
 //nolint:thelper
