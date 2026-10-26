@@ -1,12 +1,12 @@
 # droast global ignore=DF020 reason="proxy runs as root by design" expires=2026-12-31
-FROM alpine:3.23.4 AS base
+FROM alpine:3.23.7 AS base
 WORKDIR /stroltp
 # droast ignore=DF052 reason="versions follow the pinned alpine base image" expires=2026-12-31
 # hadolint ignore=DL3018
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
-FROM golang:1.26.4-alpine3.23 AS swagger-base
+FROM golang:1.27.3-alpine3.23 AS swagger-base
 # droast ignore=DF052 reason="build stage follows the pinned alpine base image" expires=2026-12-31
 # hadolint ignore=DL3018
 RUN apk --update add --no-cache make curl
@@ -17,7 +17,7 @@ WORKDIR /github.com/strolt/strolt
 COPY . .
 RUN make .swagger-strolt && make .swagger-shared-generate-client-strolt
 
-FROM golang:1.26.4-alpine3.23 AS builder
+FROM golang:1.27.3-alpine3.23 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/stroltp
 COPY ./apps/stroltp/go.mod .

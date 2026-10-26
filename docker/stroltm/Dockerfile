@@ -1,5 +1,5 @@
 # droast global ignore=DF020 reason="manager runs as root by design" expires=2026-12-31
-FROM alpine:3.23.4 AS base
+FROM alpine:3.23.7 AS base
 WORKDIR /stroltm
 # droast ignore=DF052 reason="versions follow the pinned alpine base image" expires=2026-12-31
 # hadolint ignore=DL3018
@@ -9,12 +9,12 @@ ENV TZ=UTC
 # The ui and swagger stages produce architecture-independent artifacts
 # (static dist and generated code), so they run on the build host platform;
 # node images also ship no linux/arm/v7 variant.
-FROM --platform=$BUILDPLATFORM node:24.13.0-trixie-slim AS ui-base
+FROM --platform=$BUILDPLATFORM node:24.22.1-trixie-slim AS ui-base
 # droast ignore=DF005 reason="openjdk version managed by the debian repo; exact pin adds churn" expires=2026-12-31
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get -y install openjdk-21-jre-headless --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-FROM --platform=$BUILDPLATFORM golang:1.26.4-alpine3.23 AS swagger-base
+FROM --platform=$BUILDPLATFORM golang:1.27.3-alpine3.23 AS swagger-base
 # droast ignore=DF052 reason="build stage follows the pinned alpine base image" expires=2026-12-31
 # hadolint ignore=DL3018
 RUN apk --update add --no-cache make curl
@@ -39,7 +39,7 @@ COPY ./apps/stroltm/ui .
 COPY --from=swagger /github.com/strolt/strolt/.swagger /github.com/strolt/strolt/.swagger
 RUN pnpm codegen && pnpm build
 
-FROM golang:1.26.4-alpine3.23 AS builder
+FROM golang:1.27.3-alpine3.23 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/stroltm
 COPY ./apps/stroltm/go.mod .

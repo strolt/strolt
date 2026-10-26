@@ -1,6 +1,6 @@
 module github.com/strolt/strolt/apps/stroltm
 
-go 1.26.4
+go 1.27.3
 
 require (
 	github.com/caarlos0/env/v6 v6.10.1

@@ -1,6 +1,6 @@
 module github.com/strolt/strolt/apps/stroltp
 
-go 1.26.4
+go 1.27.3
 
 replace github.com/strolt/strolt/shared v0.0.0 => ../../shared
 
