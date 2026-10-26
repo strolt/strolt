@@ -25,10 +25,10 @@ import (
 // versions compatible with the client tools baked into
 // docker/strolt/Dockerfile when bumping these.
 const (
-	postgresImage = "postgres:18.4-alpine3.23"
-	mongoImage    = "mongo:8.0.23"
-	mariadbImage  = "mariadb:11.4.12"
-	mysqlImage    = "mysql:8.4.9"
+	postgresImage = "postgres:18.6-alpine3.23"
+	mongoImage    = "mongo:9.0.4"
+	mariadbImage  = "mariadb:11.4.13"
+	mysqlImage    = "mysql:8.4.13"
 	// Garage replaces MinIO: the MinIO community images were pulled from
 	// Docker Hub and quay, and restic's S3 backend works against Garage.
 	// The container is aliased "minio" so task configs keep their
@@ -432,26 +432,24 @@ func (cm *ContainerManager) startMySQL() (testcontainers.Container, error) {
 // create buckets (every task provisions its own repository).
 func (cm *ContainerManager) startGarage() (testcontainers.Container, error) {
 	req := testcontainers.GenericContainerRequest{
-		ContainerRequest: testcontainers.ContainerRequest{
-			Image:        garageImage,
-			Cmd:          []string{"/garage", "server"},
-			ExposedPorts: []string{"9000/tcp"},
-			// Attach explicitly by network name and register the "minio"
-			// alias in the same declaration: an aliases-only attach proved
-			// unreliable on CI runners (intermittent "lookup minio: no such
-			// host" mid-suite, which restic turns into minutes of retries).
-			Networks:       []string{cm.network.Name},
-			NetworkAliases: map[string][]string{cm.network.Name: {"minio"}},
-			Files: []testcontainers.ContainerFile{
-				{
-					HostFilePath:      "garage.toml",
-					ContainerFilePath: "/etc/garage.toml",
-				},
+		Image:        garageImage,
+		Cmd:          []string{"/garage", "server"},
+		ExposedPorts: []string{"9000/tcp"},
+		// Attach explicitly by network name and register the "minio"
+		// alias in the same declaration: an aliases-only attach proved
+		// unreliable on CI runners (intermittent "lookup minio: no such
+		// host" mid-suite, which restic turns into minutes of retries).
+		Networks:       []string{cm.network.Name},
+		NetworkAliases: map[string][]string{cm.network.Name: {"minio"}},
+		Files: []testcontainers.ContainerFile{
+			{
+				HostFilePath:      "garage.toml",
+				ContainerFilePath: "/etc/garage.toml",
 			},
-			WaitingFor: wait.ForHTTP("/").
-				WithPort("9000/tcp").
-				WithStatusCodeMatcher(func(status int) bool { return status == 200 || status == 403 }),
 		},
+		WaitingFor: wait.ForHTTP("/").
+			WithPort("9000/tcp").
+			WithStatusCodeMatcher(func(status int) bool { return status == 200 || status == 403 }),
 		Started: true,
 	}
 

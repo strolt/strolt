@@ -1,5 +1,5 @@
 function getConfig(config) {
-  const goToolchain = "go1.26.4";
+  const goToolchain = "go1.27.3";
 
   return merge(config, {
     apps: {

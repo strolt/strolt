@@ -1,7 +1,7 @@
 # droast global ignore=DF020 reason="runs as root by design: data dir and dump tooling" expires=2026-12-31
-FROM alpine:3.23.4 AS fetch
+FROM alpine:3.23.7 AS fetch
 ARG TARGETARCH
-ARG RESTIC_VERSION=0.19.0
+ARG RESTIC_VERSION=0.19.1
 
 RUN apk add --no-cache \
 		postgresql18-client=18.6-r0 \
@@ -38,7 +38,7 @@ RUN rm -f \
 
 RUN apk info -v > /apk-lock.txt
 
-FROM alpine:3.23.4 AS base
+FROM alpine:3.23.7 AS base
 ENV TZ=UTC
 WORKDIR /strolt
 
@@ -101,7 +101,7 @@ RUN \
 # restic is excluded from the ldd check: official release binaries are static
 
 
-FROM golang:1.26.4-alpine3.23 AS builder
+FROM golang:1.27.3-alpine3.23 AS builder
 ARG version
 WORKDIR /go/src/github.com/strolt/strolt/apps/strolt
 COPY ./apps/strolt/go.mod .

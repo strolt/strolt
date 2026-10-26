@@ -31,18 +31,19 @@
     "@docusaurus/preset-classic": "3.9.2",
     "@mdx-js/react": "3.1.1",
     "prism-react-renderer": "2.4.1",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "redocusaurus": "2.5.0"
   },
   "devDependencies": {
+    "@docusaurus/faster": "3.9.2",
     "@docusaurus/module-type-aliases": "3.9.2",
     "@docusaurus/plugin-content-docs": "3.9.2",
     "@docusaurus/tsconfig": "3.9.2",
     "@docusaurus/types": "3.9.2",
     "@shibanet0/datamitsu-config": "catalog:",
-    "@types/node": "24.12.4",
-    "@types/react": "19.2.16"
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0"
   },
   "engines": {
     "node": ">=22.12.0"
