@@ -1,7 +1,7 @@
 name: strolt-e2e
 services:
   mariadb:
-    image: mariadb:11.4.12
+    image: mariadb:11.4.13
     volumes:
       - mariadb:/var/lib/mysql
     environment:
@@ -36,7 +36,7 @@ services:
     networks:
       - strolt
   postgres:
-    image: postgres:18.4-alpine3.23
+    image: postgres:18.6-alpine3.23
     volumes:
       - postgres:/var/lib/postgresql
     environment:

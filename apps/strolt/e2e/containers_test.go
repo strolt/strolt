@@ -25,10 +25,10 @@ import (
 // versions compatible with the client tools baked into
 // docker/strolt/Dockerfile when bumping these.
 const (
-	postgresImage = "postgres:18.4-alpine3.23"
+	postgresImage = "postgres:18.6-alpine3.23"
 	mongoImage    = "mongo:8.0.23"
-	mariadbImage  = "mariadb:11.4.12"
-	mysqlImage    = "mysql:8.4.9"
+	mariadbImage  = "mariadb:11.4.13"
+	mysqlImage    = "mysql:8.4.13"
 	// Garage replaces MinIO: the MinIO community images were pulled from
 	// Docker Hub and quay, and restic's S3 backend works against Garage.
 	// The container is aliased "minio" so task configs keep their
