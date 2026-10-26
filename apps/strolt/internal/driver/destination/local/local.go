@@ -18,7 +18,7 @@ import (
 	"github.com/strolt/strolt/shared/logger"
 
 	"github.com/google/uuid"
-	"github.com/otiai10/copy"
+	dircopy "github.com/otiai10/copy"
 	"gopkg.in/yaml.v3"
 )
 
@@ -118,7 +118,7 @@ func validateEnv(_ Env) error {
 // Backup copies the working directory into a new snapshot directory.
 func (i *Local) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 	snapshotName := uuid.New().String()
-	if err := copy.Copy(ctx.WorkDir, path.Join(i.config.Path, snapshotName)); err != nil {
+	if err := dircopy.Copy(ctx.WorkDir, path.Join(i.config.Path, snapshotName)); err != nil {
 		return sctxt.BackupOutput{}, fmt.Errorf("copy workdir to snapshot: %w", err)
 	}
 
@@ -153,7 +153,7 @@ func (i *Local) IsSupportedBackupPipe(ctx context.Context) bool {
 
 // Restore copies a snapshot directory back into the working directory.
 func (i *Local) Restore(ctx context.Context, snapshotName string) error {
-	if err := copy.Copy(path.Join(i.config.Path, snapshotName), ctx.WorkDir); err != nil {
+	if err := dircopy.Copy(path.Join(i.config.Path, snapshotName), ctx.WorkDir); err != nil {
 		return fmt.Errorf("copy snapshot to workdir: %w", err)
 	}
 

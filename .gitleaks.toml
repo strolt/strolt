@@ -1,0 +1,10 @@
+[[allowlists]]
+condition = "AND"
+description = "Public Algolia DocSearch key in generated website configuration"
+paths = ['(?:^|/)website/\.docusaurus/docusaurus\.config\.mjs$']
+regexTarget = "secret"
+regexes = ["^643d73c08ff386e3da20a56e59319785$"]
+title = "Custom Gitleaks configuration"
+
+[extend]
+path = ".datamitsu/gitleaks-managed.toml"
