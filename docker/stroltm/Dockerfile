@@ -20,11 +20,12 @@ FROM --platform=$BUILDPLATFORM golang:1.26.4-alpine3.23 AS swagger-base
 RUN apk --update add --no-cache make curl
 
 FROM ui-base AS ui-deps
-WORKDIR /github.com/strolt/strolt/apps/stroltm/ui
-COPY ./apps/stroltm/ui/package.json .
-COPY ./apps/stroltm/ui/pnpm-lock.yaml .
-COPY ./apps/stroltm/ui/pnpm-workspace.yaml .
-RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile
+WORKDIR /github.com/strolt/strolt
+COPY ./package.json ./pnpm-workspace.yaml ./pnpm-lock.yaml ./datamitsu.config.js ./
+COPY ./apps/stroltm/ui/package.json ./apps/stroltm/ui/
+# --ignore-scripts skips the root `prepare: datamitsu init` lifecycle hook,
+# which needs the full repo and network tool resolution.
+RUN corepack enable && pnpm install --frozen-lockfile --filter ./apps/stroltm/ui --ignore-scripts
 
 FROM swagger-base AS swagger
 WORKDIR /github.com/strolt/strolt
@@ -33,6 +34,7 @@ COPY . .
 RUN make .swagger-strolt && make .swagger-shared-generate-client-strolt && make .swagger-stroltp && make .swagger-shared-generate-client-stroltp && make .swagger-stroltm
 
 FROM ui-deps AS ui-builder
+WORKDIR /github.com/strolt/strolt/apps/stroltm/ui
 COPY ./apps/stroltm/ui .
 COPY --from=swagger /github.com/strolt/strolt/.swagger /github.com/strolt/strolt/.swagger
 RUN pnpm codegen && pnpm build
