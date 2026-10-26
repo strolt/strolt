@@ -34,7 +34,7 @@ const _auth = {
   "auth.login": auth("/login"),
 };
 
-export const routerConstants = {
+const routerConstants = {
   main: "/",
   ..._instances,
   ..._auth,

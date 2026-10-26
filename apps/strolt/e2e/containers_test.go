@@ -42,8 +42,8 @@ const (
 
 	// Fixed S3 credentials imported into Garage; .strolt/secrets.yml and
 	// resticExec use the same pair.
-	s3AccessKeyID     = "GK6d6e2e2a0c1b4f9d8a7e3c5b1d9f0a2e"                               // pragma: allowlist secret
-	s3SecretAccessKey = "4c7d1f8a3b6e9c2d5f0a1b4e7c8d3f6a9b2e5d8c1f4a7b0e3d6c9f2a5b8e1d4c" // pragma: allowlist secret
+	s3AccessKeyID     = "GK6d6e2e2a0c1b4f9d8a7e3c5b1d9f0a2e"                               // pragma: allowlist secret; gitleaks:allow
+	s3SecretAccessKey = "4c7d1f8a3b6e9c2d5f0a1b4e7c8d3f6a9b2e5d8c1f4a7b0e3d6c9f2a5b8e1d4c" // pragma: allowlist secret; gitleaks:allow
 )
 
 // ContainerManager manages all testcontainers for e2e tests.

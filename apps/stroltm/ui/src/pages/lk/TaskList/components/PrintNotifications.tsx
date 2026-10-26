@@ -4,7 +4,7 @@ import type { TaskListItemNotification } from "stores/manager.store/taskList";
 
 import { Print } from "components";
 
-export const PrintNotification: React.FC<TaskListItemNotification> = (el) => {
+const PrintNotification: React.FC<TaskListItemNotification> = (el) => {
   return (
     <Space direction="vertical">
       <Space wrap>

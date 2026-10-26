@@ -64,7 +64,7 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
         key: "isOnline",
         render: (v) => (
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <Print.Boolean size="1.2rem" value={v} />
+            <Print.BooleanIcon size="1.2rem" value={v} />
           </div>
         ),
         sorter: {
@@ -245,36 +245,38 @@ const useColumns = (list: TaskListItem[]): ColumnsType<TaskListItem> => {
   }, [list]);
 };
 
+const getCount = () => {
+  const proxyInstances = managerStore.instances
+    .map((el) => el.proxyName)
+    .reduce<string[]>((acc, el) => {
+      if (el && !acc.includes(el)) {
+        acc.push(el);
+      }
+      return acc;
+    }, []).length;
+  let stroltInstancesDirect = 0;
+  let stroltInstancesProxy = 0;
+
+  managerStore.instances.forEach((el) => {
+    if (el.proxyName) {
+      stroltInstancesProxy++;
+    } else {
+      stroltInstancesDirect++;
+    }
+  });
+
+  return {
+    proxyInstances,
+    stroltInstancesDirect,
+    stroltInstancesProxy,
+    tasks: managerStore.taskList.length,
+  };
+};
+
 const TaskList = observer(() => {
   const columns = useColumns(managerStore.taskList);
 
-  const count = useMemo(() => {
-    const proxyInstances = managerStore.instances
-      .map((el) => el.proxyName)
-      .reduce<string[]>((acc, el) => {
-        if (el && !acc.includes(el)) {
-          acc.push(el);
-        }
-        return acc;
-      }, []).length;
-    let stroltInstancesDirect = 0;
-    let stroltInstancesProxy = 0;
-
-    managerStore.instances.forEach((el) => {
-      if (el.proxyName) {
-        stroltInstancesProxy++;
-      } else {
-        stroltInstancesDirect++;
-      }
-    });
-
-    return {
-      proxyInstances,
-      stroltInstancesDirect,
-      stroltInstancesProxy,
-      tasks: managerStore.taskList.length,
-    };
-  }, [managerStore.instances, managerStore.taskList]);
+  const count = getCount();
 
   return (
     <>

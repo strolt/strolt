@@ -9,3 +9,14 @@ run-debug:
 .PHONY: run
 run:
 	go build && STROLTP_API_LOG_ENABLED=true STROLTP_PORT=8091 ./stroltp --config=./testdata/stroltp.yml
+
+.PHONY: all
+all: build
+
+.PHONY: clean
+clean:
+	rm -f ./stroltp
+
+.PHONY: test
+test:
+	go test ./...

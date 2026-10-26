@@ -9,7 +9,7 @@ import type * as apiGenerated from "../../api/generated";
 import * as api from "../../api";
 import { getTaskList } from "./taskList";
 
-export class ManagerStore {
+class ManagerStore {
   backupAllStatus: IPromiseBasedObservable<
     AxiosResponse<apiGenerated.ManagerhBackupAllResponse, any>
   > | null = null;
@@ -76,7 +76,7 @@ export class ManagerStore {
     runInAction(() => {
       this.instances.forEach((instance) => {
         Object.entries(instance.config?.services || {}).forEach(([serviceName, service]) => {
-          Object.entries(service || {}).forEach(([taskName]) => {
+          Object.keys(service || {}).forEach((taskName) => {
             if (instance.name) {
               this.taskStatusMapStart(instance.name, serviceName, taskName, instance.proxyName);
             }

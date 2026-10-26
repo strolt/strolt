@@ -12,8 +12,7 @@ import (
 // http.Post return an *url.Error whose Error() includes the full request URL;
 // logging it verbatim would leak the secret to any log sink.
 func RedactURLError(err error) error {
-	var urlErr *url.Error
-	if errors.As(err, &urlErr) {
+	if urlErr, ok := errors.AsType[*url.Error](err); ok {
 		urlErr.URL = "[redacted]"
 	}
 

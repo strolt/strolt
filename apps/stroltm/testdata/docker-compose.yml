@@ -1,3 +1,70 @@
+name: stroltm-testdata
+services:
+  minio:
+    image: minio/minio:RELEASE.2022-08-13T21-54-44Z
+    volumes:
+      - minio:/data
+    environment:
+      MINIO_ROOT_PASSWORD: minioadmin # pragma: allowlist secret
+      MINIO_ROOT_USER: minioadmin
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    networks:
+      - strolt
+    command: server --address 0.0.0.0:9000 --console-address 0.0.0.0:9001 /data
+    restart: always
+  pgadmin:
+    image: dpage/pgadmin4:6.16
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - "127.0.0.1:${PGADMIN_PORT:-5050}:80"
+    networks:
+      - strolt
+    restart: always
+  postgres:
+    image: postgres:18.3-alpine3.23
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: strolt
+      POSTGRES_PASSWORD: strolt # pragma: allowlist secret
+      POSTGRES_USER: strolt
+      TZ: UTC
+    networks:
+      - strolt
+    restart: always
+  strolt:
+    image: strolt/strolt:development # dclint disable-line service-image-require-explicit-tag — locally built via `make docker-strolt`, never pulled from a registry
+    # - STROLT_API_LOG_ENABLED=true
+    volumes:
+      - ./strolt.yml:/strolt/config.yml:ro
+    environment:
+      - STROLT_LOG_LEVEL=DEBUG
+      - STROLT_GLOBAL_TAGS=tag_from_environment
+    ports:
+      - "127.0.0.1:8081:8080"
+    networks:
+      - strolt
+    restart: always
+  strolt_stroltp:
+    image: strolt/strolt:development # dclint disable-line service-image-require-explicit-tag — locally built via `make docker-strolt`, never pulled from a registry
+    # - STROLT_API_LOG_ENABLED=true
+    volumes:
+      - ./strolt.stroltp.yml:/strolt/config.yml:ro
+    environment:
+      - STROLT_LOG_LEVEL=DEBUG
+      - STROLT_GLOBAL_TAGS=tag_from_environment
+    ports:
+      - "127.0.0.1:8089:8080"
+    networks:
+      - strolt
+    restart: always
 # stroltp:
 #   restart: always
 #   image: strolt/stroltp:development
@@ -24,72 +91,6 @@
 #     - strolt
 networks:
   strolt:
-services:
-  minio:
-    command: server --address 0.0.0.0:9000 --console-address 0.0.0.0:9001 /data
-    environment:
-      MINIO_ROOT_PASSWORD: minioadmin #pragma: allowlist secret
-      MINIO_ROOT_USER: minioadmin
-    image: minio/minio:RELEASE.2022-08-13T21-54-44Z
-    networks:
-      - strolt
-    ports:
-      - 9000:9000
-      - 9001:9001
-    restart: always
-    volumes:
-      - minio:/data
-  pgadmin:
-    environment:
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-    image: dpage/pgadmin4:6.16
-    networks:
-      - strolt
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
-    restart: always
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-  postgres:
-    environment:
-      POSTGRES_DB: strolt
-      POSTGRES_PASSWORD: strolt #pragma: allowlist secret
-      POSTGRES_USER: strolt
-      TZ: UTC
-    image: postgres:18.3-alpine3.23
-    networks:
-      - strolt
-    restart: always
-    volumes:
-      - postgres:/var/lib/postgresql/data
-  strolt:
-    environment:
-      - STROLT_LOG_LEVEL=DEBUG
-      - STROLT_GLOBAL_TAGS=tag_from_environment
-    image: strolt/strolt:development
-    networks:
-      - strolt
-    ports:
-      - 8081:8080
-    restart: always
-    # - STROLT_API_LOG_ENABLED=true
-    volumes:
-      - ./strolt.yml:/strolt/config.yml:ro
-  strolt_stroltp:
-    environment:
-      - STROLT_LOG_LEVEL=DEBUG
-      - STROLT_GLOBAL_TAGS=tag_from_environment
-    image: strolt/strolt:development
-    networks:
-      - strolt
-    ports:
-      - 8089:8080
-    restart: always
-    # - STROLT_API_LOG_ENABLED=true
-    volumes:
-      - ./strolt.stroltp.yml:/strolt/config.yml:ro
 volumes:
   minio:
   pgadmin:

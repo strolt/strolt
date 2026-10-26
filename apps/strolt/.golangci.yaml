@@ -9,7 +9,7 @@ linters:
     - cyclop
     - dupl
     - err113
-    - exhaustruct
+    - exhaustruct_v5
     - funlen
     - gochecknoglobals
     - gochecknoinits
@@ -136,6 +136,8 @@ linters:
           - wrapcheck
         path: "_test\\.go"
   settings:
+    canonicalheader:
+      use-default-exclusions: true
     gocyclo:
       min-complexity: 20
     gomoddirectives:

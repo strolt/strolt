@@ -30,7 +30,7 @@ const Stats = observer(() => {
     return () => {
       managerStore.resetStats();
     };
-  }, [params]);
+  }, [params, managerStore]);
 
   return (
     <div>

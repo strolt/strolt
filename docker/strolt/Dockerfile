@@ -1,3 +1,4 @@
+# droast global ignore=DF020 reason="runs as root by design: data dir and dump tooling" expires=2026-12-31
 FROM alpine:3.23.4 AS fetch
 ARG TARGETARCH
 ARG RESTIC_VERSION=0.19.0
@@ -43,6 +44,8 @@ WORKDIR /strolt
 
 COPY --from=fetch /apk-lock.txt /apk-lock.txt
 
+# droast ignore=DF052 reason="runtime libs follow the pinned alpine base; fetch stage pins exact versions" expires=2026-12-31
+# hadolint ignore=DL3018
 RUN apk add --no-cache \
 		curl \
 		tzdata\
@@ -77,7 +80,7 @@ COPY --from=fetch /usr/bin/mongorestore  /usr/bin/
 COPY --from=fetch /usr/bin/restic     /usr/bin/
 
 RUN \
-	which psql && \
+	command -v psql && \
 	psql --version && \
 	pg_dump --version && \
 	pg_restore --version && \
@@ -123,8 +126,10 @@ LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
 
 COPY --from=builder /go/src/github.com/strolt/strolt/apps/strolt/strolt ./bin/strolt
 
+EXPOSE 8080
+
 ENTRYPOINT ["/strolt/bin/strolt", "--config", "/strolt/config.yml"]
 
-HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost:8080/api/v1/ping || exit 1
+HEALTHCHECK --interval=30s --timeout=3s CMD ["curl", "--fail", "http://localhost:8080/api/v1/ping"]
 
 CMD ["start", "--json"]

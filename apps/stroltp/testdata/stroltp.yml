@@ -1,10 +1,10 @@
 api:
   users:
     admin:
-      password: admin #pragma: allowlist secret
+      password: admin # pragma: allowlist secret
 strolt:
   instances:
     test1:
-      password: admin #pragma: allowlist secret
+      password: admin # pragma: allowlist secret
       url: 127.0.0.1:8089
       username: admin

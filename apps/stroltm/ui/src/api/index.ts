@@ -23,7 +23,7 @@ axiosInstance.interceptors.response.use(
 
 const basePath = window.location.origin;
 
-export const config = new Configuration({ basePath });
+const config = new Configuration({ basePath });
 
 const commonParams: any = [config, basePath, axiosInstance];
 

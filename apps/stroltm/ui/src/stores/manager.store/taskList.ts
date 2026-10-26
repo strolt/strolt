@@ -35,7 +35,7 @@ export interface TaskListItemSchedule {
   prune: string;
 }
 
-export interface TaskListItemSource {
+interface TaskListItemSource {
   driver: string;
 }
 
@@ -47,7 +47,7 @@ const createTask = (instance: apiGenerated.ManagerPreparedInstance): TaskListIte
   return {
     destinations: [],
     instanceName: instance.name,
-    isOnline: isOnline,
+    isOnline,
     key: "",
     notifications: [],
     proxyName: instance.proxyName,
@@ -141,7 +141,7 @@ const getUptime = (proxyName?: string, instanceName?: string) => {
         if (date.getTime() < 0) {
           return ms;
         }
-        ms = (Date.now() - date.getTime()) * -1;
+        ms = -(Date.now() - date.getTime());
       } catch (error) {
         console.log(error);
       }

@@ -40,7 +40,7 @@ const config: Config = {
         docs: {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: ({ docPath, locale }) => {
+          editUrl: ({ docPath }) => {
             // if (locale !== "en") {
             // 	return `https://github.com/strolt/strolt/edit/main/website/i18n/${locale}/docusaurus-plugin-content-docs/current/${docPath}`;
             // }
@@ -86,19 +86,22 @@ const config: Config = {
     ],
   ],
   projectName: "strolt", // Usually your repo name.
-  scripts: [
-    process.env.NODE_ENV === "production" && {
-      async: true,
-      "data-website-id": "dc5cd938-935a-4b1e-95f8-da4d89f043ac",
-      src: "https://a.shibanet0.com/pzjlkgj6ujcurpo",
-    },
-  ].filter(Boolean),
+  scripts:
+    process.env.NODE_ENV === "production"
+      ? [
+          {
+            async: true,
+            "data-website-id": "dc5cd938-935a-4b1e-95f8-da4d89f043ac",
+            src: "https://a.shibanet0.com/pzjlkgj6ujcurpo",
+          },
+        ]
+      : [],
 
   tagline: "A user-friendly tool for the effortless backup management.",
 
   themeConfig: {
     algolia: {
-      apiKey: "643d73c08ff386e3da20a56e59319785", // pragma: allowlist secret
+      apiKey: "643d73c08ff386e3da20a56e59319785", // pragma: allowlist secret; gitleaks:allow — public Algolia DocSearch key
       appId: "FF83SZ9CDS",
       contextualSearch: true,
       indexName: "strolt-shibanet0",

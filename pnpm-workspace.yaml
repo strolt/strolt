@@ -5,12 +5,12 @@ allowBuilds:
   core-js: false
   core-js-pure: false
   esbuild: false
-audit: true
-auditLevel: high
+audit:
+  level: high
 autoInstallPeers: true
 blockExoticSubdeps: true
 catalog:
-  "@shibanet0/datamitsu-config": 0.1.7
+  "@shibanet0/datamitsu-config": 0.6.3
 dangerouslyAllowAllBuilds: false
 dedupeDirectDeps: true
 dedupePeerDependents: true
@@ -18,7 +18,6 @@ enableGlobalVirtualStore: true
 enablePrePostScripts: false
 engineStrict: true
 hoistPattern: []
-ignorePatchFailures: false
 lockfile: true
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
@@ -26,8 +25,6 @@ minimumReleaseAgeExclude:
   - "@ovineko/*"
   - "@shibanet0/*"
 optimisticRepeatInstall: true
-packageManagerStrict: true
-packageManagerStrictVersion: true
 packages:
   - apps/*
   - website

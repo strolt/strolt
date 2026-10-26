@@ -2,7 +2,6 @@
   "name": "website",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "docusaurus build",
     "clear": "docusaurus clear",
@@ -31,7 +30,6 @@
     "@docusaurus/core": "3.9.2",
     "@docusaurus/preset-classic": "3.9.2",
     "@mdx-js/react": "3.1.1",
-    "clsx": "2.1.1",
     "prism-react-renderer": "2.4.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
@@ -39,10 +37,12 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.9.2",
+    "@docusaurus/plugin-content-docs": "3.9.2",
     "@docusaurus/tsconfig": "3.9.2",
     "@docusaurus/types": "3.9.2",
     "@shibanet0/datamitsu-config": "catalog:",
-    "@types/node": "24.12.4"
+    "@types/node": "24.12.4",
+    "@types/react": "19.2.16"
   },
   "engines": {
     "node": ">=22.12.0"

@@ -102,7 +102,7 @@ const Prune = observer(() => {
     return () => {
       managerStore.resetSnapshotsForPrune();
     };
-  }, [params]);
+  }, [params, managerStore]);
 
   return (
     <div>
