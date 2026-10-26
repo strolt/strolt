@@ -28,7 +28,7 @@ services:
       - strolt
     command: server --address 0.0.0.0:9000 --console-address 0.0.0.0:9001 /data
   mongo:
-    image: mongo:8.0.23
+    image: mongo:9.0.4
     volumes:
       - mongo:/data/db
     ports:

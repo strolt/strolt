@@ -26,7 +26,7 @@ import (
 // docker/strolt/Dockerfile when bumping these.
 const (
 	postgresImage = "postgres:18.6-alpine3.23"
-	mongoImage    = "mongo:8.0.23"
+	mongoImage    = "mongo:9.0.4"
 	mariadbImage  = "mariadb:11.4.13"
 	mysqlImage    = "mysql:8.4.13"
 	// Garage replaces MinIO: the MinIO community images were pulled from
