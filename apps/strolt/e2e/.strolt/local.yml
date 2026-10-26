@@ -10,3 +10,13 @@ services:
         config:
           path: "/e2e/input"
         driver: local
+    local-dest:
+      destinations:
+        plain-local:
+          config:
+            path: "/e2e/local-dest"
+          driver: local
+      source:
+        config:
+          path: "/e2e/input"
+        driver: local
