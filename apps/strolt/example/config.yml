@@ -14,7 +14,7 @@ sources:
   source_local:
     config:
       path: "./example/source"
-    driver: local # [local, mongodb, mysql, postgresql]
+    driver: local # [local, mongodb, mysql, postgresql, redis]
 tasks:
   task_local:
     destinations:

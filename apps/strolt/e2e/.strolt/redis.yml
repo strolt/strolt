@@ -1,0 +1,43 @@
+# Backup-only suite: the redis source driver cannot restore (an RDB can only
+# be loaded by placing it in the server's data dir and restarting), so the
+# tests dump the artifact out of the restic repository and validate it
+# directly. Valkey speaks the Redis protocol and uses the same driver.
+services:
+  e2e:
+    e2e:
+      destinations:
+        restic-redis:
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-redis"
+          extends: restic_base
+      source:
+        config:
+          host: redis
+        driver: redis
+  e2e-pipe:
+    e2e-pipe:
+      destinations:
+        restic-redis:
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/pipe/restic-redis"
+          extends: restic_base
+      operationMode: pipe
+      # URI mode (instead of host/port) exercises the -u argv path end to
+      # end alongside the host/port tasks.
+      source:
+        config:
+          uri: "redis://redis:6379"
+        driver: redis
+  e2e-valkey:
+    e2e-valkey:
+      destinations:
+        restic-redis:
+          env:
+            RESTIC_REPOSITORY: "s3:http://minio:9000/restic-redis-valkey"
+          extends: restic_base
+      # Full userinfo in the URI: the driver must strip it to argv-free form
+      # and deliver the password via REDISCLI_AUTH against requirepass.
+      source:
+        config:
+          uri: "redis://default:e2e-valkey-pass@valkey:6379" # pragma: allowlist secret
+        driver: redis

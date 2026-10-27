@@ -7,7 +7,8 @@ RUN apk add --no-cache \
 		postgresql18-client=18.6-r0 \
 		mongodb-tools=100.13.0-r6 \
 		mariadb-client=11.4.13-r0 \
-		mariadb-connector-c=3.4.6-r0
+		mariadb-connector-c=3.4.6-r0 \
+		redis=8.4.2-r0
 
 # restic is fetched from official releases: alpine still packages 0.18.x
 RUN wget -q \
@@ -76,6 +77,9 @@ RUN ln -s /usr/bin/mysqldump /usr/bin/mariadb-dump
 COPY --from=fetch /usr/bin/mongodump     /usr/bin/
 COPY --from=fetch /usr/bin/mongorestore  /usr/bin/
 
+# Redis
+COPY --from=fetch /usr/bin/redis-cli /usr/bin/
+
 # Restic
 COPY --from=fetch /usr/bin/restic     /usr/bin/
 
@@ -88,6 +92,7 @@ RUN \
 	mysqldump --version && \
 	mongodump --version && \
 	mongorestore --version && \
+	redis-cli --version && \
 	restic version
 
 RUN \
@@ -97,7 +102,8 @@ RUN \
 		ldd /usr/bin/mysqldump && \
 		ldd /usr/bin/mariadb && \
 		ldd /usr/bin/mongodump && \
-		ldd /usr/bin/mongorestore
+		ldd /usr/bin/mongorestore && \
+		ldd /usr/bin/redis-cli
 # restic is excluded from the ldd check: official release binaries are static
 
 

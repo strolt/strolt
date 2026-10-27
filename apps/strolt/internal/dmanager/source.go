@@ -9,6 +9,7 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/driver/source/mongodb"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/source/mysql"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/source/pg"
+	"github.com/strolt/strolt/apps/strolt/internal/driver/source/redis"
 	"github.com/strolt/strolt/shared/logger"
 )
 
@@ -21,6 +22,7 @@ const (
 	DriverSourceMysql   Source = "mysql"
 	DriverSourcePg      Source = "pg"
 	DriverSourceMongodb Source = "mongodb"
+	DriverSourceRedis   Source = "redis"
 )
 
 // GetAvailableDriverSource returns the supported source drivers.
@@ -30,6 +32,7 @@ func GetAvailableDriverSource() []Source {
 		DriverSourceMysql,
 		DriverSourcePg,
 		DriverSourceMongodb,
+		DriverSourceRedis,
 	}
 }
 
@@ -44,6 +47,7 @@ func GetSourceDriver(driver Source, serviceName string, taskName string, driverC
 		DriverSourceLocal:   local.New(),
 		DriverSourcePg:      pg.New(),
 		DriverSourceMongodb: mongodb.New(),
+		DriverSourceRedis:   redis.New(),
 		DriverSourceMysql:   mysql.New(),
 	}
 
