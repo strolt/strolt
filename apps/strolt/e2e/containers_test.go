@@ -29,6 +29,10 @@ const (
 	mongoImage    = "mongo:9.0.4"
 	mariadbImage  = "mariadb:11.4.13"
 	mysqlImage    = "mysql:8.4.13"
+	// Valkey speaks the Redis protocol and CLI, so the redis source driver
+	// backs it up too; only the host differs.
+	redisImage  = "redis:7.4.12-alpine"
+	valkeyImage = "valkey/valkey:8.1.10-alpine"
 	// Garage replaces MinIO: the MinIO community images were pulled from
 	// Docker Hub and quay, and restic's S3 backend works against Garage.
 	// The container is aliased "minio" so task configs keep their
@@ -39,6 +43,10 @@ const (
 	dbName     = "strolt"
 	dbUser     = "strolt"
 	dbPassword = "strolt" // pragma: allowlist secret
+
+	// redisPassword protects the Valkey instance; the valkey task embeds it
+	// in its source URI, exercising credential normalization in e2e.
+	redisPassword = "e2e-valkey-pass" // pragma: allowlist secret
 
 	// Fixed S3 credentials imported into Garage; .strolt/secrets.yml and
 	// resticExec use the same pair.
@@ -54,6 +62,8 @@ type ContainerManager struct {
 	mongoContainer        testcontainers.Container
 	mariadbContainer      testcontainers.Container
 	mysqlContainer        testcontainers.Container
+	redisContainer        testcontainers.Container
+	valkeyContainer       testcontainers.Container
 	garageContainer       testcontainers.Container
 	stroltContainer       testcontainers.Container
 	stroltDaemonContainer testcontainers.Container
@@ -289,8 +299,10 @@ func (cm *ContainerManager) Cleanup() error {
 		cm.postgresContainer,
 		cm.mongoContainer,
 		cm.mariadbContainer,
-		cm.mysqlContainer,
+		cm.redisContainer,
+		cm.valkeyContainer,
 		cm.garageContainer,
+		cm.mysqlContainer,
 	}
 
 	for _, c := range containers {
@@ -335,6 +347,18 @@ func (cm *ContainerManager) StartAllContainers() error {
 	g.Go(func() error {
 		c, err := cm.startMySQL()
 		cm.mysqlContainer = c
+
+		return err
+	})
+	g.Go(func() error {
+		c, err := cm.startRedis()
+		cm.redisContainer = c
+
+		return err
+	})
+	g.Go(func() error {
+		c, err := cm.startValkey()
+		cm.valkeyContainer = c
 
 		return err
 	})
@@ -422,6 +446,43 @@ func (cm *ContainerManager) startMySQL() (testcontainers.Container, error) {
 	}
 
 	return c, nil
+}
+
+// startCache starts a Redis or Valkey instance for the redis source driver;
+// both images log the same readiness line and speak the same protocol, so
+// only the image, network alias and server args differ.
+func (cm *ContainerManager) startCache(image, alias string, cmd ...string) (testcontainers.Container, error) {
+	req := testcontainers.GenericContainerRequest{
+		Image:          image,
+		Networks:       []string{cm.network.Name},
+		NetworkAliases: map[string][]string{cm.network.Name: {alias}},
+		WaitingFor:     wait.ForLog("Ready to accept connections").WithOccurrence(1),
+		Started:        true,
+	}
+	if len(cmd) > 0 {
+		req.Cmd = cmd
+	}
+
+	c, err := testcontainers.GenericContainer(cm.ctx, req)
+	if err != nil {
+		if c != nil {
+			_ = c.Terminate(cm.ctx)
+		}
+
+		return nil, err
+	}
+
+	return c, nil
+}
+
+func (cm *ContainerManager) startRedis() (testcontainers.Container, error) {
+	return cm.startCache(redisImage, "redis")
+}
+
+// startValkey runs with a password so the valkey task exercises the driver's
+// URI-credential normalization and REDISCLI_AUTH delivery end to end.
+func (cm *ContainerManager) startValkey() (testcontainers.Container, error) {
+	return cm.startCache(valkeyImage, "valkey", "--requirepass", redisPassword)
 }
 
 // startGarage starts Garage, the S3-compatible object store that replaced

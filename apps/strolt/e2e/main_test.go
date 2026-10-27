@@ -166,6 +166,11 @@ func TestE2E(t *testing.T) {
 			t.Parallel()
 			MySQLSuiteTest(t)
 		})
+
+		t.Run("Redis", func(t *testing.T) {
+			t.Parallel()
+			RedisSuiteTest(t)
+		})
 	})
 
 	t.Run("Negative", func(t *testing.T) {
