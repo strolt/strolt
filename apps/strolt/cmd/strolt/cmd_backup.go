@@ -39,7 +39,7 @@ var backupCmd = &cobra.Command{
 			return
 		}
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeBackup)
+		t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeBackup)
 		if err != nil {
 			log.Fatal(err)
 		}

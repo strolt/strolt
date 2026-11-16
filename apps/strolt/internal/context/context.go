@@ -2,6 +2,7 @@
 package context
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"time"
@@ -32,6 +33,7 @@ type DestinationOperation struct {
 
 // Context carries the state of a task operation across source and destinations.
 type Context struct {
+	processContext context.Context     `json:"-"` //nolint:containedctx // Process cancellation belongs to the task operation lifetime.
 	Trigger        sctxt.TriggerType   `json:"trigger"`
 	ServiceName    string              `json:"serviceName"`
 	TaskName       string              `json:"taskName"`
@@ -48,6 +50,19 @@ type Context struct {
 	Tags []string `json:"tags"`
 
 	SourceLocalPath string `json:"sourceLocalPath"`
+}
+
+// ProcessContext returns the operation's process context, or background when unset.
+func (ctx *Context) ProcessContext() context.Context {
+	if ctx.processContext == nil {
+		return context.Background()
+	}
+	return ctx.processContext
+}
+
+// SetProcessContext sets the nonserialized context used by subprocess operations.
+func (ctx *Context) SetProcessContext(processContext context.Context) {
+	ctx.processContext = processContext
 }
 
 // New creates a Context for the given task operation and prepares its work directory.

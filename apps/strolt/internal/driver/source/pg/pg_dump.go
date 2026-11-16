@@ -3,21 +3,21 @@ package pg
 import (
 	"fmt"
 	"io"
-	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/util/bufcap"
+	"github.com/strolt/strolt/shared/process"
 )
 
-func (i *PgDump) backup(ctx context.Context, isPipe bool) *exec.Cmd {
+func (i *PgDump) backup(ctx context.Context, isPipe bool) *process.Cmd {
 	args := i.getBackupArgs()
 
 	if !isPipe {
 		args = append(args, "--file="+i.getFileName())
 	}
 
-	cmd := exec.Command(i.getBinPgDump(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
+	cmd := process.CommandContext(ctx.ProcessContext(), i.getBinPgDump(), args...)
 	cmd.Dir = ctx.WorkDir
 	cmd.Env = i.getEnv()
 

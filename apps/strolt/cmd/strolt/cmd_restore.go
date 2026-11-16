@@ -51,7 +51,7 @@ var restoreCmd = &cobra.Command{
 			return
 		}
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeRestore)
+		t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeRestore)
 		if err != nil {
 			log.Fatal(err)
 		}

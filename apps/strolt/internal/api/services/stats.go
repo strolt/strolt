@@ -29,7 +29,7 @@ func (s *Services) getStats(w http.ResponseWriter, r *http.Request) {
 	taskName := chi.URLParam(r, "taskName")
 	destinationName := chi.URLParam(r, "destinationName")
 
-	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
+	t, err := task.New(s.processContext, serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup) //nolint:contextcheck // The service passes its daemon-scoped operation context.
 	if err != nil {
 		apiu.RenderJSON500(w, r, err)
 		return

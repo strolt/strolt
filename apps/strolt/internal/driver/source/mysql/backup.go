@@ -4,16 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
+	"github.com/strolt/strolt/shared/process"
 )
 
 // Backup runs mysqldump and stores the dump in the working directory.
 func (i *MySQL) Backup(ctx context.Context) error {
 	args := i.getBackupArgs()
-	cmd := exec.Command(i.getBinMySQLDump(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
+	cmd := process.CommandContext(ctx.ProcessContext(), i.getBinMySQLDump(), args...)
 	cmd.Dir = ctx.WorkDir
 
 	outputByte, err := cmd.CombinedOutput()

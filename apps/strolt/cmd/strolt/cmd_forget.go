@@ -47,7 +47,7 @@ var forgetCmd = &cobra.Command{
 		}
 		Printf("selected snapshot: %s", prompt.SnapshotName)
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeForget)
+		t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeForget)
 		if err != nil {
 			log.Fatal(err)
 		}

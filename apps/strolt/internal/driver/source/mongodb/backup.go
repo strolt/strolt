@@ -4,17 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
+	"github.com/strolt/strolt/shared/process"
 )
 
 // Backup runs mongodump and stores the archive in the working directory.
 func (i *MongoDB) Backup(ctx context.Context) error {
 	args := i.getBackupArgs()
 
-	cmd := exec.Command(i.getBinMongoDump(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
+	cmd := process.CommandContext(ctx.ProcessContext(), i.getBinMongoDump(), args...)
 	cmd.Dir = ctx.WorkDir
 	cmd.Env = i.getEnv()
 

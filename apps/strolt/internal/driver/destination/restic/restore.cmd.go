@@ -1,10 +1,8 @@
 package restic
 
 import (
-	gocontext "context"
-	"os/exec"
-
 	"github.com/strolt/strolt/apps/strolt/internal/context"
+	"github.com/strolt/strolt/shared/process"
 )
 
 // getRestoreTarget returns the directory restic restores into.
@@ -45,8 +43,8 @@ func (i *Restic) restoreArgs(ctx context.Context, snapshotID string, path string
 	return args
 }
 
-func (i *Restic) restoreCmd(ctx context.Context, snapshotID string, path string, isPipe bool) (*exec.Cmd, error) {
-	cmd := exec.CommandContext(gocontext.Background(), i.getBin(), i.restoreArgs(ctx, snapshotID, path, isPipe)...) //nolint:gosec // restic binary path and flags come from validated config
+func (i *Restic) restoreCmd(ctx context.Context, snapshotID string, path string, isPipe bool) (*process.Cmd, error) {
+	cmd := process.CommandContext(ctx.ProcessContext(), i.getBin(), i.restoreArgs(ctx, snapshotID, path, isPipe)...)
 
 	env, err := i.getEnv()
 	if err != nil {

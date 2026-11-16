@@ -43,7 +43,7 @@ var unlockCmd = &cobra.Command{
 		}
 		Printf("selected destination: %s", prompt.DestinationName)
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeUnlock)
+		t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeUnlock)
 		if err != nil {
 			log.Fatal(err)
 		}

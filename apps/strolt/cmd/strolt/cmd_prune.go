@@ -41,7 +41,7 @@ var pruneCmd = &cobra.Command{
 		}
 		Printf("selected destination: %s", prompt.DestinationName)
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypePrune)
+		t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypePrune)
 		if err != nil {
 			log.Fatal(err)
 		}

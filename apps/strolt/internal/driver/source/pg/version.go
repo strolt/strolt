@@ -1,14 +1,14 @@
 package pg
 
 import (
-	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
+	"github.com/strolt/strolt/shared/process"
 )
 
 func (i *PgDump) getPgDumpVersion() string {
-	cmd := exec.Command(i.getBinPgDump(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
+	cmd := process.Command(i.getBinPgDump(), "--version")
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -21,7 +21,7 @@ func (i *PgDump) getPgDumpVersion() string {
 }
 
 func (i *PgDump) getPgRestoreVersion() string {
-	cmd := exec.Command(i.getBinPgRestore(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
+	cmd := process.Command(i.getBinPgRestore(), "--version")
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -34,7 +34,7 @@ func (i *PgDump) getPgRestoreVersion() string {
 }
 
 func (i *PgDump) getPsqlVersion() string {
-	cmd := exec.Command(i.getBinPSQL(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
+	cmd := process.Command(i.getBinPSQL(), "--version")
 
 	output, err := cmd.Output()
 	if err != nil {

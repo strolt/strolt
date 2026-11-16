@@ -5,9 +5,10 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"runtime"
 	"syscall"
+
+	"github.com/strolt/strolt/shared/process"
 )
 
 // RestartSelf replaces the current process with a fresh instance of its own binary.
@@ -22,7 +23,7 @@ func RestartSelf() error {
 
 	// Windows does not support exec syscall.
 	if runtime.GOOS == "windows" {
-		cmd := exec.CommandContext(context.Background(), self, args[1:]...) //nolint:gosec // self is the path of the current executable
+		cmd := process.CommandContext(context.Background(), self, args[1:]...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin

@@ -10,7 +10,7 @@ pre-commit:
     swagger:
       glob: apps/{strolt,stroltm}/internal/api/**/*.go
       priority: 5
-      run: make swagger && git add shared/sdk apps/stroltm/ui/src/api/generated
+      run: make swagger && git add -u -- shared/sdk apps/stroltm/ui/src/api/generated
     test-strolt:
       glob:
         - apps/strolt/**

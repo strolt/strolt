@@ -1,35 +1,29 @@
 package mysql
 
 import (
-	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
+	"github.com/strolt/strolt/shared/process"
 )
 
 func (i *MySQL) getMySQLVersion() string {
-	cmd := exec.Command(i.getBinMySQL(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
-
+	cmd := process.Command(i.getBinMySQL(), "--version")
 	output, err := cmd.Output()
 	if err != nil {
 		return err.Error()
 	}
-
 	arr := strings.Split(strings.ReplaceAll(string(output), "  ", " "), " ")
-
 	return arr[2]
 }
 
 func (i *MySQL) getMySQLDumpVersion() string {
-	cmd := exec.Command(i.getBinMySQLDump(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
-
+	cmd := process.Command(i.getBinMySQLDump(), "--version")
 	output, err := cmd.Output()
 	if err != nil {
 		return err.Error()
 	}
-
 	arr := strings.Split(strings.ReplaceAll(string(output), "  ", " "), " ")
-
 	return arr[2]
 }
 

@@ -120,7 +120,7 @@ func (p *Prompt) ScanDestinationName() error {
 
 	p.DestinationName = destinationName
 
-	t, err := task.New(p.ServiceName, p.TaskName, sctxt.TManual, sctxt.OpTypeSnapshots)
+	t, err := task.New(p.cmd.Context(), p.ServiceName, p.TaskName, sctxt.TManual, sctxt.OpTypeSnapshots)
 	if err != nil {
 		return fmt.Errorf("create task: %w", err)
 	}
@@ -147,7 +147,7 @@ func (p *Prompt) ScanSnapshotName() error {
 		return errors.New("destinationName is empty")
 	}
 
-	t, err := task.New(p.ServiceName, p.TaskName, sctxt.TManual, sctxt.OpTypeRestore)
+	t, err := task.New(p.cmd.Context(), p.ServiceName, p.TaskName, sctxt.TManual, sctxt.OpTypeRestore)
 	if err != nil {
 		return fmt.Errorf("create task: %w", err)
 	}

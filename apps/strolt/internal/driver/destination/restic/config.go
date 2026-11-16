@@ -1,15 +1,15 @@
 package restic
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/strolt/strolt/shared/process"
 )
 
 // ResticConfigBackupFlags describes restic backup command flags.
@@ -303,7 +303,7 @@ func (i *Restic) validateConfig() error {
 }
 
 func (i *Restic) isExistsBin() bool {
-	cmd := exec.CommandContext(context.Background(), i.getBin(), "version") //nolint:gosec // restic binary path comes from validated config
+	cmd := process.Command(i.getBin(), "version")
 
 	if _, err := cmd.Output(); err != nil {
 		return false

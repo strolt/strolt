@@ -149,8 +149,7 @@ func (i *Restic) getEnvPairs() []string {
 		}
 	}
 
-	// Appended last, in a stable order: os/exec keeps the last occurrence of a
-	// duplicated variable, so env_extra overrides the typed fields above.
+	// Appended last, in stable order, so env_extra overrides typed fields.
 	for _, name := range slices.Sorted(maps.Keys(i.config.ExtraEnv)) {
 		env = append(env, name+"="+i.config.ExtraEnv[name])
 	}

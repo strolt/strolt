@@ -1,13 +1,12 @@
 package restic
 
 import (
-	gocontext "context"
 	"fmt"
-	"os/exec"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
 	"github.com/strolt/strolt/apps/strolt/internal/ldflags"
+	"github.com/strolt/strolt/shared/process"
 )
 
 // backupArgs builds the argument list of the restic backup command. The binary
@@ -45,13 +44,13 @@ func (i *Restic) backupArgs(ctx context.Context, filename string, isPipe bool, b
 	return args
 }
 
-func (i *Restic) backupCmd(ctx context.Context, filename string, isPipe bool) (*exec.Cmd, error) {
+func (i *Restic) backupCmd(ctx context.Context, filename string, isPipe bool) (*process.Cmd, error) {
 	binaryVersions, err := i.BinaryVersion()
 	if err != nil {
 		return nil, err
 	}
 
-	cmd := exec.CommandContext(gocontext.Background(), i.getBin(), i.backupArgs(ctx, filename, isPipe, binaryVersions)...) //nolint:gosec // restic binary path and flags come from validated config
+	cmd := process.CommandContext(ctx.ProcessContext(), i.getBin(), i.backupArgs(ctx, filename, isPipe, binaryVersions)...)
 	cmd.Dir = ctx.WorkDir
 
 	env, err := i.getEnv()

@@ -28,7 +28,7 @@ type getPruneResult struct {
 //	@success	500				{object}	apiu.ResultError
 //	@Router		/api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/snapshots/prune [get].
 func (s *Services) getSnapshotsForPrune(w http.ResponseWriter, r *http.Request) {
-	prune(w, r, true)
+	prune(s, w, r, true) //nolint:contextcheck // The helper uses the task context retained by Services.
 }
 
 // prune godoc
@@ -44,15 +44,15 @@ func (s *Services) getSnapshotsForPrune(w http.ResponseWriter, r *http.Request) 
 //	@success	500				{object}	apiu.ResultError
 //	@Router		/api/v1/services/{serviceName}/tasks/{taskName}/destinations/{destinationName}/prune [post].
 func (s *Services) prune(w http.ResponseWriter, r *http.Request) {
-	prune(w, r, false)
+	prune(s, w, r, false) //nolint:contextcheck // The helper uses the task context retained by Services.
 }
 
-func prune(w http.ResponseWriter, r *http.Request, idDryRun bool) {
+func prune(s *Services, w http.ResponseWriter, r *http.Request, idDryRun bool) {
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")
 	destinationName := chi.URLParam(r, "destinationName")
 
-	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypePrune)
+	t, err := task.New(s.processContext, serviceName, taskName, sctxt.TApi, sctxt.OpTypePrune)
 	if err != nil {
 		apiu.RenderJSON500(w, r, err)
 		return

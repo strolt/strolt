@@ -1,8 +1,7 @@
 package restic
 
 import (
-	"context"
-	"os/exec"
+	"github.com/strolt/strolt/shared/process"
 )
 
 // Unlock removes locks from the repository. By default restic only removes
@@ -17,7 +16,7 @@ func (i *Restic) Unlock(isRemoveAll bool) error {
 		args = append(args, "--remove-all")
 	}
 
-	cmd := exec.CommandContext(context.Background(), i.getBin(), args...) //nolint:gosec // restic binary path and flags come from validated config
+	cmd := process.Command(i.getBin(), args...)
 
 	env, err := i.getEnv()
 	if err != nil {

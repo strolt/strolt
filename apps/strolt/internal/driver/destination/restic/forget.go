@@ -1,13 +1,12 @@
 package restic
 
 import (
-	"context"
 	"fmt"
-	"os/exec"
 	"strings"
 	"time"
 
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
+	"github.com/strolt/strolt/shared/process"
 )
 
 // snapshotNotFoundMarker is part of the warning restic prints when a forget
@@ -45,7 +44,7 @@ func (i *Restic) Forget(snapshotID string) error {
 	args = append(args, globalFlags...)
 	args = append(args, "forget", snapshotID, "--prune")
 
-	cmd := exec.CommandContext(context.Background(), i.getBin(), args...) //nolint:gosec // restic binary path and flags come from validated config
+	cmd := process.Command(i.getBin(), args...)
 
 	env, err := i.getEnv()
 	if err != nil {

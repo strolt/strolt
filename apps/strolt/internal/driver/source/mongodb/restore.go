@@ -4,17 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
+	"github.com/strolt/strolt/shared/process"
 )
 
 // Restore runs mongorestore using the archive from the working directory.
 func (i *MongoDB) Restore(ctx context.Context) error {
 	args := i.getRestoreArgs()
 
-	cmd := exec.Command(i.getBinMongoRestore(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
+	cmd := process.CommandContext(ctx.ProcessContext(), i.getBinMongoRestore(), args...)
 	cmd.Dir = ctx.WorkDir
 	cmd.Env = i.getEnv()
 

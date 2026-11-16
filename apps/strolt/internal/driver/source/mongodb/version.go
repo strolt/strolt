@@ -1,47 +1,39 @@
 package mongodb
 
 import (
-	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
+	"github.com/strolt/strolt/shared/process"
 )
 
 func (i *MongoDB) getMongoDumpVersion() string {
-	cmd := exec.Command(i.getBinMongoDump(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
-
+	cmd := process.Command(i.getBinMongoDump(), "--version")
 	output, err := cmd.Output()
 	if err != nil {
 		return err.Error()
 	}
-
 	str := string(output)
 	arr := strings.Split(str, "\n")
-
 	if len(arr) != 0 {
 		arr := strings.Split(arr[0], " ")
 		return arr[2]
 	}
-
 	return str
 }
 
 func (i *MongoDB) getMongoRestoreVersion() string {
-	cmd := exec.Command(i.getBinMongoRestore(), "--version") //nolint:gosec,noctx // binary path comes from validated configuration; no context available
-
+	cmd := process.Command(i.getBinMongoRestore(), "--version")
 	output, err := cmd.Output()
 	if err != nil {
 		return err.Error()
 	}
-
 	str := string(output)
 	arr := strings.Split(str, "\n")
-
 	if len(arr) != 0 {
 		arr := strings.Split(arr[0], " ")
 		return arr[2]
 	}
-
 	return str
 }
 

@@ -26,7 +26,7 @@ var startpCmd = &cobra.Command{
 	Short: "Start daemon",
 	Run: func(cmd *cobra.Command, args []string) {
 		initConfig()
-		ctx, cancel := ctx.WithCancel(ctx.Background())
+		ctx, cancel := ctx.WithCancel(cmd.Context())
 		log := logger.New()
 
 		// GC work directories left over from crashed runs. This lives in the
@@ -47,7 +47,7 @@ var startpCmd = &cobra.Command{
 		{
 			// Api server
 			wg.Go(func() {
-				api.New().Run(ctx, cancel)
+				api.New(ctx).Run(ctx, cancel)
 			})
 		}
 
