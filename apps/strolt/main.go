@@ -7,10 +7,13 @@ import (
 	"syscall"
 
 	cmd "github.com/strolt/strolt/apps/strolt/cmd/strolt"
+	"github.com/strolt/strolt/shared/logger"
 )
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
-	cmd.ExecuteContext(ctx)
+	if err := cmd.ExecuteContext(ctx); err != nil {
+		logger.New().Fatal(err)
+	}
 }

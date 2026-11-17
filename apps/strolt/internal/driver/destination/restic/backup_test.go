@@ -73,7 +73,10 @@ func TestStartCmdReturnsSubprocessFailure(t *testing.T) {
 	cmd.Env = append(os.Environ(), "RESTIC_HELPER=1")
 
 	_, err := startCmd(cmd)
-	require.Error(t, err)
+	var exitErr *process.ExitError
+	require.ErrorAs(t, err, &exitErr)
+	assert.Equal(t, 7, exitErr.ExitCode())
+	assert.Contains(t, err.Error(), "fixture failure")
 }
 
 func TestWaitWithStderrRetainsStreamingFailure(t *testing.T) {

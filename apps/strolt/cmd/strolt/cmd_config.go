@@ -16,7 +16,7 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Print result config",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
+		initConfig(cmd.Context())
 		logger.New().Infof("%s", config.Yaml())
 	},
 }

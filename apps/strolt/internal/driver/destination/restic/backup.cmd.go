@@ -45,7 +45,7 @@ func (i *Restic) backupArgs(ctx context.Context, filename string, isPipe bool, b
 }
 
 func (i *Restic) backupCmd(ctx context.Context, filename string, isPipe bool) (*process.Cmd, error) {
-	binaryVersions, err := i.BinaryVersion()
+	binaryVersions, err := i.BinaryVersion(ctx.ProcessContext())
 	if err != nil {
 		return nil, err
 	}

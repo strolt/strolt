@@ -1,6 +1,7 @@
 package restic
 
 import (
+	gocontext "context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -41,8 +42,8 @@ func parseStats(output []byte) (resticStats, error) {
 }
 
 // Stats returns repository statistics reported by restic.
-func (i *Restic) Stats() (interfaces.Stats, error) {
-	cmd := process.Command(i.getBin(), "--json", "stats")
+func (i *Restic) Stats(processContext gocontext.Context) (interfaces.Stats, error) {
+	cmd := process.CommandContext(processContext, i.getBin(), "--json", "stats")
 
 	env, err := i.getEnv()
 	if err != nil {

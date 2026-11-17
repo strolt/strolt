@@ -41,3 +41,17 @@ func (s *Services) trackOperation(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func (s *Services) operationContext(requestContext context.Context) (context.Context, context.CancelFunc) {
+	ctx, cancel := context.WithCancelCause(requestContext)
+	stop := context.AfterFunc(s.processContext, func() {
+		cancel(context.Cause(s.processContext))
+	})
+	if s.processContext.Err() != nil {
+		cancel(context.Cause(s.processContext))
+	}
+	return ctx, func() {
+		stop()
+		cancel(context.Canceled)
+	}
+}

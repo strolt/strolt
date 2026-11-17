@@ -44,8 +44,9 @@ type Context struct {
 	Source      Operation                       `json:"source"`
 	Destination map[string]DestinationOperation `json:"destination"`
 
-	WorkDir      string `json:"workDir"`
-	IsWorkDirTmp bool   `json:"isWorkDirTmp"`
+	WorkDir        string `json:"workDir"`
+	IsWorkDirTmp   bool   `json:"isWorkDirTmp"`
+	isWorkDirOwner bool   `json:"-"`
 
 	Tags []string `json:"tags"`
 
@@ -85,9 +86,9 @@ func New(trigger sctxt.TriggerType, serviceName string, taskName string, opertat
 	return ctx, nil
 }
 
-// Close removes the temporary work directory if one was created.
+// Close removes only temporary work owned by this instance; deserialized copies borrow the directory.
 func (ctx *Context) Close() error {
-	if ctx.IsWorkDirTmp {
+	if ctx.IsWorkDirTmp && ctx.isWorkDirOwner {
 		if err := dir.Remove(ctx.WorkDir); err != nil {
 			return fmt.Errorf("remove work dir: %w", err)
 		}
@@ -111,12 +112,12 @@ func (ctx *Context) setWorkDir() error {
 		d.SetServiceName(ctx.ServiceName)
 		d.SetTaskName(ctx.TaskName)
 		d.SetName("temp_work_dir")
-
-		tempDirPath, err := d.CreateAsTmp()
+		tempDirPath, err := d.CreateUniqueAsTmp()
 		if err != nil {
 			return fmt.Errorf("create temp work dir: %w", err)
 		}
 
+		ctx.isWorkDirOwner = true
 		ctx.WorkDir = tempDirPath
 		ctx.IsWorkDirTmp = true
 	} else {

@@ -3,6 +3,7 @@ package task
 import (
 	stdcontext "context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -94,12 +95,12 @@ func New(processContext stdcontext.Context, serviceName string, taskName string,
 		{
 			sourceDriver, err := dmanager.GetSourceDriver(c.Source.Driver, serviceName, taskName, c.Source.Config, c.Source.Env)
 			if err != nil {
-				return &Task{}, fmt.Errorf("get source driver: %w", err)
+				return &Task{}, errors.Join(fmt.Errorf("get source driver: %w", err), ctx.Close())
 			}
 
-			sourceBinVersions, err := sourceDriver.BinaryVersion()
+			sourceBinVersions, err := sourceDriver.BinaryVersion(processContext)
 			if err != nil {
-				return &Task{}, fmt.Errorf("get source binary version: %w", err)
+				return &Task{}, errors.Join(fmt.Errorf("get source binary version: %w", err), ctx.Close())
 			}
 
 			for _, bin := range sourceBinVersions {

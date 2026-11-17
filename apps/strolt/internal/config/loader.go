@@ -1,6 +1,7 @@
 package config
 
 import (
+	gocontext "context"
 	"fmt"
 	"os"
 	"path"
@@ -212,14 +213,32 @@ func load(pathname string) (loaded, error) {
 	}, nil
 }
 
+// LoadInventory resolves configuration for diagnostic inventory without running operational validation.
+func LoadInventory(processContext gocontext.Context, pathname string) error {
+	if err := processContext.Err(); err != nil {
+		return errors.Wrap(err, "load inventory")
+	}
+	l, err := load(pathname)
+	if err != nil {
+		return errors.Wrap(err, "load inventory")
+	}
+	if err := processContext.Err(); err != nil {
+		return errors.Wrap(err, "load inventory")
+	}
+	config = l.Config
+	fileList = l.FileList
+	loadedAt = time.Now()
+	return nil
+}
+
 // Load reads, merges, and validates the configuration from the given path.
-func Load(pathname string) error {
+func Load(processContext gocontext.Context, pathname string) error {
 	l, err := load(pathname)
 	if err != nil {
 		return err
 	}
 
-	if err := l.Config.validate(); err != nil {
+	if err := l.Config.validate(processContext); err != nil {
 		return errors.Wrapf(err, "validate")
 	}
 
@@ -227,9 +246,9 @@ func Load(pathname string) error {
 	fileList = l.FileList
 
 	// {
-	// 	//TODO: remove this
-	// 	data, _ := yaml.Marshal(config)
-	// 	os.WriteFile("result.config.yml", data, 0o700)
+	//  //TODO: remove this
+	//  data, _ := yaml.Marshal(config)
+	//  os.WriteFile("result.config.yml", data, 0o700)
 	// }
 
 	loadedAt = time.Now()

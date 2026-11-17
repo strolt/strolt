@@ -16,7 +16,7 @@ func (t *Task) prune(destinationName string, isDryRun bool) ([]interfaces.Snapsh
 		return []interfaces.Snapshot{}, errors.New("destination not exits")
 	}
 
-	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
+	destinationDriver, err := dmanager.GetDestinationDriver(t.Context.ProcessContext(), destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
 	if err != nil {
 		return []interfaces.Snapshot{}, fmt.Errorf("get destination driver: %w", err)
 	}

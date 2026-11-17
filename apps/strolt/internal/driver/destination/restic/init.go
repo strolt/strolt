@@ -1,20 +1,21 @@
 package restic
 
 import (
+	gocontext "context"
 	"fmt"
 
 	"github.com/strolt/strolt/shared/process"
 )
 
 // Init initializes the restic repository.
-func (i *Restic) Init() error {
+func (i *Restic) Init(processContext gocontext.Context) error {
 	globalFlags := i.getGlobalFlags()
 
 	args := make([]string, 0, len(globalFlags)+1)
 	args = append(args, globalFlags...)
 	args = append(args, "init")
 
-	cmd := process.Command(i.getBin(), args...)
+	cmd := process.CommandContext(processContext, i.getBin(), args...)
 
 	env, err := i.getEnv()
 	if err != nil {

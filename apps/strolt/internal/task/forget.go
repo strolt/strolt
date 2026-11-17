@@ -14,12 +14,12 @@ func (t *Task) forget(destinationName string, snapshotID string) error {
 		return errors.New("destination not exits")
 	}
 
-	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
+	destinationDriver, err := dmanager.GetDestinationDriver(t.Context.ProcessContext(), destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
 	if err != nil {
 		return fmt.Errorf("get destination driver: %w", err)
 	}
 
-	if err := destinationDriver.Forget(snapshotID); err != nil {
+	if err := destinationDriver.Forget(t.Context.ProcessContext(), snapshotID); err != nil {
 		return fmt.Errorf("destination forget: %w", err)
 	}
 

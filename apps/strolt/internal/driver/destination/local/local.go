@@ -2,6 +2,7 @@
 package local
 
 import (
+	gocontext "context"
 	"errors"
 	"fmt"
 	"io"
@@ -45,7 +46,7 @@ func New() *Local {
 }
 
 // Init initializes the driver.
-func (i *Local) Init() error {
+func (i *Local) Init(_ gocontext.Context) error {
 	return nil
 }
 
@@ -60,7 +61,7 @@ func (i *Local) SetDriverName(driverName string) {
 }
 
 // SetConfig parses and validates the driver configuration.
-func (i *Local) SetConfig(config any) error {
+func (i *Local) SetConfig(_ gocontext.Context, config any) error {
 	data, err := yaml.Marshal(config)
 	if err != nil {
 		return fmt.Errorf("marshal config: %w", err)
@@ -218,8 +219,8 @@ func (i *Local) Prune(_ context.Context, isDryRun bool) ([]interfaces.Snapshot, 
 // snapshot ID is matched against the stored snapshots first: it comes from user
 // input and is joined into a filesystem path, so an unchecked value could point
 // outside the destination directory.
-func (i *Local) Forget(snapshotID string) error {
-	snapshots, err := i.Snapshots()
+func (i *Local) Forget(processContext gocontext.Context, snapshotID string) error {
+	snapshots, err := i.Snapshots(processContext)
 	if err != nil {
 		return err
 	}
@@ -241,20 +242,20 @@ func (i *Local) Forget(snapshotID string) error {
 
 // Unlock does nothing: the local destination stores snapshots as plain
 // directories and never takes repository locks.
-func (i *Local) Unlock(_ bool) error {
+func (i *Local) Unlock(_ gocontext.Context, _ bool) error {
 	i.logger.Debug("unlock: nothing to do for the local destination")
 
 	return nil
 }
 
 // Stats returns statistics for the destination.
-func (i *Local) Stats() (interfaces.Stats, error) {
+func (i *Local) Stats(_ gocontext.Context) (interfaces.Stats, error) {
 	i.logger.Debug("stats")
 	return interfaces.Stats{}, nil
 }
 
 // Snapshots lists the snapshots stored in the destination directory.
-func (i *Local) Snapshots() ([]interfaces.Snapshot, error) {
+func (i *Local) Snapshots(_ gocontext.Context) ([]interfaces.Snapshot, error) {
 	entries, err := os.ReadDir(i.config.Path)
 	if err != nil {
 		return nil, fmt.Errorf("read destination directory: %w", err)
@@ -275,7 +276,7 @@ func (i *Local) Snapshots() ([]interfaces.Snapshot, error) {
 }
 
 // BinaryVersion returns the versions of external binaries used by the driver.
-func (i *Local) BinaryVersion() ([]interfaces.DriverBinaryVersion, error) {
+func (i *Local) BinaryVersion(_ gocontext.Context) ([]interfaces.DriverBinaryVersion, error) {
 	return []interfaces.DriverBinaryVersion{}, nil
 }
 

@@ -1,12 +1,16 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 	"time"
 
-	"github.com/manifoldco/promptui"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/huh/v2"
 	"github.com/spf13/cobra"
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
@@ -20,7 +24,8 @@ type Prompt struct {
 	DestinationName string
 	SnapshotName    string
 
-	cmd *cobra.Command
+	cmd         *cobra.Command
+	answerState promptAnswerState
 }
 
 // NewPrompt creates a Prompt bound to the given command.
@@ -36,18 +41,12 @@ func (p *Prompt) ScanServiceName() error {
 	serviceName, err := p.cmd.Flags().GetString("service")
 
 	if serviceName == "" || err != nil {
-		prompt := promptui.Select{
-			HideSelected: true,
-			Label:        "select service",
-			Items:        config.GetServiceNameList(),
-		}
-
-		_, result, err := prompt.Run()
+		var selected string
+		err := runSelectPrompt(p.cmd.Context(), "Select service", config.GetServiceNameList(), &selected, &p.answerState)
 		if err != nil {
 			return fmt.Errorf("select service prompt: %w", err)
 		}
-
-		serviceName = result
+		serviceName = selected
 	}
 
 	p.ServiceName = serviceName
@@ -69,18 +68,12 @@ func (p *Prompt) ScanTaskName() error {
 	taskName, _ := p.cmd.Flags().GetString("task")
 
 	if taskName == "" {
-		prompt := promptui.Select{
-			HideSelected: true,
-			Label:        "select task",
-			Items:        config.GetTaskNameList(p.ServiceName),
-		}
-
-		_, result, err := prompt.Run()
+		var selected string
+		err := runSelectPrompt(p.cmd.Context(), "Select task", config.GetTaskNameList(p.ServiceName), &selected, &p.answerState)
 		if err != nil {
 			return fmt.Errorf("select task prompt: %w", err)
 		}
-
-		taskName = result
+		taskName = selected
 	}
 
 	p.TaskName = taskName
@@ -104,18 +97,12 @@ func (p *Prompt) ScanDestinationName() error {
 
 	destinationName, _ := p.cmd.Flags().GetString("destination")
 	if destinationName == "" {
-		prompt := promptui.Select{
-			HideSelected: true,
-			Label:        "Select destination",
-			Items:        config.GetDestinationNameList(p.ServiceName, p.TaskName),
-		}
-
-		_, result, err := prompt.Run()
+		var selected string
+		err := runSelectPrompt(p.cmd.Context(), "Select destination", config.GetDestinationNameList(p.ServiceName, p.TaskName), &selected, &p.answerState)
 		if err != nil {
 			return fmt.Errorf("select destination prompt: %w", err)
 		}
-
-		destinationName = result
+		destinationName = selected
 	}
 
 	p.DestinationName = destinationName
@@ -175,18 +162,12 @@ func (p *Prompt) ScanSnapshotName() error {
 	}
 
 	if snapshotName == "" {
-		prompt := promptui.Select{
-			HideSelected: true,
-			Label:        "select snapshot",
-			Items:        items,
-		}
-
-		i, _, err := prompt.Run()
+		var selectedIndex int
+		err := runSelectIndexPrompt(p.cmd.Context(), "Select snapshot", items, &selectedIndex, &p.answerState)
 		if err != nil {
 			return fmt.Errorf("select snapshot prompt: %w", err)
 		}
-
-		snapshotName = snapshotList[i].ID
+		snapshotName = snapshotList[selectedIndex].ID
 	}
 
 	if !snapshotList.IsAvailable(snapshotName) {
@@ -194,19 +175,67 @@ func (p *Prompt) ScanSnapshotName() error {
 	}
 
 	p.SnapshotName = snapshotName
-
 	return nil
 }
 
 // AskIsConfirm asks the user for confirmation and reports whether it was given.
-func (p *Prompt) AskIsConfirm() bool {
-	prompt := promptui.Prompt{
-		HideEntered: true,
-		Label:       "Are you shure",
-		IsConfirm:   true,
+func (p *Prompt) AskIsConfirm() (bool, error) {
+	confirmed := false
+	err := runPromptAnswer(p.cmd.Context(), &p.answerState, func(formCtx context.Context, input io.Reader) error {
+		answer := ""
+		form := huh.NewForm(huh.NewGroup(huh.NewInput().Title("Are you sure? [y/N]").Value(&answer))).WithAccessible(false).WithKeyMap(promptKeyMap()).WithProgramOptions(tea.WithoutSignalHandler()).WithInput(input).WithOutput(os.Stderr)
+		runErr := form.RunWithContext(formCtx)
+		if runErr == nil {
+			confirmed = strings.EqualFold(answer, "y")
+		}
+		if runErr != nil {
+			return fmt.Errorf("run confirmation prompt: %w", runErr)
+		}
+		return nil
+	})
+	if err != nil {
+		return false, err
 	}
+	return confirmed, err
+}
 
-	_, err := prompt.Run()
+var errNoPromptChoices = errors.New("no choices available")
 
-	return err == nil
+func promptKeyMap() *huh.KeyMap {
+	keys := huh.NewDefaultKeyMap()
+	keys.Select.Filter.SetKeys()
+	keys.Select.Filter.SetEnabled(false)
+	keys.Select.Submit.SetKeys("enter", "alt+enter")
+	keys.Input.Submit.SetKeys("enter", "alt+enter")
+	return keys
+}
+
+func runSelectPrompt(ctx context.Context, title string, options []string, selected *string, answers *promptAnswerState) error {
+	if len(options) == 0 {
+		return fmt.Errorf("%s: %w", title, errNoPromptChoices)
+	}
+	return runPromptAnswer(ctx, answers, func(formCtx context.Context, input io.Reader) error {
+		form := huh.NewForm(huh.NewGroup(huh.NewSelect[string]().Title(title).Options(huh.NewOptions(options...)...).Value(selected))).WithAccessible(false).WithKeyMap(promptKeyMap()).WithProgramOptions(tea.WithoutSignalHandler()).WithInput(input).WithOutput(os.Stderr)
+		if err := form.RunWithContext(formCtx); err != nil {
+			return fmt.Errorf("run selection prompt: %w", err)
+		}
+		return nil
+	})
+}
+
+func runSelectIndexPrompt(ctx context.Context, title string, options []string, selected *int, answers *promptAnswerState) error {
+	if len(options) == 0 {
+		return fmt.Errorf("%s: %w", title, errNoPromptChoices)
+	}
+	return runPromptAnswer(ctx, answers, func(formCtx context.Context, input io.Reader) error {
+		optionsTyped := make([]huh.Option[int], len(options))
+		for i, option := range options {
+			optionsTyped[i] = huh.NewOption(option, i)
+		}
+		form := huh.NewForm(huh.NewGroup(huh.NewSelect[int]().Title(title).Options(optionsTyped...).Value(selected))).WithAccessible(false).WithKeyMap(promptKeyMap()).WithProgramOptions(tea.WithoutSignalHandler()).WithInput(input).WithOutput(os.Stderr)
+		if err := form.RunWithContext(formCtx); err != nil {
+			return fmt.Errorf("run snapshot selection: %w", err)
+		}
+		return nil
+	})
 }

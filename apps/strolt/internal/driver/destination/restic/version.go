@@ -1,6 +1,7 @@
 package restic
 
 import (
+	gocontext "context"
 	"errors"
 	"fmt"
 	"strings"
@@ -10,8 +11,8 @@ import (
 )
 
 // BinaryVersion returns the version of the restic binary used by the driver.
-func (i *Restic) BinaryVersion() ([]interfaces.DriverBinaryVersion, error) {
-	resticVersion, err := i.getBinVersion()
+func (i *Restic) BinaryVersion(processContext gocontext.Context) ([]interfaces.DriverBinaryVersion, error) {
+	resticVersion, err := i.getBinVersion(processContext)
 	if err != nil {
 		return nil, err
 	}
@@ -24,8 +25,8 @@ func (i *Restic) BinaryVersion() ([]interfaces.DriverBinaryVersion, error) {
 	}, nil
 }
 
-func (i *Restic) getBinVersion() (string, error) {
-	cmd := process.Command(i.getBin(), "version")
+func (i *Restic) getBinVersion(processContext gocontext.Context) (string, error) {
+	cmd := process.CommandContext(processContext, i.getBin(), "version")
 
 	output, err := cmd.Output()
 	if err != nil {

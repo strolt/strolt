@@ -1,6 +1,7 @@
 package restic
 
 import (
+	gocontext "context"
 	"fmt"
 	"strings"
 	"time"
@@ -37,14 +38,14 @@ func isSnapshotNotFound(output []byte) bool {
 // Forget removes a single snapshot and prunes the data it referenced. Unlike
 // Prune it ignores the configured retention policy, so the snapshot is deleted
 // even when the keep rules would preserve it.
-func (i *Restic) Forget(snapshotID string) error {
+func (i *Restic) Forget(processContext gocontext.Context, snapshotID string) error {
 	globalFlags := i.getGlobalFlagsWithLock()
 
 	args := make([]string, 0, len(globalFlags)+3) //nolint:mnd // "forget", the snapshot id and "--prune"
 	args = append(args, globalFlags...)
 	args = append(args, "forget", snapshotID, "--prune")
 
-	cmd := process.Command(i.getBin(), args...)
+	cmd := process.CommandContext(processContext, i.getBin(), args...)
 
 	env, err := i.getEnv()
 	if err != nil {

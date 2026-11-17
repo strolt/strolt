@@ -2,7 +2,7 @@
 package restic
 
 import (
-	"errors"
+	gocontext "context"
 	"fmt"
 	"strings"
 
@@ -37,7 +37,7 @@ func (i *Restic) SetDriverName(driverName string) {
 }
 
 // SetConfig parses and validates the driver configuration.
-func (i *Restic) SetConfig(config any) error {
+func (i *Restic) SetConfig(processContext gocontext.Context, config any) error {
 	data, err := yaml.Marshal(config)
 	if err != nil {
 		return fmt.Errorf("marshal config: %w", err)
@@ -47,7 +47,7 @@ func (i *Restic) SetConfig(config any) error {
 		return fmt.Errorf("unmarshal config: %w", err)
 	}
 
-	return i.validateConfig()
+	return i.validateConfig(processContext)
 }
 
 // SetEnv parses and validates the driver environment variables.
@@ -72,10 +72,8 @@ func (i *Restic) SetLogger(logger *logger.Logger) {
 func startCmd(cmd *process.Cmd) ([]byte, error) {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		outputList := strings.Split(string(output), "\n")
-
-		if len(outputList) > 1 {
-			return nil, errors.New(outputList[0])
+		if diagnostic := strings.TrimSpace(string(output)); diagnostic != "" {
+			return nil, fmt.Errorf("run restic command: %w: %s", err, diagnostic)
 		}
 
 		return nil, fmt.Errorf("run restic command: %w", err)

@@ -67,10 +67,21 @@ func getBasePath(isTemp bool) (string, error) {
 	return filepath.Join(parts...), nil
 }
 
-// CreateAsTmp creates the directory under the temporary base path.
-func (d *Directory) CreateAsTmp() (string, error) {
+// CreateUniqueAsTmp allocates a fresh work-* child beneath the task's shared temporary parent.
+func (d *Directory) CreateUniqueAsTmp() (string, error) {
 	d.isTemp = true
-	return d.create()
+	path, err := d.path()
+	if err != nil {
+		return "", err
+	}
+	if err := os.MkdirAll(path, 0o700); err != nil {
+		return "", fmt.Errorf("create temporary base directory: %w", err)
+	}
+	uniquePath, err := os.MkdirTemp(path, "work-")
+	if err != nil {
+		return "", fmt.Errorf("create unique temporary directory: %w", err)
+	}
+	return uniquePath, nil
 }
 
 // CreateAsPersist creates the directory under the persistent base path.
@@ -135,27 +146,6 @@ func (d *Directory) create() (string, error) {
 func Remove(path string) error {
 	if err := os.RemoveAll(path); err != nil {
 		return fmt.Errorf("remove directory: %w", err)
-	}
-
-	return nil
-}
-
-// RemoveTempDirectories deletes the temporary base directory if it exists.
-func RemoveTempDirectories() error {
-	path, err := getBasePath(true)
-	if err != nil {
-		return err
-	}
-
-	isExists, err := Exists(path)
-	if err != nil {
-		return err
-	}
-
-	if isExists {
-		if err := os.RemoveAll(path); err != nil {
-			return fmt.Errorf("remove temp directory: %w", err)
-		}
 	}
 
 	return nil

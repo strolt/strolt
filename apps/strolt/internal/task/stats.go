@@ -21,12 +21,12 @@ func (t *Task) GetStats(destinationName string) (interfaces.FormattedStats, erro
 		return interfaces.FormattedStats{}, errors.New("destination not exits")
 	}
 
-	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
+	destinationDriver, err := dmanager.GetDestinationDriver(t.Context.ProcessContext(), destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
 	if err != nil {
 		return interfaces.FormattedStats{}, fmt.Errorf("get destination driver: %w", err)
 	}
 
-	stats, err := destinationDriver.Stats()
+	stats, err := destinationDriver.Stats(t.Context.ProcessContext())
 	if err != nil {
 		return interfaces.FormattedStats{}, fmt.Errorf("get destination stats: %w", err)
 	}

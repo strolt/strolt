@@ -1,6 +1,7 @@
 package restic
 
 import (
+	gocontext "context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -23,8 +24,8 @@ type resticSnapshot struct {
 }
 
 // Snapshots lists the snapshots stored in the restic repository.
-func (i *Restic) Snapshots() ([]interfaces.Snapshot, error) {
-	cmd := process.Command(i.getBin(), "--json", "snapshots")
+func (i *Restic) Snapshots(processContext gocontext.Context) ([]interfaces.Snapshot, error) {
+	cmd := process.CommandContext(processContext, i.getBin(), "--json", "snapshots")
 
 	env, err := i.getEnv()
 	if err != nil {

@@ -2,6 +2,7 @@
 package interfaces
 
 import (
+	gocontext "context"
 	"io"
 	"time"
 
@@ -71,13 +72,18 @@ type DriverSourceInterface interface { //nolint:interfacebloat // the driver con
 	IsSupportedRestorePipe(ctx context.Context) bool
 
 	IsEmpty() (bool, error)
-	BinaryVersion() ([]DriverBinaryVersion, error)
+	BinaryVersion(processContext gocontext.Context) ([]DriverBinaryVersion, error)
+}
+
+// DriverSourceBinaryInventoryInterface collects versions without fail-fast behavior between binaries.
+type DriverSourceBinaryInventoryInterface interface {
+	BinaryVersionInventory(processContext gocontext.Context) ([]DriverBinaryVersion, error)
 }
 
 // DriverDestinationInterface is the contract implemented by backup destination drivers.
 type DriverDestinationInterface interface { //nolint:interfacebloat // the driver contract intentionally covers the full destination lifecycle
 	SetLogger(l *logger.Logger)
-	SetConfig(config any) error
+	SetConfig(processContext gocontext.Context, config any) error
 	SetEnv(env any) error
 	SetTaskName(taskName string)
 	SetDriverName(driverName string)
@@ -91,12 +97,12 @@ type DriverDestinationInterface interface { //nolint:interfacebloat // the drive
 	IsSupportedRestorePipe(ctx context.Context) bool
 
 	Prune(ctx context.Context, isDryRun bool) ([]Snapshot, error)
-	Forget(snapshotID string) error
-	Unlock(isRemoveAll bool) error
-	Stats() (Stats, error)
-	Snapshots() ([]Snapshot, error)
-	BinaryVersion() ([]DriverBinaryVersion, error)
-	Init() error
+	Forget(processContext gocontext.Context, snapshotID string) error
+	Unlock(processContext gocontext.Context, isRemoveAll bool) error
+	Stats(processContext gocontext.Context) (Stats, error)
+	Snapshots(processContext gocontext.Context) ([]Snapshot, error)
+	BinaryVersion(processContext gocontext.Context) ([]DriverBinaryVersion, error)
+	Init(processContext gocontext.Context) error
 }
 
 // DriverBinaryVersion holds the name and version of a binary used by a driver.

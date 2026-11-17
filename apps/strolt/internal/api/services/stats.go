@@ -28,8 +28,9 @@ func (s *Services) getStats(w http.ResponseWriter, r *http.Request) {
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")
 	destinationName := chi.URLParam(r, "destinationName")
-
-	t, err := task.New(s.processContext, serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup) //nolint:contextcheck // The service passes its daemon-scoped operation context.
+	ctx, cancel := s.operationContext(r.Context())
+	defer cancel()
+	t, err := task.New(ctx, serviceName, taskName, sctxt.TApi, sctxt.OpTypeStats)
 	if err != nil {
 		apiu.RenderJSON500(w, r, err)
 		return
@@ -45,7 +46,7 @@ func (s *Services) getStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stats, err := t.GetStats(destinationName)
+	stats, err := t.GetStats(destinationName) //nolint:contextcheck // task.New retains the composed request/daemon context used by this operation.
 	if err != nil {
 		apiu.RenderJSON500(w, r, err)
 		return

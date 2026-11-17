@@ -2,6 +2,7 @@
 package local
 
 import (
+	gocontext "context"
 	"errors"
 	"fmt"
 	"io"
@@ -162,6 +163,6 @@ func (i *Local) IsEmpty() (bool, error) {
 }
 
 // BinaryVersion returns versions of external binaries used by the driver.
-func (i *Local) BinaryVersion() ([]interfaces.DriverBinaryVersion, error) {
+func (i *Local) BinaryVersion(_ gocontext.Context) ([]interfaces.DriverBinaryVersion, error) {
 	return []interfaces.DriverBinaryVersion{}, nil
 }

@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/shared/logger"
@@ -23,7 +26,7 @@ var restoreCmd = &cobra.Command{
 	Use:   "restore",
 	Short: "Restore snapshot",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
+		initConfig(cmd.Context())
 		log := logger.New()
 		prompt := NewPrompt(cmd)
 
@@ -47,30 +50,51 @@ var restoreCmd = &cobra.Command{
 		}
 		Printf("selected snapshot: %s", prompt.SnapshotName)
 
-		if !isSkipConfirmation && !prompt.AskIsConfirm() {
-			return
-		}
-
-		t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeRestore)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer func() { _ = t.Close() }()
-
-		isSourceEmpty, err := t.IsSourceEmpty()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if !isSourceEmpty {
-			log.Warn("source is not empty")
-
-			if !isSkipConfirmation && !prompt.AskIsConfirm() {
+		if !isSkipConfirmation {
+			confirmed, err := prompt.AskIsConfirm()
+			if err != nil {
+				log.Fatal(err)
+			}
+			if !confirmed {
 				return
 			}
 		}
 
-		if err := t.Restore(prompt.DestinationName, prompt.SnapshotName); err != nil {
+		if err := func() (resultErr error) {
+			t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeRestore)
+			if err != nil {
+				return fmt.Errorf("create task: %w", err)
+			}
+			defer func() {
+				if err := t.Close(); err != nil {
+					resultErr = errors.Join(resultErr, fmt.Errorf("close task: %w", err))
+				}
+			}()
+
+			isSourceEmpty, err := t.IsSourceEmpty()
+			if err != nil {
+				return fmt.Errorf("check source emptiness: %w", err)
+			}
+
+			if !isSourceEmpty {
+				log.Warn("source is not empty")
+
+				if !isSkipConfirmation {
+					confirmed, err := prompt.AskIsConfirm()
+					if err != nil {
+						return fmt.Errorf("confirm restore: %w", err)
+					}
+					if !confirmed {
+						return nil
+					}
+				}
+			}
+
+			if err := t.Restore(prompt.DestinationName, prompt.SnapshotName); err != nil {
+				return fmt.Errorf("restore task: %w", err)
+			}
+			return nil
+		}(); err != nil {
 			log.Fatal(err)
 		}
 	},
