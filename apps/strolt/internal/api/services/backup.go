@@ -26,53 +26,41 @@ func (s *Services) backup(w http.ResponseWriter, r *http.Request) {
 	serviceName := chi.URLParam(r, "serviceName")
 	taskName := chi.URLParam(r, "taskName")
 
-	t, err := task.New(serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup)
+	releaseOperation, ok := s.beginOperation()
+	if !ok {
+		http.Error(w, "server is shutting down", http.StatusServiceUnavailable)
+		return
+	}
+	transferred := false
+	defer func() {
+		if !transferred {
+			releaseOperation()
+		}
+	}()
+	t, err := task.New(s.processContext, serviceName, taskName, sctxt.TApi, sctxt.OpTypeBackup) //nolint:contextcheck // Task owns the daemon-scoped operation context.
 	if err != nil {
 		apiu.RenderJSON500(w, r, err)
 		return
 	}
-
 	if t.IsRunning() {
+		_ = t.Close()
 		apiu.RenderJSON400(w, r, apiu.ErrTaskAlreadyWorking)
 		return
 	}
 
+	transferred = true
+	//nolint:contextcheck // The task retains the daemon-scoped context after this handler returns.
 	go func() {
+		defer releaseOperation()
 		defer func() {
 			if err := t.Close(); err != nil {
 				logger.New().Error(err)
 			}
 		}()
-
 		if err := t.Backup(); err != nil {
 			logger.New().Error(err)
 		}
 	}()
-
-	// go func() {
-	// 	defer t.Close()
-
-	// 	if err = t.BackupSourceToWorkDir(); err != nil {
-	// 		log.Error(err)
-	// 		apiu.RenderJSON500(w, r, err)
-
-	// 		return
-	// 	}
-
-	// 	for destinationName := range t.TaskConfig.Destinations {
-	// 		log := log.WithField(destinationName, destinationName)
-	// 		log.Info("backup destination")
-
-	// 		// log.Debug("Backup source to destination sleep started...")
-	// 		// time.Sleep(time.Minute * 1)
-	// 		// log.Debug("Backup source to destination sleep finished...")
-
-	// 		_, err := t.BackupWorkDirToDestination(destinationName)
-	// 		if err != nil {
-	// 			log.Error(err)
-	// 		}
-	// 	}
-	// }()
 
 	apiu.RenderJSON200(w, r, apiu.ResultSuccess{Data: "success started"})
 }

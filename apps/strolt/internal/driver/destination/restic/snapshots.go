@@ -1,13 +1,13 @@
 package restic
 
 import (
-	"context"
+	gocontext "context"
 	"encoding/json"
 	"fmt"
-	"os/exec"
 	"time"
 
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
+	"github.com/strolt/strolt/shared/process"
 )
 
 type resticSnapshot struct {
@@ -24,8 +24,8 @@ type resticSnapshot struct {
 }
 
 // Snapshots lists the snapshots stored in the restic repository.
-func (i *Restic) Snapshots() ([]interfaces.Snapshot, error) {
-	cmd := exec.CommandContext(context.Background(), i.getBin(), "--json", "snapshots") //nolint:gosec // restic binary path comes from validated config
+func (i *Restic) Snapshots(processContext gocontext.Context) ([]interfaces.Snapshot, error) {
+	cmd := process.CommandContext(processContext, i.getBin(), "--json", "snapshots")
 
 	env, err := i.getEnv()
 	if err != nil {

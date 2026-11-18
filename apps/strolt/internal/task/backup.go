@@ -17,6 +17,15 @@ import (
 // ErrNotSupportedPipeMode is returned when pipe mode is requested but not supported.
 var ErrNotSupportedPipeMode = errors.New("source or one of destinations does not support pipe mode")
 
+type backupError struct {
+	message string
+	causes  []error
+}
+
+func (err backupError) Error() string { return err.message }
+
+func (err backupError) Unwrap() []error { return err.causes }
+
 func (t *Task) backupSourceToWorkDir() error {
 	sourceDriver, err := t.getSourceDriver()
 	if err != nil {
@@ -73,6 +82,8 @@ func (t *Task) backupManual() error {
 
 	t.eventOperationStart()
 
+	var sourceErr error
+	var destinationErrors []error
 	isSourceError := false
 	isDestinationError := false
 
@@ -81,6 +92,7 @@ func (t *Task) backupManual() error {
 
 		err := t.backupSourceToWorkDir()
 		if err != nil {
+			sourceErr = err
 			t.log.Error(err)
 			t.eventSourceError(err)
 
@@ -96,37 +108,30 @@ func (t *Task) backupManual() error {
 
 			backupOutput, err := t.backupWorkDirToDestination(destinationName)
 			if err != nil {
+				destinationErrors = append(destinationErrors, fmt.Errorf("[%s]: %w", destinationName, err))
 				t.log.Error(err)
 				t.eventDestinationError(destinationName, err)
 
-				if !isDestinationError {
-					isDestinationError = true
-				}
+				isDestinationError = true
 			} else {
 				t.eventDestinationStop(destinationName, backupOutput)
 			}
 		}
 	}
 
-	if isSourceError {
-		resultError = fmt.Errorf("source: %s", t.Context.Source.Error)
-		t.eventOperationError(resultError)
-	}
-
-	if isDestinationError {
-		destinationErrors := []string{}
-
-		for destinationName, operation := range t.Context.Destination {
-			if operation.Error != "" {
-				destinationErrors = append(destinationErrors, fmt.Sprintf("[%s]: %s", destinationName, operation.Error))
-			}
+	switch {
+	case isDestinationError:
+		diagnostics := make([]string, 0, len(destinationErrors))
+		for _, err := range destinationErrors {
+			diagnostics = append(diagnostics, err.Error())
 		}
-
-		resultError = fmt.Errorf("destination: %s", strings.Join(destinationErrors, ", "))
+		diagnosticErr := fmt.Errorf("destination: %s", strings.Join(diagnostics, ", "))
+		resultError = backupError{message: diagnosticErr.Error(), causes: destinationErrors}
+		t.eventOperationError(diagnosticErr)
+	case isSourceError:
+		resultError = fmt.Errorf("source: %w", sourceErr)
 		t.eventOperationError(resultError)
-	}
-
-	if !isSourceError && !isDestinationError {
+	default:
 		t.eventOperationStop()
 	}
 
@@ -348,7 +353,7 @@ func (t *Task) getDestinationDriver(destinationName string) (interfaces.DriverDe
 		return nil, errors.New("destination not exits")
 	}
 
-	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
+	destinationDriver, err := dmanager.GetDestinationDriver(t.Context.ProcessContext(), destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
 	if err != nil {
 		return nil, fmt.Errorf("get destination driver: %w", err)
 	}

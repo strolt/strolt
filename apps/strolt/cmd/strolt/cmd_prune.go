@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/shared/logger"
@@ -22,7 +25,7 @@ var pruneCmd = &cobra.Command{
 	Use:   "prune",
 	Short: "Clean up snapshots",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
+		initConfig(cmd.Context())
 		log := logger.New()
 		prompt := NewPrompt(cmd)
 
@@ -41,18 +44,32 @@ var pruneCmd = &cobra.Command{
 		}
 		Printf("selected destination: %s", prompt.DestinationName)
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypePrune)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer func() { _ = t.Close() }()
+		if err := func() (resultErr error) {
+			t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypePrune)
+			if err != nil {
+				return fmt.Errorf("create task: %w", err)
+			}
+			defer func() {
+				if err := t.Close(); err != nil {
+					resultErr = errors.Join(resultErr, fmt.Errorf("close task: %w", err))
+				}
+			}()
 
-		if !isSkipConfirmation && !prompt.AskIsConfirm() {
-			return
-		}
+			if !isSkipConfirmation {
+				confirmed, err := prompt.AskIsConfirm()
+				if err != nil {
+					return fmt.Errorf("confirm prune: %w", err)
+				}
+				if !confirmed {
+					return nil
+				}
+			}
 
-		_, err = t.Prune(prompt.DestinationName, false)
-		if err != nil {
+			if _, err := t.Prune(prompt.DestinationName, false); err != nil {
+				return fmt.Errorf("prune destination: %w", err)
+			}
+			return nil
+		}(); err != nil {
 			log.Fatal(err)
 		}
 	},

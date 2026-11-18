@@ -17,9 +17,7 @@ func TestGetEnvPairsWithoutExtra(t *testing.T) {
 	}
 }
 
-// env_extra is appended after the typed fields, in a stable order: os/exec
-// keeps the last occurrence of a duplicated variable, so a value set there
-// overrides the typed one.
+// env_extra is appended after typed fields so its value overrides them.
 func TestGetEnvPairsExtraOverridesTypedFields(t *testing.T) {
 	t.Parallel()
 

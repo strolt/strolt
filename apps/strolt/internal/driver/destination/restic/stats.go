@@ -1,15 +1,15 @@
 package restic
 
 import (
-	"context"
+	gocontext "context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os/exec"
 	"slices"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
+	"github.com/strolt/strolt/shared/process"
 )
 
 type resticStats struct {
@@ -42,8 +42,8 @@ func parseStats(output []byte) (resticStats, error) {
 }
 
 // Stats returns repository statistics reported by restic.
-func (i *Restic) Stats() (interfaces.Stats, error) {
-	cmd := exec.CommandContext(context.Background(), i.getBin(), "--json", "stats") //nolint:gosec // restic binary path comes from validated config
+func (i *Restic) Stats(processContext gocontext.Context) (interfaces.Stats, error) {
+	cmd := process.CommandContext(processContext, i.getBin(), "--json", "stats")
 
 	env, err := i.getEnv()
 	if err != nil {

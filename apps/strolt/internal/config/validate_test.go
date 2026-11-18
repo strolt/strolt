@@ -34,7 +34,7 @@ func validConfig() Config {
 func TestValidateAcceptsMinimalConfig(t *testing.T) {
 	cfg := validConfig()
 
-	if err := cfg.validate(); err != nil {
+	if err := cfg.validate(t.Context()); err != nil {
 		t.Fatalf("expected valid config, got: %v", err)
 	}
 }
@@ -161,7 +161,7 @@ func TestValidateRejects(t *testing.T) {
 			cfg := validConfig()
 			tt.mutate(&cfg)
 
-			err := cfg.validate()
+			err := cfg.validate(t.Context())
 			if err == nil {
 				t.Fatalf("expected error containing %q, got nil", tt.wantErr)
 			}

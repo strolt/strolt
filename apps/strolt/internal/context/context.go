@@ -2,6 +2,7 @@
 package context
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"time"
@@ -32,6 +33,7 @@ type DestinationOperation struct {
 
 // Context carries the state of a task operation across source and destinations.
 type Context struct {
+	processContext context.Context     `json:"-"` //nolint:containedctx // Process cancellation belongs to the task operation lifetime.
 	Trigger        sctxt.TriggerType   `json:"trigger"`
 	ServiceName    string              `json:"serviceName"`
 	TaskName       string              `json:"taskName"`
@@ -42,12 +44,26 @@ type Context struct {
 	Source      Operation                       `json:"source"`
 	Destination map[string]DestinationOperation `json:"destination"`
 
-	WorkDir      string `json:"workDir"`
-	IsWorkDirTmp bool   `json:"isWorkDirTmp"`
+	WorkDir        string `json:"workDir"`
+	IsWorkDirTmp   bool   `json:"isWorkDirTmp"`
+	isWorkDirOwner bool   `json:"-"`
 
 	Tags []string `json:"tags"`
 
 	SourceLocalPath string `json:"sourceLocalPath"`
+}
+
+// ProcessContext returns the operation's process context, or background when unset.
+func (ctx *Context) ProcessContext() context.Context {
+	if ctx.processContext == nil {
+		return context.Background()
+	}
+	return ctx.processContext
+}
+
+// SetProcessContext sets the nonserialized context used by subprocess operations.
+func (ctx *Context) SetProcessContext(processContext context.Context) {
+	ctx.processContext = processContext
 }
 
 // New creates a Context for the given task operation and prepares its work directory.
@@ -70,9 +86,9 @@ func New(trigger sctxt.TriggerType, serviceName string, taskName string, opertat
 	return ctx, nil
 }
 
-// Close removes the temporary work directory if one was created.
+// Close removes only temporary work owned by this instance; deserialized copies borrow the directory.
 func (ctx *Context) Close() error {
-	if ctx.IsWorkDirTmp {
+	if ctx.IsWorkDirTmp && ctx.isWorkDirOwner {
 		if err := dir.Remove(ctx.WorkDir); err != nil {
 			return fmt.Errorf("remove work dir: %w", err)
 		}
@@ -96,12 +112,12 @@ func (ctx *Context) setWorkDir() error {
 		d.SetServiceName(ctx.ServiceName)
 		d.SetTaskName(ctx.TaskName)
 		d.SetName("temp_work_dir")
-
-		tempDirPath, err := d.CreateAsTmp()
+		tempDirPath, err := d.CreateUniqueAsTmp()
 		if err != nil {
 			return fmt.Errorf("create temp work dir: %w", err)
 		}
 
+		ctx.isWorkDirOwner = true
 		ctx.WorkDir = tempDirPath
 		ctx.IsWorkDirTmp = true
 	} else {

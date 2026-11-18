@@ -1,14 +1,15 @@
 package restic
 
 import (
-	"context"
-	"os/exec"
+	gocontext "context"
+
+	"github.com/strolt/strolt/shared/process"
 )
 
 // Unlock removes locks from the repository. By default restic only removes
 // stale locks, i.e. locks whose owning process is gone; isRemoveAll also
 // removes the locks of operations that are still running.
-func (i *Restic) Unlock(isRemoveAll bool) error {
+func (i *Restic) Unlock(processContext gocontext.Context, isRemoveAll bool) error {
 	var args []string
 	args = append(args, i.getGlobalFlags()...)
 	args = append(args, "unlock")
@@ -17,7 +18,7 @@ func (i *Restic) Unlock(isRemoveAll bool) error {
 		args = append(args, "--remove-all")
 	}
 
-	cmd := exec.CommandContext(context.Background(), i.getBin(), args...) //nolint:gosec // restic binary path and flags come from validated config
+	cmd := process.CommandContext(processContext, i.getBin(), args...)
 
 	env, err := i.getEnv()
 	if err != nil {

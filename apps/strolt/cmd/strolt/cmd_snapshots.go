@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -34,7 +36,7 @@ var snapshotsCmd = &cobra.Command{
 	Use:   "snapshots",
 	Short: "Print snapshots",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
+		initConfig(cmd.Context())
 		log := logger.New()
 		prompt := NewPrompt(cmd)
 
@@ -53,15 +55,24 @@ var snapshotsCmd = &cobra.Command{
 		}
 		Printf("selected destination: %s", prompt.DestinationName)
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeSnapshots)
-		if err != nil {
-			log.Fatal(err)
-		}
+		var snapshotList task.SnapshotList
+		if err := func() (resultErr error) {
+			t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeSnapshots)
+			if err != nil {
+				return fmt.Errorf("create task: %w", err)
+			}
+			defer func() {
+				if err := t.Close(); err != nil {
+					resultErr = errors.Join(resultErr, fmt.Errorf("close task: %w", err))
+				}
+			}()
 
-		defer func() { _ = t.Close() }()
-
-		snapshotList, err := t.GetSnapshotList(prompt.DestinationName)
-		if err != nil {
+			snapshotList, err = t.GetSnapshotList(prompt.DestinationName)
+			if err != nil {
+				return fmt.Errorf("get snapshot list: %w", err)
+			}
+			return nil
+		}(); err != nil {
 			log.Fatal(err)
 		}
 

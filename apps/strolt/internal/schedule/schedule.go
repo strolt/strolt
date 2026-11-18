@@ -2,6 +2,7 @@
 package schedule
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/robfig/cron/v3"
@@ -9,98 +10,86 @@ import (
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/shared/logger"
-
-	ctx "context"
 )
 
-func start(serviceName string, taskName string, operation sctxt.OperationType) func() {
+func start(processContext context.Context, serviceName string, taskName string, operation sctxt.OperationType) func() {
 	return func() {
 		log := logger.New().WithField("taskName", taskName).WithField("operation", operation)
-
 		log.Info("started")
 
 		if operation == sctxt.OpTypeBackup {
-			backup(serviceName, taskName)
+			backup(processContext, serviceName, taskName)
 		}
-
 		if operation == sctxt.OpTypePrune {
-			prune(serviceName, taskName)
+			prune(processContext, serviceName, taskName)
 		}
 
 		log.Info("finished")
 	}
 }
 
-// Run starts the cron scheduler and blocks until the context is canceled.
-func Run(ctx ctx.Context) {
-	log := logger.New()
+func runCron(processContext context.Context, cr *cron.Cron) {
+	cr.Start()
+	<-processContext.Done()
+	<-cr.Stop().Done()
+	logger.New().Debug("schedule manager stopped")
+}
+
+// Run starts the cron scheduler and waits for its active jobs to finish after cancellation.
+func Run(processContext context.Context) {
 	c := config.Get()
 	cr := cron.New(cron.WithLocation(config.GetLocation()))
 
-	go func() {
-		<-ctx.Done()
-
-		log.Debug("stop schedule manager...")
-
-		ctxCron := cr.Stop()
-		<-ctxCron.Done()
-
-		log.Debug("schedule manager stopped")
-	}()
-
 	for serviceName, service := range c.Services {
 		for taskName, task := range service {
-			log := log.WithField("taskName", taskName)
-
+			log := logger.New().WithField("taskName", taskName)
 			if task.Schedule.Backup != "" {
-				if _, err := cr.AddFunc(task.Schedule.Backup, start(serviceName, taskName, sctxt.OpTypeBackup)); err != nil {
+				if _, err := cr.AddFunc(task.Schedule.Backup, start(processContext, serviceName, taskName, sctxt.OpTypeBackup)); err != nil {
 					log.Error(fmt.Errorf("error start schedule backup - %w", err))
 				}
 			}
-
 			if task.Schedule.Prune != "" {
-				if _, err := cr.AddFunc(task.Schedule.Prune, start(serviceName, taskName, sctxt.OpTypePrune)); err != nil {
+				if _, err := cr.AddFunc(task.Schedule.Prune, start(processContext, serviceName, taskName, sctxt.OpTypePrune)); err != nil {
 					log.Error(fmt.Errorf("error start schedule prune - %w", err))
 				}
 			}
 		}
 	}
 
-	cr.Run()
+	runCron(processContext, cr)
 }
 
-func backup(serviceName string, taskName string) {
+func backup(processContext context.Context, serviceName string, taskName string) {
 	log := logger.New().WithField("serviceName", serviceName).WithField("taskName", taskName).WithField("trigger", sctxt.TSchedule)
-	t, err := task.New(serviceName, taskName, sctxt.TSchedule, sctxt.OpTypeBackup)
+	t, err := task.New(processContext, serviceName, taskName, sctxt.TSchedule, sctxt.OpTypeBackup)
 	if err != nil {
 		log.Error(err)
+		return
 	}
-
 	defer func() {
 		if err := t.Close(); err != nil {
 			log.Error(err)
 		}
 	}()
-
+	//nolint:contextcheck // Task retains the scheduled operation context through driver calls.
 	if err := t.Backup(); err != nil {
 		log.Error(err)
 	}
 }
 
-func prune(serviceName string, taskName string) {
+func prune(processContext context.Context, serviceName string, taskName string) {
 	log := logger.New().WithField("serviceName", serviceName).WithField("taskName", taskName).WithField("trigger", sctxt.TSchedule)
-
-	t, err := task.New(serviceName, taskName, sctxt.TSchedule, sctxt.OpTypePrune)
+	t, err := task.New(processContext, serviceName, taskName, sctxt.TSchedule, sctxt.OpTypePrune)
 	if err != nil {
 		log.Error(err)
+		return
 	}
-
 	defer func() {
 		if err := t.Close(); err != nil {
 			log.Error(err)
 		}
 	}()
-
+	//nolint:contextcheck // Task retains the scheduled operation context through driver calls.
 	if err := t.PruneAll(); err != nil {
 		log.Error(err)
 	}

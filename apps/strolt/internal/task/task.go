@@ -1,7 +1,9 @@
 package task
 
 import (
+	stdcontext "context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -52,8 +54,13 @@ const (
 	Prune  TaskOperation = "PRUNE"
 )
 
-// New creates a Task for the given service and task name with a prepared context.
-func New(serviceName string, taskName string, trigger sctxt.TriggerType, operationType sctxt.OperationType) (*Task, error) {
+// New creates a Task bound to the caller's operation context.
+//
+//nolint:contextcheck // The Task owns this context through its operation and driver calls.
+func New(processContext stdcontext.Context, serviceName string, taskName string, trigger sctxt.TriggerType, operationType sctxt.OperationType) (*Task, error) {
+	if processContext == nil {
+		processContext = stdcontext.Background()
+	}
 	c, err := config.GetConfigForTask(serviceName, taskName)
 	if err != nil {
 		return &Task{}, fmt.Errorf("get config for task: %w", err)
@@ -79,6 +86,7 @@ func New(serviceName string, taskName string, trigger sctxt.TriggerType, operati
 	if err != nil {
 		return &Task{}, fmt.Errorf("create task context: %w", err)
 	}
+	ctx.SetProcessContext(processContext)
 
 	if operationType == sctxt.OpTypeBackup {
 		ctx.Tags = append(ctx.Tags, c.Tags...)
@@ -87,12 +95,12 @@ func New(serviceName string, taskName string, trigger sctxt.TriggerType, operati
 		{
 			sourceDriver, err := dmanager.GetSourceDriver(c.Source.Driver, serviceName, taskName, c.Source.Config, c.Source.Env)
 			if err != nil {
-				return &Task{}, fmt.Errorf("get source driver: %w", err)
+				return &Task{}, errors.Join(fmt.Errorf("get source driver: %w", err), ctx.Close())
 			}
 
-			sourceBinVersions, err := sourceDriver.BinaryVersion()
+			sourceBinVersions, err := sourceDriver.BinaryVersion(processContext)
 			if err != nil {
-				return &Task{}, fmt.Errorf("get source binary version: %w", err)
+				return &Task{}, errors.Join(fmt.Errorf("get source binary version: %w", err), ctx.Close())
 			}
 
 			for _, bin := range sourceBinVersions {
@@ -140,6 +148,7 @@ func (t *Task) Clone() (Task, error) {
 		return Task{}, fmt.Errorf("unmarshal task: %w", err)
 	}
 
+	tClone.Context.SetProcessContext(t.Context.ProcessContext())
 	return tClone, nil
 }
 

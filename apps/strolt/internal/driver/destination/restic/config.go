@@ -1,15 +1,16 @@
 package restic
 
 import (
-	"context"
+	gocontext "context"
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/strolt/strolt/shared/process"
 )
 
 // ResticConfigBackupFlags describes restic backup command flags.
@@ -217,7 +218,7 @@ func (i *Restic) getKeepFlags() []string {
 	return flags
 }
 
-func (i *Restic) validateConfigBinPath() error {
+func (i *Restic) validateConfigBinPath(processContext gocontext.Context) error {
 	if i.config.BinPath != "" {
 		_, err := os.Stat(i.config.BinPath)
 		if os.IsNotExist(err) {
@@ -232,8 +233,8 @@ func (i *Restic) validateConfigBinPath() error {
 		i.config.BinPath = binPathAbs
 	}
 
-	if !i.isExistsBin() {
-		return errors.New("bin not exists")
+	if err := i.checkBin(processContext); err != nil {
+		return err
 	}
 
 	return nil
@@ -284,8 +285,8 @@ func (i *Restic) validateCompression() error {
 	return nil
 }
 
-func (i *Restic) validateConfig() error {
-	if err := i.validateConfigBinPath(); err != nil {
+func (i *Restic) validateConfig(processContext gocontext.Context) error {
+	if err := i.validateConfigBinPath(processContext); err != nil {
 		return err
 	}
 
@@ -302,14 +303,12 @@ func (i *Restic) validateConfig() error {
 	return nil
 }
 
-func (i *Restic) isExistsBin() bool {
-	cmd := exec.CommandContext(context.Background(), i.getBin(), "version") //nolint:gosec // restic binary path comes from validated config
-
+func (i *Restic) checkBin(processContext gocontext.Context) error {
+	cmd := process.CommandContext(processContext, i.getBin(), "version")
 	if _, err := cmd.Output(); err != nil {
-		return false
+		return fmt.Errorf("check restic binary: %w", err)
 	}
-
-	return true
+	return nil
 }
 
 func (i *Restic) getBin() string {

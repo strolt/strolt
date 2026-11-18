@@ -27,7 +27,7 @@ func TestForgetRemovesSnapshot(t *testing.T) {
 		}
 	}
 
-	if err := destination.Forget("snapshot-a"); err != nil {
+	if err := destination.Forget(t.Context(), "snapshot-a"); err != nil {
 		t.Fatalf("Forget() = %v, want nil", err)
 	}
 
@@ -49,7 +49,7 @@ func TestForgetUnknownSnapshot(t *testing.T) {
 		t.Fatalf("create snapshot: %v", err)
 	}
 
-	if err := destination.Forget("snapshot-unknown"); err == nil {
+	if err := destination.Forget(t.Context(), "snapshot-unknown"); err == nil {
 		t.Fatal("Forget() with unknown snapshot = nil, want error")
 	}
 
@@ -77,7 +77,7 @@ func TestForgetRejectsPathTraversal(t *testing.T) {
 
 	destination := &Local{config: Config{Path: destinationPath}, logger: logger.New()}
 
-	if err := destination.Forget("../outside"); err == nil {
+	if err := destination.Forget(t.Context(), "../outside"); err == nil {
 		t.Fatal("Forget() with traversing id = nil, want error")
 	}
 
@@ -91,7 +91,7 @@ func TestUnlockIsNoop(t *testing.T) {
 
 	destination, _ := newDestination(t)
 
-	if err := destination.Unlock(true); err != nil {
+	if err := destination.Unlock(t.Context(), true); err != nil {
 		t.Fatalf("Unlock() = %v, want nil", err)
 	}
 }

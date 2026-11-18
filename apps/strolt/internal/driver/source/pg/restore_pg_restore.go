@@ -3,14 +3,14 @@ package pg
 import (
 	"fmt"
 	"io"
-	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/util/bufcap"
+	"github.com/strolt/strolt/shared/process"
 )
 
-func (i *PgDump) restoreWithPgRestoreCmd(ctx context.Context, filename string, isPipe bool) *exec.Cmd {
+func (i *PgDump) restoreWithPgRestoreCmd(ctx context.Context, filename string, isPipe bool) *process.Cmd {
 	i.logger.Info("restore with pg_restore")
 
 	args := i.getRestoreArgs()
@@ -18,7 +18,7 @@ func (i *PgDump) restoreWithPgRestoreCmd(ctx context.Context, filename string, i
 		args = append(args, filename)
 	}
 
-	cmd := exec.Command(i.getBinPgRestore(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
+	cmd := process.CommandContext(ctx.ProcessContext(), i.getBinPgRestore(), args...)
 	cmd.Dir = ctx.WorkDir
 	cmd.Env = i.getEnv()
 

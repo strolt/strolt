@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
+	"github.com/strolt/strolt/shared/process"
 )
 
 // Restore runs the mysql client to load the dump from the working directory.
@@ -26,7 +26,7 @@ func (i *MySQL) Restore(ctx context.Context) error {
 	}()
 
 	args := i.getRestoreArgs()
-	cmd := exec.Command(i.getBinMySQL(), args...) //nolint:gosec,noctx // arguments come from validated configuration; driver context carries no std context
+	cmd := process.CommandContext(ctx.ProcessContext(), i.getBinMySQL(), args...)
 	cmd.Dir = ctx.WorkDir
 	// Feed the dump on stdin so the client runs in batch mode and aborts on the
 	// first failing statement with a non-zero exit code.

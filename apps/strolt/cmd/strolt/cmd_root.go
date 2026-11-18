@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
@@ -11,9 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	configPath = "./config.yml"
-)
+const configPath = "./config.yml"
 
 var (
 	isJSONFlag         = false
@@ -21,19 +20,15 @@ var (
 	configPathFlag     = ""
 )
 
-func initConfig() {
+func initConfig(processContext context.Context) {
 	if isJSONFlag {
 		logger.SetLogFormat(logger.LogFormatJSON)
 	}
-
 	if configPathFlag == "" {
 		configPathFlag = configPath
 	}
-
 	log := logger.New()
-
-	err := config.Load(configPathFlag)
-	if err != nil {
+	if err := config.Load(processContext, configPathFlag); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -57,13 +52,10 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// Execute runs the root command of the strolt CLI.
-//
-// The shared temp directory is deliberately NOT wiped here: several strolt
-// processes can share one data directory (the daemon plus CLI invocations
-// inside the same container), and a blanket cleanup on every CLI run deletes
-// the work directories of operations still in flight. Leftover GC happens on
-// daemon startup instead; each task removes its own work directory on Close.
-func Execute() {
-	_ = rootCmd.Execute()
+// ExecuteContext runs the root command under the supplied cancellation context.
+func ExecuteContext(ctx context.Context) error {
+	if err := rootCmd.ExecuteContext(ctx); err != nil {
+		return fmt.Errorf("execute command: %w", err)
+	}
+	return nil
 }

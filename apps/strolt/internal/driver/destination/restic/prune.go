@@ -1,14 +1,13 @@
 package restic
 
 import (
-	gocontext "context"
 	"encoding/json"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
+	"github.com/strolt/strolt/shared/process"
 )
 
 // Prune runs restic forget with the configured retention policy and prunes removed data.
@@ -28,7 +27,7 @@ func (i *Restic) Prune(ctx context.Context, isDryRun bool) ([]interfaces.Snapsho
 		args = append(args, "--dry-run")
 	}
 
-	cmd := exec.CommandContext(gocontext.Background(), i.getBin(), args...) //nolint:gosec // restic binary path and flags come from validated config
+	cmd := process.CommandContext(ctx.ProcessContext(), i.getBin(), args...)
 
 	env, err := i.getEnv()
 	if err != nil {

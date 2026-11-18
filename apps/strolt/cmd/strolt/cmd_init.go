@@ -17,18 +17,18 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize destinations",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
+		initConfig(cmd.Context())
 		c := config.Get()
 
 		for serviceName, service := range c.Services {
 			for taskName, task := range service {
 				for destinationName, destination := range task.Destinations {
 					log := logger.New().WithField("destination", destinationName)
-					d, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, serviceName, taskName, destination.Config, destination.Env)
+					d, err := dmanager.GetDestinationDriver(cmd.Context(), destinationName, destination.Driver, serviceName, taskName, destination.Config, destination.Env)
 					if err != nil {
 						log.Error(err)
 					} else {
-						if err := d.Init(); err != nil {
+						if err := d.Init(cmd.Context()); err != nil {
 							log.Error(err)
 						} else {
 							log.Info("initialized")

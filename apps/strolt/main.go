@@ -1,8 +1,19 @@
 // Strolt is a CLI and service for managing, scheduling, and monitoring backups.
 package main
 
-import cmd "github.com/strolt/strolt/apps/strolt/cmd/strolt"
+import (
+	"context"
+	"os/signal"
+	"syscall"
+
+	cmd "github.com/strolt/strolt/apps/strolt/cmd/strolt"
+	"github.com/strolt/strolt/shared/logger"
+)
 
 func main() {
-	cmd.Execute()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	if err := cmd.ExecuteContext(ctx); err != nil {
+		logger.New().Fatal(err)
+	}
 }

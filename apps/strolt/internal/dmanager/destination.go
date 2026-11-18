@@ -2,6 +2,7 @@
 package dmanager
 
 import (
+	gocontext "context"
 	"fmt"
 	"slices"
 
@@ -34,7 +35,7 @@ func IsAvailableDriverDestination(driver Destination) bool {
 }
 
 // GetDestinationDriver creates and configures the requested destination driver.
-func GetDestinationDriver(destinationName string, driver Destination, serviceName string, taskName string, driverConfig any, driverEnv any) (interfaces.DriverDestinationInterface, error) {
+func GetDestinationDriver(processContext gocontext.Context, destinationName string, driver Destination, serviceName string, taskName string, driverConfig any, driverEnv any) (interfaces.DriverDestinationInterface, error) {
 	destinationDrivers := map[Destination]interfaces.DriverDestinationInterface{
 		DriverDestinationLocal:  local.New(),
 		DriverDestinationRestic: restic.New(),
@@ -56,7 +57,7 @@ func GetDestinationDriver(destinationName string, driver Destination, serviceNam
 	}
 	d.SetLogger(logger.New().WithFields(loggerFields))
 
-	if err := d.SetConfig(driverConfig); err != nil {
+	if err := d.SetConfig(processContext, driverConfig); err != nil {
 		return nil, fmt.Errorf("set destination driver config: %w", err)
 	}
 

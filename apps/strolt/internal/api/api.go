@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/strolt/strolt/apps/strolt/internal/api/public"
@@ -23,19 +24,37 @@ type API struct {
 	addr       string
 	httpServer *http.Server
 	log        *logger.Logger
+	operations operationTracker
+}
+
+type operationTracker struct {
+	mu       sync.Mutex
+	wg       sync.WaitGroup
+	stopping bool
+}
+
+func (tracker *operationTracker) begin() (func(), bool) {
+	tracker.mu.Lock()
+	defer tracker.mu.Unlock()
+	if tracker.stopping {
+		return nil, false
+	}
+	tracker.wg.Add(1)
+	return tracker.wg.Done, true
+}
+
+func (tracker *operationTracker) stopAndWait() {
+	tracker.mu.Lock()
+	tracker.stopping = true
+	tracker.mu.Unlock()
+	tracker.wg.Wait()
 }
 
 // New creates an API server listening on the configured host and port.
-func New() *API {
+func New(processContext context.Context) *API {
 	addr := fmt.Sprintf("%s:%d", env.Host(), env.Port())
-
-	api := API{
-		addr: addr,
-		log:  logger.New(),
-	}
-
-	api.httpServer = api.makeHTTPServer()
-
+	api := API{addr: addr, log: logger.New()}
+	api.httpServer = api.makeHTTPServer(processContext)
 	return &api
 }
 
@@ -53,36 +72,33 @@ func (api *API) Shutdown() {
 	}
 }
 
-// Run the lister and request's router, activate api server.
+// Run serves requests until ctx is canceled or the server exits.
 func (api *API) Run(ctx context.Context, cancel func()) {
-	done := make(chan bool)
-
+	done := make(chan struct{})
 	go func() {
 		<-ctx.Done()
-
 		api.log.Debug("stop api server...")
 		api.Shutdown() //nolint:contextcheck
-		done <- true
+		close(done)
 	}()
 
 	go func() {
 		api.log.Infof("api server started on: %s", api.addr)
-
-		err := api.httpServer.ListenAndServe()
-		if err != nil {
+		if err := api.httpServer.ListenAndServe(); err != nil {
 			api.log.Warnf("http server terminated, %s", err)
 			cancel()
 		}
 	}()
 
 	<-done
+	api.operations.stopAndWait()
 	api.log.Debug("api server was stopped")
 }
 
-func (api *API) makeHTTPServer() *http.Server {
+func (api *API) makeHTTPServer(processContext context.Context) *http.Server {
 	return &http.Server{
 		Addr:              api.addr,
-		Handler:           api.handler(),
+		Handler:           api.handler(processContext),
 		ReadHeaderTimeout: 5 * time.Second,   //nolint:mnd
 		WriteTimeout:      120 * time.Second, //nolint:mnd
 		IdleTimeout:       30 * time.Second,  //nolint:mnd
@@ -94,7 +110,8 @@ func (api *API) makeHTTPServer() *http.Server {
 //	@version					1.0
 //	@securityDefinitions.basic	BasicAuth
 //	@title						Strolt API.
-func (api *API) handler() http.Handler {
+
+func (api *API) handler(processContext context.Context) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -111,7 +128,7 @@ func (api *API) handler() http.Handler {
 
 		r.Get("/api/v1/config", api.getConfig)
 		r.Get("/api/v1/info", api.getInfo)
-		services.New().Router(r)
+		services.New(processContext, api.operations.begin).Router(r)
 	})
 
 	return r

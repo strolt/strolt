@@ -1,14 +1,14 @@
 package restic
 
 import (
-	gocontext "context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/strolt/strolt/shared/process"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 )
@@ -94,14 +94,14 @@ func parseLsItem(line string) (lsItem, error) {
 	}
 }
 
-func (i *Restic) ls(_ context.Context, snapshotID string, path string) ([]lsItem, error) {
+func (i *Restic) ls(ctx context.Context, snapshotID string, path string) ([]lsItem, error) {
 	globalFlags := i.getGlobalFlags()
 
 	args := make([]string, 0, len(globalFlags)+3)
 	args = append(args, globalFlags...)
 	args = append(args, "ls", snapshotID, path)
 
-	cmd := exec.CommandContext(gocontext.Background(), i.getBin(), args...) //nolint:gosec // restic binary path and flags come from validated config
+	cmd := process.CommandContext(ctx.ProcessContext(), i.getBin(), args...)
 
 	env, err := i.getEnv()
 	if err != nil {

@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/shared/logger"
@@ -23,7 +26,7 @@ var forgetCmd = &cobra.Command{
 	Use:   "forget",
 	Short: "Delete a single snapshot, ignoring the retention policy",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
+		initConfig(cmd.Context())
 		log := logger.New()
 		prompt := NewPrompt(cmd)
 
@@ -47,20 +50,34 @@ var forgetCmd = &cobra.Command{
 		}
 		Printf("selected snapshot: %s", prompt.SnapshotName)
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeForget)
-		if err != nil {
+		if err := func() (resultErr error) {
+			t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeForget)
+			if err != nil {
+				return fmt.Errorf("create task: %w", err)
+			}
+			defer func() {
+				if err := t.Close(); err != nil {
+					resultErr = errors.Join(resultErr, fmt.Errorf("close task: %w", err))
+				}
+			}()
+
+			if !isSkipConfirmation {
+				confirmed, err := prompt.AskIsConfirm()
+				if err != nil {
+					return fmt.Errorf("confirm forget: %w", err)
+				}
+				if !confirmed {
+					return nil
+				}
+			}
+
+			if err := t.Forget(prompt.DestinationName, prompt.SnapshotName); err != nil {
+				return fmt.Errorf("forget snapshot: %w", err)
+			}
+			Printf("snapshot removed: %s", prompt.SnapshotName)
+			return nil
+		}(); err != nil {
 			log.Fatal(err)
 		}
-		defer func() { _ = t.Close() }()
-
-		if !isSkipConfirmation && !prompt.AskIsConfirm() {
-			return
-		}
-
-		if err := t.Forget(prompt.DestinationName, prompt.SnapshotName); err != nil {
-			log.Fatal(err)
-		}
-
-		Printf("snapshot removed: %s", prompt.SnapshotName)
 	},
 }

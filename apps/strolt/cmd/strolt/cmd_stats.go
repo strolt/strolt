@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 
 	"github.com/strolt/strolt/apps/strolt/internal/driver/interfaces"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
@@ -23,7 +25,7 @@ var statsCmd = &cobra.Command{
 	Use:   "stats",
 	Short: "Print destination stats",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
+		initConfig(cmd.Context())
 		log := logger.New()
 		prompt := NewPrompt(cmd)
 
@@ -42,15 +44,24 @@ var statsCmd = &cobra.Command{
 		}
 		Printf("selected destination: %s", prompt.DestinationName)
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeSnapshots)
-		if err != nil {
-			log.Fatal(err)
-		}
+		var stats interfaces.FormattedStats
+		if err := func() (resultErr error) {
+			t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeSnapshots)
+			if err != nil {
+				return fmt.Errorf("create task: %w", err)
+			}
+			defer func() {
+				if err := t.Close(); err != nil {
+					resultErr = errors.Join(resultErr, fmt.Errorf("close task: %w", err))
+				}
+			}()
 
-		defer func() { _ = t.Close() }()
-
-		stats, err := t.GetStats(prompt.DestinationName)
-		if err != nil {
+			stats, err = t.GetStats(prompt.DestinationName)
+			if err != nil {
+				return fmt.Errorf("get destination stats: %w", err)
+			}
+			return nil
+		}(); err != nil {
 			log.Fatal(err)
 		}
 

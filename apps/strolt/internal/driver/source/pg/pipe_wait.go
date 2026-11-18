@@ -2,10 +2,10 @@ package pg
 
 import (
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/strolt/strolt/apps/strolt/internal/util/bufcap"
+	"github.com/strolt/strolt/shared/process"
 )
 
 // stderrTailCap bounds how much subprocess stderr is retained on pipe
@@ -14,10 +14,8 @@ import (
 // memory on chatty runs.
 const stderrTailCap = 8 * 1024
 
-// waitWithStderr returns a wait function that appends the captured stderr
-// tail to a non-zero exit, so a piped restore failure names the actual SQL
-// error instead of a bare "exit status 1".
-func waitWithStderr(cmd *exec.Cmd, stderr *bufcap.Writer) func() error {
+// waitWithStderr appends the captured stderr tail to a non-zero exit.
+func waitWithStderr(cmd *process.Cmd, stderr *bufcap.Writer) func() error {
 	return func() error {
 		err := cmd.Wait()
 		if err == nil {

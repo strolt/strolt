@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/shared/logger"
@@ -24,7 +27,7 @@ var unlockCmd = &cobra.Command{
 	Use:   "unlock",
 	Short: "Remove locks from the destination repository",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
+		initConfig(cmd.Context())
 		log := logger.New()
 		prompt := NewPrompt(cmd)
 
@@ -43,16 +46,24 @@ var unlockCmd = &cobra.Command{
 		}
 		Printf("selected destination: %s", prompt.DestinationName)
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeUnlock)
-		if err != nil {
+		if err := func() (resultErr error) {
+			t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeUnlock)
+			if err != nil {
+				return fmt.Errorf("create task: %w", err)
+			}
+			defer func() {
+				if err := t.Close(); err != nil {
+					resultErr = errors.Join(resultErr, fmt.Errorf("close task: %w", err))
+				}
+			}()
+
+			if err := t.Unlock(prompt.DestinationName, isRemoveAllLocks); err != nil {
+				return fmt.Errorf("unlock destination: %w", err)
+			}
+			Printf("destination unlocked: %s", prompt.DestinationName)
+			return nil
+		}(); err != nil {
 			log.Fatal(err)
 		}
-		defer func() { _ = t.Close() }()
-
-		if err := t.Unlock(prompt.DestinationName, isRemoveAllLocks); err != nil {
-			log.Fatal(err)
-		}
-
-		Printf("destination unlocked: %s", prompt.DestinationName)
 	},
 }

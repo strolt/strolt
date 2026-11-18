@@ -1,20 +1,21 @@
 package restic
 
 import (
-	"context"
+	gocontext "context"
 	"fmt"
-	"os/exec"
+
+	"github.com/strolt/strolt/shared/process"
 )
 
 // Init initializes the restic repository.
-func (i *Restic) Init() error {
+func (i *Restic) Init(processContext gocontext.Context) error {
 	globalFlags := i.getGlobalFlags()
 
 	args := make([]string, 0, len(globalFlags)+1)
 	args = append(args, globalFlags...)
 	args = append(args, "init")
 
-	cmd := exec.CommandContext(context.Background(), i.getBin(), args...) //nolint:gosec // restic binary path and flags come from validated config
+	cmd := process.CommandContext(processContext, i.getBin(), args...)
 
 	env, err := i.getEnv()
 	if err != nil {

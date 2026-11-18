@@ -10,6 +10,7 @@ require (
 	github.com/go-openapi/strfmt v0.27.4
 	github.com/go-openapi/swag v0.29.2
 	github.com/go-openapi/validate v1.0.1
+	github.com/ovineko/procguard v0.1.1
 	github.com/sirupsen/logrus v1.10.2
 )
 

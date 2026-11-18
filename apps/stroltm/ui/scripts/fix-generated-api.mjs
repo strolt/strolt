@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const output = resolve("src/api/generated");
@@ -64,6 +64,26 @@ const patches = new Map([
       ],
     ],
   ],
+  [
+    "configuration.ts",
+    [
+      // A list keeps MIME examples stable across formatter passes.
+      [/^([ \t]*\* ) {2}(\S.*)$/gm, "$1- $2"],
+    ],
+  ],
+  [
+    "git_push.sh",
+    [
+      [
+        "git remote add origin https://${git_host}/${git_user_id}/${git_repo_id}.git",
+        'git remote add origin "https://${git_host}/${git_user_id}/${git_repo_id}.git"',
+      ],
+      [
+        /git remote add origin https:\/\/\$\{git_user_id\}:"?\$\{GIT_TOKEN\}"?@\$\{git_host\}\/\$\{git_user_id\}\/\$\{git_repo_id\}\.git/g,
+        'git remote add origin "https://${git_user_id}:${GIT_TOKEN}@${git_host}/${git_user_id}/${git_repo_id}.git"',
+      ],
+    ],
+  ],
 ]);
 
 for (const [file, replacements] of patches) {
@@ -79,4 +99,12 @@ for (const [file, replacements] of patches) {
     }
   }
   await writeFile(path, source);
+}
+
+for (const file of await readdir(output)) {
+  if (!file.endsWith(".ts")) continue;
+  const path = resolve(output, file);
+  const source = await readFile(path, "utf8");
+  const normalized = `${source.replace(/[ \t]+$/gm, "").trimEnd()}\n`;
+  if (source !== normalized) await writeFile(path, normalized);
 }

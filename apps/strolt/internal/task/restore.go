@@ -42,7 +42,7 @@ func (t *Task) RestoreDestinationToTemp(destinationName string, snapshotName str
 		return errors.New("destination not exits")
 	}
 
-	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
+	destinationDriver, err := dmanager.GetDestinationDriver(t.Context.ProcessContext(), destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
 	if err != nil {
 		return fmt.Errorf("get destination driver: %w", err)
 	}

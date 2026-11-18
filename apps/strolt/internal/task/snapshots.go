@@ -25,12 +25,12 @@ func (t *Task) GetSnapshotList(destinationName string) (SnapshotList, error) {
 		return nil, errors.New("destination not exits")
 	}
 
-	destinationDriver, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
+	destinationDriver, err := dmanager.GetDestinationDriver(t.Context.ProcessContext(), destinationName, destination.Driver, t.ServiceName, t.TaskName, destination.Config, destination.Env)
 	if err != nil {
 		return nil, fmt.Errorf("get destination driver: %w", err)
 	}
 
-	snapshots, err := destinationDriver.Snapshots()
+	snapshots, err := destinationDriver.Snapshots(t.Context.ProcessContext())
 	if err != nil {
 		return nil, fmt.Errorf("get destination snapshots: %w", err)
 	}

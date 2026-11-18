@@ -1,6 +1,7 @@
 package config
 
 import (
+	gocontext "context"
 	"fmt"
 
 	"github.com/strolt/strolt/apps/strolt/internal/dmanager"
@@ -10,12 +11,12 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-func (c *Config) validate() error {
+func (c *Config) validate(processContext gocontext.Context) error {
 	if err := c.validateNotifications(); err != nil {
 		return err
 	}
 
-	return c.validateServices()
+	return c.validateServices(processContext)
 }
 
 func (c *Config) validateNotifications() error {
@@ -28,7 +29,7 @@ func (c *Config) validateNotifications() error {
 	return nil
 }
 
-func (c *Config) validateServices() error {
+func (c *Config) validateServices(processContext gocontext.Context) error {
 	for serviceName, service := range c.Services {
 		if len(service) == 0 {
 			return fmt.Errorf("tasks must be exists service '%s'", serviceName)
@@ -55,7 +56,7 @@ func (c *Config) validateServices() error {
 			}
 
 			for destinationName, destination := range task.Destinations {
-				if err := destination.validate(serviceName, taskName, destinationName); err != nil {
+				if err := destination.validate(processContext, serviceName, taskName, destinationName); err != nil {
 					return err
 				}
 			}
@@ -101,12 +102,12 @@ func (source DriverSourceConfig) validate(serviceName string, taskName string) e
 	return nil
 }
 
-func (destination DriverDestinationConfig) validate(serviceName string, taskName string, destinationName string) error {
+func (destination DriverDestinationConfig) validate(processContext gocontext.Context, serviceName string, taskName string, destinationName string) error {
 	if destination.Driver == "" {
 		return fmt.Errorf("service '%s' task '%s' destination '%s' driver must be fill", serviceName, taskName, destinationName)
 	}
 
-	_, err := dmanager.GetDestinationDriver(destinationName, destination.Driver, serviceName, taskName, destination.Config, destination.Env)
+	_, err := dmanager.GetDestinationDriver(processContext, destinationName, destination.Driver, serviceName, taskName, destination.Config, destination.Env)
 	if err != nil {
 		return errors.Wrapf(err, "service '%s' task '%s' destination '%s'", serviceName, taskName, destinationName)
 	}

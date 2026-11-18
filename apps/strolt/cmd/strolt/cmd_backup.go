@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
 	"github.com/strolt/strolt/apps/strolt/internal/task"
 	"github.com/strolt/strolt/shared/logger"
@@ -21,7 +24,7 @@ var backupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Create backup",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
+		initConfig(cmd.Context())
 		log := logger.New()
 		prompt := NewPrompt(cmd)
 
@@ -35,17 +38,32 @@ var backupCmd = &cobra.Command{
 		}
 		Printf("selected task: %s", prompt.TaskName)
 
-		if !isSkipConfirmation && !prompt.AskIsConfirm() {
-			return
+		if !isSkipConfirmation {
+			confirmed, err := prompt.AskIsConfirm()
+			if err != nil {
+				log.Fatal(err)
+			}
+			if !confirmed {
+				return
+			}
 		}
 
-		t, err := task.New(prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeBackup)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer func() { _ = t.Close() }()
+		if err := func() (resultErr error) {
+			t, err := task.New(cmd.Context(), prompt.ServiceName, prompt.TaskName, sctxt.TManual, sctxt.OpTypeBackup)
+			if err != nil {
+				return fmt.Errorf("create task: %w", err)
+			}
+			defer func() {
+				if err := t.Close(); err != nil {
+					resultErr = errors.Join(resultErr, fmt.Errorf("close task: %w", err))
+				}
+			}()
 
-		if err := t.Backup(); err != nil {
+			if err := t.Backup(); err != nil {
+				return fmt.Errorf("backup task: %w", err)
+			}
+			return nil
+		}(); err != nil {
 			log.Fatal(err)
 		}
 	},
