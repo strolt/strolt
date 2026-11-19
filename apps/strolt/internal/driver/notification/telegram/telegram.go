@@ -39,6 +39,7 @@ const telegramAPIPrefix = "https://api.telegram.org/bot"
 // New creates a Telegram driver with the given parameters.
 func New(params Params) *Telegram {
 	res := Telegram{
+		logger: nil, config: Config{Token: "", ChatID: ""},
 		Params: params,
 	}
 

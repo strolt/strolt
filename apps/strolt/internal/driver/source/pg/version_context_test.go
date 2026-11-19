@@ -41,7 +41,7 @@ func TestBinaryVersionFailureStopsAtEachPostgresBinary(t *testing.T) {
 				}
 				require.NoError(t, os.WriteFile(paths[index], []byte(contents), 0o700))
 			}
-			driver := &PgDump{config: PgDumpConfig{BinPathPgDump: paths[0], BinPathPgRestore: paths[1], BinPathPsql: paths[2]}}
+			driver := &PgDump{logger: nil, env: nil, config: PgDumpConfig{Host: "", Port: 0, Database: "", Username: "", Password: "", Format: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathPgDump: paths[0], BinPathPgRestore: paths[1], BinPathPsql: paths[2]}}
 			versions, err := driver.BinaryVersion(context.Background())
 			require.Nil(t, versions)
 			var exitError *process.ExitError
@@ -64,14 +64,14 @@ func TestBinaryVersionReturnsParsedPostgresVersions(t *testing.T) {
 		paths[index] = filepath.Join(root, fmt.Sprintf("binary-%d", index))
 		require.NoError(t, os.WriteFile(paths[index], []byte("#!/bin/sh\nprintf '%s' "+shellQuote(output)+"\n"), 0o700))
 	}
-	driver := &PgDump{config: PgDumpConfig{BinPathPgDump: paths[0], BinPathPgRestore: paths[1], BinPathPsql: paths[2]}}
+	driver := &PgDump{logger: nil, env: nil, config: PgDumpConfig{Host: "", Port: 0, Database: "", Username: "", Password: "", Format: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathPgDump: paths[0], BinPathPgRestore: paths[1], BinPathPsql: paths[2]}}
 	versions, err := driver.BinaryVersion(context.Background())
 	require.NoError(t, err)
 	require.Equal(t, []string{"18.7\n", "18.7\n", "18.7\n"}, []string{versions[0].Version, versions[1].Version, versions[2].Version})
 }
 
 func TestBinaryVersionCanceledAndMissingPostgresProbe(t *testing.T) {
-	driver := &PgDump{config: PgDumpConfig{BinPathPgDump: filepath.Join(t.TempDir(), "missing")}}
+	driver := &PgDump{logger: nil, env: nil, config: PgDumpConfig{BinPathPgRestore: "", BinPathPsql: "", Host: "", Port: 0, Database: "", Username: "", Password: "", Format: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathPgDump: filepath.Join(t.TempDir(), "missing")}}
 	versions, err := driver.BinaryVersion(context.Background())
 	require.Nil(t, versions)
 	require.Error(t, err)
@@ -98,7 +98,7 @@ func TestBinaryVersionCancelsRunningPostgresProbe(t *testing.T) {
 	second := filepath.Join(root, "pg_restore")
 	require.NoError(t, os.WriteFile(first, []byte("#!/bin/sh\nprintf ready > "+shellQuote(ready)+"\nwhile :; do /bin/sleep 1; done\n"), 0o700))
 	require.NoError(t, os.WriteFile(second, []byte("#!/bin/sh\ntouch "+shellQuote(marker)+"\nprintf 'pg_restore (PostgreSQL) 18.7\\n'\n"), 0o700))
-	driver := &PgDump{config: PgDumpConfig{BinPathPgDump: first, BinPathPgRestore: second}}
+	driver := &PgDump{logger: nil, env: nil, config: PgDumpConfig{BinPathPsql: "", Host: "", Port: 0, Database: "", Username: "", Password: "", Format: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathPgDump: first, BinPathPgRestore: second}}
 	ctx, cancel := context.WithCancel(context.Background())
 	result := make(chan error, 1)
 	go func() {

@@ -38,7 +38,9 @@ type Webhook struct {
 // New creates a Webhook driver.
 func New() *Webhook {
 	return &Webhook{
-		client: &http.Client{Timeout: requestTimeout},
+		logger: nil,
+		config: Config{URL: ""},
+		client: &http.Client{Transport: nil, CheckRedirect: nil, Jar: nil, Timeout: requestTimeout},
 	}
 }
 

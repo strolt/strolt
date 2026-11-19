@@ -28,7 +28,7 @@ func TestCountingWriter(t *testing.T) {
 	t.Run("counts bytes and forwards them to the underlying writer", func(t *testing.T) {
 		var buf bytes.Buffer
 
-		cw := &countingWriter{w: &buf}
+		cw := &countingWriter{written: 0, w: &buf}
 
 		payload := []byte("hello world")
 
@@ -45,7 +45,7 @@ func TestCountingWriter(t *testing.T) {
 	})
 
 	t.Run("counts only the bytes accepted on a short write", func(t *testing.T) {
-		cw := &countingWriter{w: &shortWriter{limit: 3}}
+		cw := &countingWriter{written: 0, w: &shortWriter{limit: 3}}
 
 		n, err := cw.Write([]byte("hello"))
 		require.ErrorIs(t, err, io.ErrShortWrite)
@@ -56,7 +56,7 @@ func TestCountingWriter(t *testing.T) {
 	t.Run("io.Copy through the writer records the full stream size", func(t *testing.T) {
 		var buf bytes.Buffer
 
-		cw := &countingWriter{w: &buf}
+		cw := &countingWriter{written: 0, w: &buf}
 
 		payload := bytes.Repeat([]byte("x"), 4096)
 
@@ -69,7 +69,7 @@ func TestCountingWriter(t *testing.T) {
 	t.Run("propagates an underlying writer error", func(t *testing.T) {
 		wantErr := errors.New("boom")
 
-		cw := &countingWriter{w: writerFunc(func(p []byte) (int, error) {
+		cw := &countingWriter{written: 0, w: writerFunc(func(p []byte) (int, error) {
 			return 0, wantErr
 		})}
 

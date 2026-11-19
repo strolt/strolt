@@ -46,7 +46,7 @@ func newPromptInput(input *os.File) (io.ReadCloser, error) {
 		_ = unix.Close(fd)
 		return nil, fmt.Errorf("set prompt input nonblocking: %w", err)
 	}
-	return &promptInput{fd: fd, pollFD: int32(fd), originalFlags: flags, closeDone: make(chan struct{})}, nil
+	return &promptInput{readMu: sync.Mutex{}, mu: sync.Mutex{}, stopped: false, closeStarted: false, closeErr: nil, fd: fd, pollFD: int32(fd), originalFlags: flags, closeDone: make(chan struct{})}, nil
 }
 
 func (input *promptInput) Read(data []byte) (int, error) {
@@ -59,7 +59,7 @@ func (input *promptInput) Read(data []byte) (int, error) {
 		if input.isStopped() {
 			return 0, io.EOF
 		}
-		polls := []unix.PollFd{{Fd: input.pollFD, Events: unix.POLLIN | unix.POLLHUP | unix.POLLERR}}
+		polls := []unix.PollFd{{Revents: 0, Fd: input.pollFD, Events: unix.POLLIN | unix.POLLHUP | unix.POLLERR}}
 		count, err := unix.Poll(polls, int(promptInputPollInterval.Milliseconds()))
 		if err != nil {
 			if input.isStopped() {

@@ -32,8 +32,9 @@ func New() *API {
 	addr := fmt.Sprintf("%s:%d", env.Host(), env.Port())
 
 	api := API{
-		addr: addr,
-		log:  logger.New(),
+		httpServer: nil,
+		addr:       addr,
+		log:        logger.New(),
 	}
 
 	api.httpServer = api.makeHTTPServer()
@@ -83,6 +84,9 @@ func (api *API) Run(ctx context.Context, cancel func()) {
 
 func (api *API) makeHTTPServer() *http.Server {
 	return &http.Server{
+		DisableGeneralOptionsHandler: false, TLSConfig: nil, ReadTimeout: 0, MaxHeaderBytes: 0,
+		MaxHeaderValueCount: 0, TLSNextProto: nil, ConnState: nil, ErrorLog: nil, BaseContext: nil,
+		ConnContext: nil, HTTP2: nil, Protocols: nil, DisableClientPriority: false,
 		Addr:              api.addr,
 		Handler:           api.handler(),
 		ReadHeaderTimeout: 5 * time.Second,   //nolint:mnd

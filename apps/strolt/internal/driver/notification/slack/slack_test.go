@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	time "time"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/sctxt"
@@ -15,6 +16,7 @@ import (
 
 func testContext() context.Context {
 	return context.Context{
+		Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: "",
 		Trigger:        sctxt.TManual,
 		ServiceName:    "svc",
 		TaskName:       "task",
@@ -38,7 +40,7 @@ func TestValidateConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := New(Params{})
+			s := New(Params{apiPrefix: ""})
 			s.SetLogger(logger.New())
 
 			err := s.SetConfig(tt.config)

@@ -42,7 +42,7 @@ func (t *Task) Forget(destinationName string, snapshotID string) error {
 		t.eventDestinationError(destinationName, err)
 		t.eventOperationError(err)
 	} else {
-		t.eventDestinationStop(destinationName, sctxt.BackupOutput{})
+		t.eventDestinationStop(destinationName, sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0})
 		t.eventOperationStop()
 	}
 

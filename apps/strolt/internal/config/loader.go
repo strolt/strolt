@@ -49,7 +49,12 @@ func scan(pathname string) (*FileInfo, error) {
 	}
 
 	fi := FileInfo{
-		ConfigPathname: configPathname,
+		ConfigPathname:              configPathname,
+		Config:                      Config{TimeZone: "", timeLocation: nil, Services: nil, Tags: nil, Secrets: nil, Extends: Extends{Secrets: nil, Configs: nil}, Definitions: Definitions{Destinations: nil, Notifications: nil}, API: API{Users: nil}},
+		ExtendedConfigPathnameList:  nil,
+		ExtendedSecretsPathnameList: nil,
+		ExtendedFileInfoList:        nil,
+		ExtendedSecretsList:         nil,
 	}
 
 	configData, err := os.ReadFile(pathname) //nolint:gosec // path comes from user-provided configuration
@@ -97,7 +102,7 @@ func scan(pathname string) (*FileInfo, error) {
 		fi.ExtendedSecretsList = append(fi.ExtendedSecretsList, *extendedSecrets)
 	}
 
-	fi.Config.Extends = Extends{}
+	fi.Config.Extends = Extends{Secrets: nil, Configs: nil}
 
 	return &fi, nil
 }
@@ -172,39 +177,43 @@ func (c *Config) setDefaults() error {
 func load(pathname string) (loaded, error) {
 	fi, err := scan(pathname)
 	if err != nil {
-		return loaded{}, err
+		return loaded{Config: Config{TimeZone: "", timeLocation: nil, Services: nil, Tags: nil, Secrets: nil, Extends: Extends{Secrets: nil, Configs: nil}, Definitions: Definitions{Destinations: nil, Notifications: nil}, API: API{Users: nil}}, FileList: nil}, err
 	}
 
 	fi.ExtendedFileInfoList = append(fi.ExtendedFileInfoList,
 		FileInfo{
+			ConfigPathname: "", ExtendedConfigPathnameList: nil, ExtendedSecretsPathnameList: nil, ExtendedFileInfoList: nil, ExtendedSecretsList: nil,
 			Config: getCliConfig(),
 		},
 		FileInfo{
+			ConfigPathname: "", ExtendedConfigPathnameList: nil, ExtendedSecretsPathnameList: nil, ExtendedFileInfoList: nil, ExtendedSecretsList: nil,
 			Config: Config{
+				TimeZone: "", timeLocation: nil, Services: nil, Secrets: nil, Extends: Extends{Secrets: nil, Configs: nil}, Definitions: Definitions{Destinations: nil, Notifications: nil}, API: API{Users: nil},
 				Tags: env.GlobalTags(),
 			},
 		})
 
 	c, err := fi.merge()
 	if err != nil {
-		return loaded{}, err
+		return loaded{Config: Config{TimeZone: "", timeLocation: nil, Services: nil, Tags: nil, Secrets: nil, Extends: Extends{Secrets: nil, Configs: nil}, Definitions: Definitions{Destinations: nil, Notifications: nil}, API: API{Users: nil}}, FileList: nil}, err
 	}
 
 	if err := c.mergeDestinationExtends(); err != nil {
-		return loaded{}, err
+		return loaded{Config: Config{TimeZone: "", timeLocation: nil, Services: nil, Tags: nil, Secrets: nil, Extends: Extends{Secrets: nil, Configs: nil}, Definitions: Definitions{Destinations: nil, Notifications: nil}, API: API{Users: nil}}, FileList: nil}, err
 	}
 
 	if err := c.replaceSecrets(); err != nil {
-		return loaded{}, err
+		return loaded{Config: Config{TimeZone: "", timeLocation: nil, Services: nil, Tags: nil, Secrets: nil, Extends: Extends{Secrets: nil, Configs: nil}, Definitions: Definitions{Destinations: nil, Notifications: nil}, API: API{Users: nil}}, FileList: nil}, err
 	}
 
 	c.Secrets = map[string]string{}
 	c.Definitions = Definitions{
+		Destinations:  nil,
 		Notifications: c.Definitions.Notifications,
 	}
 
 	if err := c.setDefaults(); err != nil {
-		return loaded{}, err
+		return loaded{Config: Config{TimeZone: "", timeLocation: nil, Services: nil, Tags: nil, Secrets: nil, Extends: Extends{Secrets: nil, Configs: nil}, Definitions: Definitions{Destinations: nil, Notifications: nil}, API: API{Users: nil}}, FileList: nil}, err
 	}
 
 	return loaded{

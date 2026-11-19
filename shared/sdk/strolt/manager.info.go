@@ -15,6 +15,7 @@ func ManagerGetInfo(version string) common.ManagerInfo {
 
 	info := common.ManagerInfo{
 		Instances: make([]common.ManagerInfoInstance, len(manager.Instances)),
+		UpdatedAt: "",
 		Version:   version,
 	}
 
@@ -24,6 +25,7 @@ func ManagerGetInfo(version string) common.ManagerInfo {
 		instance.RLock()
 
 		infoItem := common.ManagerInfoInstance{
+			ProxyName: nil, Version: "", StartedAt: "", Config: common.ManagerInfoInstanceConfig{IsInitialized: false, UpdatedAt: ""}, TaskStatus: common.ManagerInfoInstanceTaskStatus{IsInitialized: false, UpdatedAt: "", UpdateRequestedAt: ""},
 			Name:            instance.Name,
 			IsOnline:        instance.IsOnline,
 			LastestOnlineAt: instance.Watch.LatestSuccessPingAt.Format(time.RFC3339),

@@ -42,7 +42,7 @@ type Local struct {
 
 // New creates a new Local driver instance.
 func New() *Local {
-	return &Local{}
+	return &Local{taskName: "", driverName: "", logger: nil, config: Config{Path: ""}, env: Env{}}
 }
 
 // Init initializes the driver.
@@ -120,10 +120,10 @@ func validateEnv(_ Env) error {
 func (i *Local) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 	snapshotName := uuid.New().String()
 	if err := dircopy.Copy(ctx.WorkDir, path.Join(i.config.Path, snapshotName)); err != nil {
-		return sctxt.BackupOutput{}, fmt.Errorf("copy workdir to snapshot: %w", err)
+		return sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}, fmt.Errorf("copy workdir to snapshot: %w", err)
 	}
 
-	return sctxt.BackupOutput{}, nil
+	return sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}, nil
 }
 
 // BackupPipe returns a writer that stores the piped backup in a new snapshot directory.
@@ -144,7 +144,9 @@ func (i *Local) BackupPipe(ctx context.Context, filename string) (io.WriteCloser
 		return nil, nil, fmt.Errorf("open snapshot file: %w", err)
 	}
 
-	return writer, func() (sctxt.BackupOutput, error) { return sctxt.BackupOutput{}, nil }, nil
+	return writer, func() (sctxt.BackupOutput, error) {
+		return sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}, nil
+	}, nil
 }
 
 // IsSupportedBackupPipe reports whether piped backups are supported.
@@ -251,7 +253,7 @@ func (i *Local) Unlock(_ gocontext.Context, _ bool) error {
 // Stats returns statistics for the destination.
 func (i *Local) Stats(_ gocontext.Context) (interfaces.Stats, error) {
 	i.logger.Debug("stats")
-	return interfaces.Stats{}, nil
+	return interfaces.Stats{TotalSize: 0, TotalFileCount: 0, SnapshotsCount: 0}, nil
 }
 
 // Snapshots lists the snapshots stored in the destination directory.
@@ -266,6 +268,7 @@ func (i *Local) Snapshots(_ gocontext.Context) ([]interfaces.Snapshot, error) {
 	for _, entry := range entries {
 		if entry.IsDir() {
 			snapshots = append(snapshots, interfaces.Snapshot{
+				ShortID: "", Tags: nil, Paths: nil,
 				ID:   entry.Name(),
 				Time: time.Now(),
 			})

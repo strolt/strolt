@@ -78,8 +78,9 @@ func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 		if !instance.IsOnline || instance.Config == nil {
 			itemsError = append(itemsError, backupAllStatusItem{
 				InstanceName: instance.Name,
+				ServiceName:  "",
+				TaskName:     "",
 			})
-
 			continue
 		}
 

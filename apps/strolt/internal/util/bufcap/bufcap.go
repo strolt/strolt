@@ -23,7 +23,7 @@ func New(limit int) *Writer {
 		limit = 0
 	}
 
-	return &Writer{limit: limit}
+	return &Writer{mu: sync.Mutex{}, buf: bytes.Buffer{}, limit: limit}
 }
 
 // Write stores p, evicting the oldest bytes once the capacity is exceeded.

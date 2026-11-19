@@ -69,6 +69,7 @@ func (ctx *Context) SetProcessContext(processContext context.Context) {
 // New creates a Context for the given task operation and prepares its work directory.
 func New(trigger sctxt.TriggerType, serviceName string, taskName string, opertationType sctxt.OperationType, sourceLocalPath string) (Context, error) {
 	ctx := Context{
+		processContext: nil, Operation: Operation{Time: Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: Operation{Time: Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, WorkDir: "", IsWorkDirTmp: false, isWorkDirOwner: false, Tags: nil,
 		Trigger:        trigger,
 		ServiceName:    serviceName,
 		TaskName:       taskName,
@@ -80,7 +81,7 @@ func New(trigger sctxt.TriggerType, serviceName string, taskName string, opertat
 	}
 
 	if err := ctx.setWorkDir(); err != nil {
-		return Context{}, err
+		return Context{processContext: nil, Trigger: "", ServiceName: "", TaskName: "", OpertationType: "", Event: "", Operation: Operation{Time: Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: Operation{Time: Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, isWorkDirOwner: false, Tags: nil, SourceLocalPath: ""}, err
 	}
 
 	return ctx, nil

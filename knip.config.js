@@ -2,8 +2,12 @@ import { defineConfig } from "./.datamitsu/knip.config.js";
 
 export default defineConfig({
   ignore: ["**/stylelint.config.mjs"],
-  ignoreDependencies: ["@docusaurus/tsconfig", "@docusaurus/faster", "redocusaurus"],
-  ignoreUnresolved: ["docusaurus-preset-redocusaurus"],
+  ignoreDependencies: [
+    "@docusaurus/tsconfig",
+    "@docusaurus/faster",
+    "redocusaurus",
+    "docusaurus-preset-redocusaurus",
+  ],
   workspaces: {
     "apps/stroltm/ui": {
       entry: ["src/main.tsx", "scripts/fix-generated-api.mjs"],

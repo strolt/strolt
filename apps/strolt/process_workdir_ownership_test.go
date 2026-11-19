@@ -75,7 +75,7 @@ api:
 	require.NoError(t, err)
 	require.NoError(t, listener.Close())
 	process := startStroltProcessFromConfig(t, port, root, configuration, "start")
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Transport: nil, CheckRedirect: nil, Jar: nil, Timeout: 10 * time.Second}
 	t.Cleanup(client.CloseIdleConnections)
 	baseURL := "http://" + net.JoinHostPort("127.0.0.1", port)
 	readyForRequests := false

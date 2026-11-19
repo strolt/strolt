@@ -61,7 +61,7 @@ type lsItem struct {
 func parseLsItem(line string) (lsItem, error) {
 	var itemType lsType
 	if err := json.Unmarshal([]byte(line), &itemType); err != nil {
-		return lsItem{}, fmt.Errorf("unmarshal ls item type: %w", err)
+		return lsItem{Node: nil, Snapshot: nil, Type: ""}, fmt.Errorf("unmarshal ls item type: %w", err)
 	}
 
 	switch itemType.StructType {
@@ -69,10 +69,11 @@ func parseLsItem(line string) (lsItem, error) {
 		var snapshot lsSnapshot
 
 		if err := json.Unmarshal([]byte(line), &snapshot); err != nil {
-			return lsItem{}, fmt.Errorf("unmarshal ls snapshot: %w", err)
+			return lsItem{Node: nil, Snapshot: nil, Type: ""}, fmt.Errorf("unmarshal ls snapshot: %w", err)
 		}
 
 		return lsItem{
+			Node:     nil,
 			Snapshot: &snapshot,
 			Type:     lsItemTypeSnapshot,
 		}, nil
@@ -81,16 +82,17 @@ func parseLsItem(line string) (lsItem, error) {
 		var node lsNode
 
 		if err := json.Unmarshal([]byte(line), &node); err != nil {
-			return lsItem{}, fmt.Errorf("unmarshal ls node: %w", err)
+			return lsItem{Node: nil, Snapshot: nil, Type: ""}, fmt.Errorf("unmarshal ls node: %w", err)
 		}
 
 		return lsItem{
-			Node: &node,
-			Type: lsItemTypeNode,
+			Node:     &node,
+			Snapshot: nil,
+			Type:     lsItemTypeNode,
 		}, nil
 
 	default:
-		return lsItem{}, errors.New("unknown item type")
+		return lsItem{Node: nil, Snapshot: nil, Type: ""}, errors.New("unknown item type")
 	}
 }
 

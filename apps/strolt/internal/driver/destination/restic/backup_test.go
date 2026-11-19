@@ -22,9 +22,15 @@ func TestParseBackupSummary(t *testing.T) {
 
 	expected := sctxt.BackupOutput{
 		FilesNew:            1,
+		FilesChanged:        0,
+		FilesUnmodified:     0,
+		DirsNew:             0,
+		DirsChanged:         0,
+		DirsUnmodified:      0,
 		TotalFilesProcessed: 1,
 		TotalBytesProcessed: 44040192,
 		SnapshotID:          "a1b2c3d4",
+		TotalBytesStreamed:  0,
 	}
 
 	t.Run("summary after status lines with trailing newline", func(t *testing.T) {

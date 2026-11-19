@@ -127,13 +127,34 @@ func (l *Logger) setLogLevel() {
 
 func (l *Logger) setFormat() {
 	if logFormat == LogFormatJSON {
-		l.logger.SetFormatter(&logrus.JSONFormatter{})
+		l.logger.SetFormatter(&logrus.JSONFormatter{
+			TimestampFormat:   "",
+			DisableTimestamp:  false,
+			DisableHTMLEscape: false,
+			DataKey:           "",
+			FieldMap:          nil,
+			CallerPrettyfier:  nil,
+			PrettyPrint:       false,
+		})
 	}
 
 	if logFormat == LogFormatText {
 		l.logger.SetFormatter(&logrus.TextFormatter{
-			DisableTimestamp:       true,
-			DisableLevelTruncation: true,
+			ForceColors:               false,
+			DisableColors:             false,
+			ForceQuote:                false,
+			DisableQuote:              false,
+			EnvironmentOverrideColors: false,
+			DisableTimestamp:          true,
+			FullTimestamp:             false,
+			TimestampFormat:           "",
+			DisableSorting:            false,
+			SortingFunc:               nil,
+			DisableLevelTruncation:    true,
+			PadLevelText:              false,
+			QuoteEmptyFields:          false,
+			FieldMap:                  nil,
+			CallerPrettyfier:          nil,
 		})
 	}
 }

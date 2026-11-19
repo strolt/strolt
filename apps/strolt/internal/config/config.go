@@ -80,7 +80,7 @@ func GetLocation() *time.Location {
 
 // GetConfigForTask returns the resolved configuration for the given task.
 func GetConfigForTask(serviceName string, taskName string) (TaskConfig, error) {
-	cTask := TaskConfig{}
+	cTask := TaskConfig{Schedule: Schedule{Backup: "", Prune: ""}, Source: DriverSourceConfig{Driver: "", Config: nil, Env: nil}, OperationMode: "", Destinations: nil, Notifications: nil, Tags: nil}
 	c := Get()
 
 	task, ok := c.Services[serviceName][taskName]

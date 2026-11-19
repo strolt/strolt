@@ -74,6 +74,7 @@ type restoreProgress struct {
 
 func newRestoreProgress(reader io.Reader, logf func(format string, a ...any)) *restoreProgress {
 	p := &restoreProgress{
+		total: 0, hasTotal: false, written: atomic.Int64{},
 		logf:     logf,
 		interval: restoreProgressInterval,
 		done:     make(chan struct{}),

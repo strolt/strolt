@@ -90,7 +90,7 @@ func startStroltProcessFromConfig(t *testing.T, port, root, configuration string
 	command := exec.CommandContext(ctx, executable, args...)
 	command.Env = append(os.Environ(), "STROLT_PROCESS_HELPER=1", "STROLT_PATH_DATA="+root,
 		"STROLT_HOST=127.0.0.1", "STROLT_PORT="+port, "STROLT_DISABLE_WATCH_FILES_CHANGED=true")
-	process := &runningStrolt{command: command, finished: make(chan struct{}), ready: ready, release: release}
+	process := &runningStrolt{command: command, finished: make(chan struct{}), waitErr: nil, log: processLog{mu: sync.Mutex{}, buffer: bytes.Buffer{}}, ready: ready, release: release}
 	command.Stdout, command.Stderr = &process.log, &process.log
 	require.NoError(t, command.Start())
 	go func() {
@@ -161,7 +161,7 @@ func TestAPIStatsDoesNotProbeSourceBinaries(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, listener.Close())
 	process := startStroltProcessFromConfig(t, port, root, configuration, "start")
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 10 * time.Second, Transport: nil, CheckRedirect: nil, Jar: nil}
 	t.Cleanup(client.CloseIdleConnections)
 	baseURL := "http://" + net.JoinHostPort("127.0.0.1", port)
 	require.Eventually(t, func() bool {
@@ -248,7 +248,7 @@ func TestDaemonShutdownCancelsRepositoryRequest(t *testing.T) {
 			require.NoError(t, err)
 			require.NoError(t, listener.Close())
 			process := startStroltProcess(t, port, "start")
-			client := &http.Client{Timeout: 10 * time.Second}
+			client := &http.Client{Timeout: 10 * time.Second, Transport: nil, CheckRedirect: nil, Jar: nil}
 			t.Cleanup(client.CloseIdleConnections)
 			baseURL := "http://" + net.JoinHostPort("127.0.0.1", port)
 			require.Eventually(t, func() bool {
@@ -310,7 +310,7 @@ func TestClientCancellationStopsRepositoryRequest(t *testing.T) {
 			require.NoError(t, err)
 			require.NoError(t, listener.Close())
 			process := startStroltProcess(t, port, "start")
-			client := &http.Client{Timeout: 10 * time.Second}
+			client := &http.Client{Timeout: 10 * time.Second, Transport: nil, CheckRedirect: nil, Jar: nil}
 			t.Cleanup(client.CloseIdleConnections)
 			baseURL := "http://" + net.JoinHostPort("127.0.0.1", port)
 			require.Eventually(t, func() bool {
@@ -370,7 +370,7 @@ func TestBackgroundBackupRetainsDaemonLifetime(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, listener.Close())
 	process := startStroltProcess(t, port, "start")
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 10 * time.Second, Transport: nil, CheckRedirect: nil, Jar: nil}
 	t.Cleanup(client.CloseIdleConnections)
 	baseURL := "http://" + net.JoinHostPort("127.0.0.1", port)
 	require.Eventually(t, func() bool {

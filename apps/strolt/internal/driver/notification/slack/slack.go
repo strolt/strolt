@@ -39,6 +39,7 @@ const slackAPIPrefix = "https://hooks.slack.com/services"
 // New creates a Slack driver with the given parameters.
 func New(params Params) *Slack {
 	res := Slack{
+		logger: nil, config: Config{TeamID: "", BotID: "", HookID: ""},
 		Params: params,
 	}
 

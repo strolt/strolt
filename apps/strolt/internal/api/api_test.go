@@ -1,6 +1,7 @@
 package api
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -8,7 +9,7 @@ import (
 )
 
 func TestOperationTrackerWaitsAndStopsAdmission(t *testing.T) {
-	tracker := &operationTracker{}
+	tracker := &operationTracker{mu: sync.Mutex{}, wg: sync.WaitGroup{}, stopping: false}
 	release, ok := tracker.begin()
 	require.True(t, ok)
 

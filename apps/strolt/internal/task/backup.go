@@ -235,10 +235,11 @@ func (t *Task) runBackupPipe() error {
 		}
 
 		destinations = append(destinations, destinationPipe{
-			name:    destinationName,
-			counter: &countingWriter{w: writer},
-			closer:  writer,
-			wait:    sync.OnceValues(destinationWait),
+			closeErr: nil,
+			name:     destinationName,
+			counter:  &countingWriter{w: writer, written: 0},
+			closer:   writer,
+			wait:     sync.OnceValues(destinationWait),
 		})
 	}
 

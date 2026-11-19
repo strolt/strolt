@@ -32,7 +32,7 @@ type Local struct {
 
 // New creates a new Local driver instance.
 func New() *Local {
-	return &Local{}
+	return &Local{logger: nil, config: Config{Path: ""}, env: Env{}}
 }
 
 // SetConfig parses and validates the driver configuration.

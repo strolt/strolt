@@ -47,6 +47,13 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
+	Aliases: nil, SuggestFor: nil, GroupID: "", Example: "", ValidArgs: nil, ValidArgsFunction: nil,
+	Args: nil, ArgAliases: nil, BashCompletionFunction: "", Deprecated: "", Annotations: nil, Version: "",
+	PersistentPreRunE: nil, PreRun: nil, PreRunE: nil, RunE: nil, PostRun: nil, PostRunE: nil,
+	PersistentPostRun: nil, PersistentPostRunE: nil, FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: false},
+	CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: false, DisableNoDescFlag: false, DisableDescriptions: false, HiddenDefaultCmd: false, DefaultShellCompDirective: nil}, TraverseChildren: false, Hidden: false, SilenceErrors: false,
+	SilenceUsage: false, DisableFlagParsing: false, DisableAutoGenTag: false, DisableFlagsInUseLine: false,
+	DisableSuggestions: false, SuggestionsMinimumDistance: 0,
 	Use:   "stroltm",
 	Short: "Strolt Manager - centralized management for Strolt and Stroltp instances",
 	Long: `Strolt Manager (stroltm) is a centralized management tool for Strolt and Stroltp instances.

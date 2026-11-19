@@ -7,8 +7,12 @@ import (
 func (m *Metrics) registerOperations() {
 	m.operations = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "strolt_operations_total",
-			Help: "Total operations.",
+			Namespace:   "",
+			Subsystem:   "",
+			Name:        "strolt_operations_total",
+			Help:        "Total operations.",
+			ConstLabels: nil,
+			Unit:        "",
 		},
 		[]string{"type", "operation"},
 	)

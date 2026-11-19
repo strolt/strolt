@@ -46,16 +46,32 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "stroltp",
-	Short: "Strolt Proxy - reverse proxy and load balancer for Strolt instances",
+	RunE:       nil,
+	Use:        "stroltp",
+	Aliases:    nil,
+	SuggestFor: nil,
+	Short:      "Strolt Proxy - reverse proxy and load balancer for Strolt instances",
+	GroupID:    "",
 	Long: `Strolt Proxy (stroltp) provides reverse proxy and load balancing capabilities for Strolt instances.
 It enables centralized access management, request routing, and high availability
 for your distributed backup infrastructure.`,
+	Example:                "",
+	ValidArgs:              nil,
+	ValidArgsFunction:      nil,
+	Args:                   nil,
+	ArgAliases:             nil,
+	BashCompletionFunction: "",
+	Deprecated:             "",
+	Annotations:            nil,
+	Version:                "",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		env.Scan()
 
 		initConfig()
 	},
+	PersistentPreRunE: nil,
+	PreRun:            nil,
+	PreRunE:           nil,
 	Run: func(cmd *cobra.Command, args []string) {
 		log := logger.New()
 
@@ -105,6 +121,21 @@ for your distributed backup infrastructure.`,
 
 		wg.Wait()
 	},
+	PostRun:                    nil,
+	PostRunE:                   nil,
+	PersistentPostRun:          nil,
+	PersistentPostRunE:         nil,
+	FParseErrWhitelist:         cobra.FParseErrWhitelist{UnknownFlags: false},
+	CompletionOptions:          cobra.CompletionOptions{DisableDefaultCmd: false, DisableNoDescFlag: false, DisableDescriptions: false, HiddenDefaultCmd: false, DefaultShellCompDirective: nil},
+	TraverseChildren:           false,
+	Hidden:                     false,
+	SilenceErrors:              false,
+	SilenceUsage:               false,
+	DisableFlagParsing:         false,
+	DisableAutoGenTag:          false,
+	DisableFlagsInUseLine:      false,
+	DisableSuggestions:         false,
+	SuggestionsMinimumDistance: 0,
 }
 
 // Execute runs the root command and exits on error.

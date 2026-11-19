@@ -53,7 +53,7 @@ func (tracker *operationTracker) stopAndWait() {
 // New creates an API server listening on the configured host and port.
 func New(processContext context.Context) *API {
 	addr := fmt.Sprintf("%s:%d", env.Host(), env.Port())
-	api := API{addr: addr, log: logger.New()}
+	api := API{addr: addr, httpServer: nil, log: logger.New(), operations: operationTracker{mu: sync.Mutex{}, wg: sync.WaitGroup{}, stopping: false}}
 	api.httpServer = api.makeHTTPServer(processContext)
 	return &api
 }
@@ -97,11 +97,24 @@ func (api *API) Run(ctx context.Context, cancel func()) {
 
 func (api *API) makeHTTPServer(processContext context.Context) *http.Server {
 	return &http.Server{
-		Addr:              api.addr,
-		Handler:           api.handler(processContext),
-		ReadHeaderTimeout: 5 * time.Second,   //nolint:mnd
-		WriteTimeout:      120 * time.Second, //nolint:mnd
-		IdleTimeout:       30 * time.Second,  //nolint:mnd
+		Addr:                         api.addr,
+		Handler:                      api.handler(processContext),
+		DisableGeneralOptionsHandler: false,
+		TLSConfig:                    nil,
+		ReadTimeout:                  0,
+		ReadHeaderTimeout:            5 * time.Second,   //nolint:mnd
+		WriteTimeout:                 120 * time.Second, //nolint:mnd
+		IdleTimeout:                  30 * time.Second,  //nolint:mnd
+		MaxHeaderBytes:               0,
+		MaxHeaderValueCount:          0,
+		TLSNextProto:                 nil,
+		ConnState:                    nil,
+		ErrorLog:                     nil,
+		BaseContext:                  nil,
+		ConnContext:                  nil,
+		HTTP2:                        nil,
+		Protocols:                    nil,
+		DisableClientPriority:        false,
 	}
 }
 

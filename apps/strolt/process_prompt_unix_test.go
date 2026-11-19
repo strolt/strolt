@@ -3,12 +3,14 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"testing"
 	"time"
@@ -20,21 +22,22 @@ import (
 )
 
 func TestCLIPromptSignalCancellation(t *testing.T) {
-	for _, scenario := range []struct {
+	scenarios := []struct {
 		name    string
 		args    []string
 		partial string
 		prompt  string
 		ctrlC   bool
 	}{
-		{name: "service-selection", args: []string{"snapshots"}, prompt: "Select service"},
-		{name: "confirmation", args: []string{"backup", "--service", "smoke", "--task", "task"}, prompt: "Are you sure?"},
-		{name: "partial-confirmation", args: []string{"backup", "--service", "smoke", "--task", "task"}, partial: "y", prompt: "Are you sure?"},
-		{name: "partial-escape", args: []string{"snapshots"}, partial: "\x1b[", prompt: "Select service"},
+		{name: "service-selection", args: []string{"snapshots"}, partial: "", prompt: "Select service", ctrlC: false},
+		{name: "confirmation", args: []string{"backup", "--service", "smoke", "--task", "task"}, partial: "", prompt: "Are you sure?", ctrlC: false},
+		{name: "partial-confirmation", args: []string{"backup", "--service", "smoke", "--task", "task"}, partial: "y", prompt: "Are you sure?", ctrlC: false},
+		{name: "partial-escape", args: []string{"snapshots"}, partial: "\x1b[", prompt: "Select service", ctrlC: false},
 		{name: "ctrl-c", args: []string{"snapshots"}, partial: "\x03", prompt: "Select service", ctrlC: true},
-		{name: "snapshot-restore", args: []string{"restore", "--service", "smoke", "--task", "task", "--destination", "storage"}, prompt: "Select snapshot"},
-		{name: "snapshot-forget", args: []string{"forget", "--service", "smoke", "--task", "task", "--destination", "storage"}, prompt: "Select snapshot"},
-	} {
+		{name: "snapshot-restore", args: []string{"restore", "--service", "smoke", "--task", "task", "--destination", "storage"}, partial: "", prompt: "Select snapshot", ctrlC: false},
+		{name: "snapshot-forget", args: []string{"forget", "--service", "smoke", "--task", "task", "--destination", "storage"}, partial: "", prompt: "Select snapshot", ctrlC: false},
+	}
+	for _, scenario := range scenarios {
 		t.Run(scenario.name, func(t *testing.T) {
 			runCLIPromptSignalCase(t, scenario.args, scenario.partial, scenario.prompt, scenario.ctrlC)
 		})
@@ -60,7 +63,7 @@ func testCLIPromptSnapshotInputOwnership(t *testing.T, delimiter string) {
 			master, slave, err := pty.Open()
 			require.NoError(t, err)
 			t.Cleanup(func() { _ = master.Close(); _ = slave.Close() })
-			output := &processLog{}
+			output := &processLog{mu: sync.Mutex{}, buffer: bytes.Buffer{}}
 			readDone := make(chan struct{})
 			go func() {
 				defer close(readDone)
@@ -75,7 +78,7 @@ func testCLIPromptSnapshotInputOwnership(t *testing.T, delimiter string) {
 					}
 				}
 			}()
-			require.NoError(t, pty.Setsize(slave, &pty.Winsize{Rows: 24, Cols: 80}))
+			require.NoError(t, pty.Setsize(slave, &pty.Winsize{Rows: 24, Cols: 80, X: 0, Y: 0}))
 			executable, err := os.Executable()
 			require.NoError(t, err)
 			args := []string{"-test.run=^TestStroltProcessHelper$", "--", "--config", configPath, operation, "--service", "smoke", "--task", "task", "--destination", "storage"}
@@ -152,7 +155,7 @@ func runCLIPromptSignalCase(t *testing.T, args []string, partial, promptLabel st
 	require.NoError(t, err)
 	defer func() { _ = master.Close() }()
 	defer func() { _ = slave.Close() }()
-	require.NoError(t, pty.Setsize(slave, &pty.Winsize{Rows: 24, Cols: 80}))
+	require.NoError(t, pty.Setsize(slave, &pty.Winsize{Rows: 24, Cols: 80, X: 0, Y: 0}))
 	before, err := term.GetState(slave.Fd())
 	require.NoError(t, err)
 	flags, err := unix.FcntlInt(slave.Fd(), unix.F_GETFL, 0)
@@ -170,7 +173,7 @@ func runCLIPromptSignalCase(t *testing.T, args []string, partial, promptLabel st
 			_ = command.Wait()
 		}
 	}()
-	output := &processLog{}
+	output := &processLog{mu: sync.Mutex{}, buffer: bytes.Buffer{}}
 	readDone := make(chan struct{})
 	go func() {
 		defer close(readDone)
@@ -209,7 +212,8 @@ func runCLIPromptSignalCase(t *testing.T, args []string, partial, promptLabel st
 	require.Equal(t, before, after, "terminal attributes were not restored")
 	afterFlags, err := unix.FcntlInt(slave.Fd(), unix.F_GETFL, 0)
 	require.NoError(t, err)
-	require.Equal(t, flags, afterFlags, "shared descriptor flags were not restored")
+	// O_NONBLOCK is the only status bit this code changes; macOS adds private bits.
+	require.Equal(t, flags&unix.O_NONBLOCK, afterFlags&unix.O_NONBLOCK, "shared descriptor nonblocking flag was not restored")
 	require.NoError(t, slave.Close())
 	select {
 	case <-readDone:

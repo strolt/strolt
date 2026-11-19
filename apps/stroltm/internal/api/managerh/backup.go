@@ -79,6 +79,7 @@ func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 	for _, instance := range strolt.ManagerGetPreparedInstances() {
 		if !instance.IsOnline || instance.Config == nil {
 			itemsError = append(itemsError, backupAllStatusItem{
+				ProxyName: "", ServiceName: "", TaskName: "",
 				InstanceName: instance.Name,
 			})
 
@@ -88,6 +89,7 @@ func (s *ManagerHandlers) backupAll(w http.ResponseWriter, r *http.Request) {
 		for serviceName, service := range instance.Config.Services {
 			for taskName := range service {
 				items = append(items, backupAllStatusItem{
+					ProxyName:    "",
 					InstanceName: instance.Name,
 					ServiceName:  serviceName,
 					TaskName:     taskName,

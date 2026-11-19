@@ -16,7 +16,7 @@ type MySQL struct {
 
 // New creates a new MySQL driver instance.
 func New() *MySQL {
-	return &MySQL{}
+	return &MySQL{logger: nil, config: Config{BinPathMySQL: "", BinPathMySQLDump: "", Host: "", Port: 0, Database: "", Username: "", Password: "", TLS: ""}}
 }
 
 // SetLogger sets the logger used by the driver.

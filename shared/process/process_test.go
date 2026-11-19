@@ -94,7 +94,7 @@ func TestEnvironmentAndWorkingDirectory(t *testing.T) {
 		env  []string
 		want string
 	}{
-		{name: "inherit", want: "inherited"},
+		{name: "inherit", env: nil, want: "inherited"},
 		{name: "empty", env: []string{}, want: ""},
 		{name: "explicit", env: []string{"STROLT_PROCESS_VALUE=first", "STROLT_PROCESS_VALUE=last"}, want: "last"},
 	} {
@@ -106,8 +106,20 @@ func TestEnvironmentAndWorkingDirectory(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if string(output) != tc.want+"|"+command.Dir {
-				t.Fatalf("environment/cwd = %q, want %q", output, tc.want+"|"+command.Dir)
+			value, directory, ok := strings.Cut(string(output), "|")
+			if !ok || value != tc.want {
+				t.Fatalf("environment/cwd = %q, want environment %q", output, tc.want)
+			}
+			actual, err := os.Stat(directory)
+			if err != nil {
+				t.Fatal(err)
+			}
+			want, err := os.Stat(command.Dir)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !os.SameFile(actual, want) {
+				t.Fatalf("working directory = %q, want the same directory as %q", directory, command.Dir)
 			}
 		})
 	}

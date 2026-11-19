@@ -10,10 +10,10 @@ type Metrics struct {
 	operations *prometheus.CounterVec
 }
 
-var metrics = &Metrics{}
+var metrics = &Metrics{operations: nil}
 
 // Init registers the strolt Prometheus metrics.
 func Init() {
-	metrics = &Metrics{}
+	metrics = &Metrics{operations: nil}
 	metrics.registerOperations()
 }

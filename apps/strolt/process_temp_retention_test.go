@@ -33,7 +33,7 @@ func TestDaemonStartupRetainsExistingTemporaryFiles(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, listener.Close())
 	process := startStroltProcessFromConfig(t, port, root, configuration, "start")
-	client := &http.Client{Timeout: time.Second}
+	client := &http.Client{Transport: nil, CheckRedirect: nil, Jar: nil, Timeout: time.Second}
 	t.Cleanup(client.CloseIdleConnections)
 	url := "http://" + net.JoinHostPort("127.0.0.1", port) + "/api/v1/ping"
 	require.Eventually(t, func() bool {

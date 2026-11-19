@@ -23,7 +23,7 @@ func TestSetConfigTLSValidation(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			i := &MySQL{}
+			i := &MySQL{logger: nil, config: Config{BinPathMySQL: "", BinPathMySQLDump: "", Host: "", Port: 0, Database: "", Username: "", Password: "", TLS: ""}}
 
 			err := i.SetConfig(map[string]any{"tls": tc.tls})
 			if (err != nil) != tc.wantErr {
@@ -49,7 +49,7 @@ func TestGetCommonArgsTLS(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			i := &MySQL{}
+			i := &MySQL{logger: nil, config: Config{BinPathMySQL: "", BinPathMySQLDump: "", Host: "", Port: 0, Database: "", Username: "", Password: "", TLS: ""}}
 			if err := i.SetConfig(map[string]any{"host": "db", "tls": tc.tls}); err != nil {
 				t.Fatalf("SetConfig: %v", err)
 			}
@@ -65,7 +65,7 @@ func TestGetCommonArgsTLS(t *testing.T) {
 func TestGetCommonArgsNoTLSFlagByDefault(t *testing.T) {
 	t.Parallel()
 
-	i := &MySQL{}
+	i := &MySQL{logger: nil, config: Config{BinPathMySQL: "", BinPathMySQLDump: "", Host: "", Port: 0, Database: "", Username: "", Password: "", TLS: ""}}
 	if err := i.SetConfig(map[string]any{"host": "db"}); err != nil {
 		t.Fatalf("SetConfig: %v", err)
 	}

@@ -3,12 +3,14 @@ package stroltp
 import (
 	"context"
 	"sync"
+	time "time"
 
 	"github.com/strolt/strolt/shared/logger"
 	"github.com/strolt/strolt/shared/sdk/common"
 )
 
 var manager = &Manager{
+	RWMutex:   sync.RWMutex{},
 	Instances: map[string]*Instance{},
 }
 
@@ -16,11 +18,12 @@ var manager = &Manager{
 func ManagerInit(ctx context.Context, cancel func(), instances []ManagerInstanceInit) {
 	for _, instance := range instances {
 		manager.Instances[instance.Name] = &Instance{
+			Info: nil, IsOnline: false,
 			Name:                     instance.Name,
 			URL:                      instance.URL,
 			Username:                 instance.Username,
 			Password:                 instance.Password, // pragma: allowlist secret
-			Watch:                    WatchItem{},
+			Watch:                    WatchItem{LatestPingAt: time.Time{}, LatestSuccessPingAt: time.Time{}, IsPingInProcess: false, IsUpdateStatusInProcess: false},
 			sdk:                      New(instance.URL, instance.Username, instance.Password),
 			log:                      logger.New().WithField("proxyInstanceName", instance.Name),
 			RWMutex:                  &sync.RWMutex{},
@@ -62,6 +65,7 @@ func ManagerGetPreparedInstances() []common.ManagerPreparedInstance {
 
 		if len(instance.StroltInstances) == 0 {
 			list[i] = common.ManagerPreparedInstance{
+				Config: nil, TaskStatus: nil, IsOnline: false,
 				ProxyName: &instance.Name,
 				Name:      "",
 			}

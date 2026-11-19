@@ -40,7 +40,7 @@ func TestBinaryVersionFailureStopsAtEachMongoBinary(t *testing.T) {
 				}
 				require.NoError(t, os.WriteFile(paths[index], []byte(contents), 0o700))
 			}
-			driver := &MongoDB{config: Config{BinPathMongoDump: paths[0], BinPathMongoRestore: paths[1]}}
+			driver := &MongoDB{logger: nil, env: nil, config: Config{URI: "", Host: "", Port: 0, Database: "", Username: "", Password: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathMongoDump: paths[0], BinPathMongoRestore: paths[1]}}
 			versions, err := driver.BinaryVersion(context.Background())
 			require.Nil(t, versions)
 			var exitError *process.ExitError
@@ -63,14 +63,14 @@ func TestBinaryVersionReturnsParsedMongoVersions(t *testing.T) {
 		paths[index] = filepath.Join(root, fmt.Sprintf("binary-%d", index))
 		require.NoError(t, os.WriteFile(paths[index], []byte("#!/bin/sh\nprintf '%s' "+shellQuote(output)+"\n"), 0o700))
 	}
-	driver := &MongoDB{config: Config{BinPathMongoDump: paths[0], BinPathMongoRestore: paths[1]}}
+	driver := &MongoDB{logger: nil, env: nil, config: Config{URI: "", Host: "", Port: 0, Database: "", Username: "", Password: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathMongoDump: paths[0], BinPathMongoRestore: paths[1]}}
 	versions, err := driver.BinaryVersion(context.Background())
 	require.NoError(t, err)
 	require.Equal(t, []string{"100.13.0", "100.13.0"}, []string{versions[0].Version, versions[1].Version})
 }
 
 func TestBinaryVersionCanceledAndMissingMongoProbe(t *testing.T) {
-	driver := &MongoDB{config: Config{BinPathMongoDump: filepath.Join(t.TempDir(), "missing")}}
+	driver := &MongoDB{logger: nil, env: nil, config: Config{BinPathMongoRestore: "", URI: "", Host: "", Port: 0, Database: "", Username: "", Password: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathMongoDump: filepath.Join(t.TempDir(), "missing")}}
 	versions, err := driver.BinaryVersion(context.Background())
 	require.Nil(t, versions)
 	require.Error(t, err)
@@ -97,7 +97,7 @@ func TestBinaryVersionCancelsRunningMongoProbe(t *testing.T) {
 	second := filepath.Join(root, "mongorestore")
 	require.NoError(t, os.WriteFile(first, []byte("#!/bin/sh\nprintf ready > "+shellQuote(ready)+"\nwhile :; do /bin/sleep 1; done\n"), 0o700))
 	require.NoError(t, os.WriteFile(second, []byte("#!/bin/sh\ntouch "+shellQuote(marker)+"\nprintf 'mongorestore version: 100.13.0\\n'\n"), 0o700))
-	driver := &MongoDB{config: Config{BinPathMongoDump: first, BinPathMongoRestore: second}}
+	driver := &MongoDB{logger: nil, env: nil, config: Config{URI: "", Host: "", Port: 0, Database: "", Username: "", Password: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathMongoDump: first, BinPathMongoRestore: second}}
 	ctx, cancel := context.WithCancel(context.Background())
 	result := make(chan error, 1)
 	go func() {

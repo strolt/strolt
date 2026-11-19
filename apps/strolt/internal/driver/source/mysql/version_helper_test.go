@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestMain(m *testing.M) {
@@ -28,7 +29,10 @@ func probeHelper(binary, mode string) {
 		_ = os.WriteFile(filepath.Join(filepath.Dir(os.Args[0]), "invoked"), nil, 0o600)
 	case "gate":
 		_ = os.WriteFile(filepath.Join(filepath.Dir(os.Args[0]), "ready"), nil, 0o600)
-		select {}
+		// Keep a runnable timer so the runtime does not report a deadlock before cancellation.
+		for {
+			time.Sleep(time.Hour)
+		}
 	case "empty":
 	case "truncated":
 		if _, err := fmt.Fprintln(os.Stdout, "short"); err != nil {

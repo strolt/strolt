@@ -32,13 +32,13 @@ func parseStats(output []byte) (resticStats, error) {
 
 		var stats resticStats
 		if err := json.Unmarshal([]byte(line), &stats); err != nil {
-			return resticStats{}, fmt.Errorf("unmarshal stats output: %w", err)
+			return resticStats{TotalSize: 0, TotalFileCount: 0, SnapshotsCount: 0}, fmt.Errorf("unmarshal stats output: %w", err)
 		}
 
 		return stats, nil
 	}
 
-	return resticStats{}, errors.New("restic stats output not found")
+	return resticStats{TotalSize: 0, TotalFileCount: 0, SnapshotsCount: 0}, errors.New("restic stats output not found")
 }
 
 // Stats returns repository statistics reported by restic.
@@ -47,7 +47,7 @@ func (i *Restic) Stats(processContext gocontext.Context) (interfaces.Stats, erro
 
 	env, err := i.getEnv()
 	if err != nil {
-		return interfaces.Stats{}, err
+		return interfaces.Stats{TotalSize: 0, TotalFileCount: 0, SnapshotsCount: 0}, err
 	}
 
 	cmd.Env = env
@@ -60,13 +60,13 @@ func (i *Restic) Stats(processContext gocontext.Context) (interfaces.Stats, erro
 
 	if err != nil {
 		i.logger.Error(err)
-		return interfaces.Stats{}, err
+		return interfaces.Stats{TotalSize: 0, TotalFileCount: 0, SnapshotsCount: 0}, err
 	}
 
 	parsed, err := parseStats(output)
 	if err != nil {
 		i.logger.Error(err)
-		return interfaces.Stats{}, err
+		return interfaces.Stats{TotalSize: 0, TotalFileCount: 0, SnapshotsCount: 0}, err
 	}
 
 	stats := interfaces.Stats{

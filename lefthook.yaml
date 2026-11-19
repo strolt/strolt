@@ -10,7 +10,7 @@ pre-commit:
     swagger:
       glob: apps/{strolt,stroltm}/internal/api/**/*.go
       priority: 5
-      run: make swagger && git add -u -- shared/sdk apps/stroltm/ui/src/api/generated
+      run: "make swagger && git add -u -- shared/sdk apps/stroltm/ui/src/api/generated"
     test-strolt:
       glob:
         - apps/strolt/**
@@ -36,6 +36,9 @@ pre-commit:
     datamitsu-init:
       priority: 10
       run: pnpm datamitsu init
+    datamitsu-ensure-configs:
+      priority: 15
+      run: pnpm datamitsu config reconcile --create-missing --no-verify-hash
     datamitsu-check:
       priority: 40
       run: pnpm datamitsu check --file-scoped
@@ -53,4 +56,7 @@ post-checkout:
     init datamitsu:
       priority: 2
       run: pnpm datamitsu init
+    datamitsu-ensure-configs:
+      priority: 3
+      run: pnpm datamitsu config reconcile --create-missing --no-verify-hash
   parallel: false

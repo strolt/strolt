@@ -45,6 +45,7 @@ func (o *resticBackupOutput) toBackupOutput() sctxt.BackupOutput {
 		TotalFilesProcessed: o.TotalFilesProcessed,
 		TotalBytesProcessed: o.TotalBytesProcessed,
 		SnapshotID:          o.SnapshotID,
+		TotalBytesStreamed:  0,
 	}
 }
 
@@ -62,7 +63,7 @@ func parseBackupSummary(output []byte) (sctxt.BackupOutput, error) {
 
 		var summary resticBackupOutput
 		if err := json.Unmarshal([]byte(line), &summary); err != nil {
-			return sctxt.BackupOutput{}, fmt.Errorf("unmarshal backup output: %w", err)
+			return sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}, fmt.Errorf("unmarshal backup output: %w", err)
 		}
 
 		// Skip non-summary progress lines (e.g. "status"); accept the summary
@@ -74,14 +75,14 @@ func parseBackupSummary(output []byte) (sctxt.BackupOutput, error) {
 		return summary.toBackupOutput(), nil
 	}
 
-	return sctxt.BackupOutput{}, errors.New("restic backup summary not found")
+	return sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}, errors.New("restic backup summary not found")
 }
 
 // Backup runs a restic backup of the working directory and returns its summary.
 func (i *Restic) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 	cmd, err := i.backupCmd(ctx, "", false)
 	if err != nil {
-		return sctxt.BackupOutput{}, err
+		return sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}, err
 	}
 
 	i.logger.Debug(cmd.String())
@@ -89,7 +90,7 @@ func (i *Restic) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 	output, err := startCmd(cmd)
 	if err != nil {
 		i.logger.Error(err)
-		return sctxt.BackupOutput{}, err
+		return sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}, err
 	}
 
 	i.logger.Debug(string(output))
@@ -97,7 +98,7 @@ func (i *Restic) Backup(ctx context.Context) (sctxt.BackupOutput, error) {
 	backupOutput, err := parseBackupSummary(output)
 	if err != nil {
 		i.logger.Error(err)
-		return sctxt.BackupOutput{}, err
+		return sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}, err
 	}
 
 	return backupOutput, nil
@@ -131,16 +132,16 @@ func (i *Restic) BackupPipe(ctx context.Context, filename string) (io.WriteClose
 	wait := func() (sctxt.BackupOutput, error) {
 		if err := cmd.Wait(); err != nil {
 			if tail := strings.TrimSpace(stderr.Tail()); tail != "" {
-				return sctxt.BackupOutput{}, fmt.Errorf("wait restic backup: %w: %s", err, tail)
+				return sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}, fmt.Errorf("wait restic backup: %w: %s", err, tail)
 			}
 
-			return sctxt.BackupOutput{}, fmt.Errorf("wait restic backup: %w", err)
+			return sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}, fmt.Errorf("wait restic backup: %w", err)
 		}
 
 		output, err := parseBackupSummary(stdout.Bytes())
 		if err != nil {
 			i.logger.Error(err)
-			return sctxt.BackupOutput{}, err
+			return sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}, err
 		}
 
 		return output, nil

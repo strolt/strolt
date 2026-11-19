@@ -14,7 +14,7 @@ type MongoDB struct {
 
 // New creates a new MongoDB driver instance.
 func New() *MongoDB {
-	return &MongoDB{}
+	return &MongoDB{logger: nil, config: Config{BinPathMongoDump: "", BinPathMongoRestore: "", URI: "", Host: "", Port: 0, Database: "", Username: "", Password: "", BackupParams: "", RestoreParams: "", CommonParams: ""}, env: nil}
 }
 
 // SetLogger sets the logger used by the driver.
