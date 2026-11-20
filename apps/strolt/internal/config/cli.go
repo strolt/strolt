@@ -5,7 +5,7 @@ type CliConfig struct {
 	Tags []string
 }
 
-var cliConfig = CliConfig{}
+var cliConfig = CliConfig{Tags: nil}
 
 // SetCliConfig stores CLI-provided configuration overrides.
 func SetCliConfig(config *CliConfig) {
@@ -14,6 +14,13 @@ func SetCliConfig(config *CliConfig) {
 
 func getCliConfig() Config {
 	return Config{
-		Tags: cliConfig.Tags,
+		TimeZone:     "",
+		timeLocation: nil,
+		Services:     nil,
+		Tags:         cliConfig.Tags,
+		Secrets:      nil,
+		Extends:      Extends{Secrets: nil, Configs: nil},
+		Definitions:  Definitions{Destinations: nil, Notifications: nil},
+		API:          API{Users: nil},
 	}
 }

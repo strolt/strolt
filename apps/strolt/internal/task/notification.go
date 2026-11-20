@@ -109,7 +109,7 @@ func (t *Task) eventDestinationStart(destinationName string) {
 	operation, ok := t.Context.Destination[destinationName]
 
 	if !ok {
-		operation = context.DestinationOperation{}
+		operation = context.DestinationOperation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: "", BackupOutput: sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}}
 	}
 
 	operation.Time.Start = time.Now()
@@ -124,7 +124,7 @@ func (t *Task) eventDestinationError(destinationName string, err error) {
 	operation, ok := t.Context.Destination[destinationName]
 
 	if !ok {
-		operation = context.DestinationOperation{}
+		operation = context.DestinationOperation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: "", BackupOutput: sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}}
 	}
 
 	operation.Time.Stop = time.Now()
@@ -140,7 +140,7 @@ func (t *Task) eventDestinationStop(destinationName string, output sctxt.BackupO
 	operation, ok := t.Context.Destination[destinationName]
 
 	if !ok {
-		operation = context.DestinationOperation{}
+		operation = context.DestinationOperation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: "", BackupOutput: sctxt.BackupOutput{FilesNew: 0, FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0, TotalFilesProcessed: 0, TotalBytesProcessed: 0, SnapshotID: "", TotalBytesStreamed: 0}}
 	}
 
 	operation.Time.Stop = time.Now()

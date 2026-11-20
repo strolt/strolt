@@ -13,7 +13,7 @@ func newDestination(t *testing.T) (*Local, string) {
 
 	dir := t.TempDir()
 
-	return &Local{config: Config{Path: dir}, logger: logger.New()}, dir
+	return &Local{taskName: "", driverName: "", env: Env{}, config: Config{Path: dir}, logger: logger.New()}, dir
 }
 
 func TestForgetRemovesSnapshot(t *testing.T) {
@@ -75,7 +75,7 @@ func TestForgetRejectsPathTraversal(t *testing.T) {
 		t.Fatalf("create outside directory: %v", err)
 	}
 
-	destination := &Local{config: Config{Path: destinationPath}, logger: logger.New()}
+	destination := &Local{taskName: "", driverName: "", env: Env{}, config: Config{Path: destinationPath}, logger: logger.New()}
 
 	if err := destination.Forget(t.Context(), "../outside"); err == nil {
 		t.Fatal("Forget() with traversing id = nil, want error")

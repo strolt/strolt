@@ -19,7 +19,7 @@ func TestPortablePostgresMalformedProbeOutput(t *testing.T) {
 			first := installProbe(t, root, "pg_dump", mode)
 			second := installProbe(t, root, "pg_restore", "forbidden")
 			third := installProbe(t, root, "psql", "forbidden")
-			versions, err := (&PgDump{config: PgDumpConfig{BinPathPgDump: first, BinPathPgRestore: second, BinPathPsql: third}}).BinaryVersion(context.Background())
+			versions, err := (&PgDump{logger: nil, env: nil, config: PgDumpConfig{Host: "", Port: 0, Database: "", Username: "", Password: "", Format: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathPgDump: first, BinPathPgRestore: second, BinPathPsql: third}}).BinaryVersion(context.Background())
 			require.Nil(t, versions)
 			require.Error(t, err)
 			require.NoFileExists(t, filepath.Join(root, "invoked"))
@@ -42,7 +42,7 @@ func TestPortablePostgresProbeFailureOrdering(t *testing.T) {
 				}
 				paths[index] = installProbe(t, root, binary, mode)
 			}
-			driver := &PgDump{config: PgDumpConfig{BinPathPgDump: paths[0], BinPathPgRestore: paths[1], BinPathPsql: paths[2]}}
+			driver := &PgDump{logger: nil, env: nil, config: PgDumpConfig{Host: "", Port: 0, Database: "", Username: "", Password: "", Format: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathPgDump: paths[0], BinPathPgRestore: paths[1], BinPathPsql: paths[2]}}
 			versions, err := driver.BinaryVersion(context.Background())
 			require.Nil(t, versions)
 			var exitError *process.ExitError
@@ -58,7 +58,7 @@ func TestPortablePostgresProbeCancellation(t *testing.T) {
 	root := t.TempDir()
 	first := installProbe(t, root, "pg_dump", "gate")
 	second := installProbe(t, root, "pg_restore", "forbidden")
-	driver := &PgDump{config: PgDumpConfig{BinPathPgDump: first, BinPathPgRestore: second}}
+	driver := &PgDump{logger: nil, env: nil, config: PgDumpConfig{BinPathPsql: "", Host: "", Port: 0, Database: "", Username: "", Password: "", Format: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathPgDump: first, BinPathPgRestore: second}}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	result := make(chan error, 1)

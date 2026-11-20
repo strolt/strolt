@@ -40,7 +40,7 @@ func TestBinaryVersionFailureStopsAtEachMySQLBinary(t *testing.T) {
 				}
 				require.NoError(t, os.WriteFile(paths[index], []byte(contents), 0o700))
 			}
-			driver := &MySQL{config: Config{BinPathMySQL: paths[0], BinPathMySQLDump: paths[1]}}
+			driver := &MySQL{logger: nil, config: Config{Host: "", Port: 0, Database: "", Username: "", Password: "", TLS: "", BinPathMySQL: paths[0], BinPathMySQLDump: paths[1]}}
 			versions, err := driver.BinaryVersion(context.Background())
 			require.Nil(t, versions)
 			var exitError *process.ExitError
@@ -63,14 +63,14 @@ func TestBinaryVersionReturnsParsedMySQLVersions(t *testing.T) {
 		paths[index] = filepath.Join(root, fmt.Sprintf("binary-%d", index))
 		require.NoError(t, os.WriteFile(paths[index], []byte("#!/bin/sh\nprintf '%s' "+shellQuote(output)+"\n"), 0o700))
 	}
-	driver := &MySQL{config: Config{BinPathMySQL: paths[0], BinPathMySQLDump: paths[1]}}
+	driver := &MySQL{logger: nil, config: Config{Host: "", Port: 0, Database: "", Username: "", Password: "", TLS: "", BinPathMySQL: paths[0], BinPathMySQLDump: paths[1]}}
 	versions, err := driver.BinaryVersion(context.Background())
 	require.NoError(t, err)
 	require.Equal(t, []string{"11.4.13-MariaDB", "11.4.13-MariaDB"}, []string{versions[0].Version, versions[1].Version})
 }
 
 func TestBinaryVersionCanceledAndMissingMySQLProbe(t *testing.T) {
-	driver := &MySQL{config: Config{BinPathMySQL: filepath.Join(t.TempDir(), "missing")}}
+	driver := &MySQL{logger: nil, config: Config{BinPathMySQLDump: "", Host: "", Port: 0, Database: "", Username: "", Password: "", TLS: "", BinPathMySQL: filepath.Join(t.TempDir(), "missing")}}
 	versions, err := driver.BinaryVersion(context.Background())
 	require.Nil(t, versions)
 	require.Error(t, err)
@@ -97,7 +97,7 @@ func TestBinaryVersionCancelsRunningMySQLProbe(t *testing.T) {
 	second := filepath.Join(root, "mysqldump")
 	require.NoError(t, os.WriteFile(first, []byte("#!/bin/sh\nprintf ready > "+shellQuote(ready)+"\nwhile :; do /bin/sleep 1; done\n"), 0o700))
 	require.NoError(t, os.WriteFile(second, []byte("#!/bin/sh\ntouch "+shellQuote(marker)+"\nprintf 'mysqldump  Ver 11.4.13-MariaDB for Linux\\n'\n"), 0o700))
-	driver := &MySQL{config: Config{BinPathMySQL: first, BinPathMySQLDump: second}}
+	driver := &MySQL{logger: nil, config: Config{Host: "", Port: 0, Database: "", Username: "", Password: "", TLS: "", BinPathMySQL: first, BinPathMySQLDump: second}}
 	ctx, cancel := context.WithCancel(context.Background())
 	result := make(chan error, 1)
 	go func() {

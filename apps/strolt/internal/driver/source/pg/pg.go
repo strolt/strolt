@@ -19,7 +19,7 @@ type PgDump struct {
 
 // New creates a new PgDump driver instance.
 func New() *PgDump {
-	return &PgDump{}
+	return &PgDump{logger: nil, config: PgDumpConfig{BinPathPgDump: "", BinPathPgRestore: "", BinPathPsql: "", Host: "", Port: 0, Database: "", Username: "", Password: "", Format: "", BackupParams: "", RestoreParams: "", CommonParams: ""}, env: nil}
 }
 
 // SetLogger sets the logger used by the driver.

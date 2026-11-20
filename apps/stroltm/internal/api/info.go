@@ -68,6 +68,7 @@ func (api *API) getInfo(w http.ResponseWriter, r *http.Request) {
 	instances, updatedAt := getInfoInstances()
 
 	info := Info{
+		UpdatedAt:     "",
 		Instances:     instances,
 		LatestVersion: ldflags.GetVersion(), // TODO: replace this for github release api
 		Version:       ldflags.GetVersion(),

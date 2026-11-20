@@ -35,7 +35,7 @@ func (s *DaemonSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	s.baseURL = "http://localhost:" + port
-	s.client = &http.Client{Timeout: 10 * time.Second}
+	s.client = &http.Client{Transport: nil, CheckRedirect: nil, Jar: nil, Timeout: 10 * time.Second}
 
 	s.fs = fs()
 	s.Require().NoError(s.fs.dropData())

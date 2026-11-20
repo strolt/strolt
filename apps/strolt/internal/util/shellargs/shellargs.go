@@ -41,7 +41,7 @@ type tokenizer struct {
 // MustSplit instead.
 func Split(s string) ([]string, error) {
 	runes := []rune(s)
-	t := &tokenizer{}
+	t := &tokenizer{args: nil, current: nil, hasToken: false, state: 0}
 
 	for i := 0; i < len(runes); i++ {
 		r := runes[i]

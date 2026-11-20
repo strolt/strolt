@@ -1,3 +1,5 @@
+title = "Custom Gitleaks configuration"
+
 [[allowlists]]
 condition = "AND"
 description = "Public Algolia DocSearch key in generated website configuration"

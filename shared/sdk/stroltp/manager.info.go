@@ -26,6 +26,7 @@ func ManagerGetInfo(version string) common.ManagerInfo {
 
 	info := common.ManagerInfo{
 		Instances: []common.ManagerInfoInstance{},
+		UpdatedAt: "",
 		Version:   version,
 	}
 
@@ -34,16 +35,19 @@ func ManagerGetInfo(version string) common.ManagerInfo {
 
 		if instance.Info == nil {
 			infoItem := common.ManagerInfoInstance{
+				Name: "", Version: "", StartedAt: "", Config: common.ManagerInfoInstanceConfig{IsInitialized: false, UpdatedAt: ""}, TaskStatus: common.ManagerInfoInstanceTaskStatus{IsInitialized: false, UpdatedAt: "", UpdateRequestedAt: ""},
 				ProxyName:       &instance.Name,
 				IsOnline:        false,
 				LastestOnlineAt: instance.Watch.LatestSuccessPingAt.Format(time.RFC3339),
 			}
 
 			infoItem.Config = common.ManagerInfoInstanceConfig{
+				UpdatedAt:     "",
 				IsInitialized: false,
 			}
 
 			infoItem.TaskStatus = common.ManagerInfoInstanceTaskStatus{
+				UpdatedAt: "", UpdateRequestedAt: "",
 				IsInitialized: false,
 			}
 
@@ -63,6 +67,7 @@ func ManagerGetInfo(version string) common.ManagerInfo {
 			}
 
 			infoItem := common.ManagerInfoInstance{
+				Name: "", Version: "", StartedAt: "", Config: common.ManagerInfoInstanceConfig{IsInitialized: false, UpdatedAt: ""}, TaskStatus: common.ManagerInfoInstanceTaskStatus{IsInitialized: false, UpdatedAt: "", UpdateRequestedAt: ""},
 				ProxyName:       &instance.Name,
 				IsOnline:        stroltInstance.IsOnline,
 				LastestOnlineAt: latestOnlineAt,

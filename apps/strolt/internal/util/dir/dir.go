@@ -24,7 +24,7 @@ const prefix = "strolt-data"
 
 // New creates an empty Directory builder.
 func New() *Directory {
-	return &Directory{}
+	return &Directory{serviceName: "", taskName: "", driverName: "", name: "", isTemp: false}
 }
 
 // SetServiceName sets the service name part of the directory path.

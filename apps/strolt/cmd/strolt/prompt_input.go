@@ -103,9 +103,15 @@ type promptAnswerInput struct {
 
 func newPromptAnswerInput(input io.ReadCloser, cancel context.CancelCauseFunc, answers *promptAnswerState) *promptAnswerInput {
 	if answers == nil {
-		answers = &promptAnswerState{}
+		answers = &promptAnswerState{mu: sync.Mutex{}, skipLF: false}
 	}
-	return &promptAnswerInput{input: input, cancel: cancel, answers: answers, skipLF: answers.takeSkipLF()}
+	return &promptAnswerInput{
+		mu: sync.Mutex{}, answerDone: false, frame: [6]byte{}, sourceByte: [1]byte{}, frameSize: 0, frameOffset: 0, inPaste: false,
+		input:   input,
+		cancel:  cancel,
+		answers: answers,
+		skipLF:  answers.takeSkipLF(),
+	}
 }
 
 func (input *promptAnswerInput) Read(data []byte) (int, error) {

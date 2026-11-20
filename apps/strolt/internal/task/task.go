@@ -1,11 +1,13 @@
 package task
 
 import (
-	stdcontext "context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
+	time "time"
+
+	stdcontext "context"
 
 	"github.com/strolt/strolt/apps/strolt/internal/config"
 	"github.com/strolt/strolt/apps/strolt/internal/context"
@@ -63,7 +65,7 @@ func New(processContext stdcontext.Context, serviceName string, taskName string,
 	}
 	c, err := config.GetConfigForTask(serviceName, taskName)
 	if err != nil {
-		return &Task{}, fmt.Errorf("get config for task: %w", err)
+		return &Task{Context: context.Context{Trigger: "", ServiceName: "", TaskName: "", OpertationType: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: ""}, Trigger: "", ServiceName: "", TaskName: "", OperationBackup: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, OperationPrune: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, TaskConfig: config.TaskConfig{Schedule: config.Schedule{Backup: "", Prune: ""}, Source: config.DriverSourceConfig{Driver: "", Config: nil, Env: nil}, OperationMode: "", Destinations: nil, Notifications: nil, Tags: nil}, log: nil, isNotificationsDisabled: false, notificationWaitGroup: nil}, fmt.Errorf("get config for task: %w", err)
 	}
 
 	sourceLocalPath := ""
@@ -71,12 +73,12 @@ func New(processContext stdcontext.Context, serviceName string, taskName string,
 	if c.Source.Driver == dmanager.DriverSourceLocal {
 		sourceConfig, ok := c.Source.Config.(map[string]any)
 		if !ok {
-			return &Task{}, fmt.Errorf("want type map[string]interface{};  got %T", c.Source.Config)
+			return &Task{Context: context.Context{Trigger: "", ServiceName: "", TaskName: "", OpertationType: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: ""}, Trigger: "", ServiceName: "", TaskName: "", OperationBackup: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, OperationPrune: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, TaskConfig: config.TaskConfig{Schedule: config.Schedule{Backup: "", Prune: ""}, Source: config.DriverSourceConfig{Driver: "", Config: nil, Env: nil}, OperationMode: "", Destinations: nil, Notifications: nil, Tags: nil}, log: nil, isNotificationsDisabled: false, notificationWaitGroup: nil}, fmt.Errorf("want type map[string]interface{};  got %T", c.Source.Config)
 		}
 
 		path, ok := sourceConfig["path"].(string)
 		if !ok {
-			return &Task{}, fmt.Errorf("want type map[string]interface{};  got %T", sourceConfig["path"])
+			return &Task{Context: context.Context{Trigger: "", ServiceName: "", TaskName: "", OpertationType: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: ""}, Trigger: "", ServiceName: "", TaskName: "", OperationBackup: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, OperationPrune: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, TaskConfig: config.TaskConfig{Schedule: config.Schedule{Backup: "", Prune: ""}, Source: config.DriverSourceConfig{Driver: "", Config: nil, Env: nil}, OperationMode: "", Destinations: nil, Notifications: nil, Tags: nil}, log: nil, isNotificationsDisabled: false, notificationWaitGroup: nil}, fmt.Errorf("want type map[string]interface{};  got %T", sourceConfig["path"])
 		}
 
 		sourceLocalPath = path
@@ -84,7 +86,7 @@ func New(processContext stdcontext.Context, serviceName string, taskName string,
 
 	ctx, err := context.New(trigger, serviceName, taskName, operationType, sourceLocalPath)
 	if err != nil {
-		return &Task{}, fmt.Errorf("create task context: %w", err)
+		return &Task{Context: context.Context{Trigger: "", ServiceName: "", TaskName: "", OpertationType: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: ""}, Trigger: "", ServiceName: "", TaskName: "", OperationBackup: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, OperationPrune: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, TaskConfig: config.TaskConfig{Schedule: config.Schedule{Backup: "", Prune: ""}, Source: config.DriverSourceConfig{Driver: "", Config: nil, Env: nil}, OperationMode: "", Destinations: nil, Notifications: nil, Tags: nil}, log: nil, isNotificationsDisabled: false, notificationWaitGroup: nil}, fmt.Errorf("create task context: %w", err)
 	}
 	ctx.SetProcessContext(processContext)
 
@@ -95,12 +97,12 @@ func New(processContext stdcontext.Context, serviceName string, taskName string,
 		{
 			sourceDriver, err := dmanager.GetSourceDriver(c.Source.Driver, serviceName, taskName, c.Source.Config, c.Source.Env)
 			if err != nil {
-				return &Task{}, errors.Join(fmt.Errorf("get source driver: %w", err), ctx.Close())
+				return &Task{Context: context.Context{Trigger: "", ServiceName: "", TaskName: "", OpertationType: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: ""}, Trigger: "", ServiceName: "", TaskName: "", OperationBackup: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, OperationPrune: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, TaskConfig: config.TaskConfig{Schedule: config.Schedule{Backup: "", Prune: ""}, Source: config.DriverSourceConfig{Driver: "", Config: nil, Env: nil}, OperationMode: "", Destinations: nil, Notifications: nil, Tags: nil}, log: nil, isNotificationsDisabled: false, notificationWaitGroup: nil}, errors.Join(fmt.Errorf("get source driver: %w", err), ctx.Close())
 			}
 
 			sourceBinVersions, err := sourceDriver.BinaryVersion(processContext)
 			if err != nil {
-				return &Task{}, errors.Join(fmt.Errorf("get source binary version: %w", err), ctx.Close())
+				return &Task{Context: context.Context{Trigger: "", ServiceName: "", TaskName: "", OpertationType: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: ""}, Trigger: "", ServiceName: "", TaskName: "", OperationBackup: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, OperationPrune: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, TaskConfig: config.TaskConfig{Schedule: config.Schedule{Backup: "", Prune: ""}, Source: config.DriverSourceConfig{Driver: "", Config: nil, Env: nil}, OperationMode: "", Destinations: nil, Notifications: nil, Tags: nil}, log: nil, isNotificationsDisabled: false, notificationWaitGroup: nil}, errors.Join(fmt.Errorf("get source binary version: %w", err), ctx.Close())
 			}
 
 			for _, bin := range sourceBinVersions {
@@ -110,6 +112,7 @@ func New(processContext stdcontext.Context, serviceName string, taskName string,
 	}
 
 	return &Task{
+		isNotificationsDisabled: false, notificationWaitGroup: nil,
 		Context:     ctx,
 		Trigger:     trigger,
 		ServiceName: serviceName,
@@ -117,11 +120,13 @@ func New(processContext stdcontext.Context, serviceName string, taskName string,
 		TaskConfig:  c,
 
 		OperationBackup: Operation{
+			LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false,
 			Schedule: c.Schedule.Backup,
 		},
 		log: logger.New().WithField("serviceName", serviceName).WithField("taskName", taskName).WithField("trigger", sctxt.TSchedule),
 
 		OperationPrune: Operation{
+			LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false,
 			Schedule: c.Schedule.Prune,
 		},
 	}, nil
@@ -140,12 +145,12 @@ func (t *Task) Close() error {
 func (t *Task) Clone() (Task, error) {
 	data, err := json.Marshal(t) //nolint:musttag // nested config.TaskConfig is yaml-tagged; the JSON round-trip only needs symmetry
 	if err != nil {
-		return Task{}, fmt.Errorf("marshal task: %w", err)
+		return Task{Context: context.Context{Trigger: "", ServiceName: "", TaskName: "", OpertationType: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: ""}, Trigger: "", ServiceName: "", TaskName: "", OperationBackup: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, OperationPrune: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, TaskConfig: config.TaskConfig{Schedule: config.Schedule{Backup: "", Prune: ""}, Source: config.DriverSourceConfig{Driver: "", Config: nil, Env: nil}, OperationMode: "", Destinations: nil, Notifications: nil, Tags: nil}, log: nil, isNotificationsDisabled: false, notificationWaitGroup: nil}, fmt.Errorf("marshal task: %w", err)
 	}
 
 	var tClone Task
 	if err := json.Unmarshal(data, &tClone); err != nil { //nolint:musttag // nested config.TaskConfig is yaml-tagged; the JSON round-trip only needs symmetry
-		return Task{}, fmt.Errorf("unmarshal task: %w", err)
+		return Task{Context: context.Context{Trigger: "", ServiceName: "", TaskName: "", OpertationType: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: ""}, Trigger: "", ServiceName: "", TaskName: "", OperationBackup: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, OperationPrune: Operation{Schedule: "", LatestRun: 0, LatestDuration: 0, IsPreviouslyLaunched: false}, TaskConfig: config.TaskConfig{Schedule: config.Schedule{Backup: "", Prune: ""}, Source: config.DriverSourceConfig{Driver: "", Config: nil, Env: nil}, OperationMode: "", Destinations: nil, Notifications: nil, Tags: nil}, log: nil, isNotificationsDisabled: false, notificationWaitGroup: nil}, fmt.Errorf("unmarshal task: %w", err)
 	}
 
 	tClone.Context.SetProcessContext(t.Context.ProcessContext())

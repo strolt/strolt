@@ -6,179 +6,163 @@ importers:
   .:
     configDependencies: {}
     packageManagerDependencies:
-      '@pnpm/exe':
-        specifier: 12.14.0
-        version: 12.14.0
       pnpm:
-        specifier: 12.14.0
-        version: 12.14.0
+        specifier: 12.19.0
+        version: 12.19.0
 
 packages:
 
-  '@pnpm/exe.android-arm64@12.14.0':
-    resolution: {integrity: sha512-+iSh7x21C3A2hqc+Z0ZmbKTcn6YNlzrXM142PsnQH/dLj0DYxFzoBvc6XAnL/yfQ5nnH2ebBiRj/zVxr61fZbQ==}
+  '@pnpm/exe.android-arm64@12.19.0':
+    resolution: {integrity: sha512-NpPhCmjTAQUmG6PK5CYQBWrPE8D/IQCOcmVQQ1MMfVjcBIWh8KAxk1jBsKjy9Dpz7JH9k3QAQdwCekpi/9Q3LQ==}
     cpu: [arm64]
     os: [android]
 
-  '@pnpm/exe.android-x64@12.14.0':
-    resolution: {integrity: sha512-qT+0LqEr2wBVaxcG2T8cX/R8SSRz2Rvpp8nRR4fh8tnGUZRch87gFmsHUAoSQh7w6j1h0qTjrA384j4xi8frvw==}
+  '@pnpm/exe.android-x64@12.19.0':
+    resolution: {integrity: sha512-Ko6d6NHauv1fV9WjuEoFTM/V4Q6wVuv+A59atp37YB4UMYs9h6OHcpN7W4Q6l//do8LJhN2fjt4F7K4+/SRWSw==}
     cpu: [x64]
     os: [android]
 
-  '@pnpm/exe.darwin-arm64@12.14.0':
-    resolution: {integrity: sha512-tnrdUB8ecJoehuKKqi1YHCBVl61xtJ9XVGcx5EviC6fWO4DeGI8GtXrjvJxDBM3nuVjJeWistgsUp/N142x4sw==}
+  '@pnpm/exe.darwin-arm64@12.19.0':
+    resolution: {integrity: sha512-2u5ifdaBi/3pA0MMmEZ9ZvXBY2DJvk0NrvxgZ3L87B3MlbZdTb9oq6tTYMJAsMLhEg0NiGovtq1cTHVc75OnKw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@pnpm/exe.darwin-x64@12.14.0':
-    resolution: {integrity: sha512-vlBfGkruqQRsEHTW43cPwpYd7QlbIJ//cvpAdb3bVXkI8SgTPoXhCnc05m+ZNiPrrEkBsX/t7KHw9aXpkzPm3Q==}
+  '@pnpm/exe.darwin-x64@12.19.0':
+    resolution: {integrity: sha512-VZOyG983At+Y9iqOtxSfRSMDci4dLqmfYL7xFDKeLvsw8u101T1vellHFYdWnxM59gNi4jufuhBcyx5WwjeF+A==}
     cpu: [x64]
     os: [darwin]
 
-  '@pnpm/exe.freebsd-x64@12.14.0':
-    resolution: {integrity: sha512-Qg5rxBrGYl6Tfso+EyygPf84fY1Fzy55E/0or+iuYKtnf0vc0MlHJfVIlT7pBukMRntQHRik7hUi0Z4s7AlJsw==}
+  '@pnpm/exe.freebsd-x64@12.19.0':
+    resolution: {integrity: sha512-VctpMq4CSn8fh20XX0dsQz1cmakaRxSMq5AT7u66dQxkpMhf/ugm6bbwyj0rJpb04SYHtUBJKb7BB433KWHy8A==}
     cpu: [x64]
     os: [freebsd]
 
-  '@pnpm/exe.linux-arm64-musl@12.14.0':
-    resolution: {integrity: sha512-DRIe4yQkXBGA/PhVJdzlbnllxBdAtnMMvTVLLcGpsK5FvJz9kxD2Hyxtn68ovmNkVX06f6p45cQwfm3wx2jn1A==}
+  '@pnpm/exe.linux-arm64-musl@12.19.0':
+    resolution: {integrity: sha512-qWBJJrY084dmXordzdjL8C4drTHEU6dhbJ4ZupTChg9DKbWSKhVxJwTZXzUwFNmbo/TTAIQ8pFic8YCr0fIczg==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/exe.linux-arm64@12.14.0':
-    resolution: {integrity: sha512-7joGShZ44Nk3WpNU+60JoOPjCXlgxhJAq11S2UiVtwCUDgTer1yTPPfxGW8pxaD6046actYLIYDbZNlubHWs0A==}
+  '@pnpm/exe.linux-arm64@12.19.0':
+    resolution: {integrity: sha512-Rcivut7V1fcWSz4c11GYcZwRrUO1+wXWLUUBV13uRGuQ0QcixOoVn9+2ypfSmp6arDXl2Y+vKhs9522V8kCZHw==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-ppc64@12.14.0':
-    resolution: {integrity: sha512-gSoryn7ySdXd//gjgf3MvvA8ZerJayaSbuMZMtAWq4vb2/wlVEgpl0Kvqt54y58TRj533Qjq2txKgnxd4JyoAQ==}
+  '@pnpm/exe.linux-ppc64@12.19.0':
+    resolution: {integrity: sha512-KhBS0NJK+wY0PbwdjFQ7gR00Pv+1be83nXqPrRcK+h0xmUmRSAEiLGyPajSNa7xUFoCXVVwJGeoCYMepz2VNmg==}
     cpu: [ppc64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-riscv64@12.14.0':
-    resolution: {integrity: sha512-EMjew1H9WqQ7pL+tYqCPwiuB+0PeCiJRV7fyWeuFw0wwYUajFBjcaPO3IGAVu9sdmJDU+e+HYv/Zey6aKae0Vw==}
+  '@pnpm/exe.linux-riscv64@12.19.0':
+    resolution: {integrity: sha512-fbwKjV+2AsrFTToCseD9IccE+VQXbzeKMiho6U1he4N904gQ9p06/MwtxqKBGSD+PaEVAn8IolzSQRpBq84XZg==}
     cpu: [riscv64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-s390x@12.14.0':
-    resolution: {integrity: sha512-shYOj/SFoXD35fHe0pWr2JofwSXulC0BnEIXLj2QokDi0EF//AfKsui35yKIkTEl+s2VJybc3PO4iJNhKIj5Qw==}
+  '@pnpm/exe.linux-s390x@12.19.0':
+    resolution: {integrity: sha512-Bntrz3smF+pHpH3z82JFY3ldFthmrpGXB6xT32qhDB0qwo096OUSQvzO3xZ6+Mt1bnStM72q7w0Ht1jyEMdS3A==}
     cpu: [s390x]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-x64-musl@12.14.0':
-    resolution: {integrity: sha512-btZiZ2Ot0llKK1ndSfA5i3IRX7/S0VrmzseNH/BJ4c+Cady+S81H6vvU1zByggHMyqQhC8OgxO5PiIY7D9bH0Q==}
+  '@pnpm/exe.linux-x64-musl@12.19.0':
+    resolution: {integrity: sha512-2IJD+LBqnrwAInPSlhm5Z4l8qXUEG3L/zPmAy1amx8Mw/d+SYOoeI4X61eML1m4UD9mjrePF76M6Z+DEbLv/mg==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/exe.linux-x64@12.14.0':
-    resolution: {integrity: sha512-F6K8e/jWxiuEYJaQtRRUG9ynBSTEHa+t7Lf86MKuOO5UA7WVVMbi+oB8nY6iKW++ncWS2yG6T9faXZGxqNsfoQ==}
+  '@pnpm/exe.linux-x64@12.19.0':
+    resolution: {integrity: sha512-oTji4PzIwSG+AbcHnouo/hW1Oz+1yDP30KJqBmmQnxiOSqTAi8HylytTrONUT08DIjuZ9t8gGZWjv/tqnQdb2w==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.win32-arm64@12.14.0':
-    resolution: {integrity: sha512-DOjlkVB6TtTKeAAe0hNZXn5S7YqESmo1Z6SGbR4BZNQ4isRg31XVHjX2RFTbY8gnZq68IwzyLmPqlEjMmYxofg==}
+  '@pnpm/exe.netbsd-x64@12.19.0':
+    resolution: {integrity: sha512-0Sh1mIsOEvuQQsI6wAK3iRYBTqIaa3uAP81Gd+P27/yIpwfLnrHRdtWw+ojfhz0KeQmOH3SJYIY6504wYYuDNA==}
+    cpu: [x64]
+    os: [netbsd]
+
+  '@pnpm/exe.win32-arm64@12.19.0':
+    resolution: {integrity: sha512-vHJKl9Z4KDm48dAMlf2RXJroQiFTrxcN0DWc7m6fi+czyTHwtR8kVn2W0CQA0wbWAsdFg2kZ1A8KCuzbAo5Vsg==}
     cpu: [arm64]
     os: [win32]
 
-  '@pnpm/exe.win32-x64@12.14.0':
-    resolution: {integrity: sha512-/LSX6mew/sLf08XqcjemuklNKf1K/Ftpgj4//hK/HKzI2dKbmxDB27a/2OaQ5a0O3/3OFzlssXDziZsi+yVBwQ==}
+  '@pnpm/exe.win32-x64@12.19.0':
+    resolution: {integrity: sha512-Jr3tdhL7PG20T2mz3XWVa/CIod5dIC3vv+IUWNictKTky8vNwQQ00OCK8fd9rNihVhCC61oMjBROm8ABZEDLWQ==}
     cpu: [x64]
     os: [win32]
 
-  '@pnpm/exe@12.14.0':
-    resolution: {integrity: sha512-iZCbiKegYUapNVkZY4O8vjXt9EF/j34LbDvew6qUM5g/HrxMY38cFJaoE8+5ZWQfbt2YCsLfufI5TTh+GxUbWw==}
-    engines: {node: '>=18.*'}
-    hasBin: true
-
-  pnpm@12.14.0:
-    resolution: {integrity: sha512-wYum2HmT09Fky16JSPMrLAbuhUSH4GzY2GeBNC+z5btGNDZwNHEehoArqpw3vqkGzhkprQjXCITJfYAd8TOJpg==}
-    engines: {node: '>=18.*'}
+  pnpm@12.19.0:
+    resolution: {integrity: sha512-hzJ7ZhmFMgWDTkvlm6OiMeMD2fXkNZEu3jMSt1Obea+JCUL2UTsFpGkHRWZoiARcCbM/xCDCzS072VwBuiHb6w==}
+    engines: {node: '>=18'}
     hasBin: true
 
 snapshots:
 
-  '@pnpm/exe.android-arm64@12.14.0':
+  '@pnpm/exe.android-arm64@12.19.0':
     optional: true
 
-  '@pnpm/exe.android-x64@12.14.0':
+  '@pnpm/exe.android-x64@12.19.0':
     optional: true
 
-  '@pnpm/exe.darwin-arm64@12.14.0':
+  '@pnpm/exe.darwin-arm64@12.19.0':
     optional: true
 
-  '@pnpm/exe.darwin-x64@12.14.0':
+  '@pnpm/exe.darwin-x64@12.19.0':
     optional: true
 
-  '@pnpm/exe.freebsd-x64@12.14.0':
+  '@pnpm/exe.freebsd-x64@12.19.0':
     optional: true
 
-  '@pnpm/exe.linux-arm64-musl@12.14.0':
+  '@pnpm/exe.linux-arm64-musl@12.19.0':
     optional: true
 
-  '@pnpm/exe.linux-arm64@12.14.0':
+  '@pnpm/exe.linux-arm64@12.19.0':
     optional: true
 
-  '@pnpm/exe.linux-ppc64@12.14.0':
+  '@pnpm/exe.linux-ppc64@12.19.0':
     optional: true
 
-  '@pnpm/exe.linux-riscv64@12.14.0':
+  '@pnpm/exe.linux-riscv64@12.19.0':
     optional: true
 
-  '@pnpm/exe.linux-s390x@12.14.0':
+  '@pnpm/exe.linux-s390x@12.19.0':
     optional: true
 
-  '@pnpm/exe.linux-x64-musl@12.14.0':
+  '@pnpm/exe.linux-x64-musl@12.19.0':
     optional: true
 
-  '@pnpm/exe.linux-x64@12.14.0':
+  '@pnpm/exe.linux-x64@12.19.0':
     optional: true
 
-  '@pnpm/exe.win32-arm64@12.14.0':
+  '@pnpm/exe.netbsd-x64@12.19.0':
     optional: true
 
-  '@pnpm/exe.win32-x64@12.14.0':
+  '@pnpm/exe.win32-arm64@12.19.0':
     optional: true
 
-  '@pnpm/exe@12.14.0':
+  '@pnpm/exe.win32-x64@12.19.0':
+    optional: true
+
+  pnpm@12.19.0:
     optionalDependencies:
-      '@pnpm/exe.android-arm64': 12.14.0
-      '@pnpm/exe.android-x64': 12.14.0
-      '@pnpm/exe.darwin-arm64': 12.14.0
-      '@pnpm/exe.darwin-x64': 12.14.0
-      '@pnpm/exe.freebsd-x64': 12.14.0
-      '@pnpm/exe.linux-arm64': 12.14.0
-      '@pnpm/exe.linux-arm64-musl': 12.14.0
-      '@pnpm/exe.linux-ppc64': 12.14.0
-      '@pnpm/exe.linux-riscv64': 12.14.0
-      '@pnpm/exe.linux-s390x': 12.14.0
-      '@pnpm/exe.linux-x64': 12.14.0
-      '@pnpm/exe.linux-x64-musl': 12.14.0
-      '@pnpm/exe.win32-arm64': 12.14.0
-      '@pnpm/exe.win32-x64': 12.14.0
-
-  pnpm@12.14.0:
-    optionalDependencies:
-      '@pnpm/exe.android-arm64': 12.14.0
-      '@pnpm/exe.android-x64': 12.14.0
-      '@pnpm/exe.darwin-arm64': 12.14.0
-      '@pnpm/exe.darwin-x64': 12.14.0
-      '@pnpm/exe.freebsd-x64': 12.14.0
-      '@pnpm/exe.linux-arm64': 12.14.0
-      '@pnpm/exe.linux-arm64-musl': 12.14.0
-      '@pnpm/exe.linux-ppc64': 12.14.0
-      '@pnpm/exe.linux-riscv64': 12.14.0
-      '@pnpm/exe.linux-s390x': 12.14.0
-      '@pnpm/exe.linux-x64': 12.14.0
-      '@pnpm/exe.linux-x64-musl': 12.14.0
-      '@pnpm/exe.win32-arm64': 12.14.0
-      '@pnpm/exe.win32-x64': 12.14.0
+      '@pnpm/exe.android-arm64': 12.19.0
+      '@pnpm/exe.android-x64': 12.19.0
+      '@pnpm/exe.darwin-arm64': 12.19.0
+      '@pnpm/exe.darwin-x64': 12.19.0
+      '@pnpm/exe.freebsd-x64': 12.19.0
+      '@pnpm/exe.linux-arm64': 12.19.0
+      '@pnpm/exe.linux-arm64-musl': 12.19.0
+      '@pnpm/exe.linux-ppc64': 12.19.0
+      '@pnpm/exe.linux-riscv64': 12.19.0
+      '@pnpm/exe.linux-s390x': 12.19.0
+      '@pnpm/exe.linux-x64': 12.19.0
+      '@pnpm/exe.linux-x64-musl': 12.19.0
+      '@pnpm/exe.netbsd-x64': 12.19.0
+      '@pnpm/exe.win32-arm64': 12.19.0
+      '@pnpm/exe.win32-x64': 12.19.0
 
 ---
 lockfileVersion: '9.0'
@@ -190,8 +174,8 @@ settings:
 catalogs:
   default:
     '@shibanet0/datamitsu-config':
-      specifier: 0.6.3
-      version: 0.6.3
+      specifier: 0.0.0-unstable.20261119.c3841f0
+      version: 0.0.0-unstable.20261119.c3841f0
 
 importers:
 
@@ -199,19 +183,19 @@ importers:
     devDependencies:
       '@shibanet0/datamitsu-config':
         specifier: 'catalog:'
-        version: 0.6.3
+        version: 0.0.0-unstable.20261119.c3841f0
 
   apps/strolt:
     devDependencies:
       '@shibanet0/datamitsu-config':
         specifier: 'catalog:'
-        version: 0.6.3
+        version: 0.0.0-unstable.20261119.c3841f0
 
   apps/stroltm:
     devDependencies:
       '@shibanet0/datamitsu-config':
         specifier: 'catalog:'
-        version: 0.6.3
+        version: 0.0.0-unstable.20261119.c3841f0
 
   apps/stroltm/ui:
     dependencies:
@@ -263,7 +247,7 @@ importers:
         version: 0.2.4(@babel/core@7.29.7(supports-color@8.1.1))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@babel/runtime@8.0.7)(rolldown@1.2.14)(vite@8.3.4(@types/node@26.6.5)(esbuild@0.28.2)(jiti@1.21.7)(terser@5.51.2)(tsx@4.23.15))
       '@shibanet0/datamitsu-config':
         specifier: 'catalog:'
-        version: 0.6.3
+        version: 0.0.0-unstable.20261119.c3841f0
       '@types/babel__core':
         specifier: 7.20.5
         version: 7.20.5
@@ -299,7 +283,7 @@ importers:
     devDependencies:
       '@shibanet0/datamitsu-config':
         specifier: 'catalog:'
-        version: 0.6.3
+        version: 0.0.0-unstable.20261119.c3841f0
 
   website:
     dependencies:
@@ -342,7 +326,7 @@ importers:
         version: 3.9.2(@swc/core@1.16.18)(@swc/html@1.16.18)(clean-css@5.3.3)(cssnano@6.1.2(postcss@8.5.31))(csso@5.0.5)(esbuild@0.28.2)(html-minifier-terser@7.2.0)(lightningcss@1.33.0)(postcss@8.5.31)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(svgo@3.3.5)
       '@shibanet0/datamitsu-config':
         specifier: 'catalog:'
-        version: 0.6.3
+        version: 0.0.0-unstable.20261119.c3841f0
       '@types/node':
         specifier: 26.6.5
         version: 26.6.5
@@ -1046,10 +1030,10 @@ packages:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
 
-  '@commander-js/extra-typings@15.0.0':
-    resolution: {integrity: sha512-yeJlba62xqmkgELUsn7356MEnzLLu/fw2x4lofFqGnXh6YysRdEs2BaLeLtg1+KU0AXvMeqQvTTp+3hBEBK+EA==}
+  '@commander-js/extra-typings@15.1.0':
+    resolution: {integrity: sha512-FsI7l5tFON52RyyDKyCkvwFl+peHZuP5TZ7AhxbDFGo/5T6KQd4+KE48aJ8jrDSSAQDvZ8hYKX47fmwZ5bGFNw==}
     peerDependencies:
-      commander: ~15.0.0
+      commander: ~15.1.0
 
   '@csstools/cascade-layer-name-parser@2.0.5':
     resolution: {integrity: sha512-p1ko5eHgV+MgXFVa4STPKpvPxr6ReS8oS2jzTukjR74i5zJNyWO1ZM1m8YKBXnzDKWfBN1ztLYlHxbVemDD88A==}
@@ -1351,48 +1335,48 @@ packages:
     peerDependencies:
       postcss: ^8.4
 
-  '@datamitsu/datamitsu-darwin-arm64@0.5.3':
-    resolution: {integrity: sha512-TbI+XI+MJwYDTGHABe+5WJ8PgTyADcdQpikzSHq8IswKsZ0RpBAGOMuQB400SlNiwIYo/+cR566dnqLBKBWEKA==}
+  '@datamitsu/datamitsu-darwin-arm64@0.0.0-unstable.20261119.7e9c807':
+    resolution: {integrity: sha512-1fRMV5pWFRh1LLykpYdNjExINDQ6G+lHuur6mZOrV+Wjs+sxyO0u1ZuCZY20Ydya2x2MJEixkimaDihz1fpO0A==}
     cpu: [arm64]
     os: [darwin]
 
-  '@datamitsu/datamitsu-darwin-x64@0.5.3':
-    resolution: {integrity: sha512-VFmcCWYKlnDGbUcVBaHalNUPnZfcFr6dOjsoXdY3Wg5AYgYFKGyf0Od+DL09GYUwXnnZ1erTWfI7xkDodlb8+A==}
+  '@datamitsu/datamitsu-darwin-x64@0.0.0-unstable.20261119.7e9c807':
+    resolution: {integrity: sha512-4t0hhs+iatm0bGpW5QNAA7RKrwMZgKJkY+xHmJtOkQr/UZXOPrxeihpEII8OI7PebkMROpxwI2+w+HvXc7MFJA==}
     cpu: [x64]
     os: [darwin]
 
-  '@datamitsu/datamitsu-freebsd-arm64@0.5.3':
-    resolution: {integrity: sha512-FNhdseB0KMUiDRQ7v8zlm/qIgU0IrxL8oS277RzUD+MBTRBqBGvkeJupO/XCS6KkXd++5TUTFmud/0rnYpZq/g==}
+  '@datamitsu/datamitsu-freebsd-arm64@0.0.0-unstable.20261119.7e9c807':
+    resolution: {integrity: sha512-3ER4uPHzl4YhNRceSVe0OPZrCyn/+1ZYTqTSIh+qaamUTi0YWAR3QcolI0evc3nqKb6cIRdqWx55V22p/Qwecw==}
     cpu: [arm64]
     os: [freebsd]
 
-  '@datamitsu/datamitsu-freebsd-x64@0.5.3':
-    resolution: {integrity: sha512-3k+59SW336CxRC5LCnc2dUSA3DLg3+yx4Wv+iDbl/D4+0SAz/WVWmz0Y+ZLqnSRm0ohToSTtPwW07PO5O9X0Sw==}
+  '@datamitsu/datamitsu-freebsd-x64@0.0.0-unstable.20261119.7e9c807':
+    resolution: {integrity: sha512-5tsR+FuHBd1hqCc2mQcvRij5g2BXfo+xFlVMvEdgcaXWleY5xf1BVg9ulOr5jGmYAL79OFQ5lONl5Miu9If3nw==}
     cpu: [x64]
     os: [freebsd]
 
-  '@datamitsu/datamitsu-linux-arm64@0.5.3':
-    resolution: {integrity: sha512-LsmWNsxSRcLEVfd1P75aPpHOwRxo5a9R3TcbQ27LjZICFmBpVcuodD+MKV5ZpJMetttKFA69cflK+9NM9onx5g==}
+  '@datamitsu/datamitsu-linux-arm64@0.0.0-unstable.20261119.7e9c807':
+    resolution: {integrity: sha512-YIw7zNAcKhkh0VpZ4CjhQ2S+ZFRsDJDEuAwB3E11joS1b9BdVcqFsncfEOr9U8WBN1FUq+MaOlTdjxcIln6USw==}
     cpu: [arm64]
     os: [linux]
 
-  '@datamitsu/datamitsu-linux-x64@0.5.3':
-    resolution: {integrity: sha512-+onvlJi80NUp+M8L3M0+CSrirE3/Ac4iqkAQj/2EKUq2GzV9AyI5sRArOBAYu4O/5jIHfbwRWbc4ymhEDg5QVw==}
+  '@datamitsu/datamitsu-linux-x64@0.0.0-unstable.20261119.7e9c807':
+    resolution: {integrity: sha512-gaRBHZ2Ell6kdi4ltdCbTyqcOiCUuAKYLco7qnGdjmXS9PIHFm3nMwgYb4fC+DIbU3dJD2HHlJhKTTvp8pNLBQ==}
     cpu: [x64]
     os: [linux]
 
-  '@datamitsu/datamitsu-win32-arm64@0.5.3':
-    resolution: {integrity: sha512-Kl/9pH8IZMgvocw9STw04+wSHTJUdv7hvslFETrxxyRmhGko8wDSElWRnDHNGRzH3H1KAupc/64nhyiv96q+9Q==}
+  '@datamitsu/datamitsu-win32-arm64@0.0.0-unstable.20261119.7e9c807':
+    resolution: {integrity: sha512-l7A1BQeGVwlP61gMW08exKmEKpWBNXTKrcWKSncA+Tb12JEzqYGeHL7/mJgRv0Ipe4w8XwMVA3Pkhxkt6AFOOg==}
     cpu: [arm64]
     os: [win32]
 
-  '@datamitsu/datamitsu-win32-x64@0.5.3':
-    resolution: {integrity: sha512-jCcW3nWy7q9D7gCINmN1ChHn5bQ3JCoJH3iCY67Bv0SWFKSvFpNBkuDMrAOHuKsJV7fwvywJwMoql0rQh8j5mA==}
+  '@datamitsu/datamitsu-win32-x64@0.0.0-unstable.20261119.7e9c807':
+    resolution: {integrity: sha512-BBd/AU/PMlrQ0d8ZuX2q1H9ZryehJgmVnNKloCQZHmM8h53NVNrYGZrAoxiZRPWkaCVyIZGbTqV/6MQVGixQNA==}
     cpu: [x64]
     os: [win32]
 
-  '@datamitsu/datamitsu@0.5.3':
-    resolution: {integrity: sha512-a2PdQF6S3G6Db51cwOYkGAOqhTib6c41IlfJAI023krrhj6X2Ho/qioIa+YiwM//SG0BLuVEZlURNs1o2P8Z/g==}
+  '@datamitsu/datamitsu@0.0.0-unstable.20261119.7e9c807':
+    resolution: {integrity: sha512-MqfhRlDREeqUeXc4wp0bdNxuFurDydgoDVnQm5bNypUjXgxUiajHCaMaALrtd1KwjDvgAL4mGCp4QuYmpRgZyw==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -2614,8 +2598,8 @@ packages:
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
 
-  '@shibanet0/datamitsu-config@0.6.3':
-    resolution: {integrity: sha512-kungF3tbq5Rs2avBpgH3w9uiihek+GHuZIFn2e1kb9+PrNxftEQtKXSQwryi1nTDswL+g9UaMcaX4+gC6Y0Ytg==}
+  '@shibanet0/datamitsu-config@0.0.0-unstable.20261119.c3841f0':
+    resolution: {integrity: sha512-IpGILv9nbO3RRaxT8NDtq+PJjuok2cFLZQc9HdIfY2viyMH04eIarqRCqCsF7d1Bipenk4DW5ntyP8ZDeKcugA==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -3219,6 +3203,11 @@ packages:
 
   ajv-formats@3.0.1:
     resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
+    peerDependencies:
+      ajv: ^8.0.0
+    peerDependenciesMeta:
+      ajv:
+        optional: true
 
   ajv-keywords@3.5.2:
     resolution: {integrity: sha512-5p6WTN0DdTGVQk6VjcEju19IgaHudalcfabD7yhDGeA6bcQnmL+CpveLJq/3hvfwd1aof6L386Ougkx6RfyMIQ==}
@@ -3633,8 +3622,8 @@ packages:
     resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==}
     engines: {node: '>=14'}
 
-  commander@15.0.0:
-    resolution: {integrity: sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==}
+  commander@15.1.0:
+    resolution: {integrity: sha512-cgnQ88TRrWcC7pVq46RzJVRMktu3W2RcbnoidnfBsl1bmDCBwJS/udcIZpKoCrbAYYaCqsz1yZCVIgbIaU3ddQ==}
     engines: {node: '>=22.12.0'}
 
   commander@2.20.3:
@@ -4262,8 +4251,8 @@ packages:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
 
-  execa@10.1.1:
-    resolution: {integrity: sha512-yJAC9ulsE6fU0K6wzJBIH+wI+KAtMeu6Ck8rs23OVzvEhqXjGADdI6K+YNIDAjcQQ6AwXTD96cKExJo6xFJXyg==}
+  execa@10.2.1:
+    resolution: {integrity: sha512-/Bofl3ZBh2Q4/PG0W63qFzP5vDAypi8Zc90UWTBzaDNIYiX7apPOd0N6L8hG8CojUdq4V51adu8BObP+iVsSTw==}
     engines: {node: '>=22'}
 
   execa@5.1.1:
@@ -6956,10 +6945,13 @@ packages:
     resolution: {integrity: sha512-drKKsqvDBxVRn4ySU67iQ5nQBuo/1xyYeBfdhDde112PkqrS3+95KPnpDs5hFRcmrW+q6+gbyywYYYR14oWFtw==}
     engines: {node: '>= 16'}
     peerDependencies:
+      css-to-react-native: '>= 3.2.0'
       react: '>= 16.8.0'
       react-dom: '>= 16.8.0'
       react-native: '>= 0.68.0'
     peerDependenciesMeta:
+      css-to-react-native:
+        optional: true
       react-dom:
         optional: true
       react-native:
@@ -8536,9 +8528,9 @@ snapshots:
   '@colors/colors@1.5.0':
     optional: true
 
-  '@commander-js/extra-typings@15.0.0(commander@15.0.0)':
+  '@commander-js/extra-typings@15.1.0(commander@15.1.0)':
     dependencies:
-      commander: 15.0.0
+      commander: 15.1.0
 
   '@csstools/cascade-layer-name-parser@2.0.5(@csstools/css-parser-algorithms@3.0.5(@csstools/css-tokenizer@3.0.4))(@csstools/css-tokenizer@3.0.4)':
     dependencies:
@@ -8849,42 +8841,42 @@ snapshots:
     dependencies:
       postcss: 8.5.31
 
-  '@datamitsu/datamitsu-darwin-arm64@0.5.3':
+  '@datamitsu/datamitsu-darwin-arm64@0.0.0-unstable.20261119.7e9c807':
     optional: true
 
-  '@datamitsu/datamitsu-darwin-x64@0.5.3':
+  '@datamitsu/datamitsu-darwin-x64@0.0.0-unstable.20261119.7e9c807':
     optional: true
 
-  '@datamitsu/datamitsu-freebsd-arm64@0.5.3':
+  '@datamitsu/datamitsu-freebsd-arm64@0.0.0-unstable.20261119.7e9c807':
     optional: true
 
-  '@datamitsu/datamitsu-freebsd-x64@0.5.3':
+  '@datamitsu/datamitsu-freebsd-x64@0.0.0-unstable.20261119.7e9c807':
     optional: true
 
-  '@datamitsu/datamitsu-linux-arm64@0.5.3':
+  '@datamitsu/datamitsu-linux-arm64@0.0.0-unstable.20261119.7e9c807':
     optional: true
 
-  '@datamitsu/datamitsu-linux-x64@0.5.3':
+  '@datamitsu/datamitsu-linux-x64@0.0.0-unstable.20261119.7e9c807':
     optional: true
 
-  '@datamitsu/datamitsu-win32-arm64@0.5.3':
+  '@datamitsu/datamitsu-win32-arm64@0.0.0-unstable.20261119.7e9c807':
     optional: true
 
-  '@datamitsu/datamitsu-win32-x64@0.5.3':
+  '@datamitsu/datamitsu-win32-x64@0.0.0-unstable.20261119.7e9c807':
     optional: true
 
-  '@datamitsu/datamitsu@0.5.3':
+  '@datamitsu/datamitsu@0.0.0-unstable.20261119.7e9c807':
     dependencies:
       tinyexec: 1.3.1
     optionalDependencies:
-      '@datamitsu/datamitsu-darwin-arm64': 0.5.3
-      '@datamitsu/datamitsu-darwin-x64': 0.5.3
-      '@datamitsu/datamitsu-freebsd-arm64': 0.5.3
-      '@datamitsu/datamitsu-freebsd-x64': 0.5.3
-      '@datamitsu/datamitsu-linux-arm64': 0.5.3
-      '@datamitsu/datamitsu-linux-x64': 0.5.3
-      '@datamitsu/datamitsu-win32-arm64': 0.5.3
-      '@datamitsu/datamitsu-win32-x64': 0.5.3
+      '@datamitsu/datamitsu-darwin-arm64': 0.0.0-unstable.20261119.7e9c807
+      '@datamitsu/datamitsu-darwin-x64': 0.0.0-unstable.20261119.7e9c807
+      '@datamitsu/datamitsu-freebsd-arm64': 0.0.0-unstable.20261119.7e9c807
+      '@datamitsu/datamitsu-freebsd-x64': 0.0.0-unstable.20261119.7e9c807
+      '@datamitsu/datamitsu-linux-arm64': 0.0.0-unstable.20261119.7e9c807
+      '@datamitsu/datamitsu-linux-x64': 0.0.0-unstable.20261119.7e9c807
+      '@datamitsu/datamitsu-win32-arm64': 0.0.0-unstable.20261119.7e9c807
+      '@datamitsu/datamitsu-win32-x64': 0.0.0-unstable.20261119.7e9c807
 
   '@discoveryjs/json-ext@0.5.7': {}
 
@@ -11009,12 +11001,12 @@ snapshots:
 
   '@sec-ant/readable-stream@0.4.1': {}
 
-  '@shibanet0/datamitsu-config@0.6.3':
+  '@shibanet0/datamitsu-config@0.0.0-unstable.20261119.c3841f0':
     dependencies:
-      '@commander-js/extra-typings': 15.0.0(commander@15.0.0)
-      '@datamitsu/datamitsu': 0.5.3
-      commander: 15.0.0
-      execa: 10.1.1
+      '@commander-js/extra-typings': 15.1.0(commander@15.1.0)
+      '@datamitsu/datamitsu': 0.0.0-unstable.20261119.7e9c807
+      commander: 15.1.0
+      execa: 10.2.1
       fast-glob: 3.3.3
       tsx: 4.23.15
       type-fest: 5.10.0
@@ -12193,7 +12185,7 @@ snapshots:
 
   commander@10.0.1: {}
 
-  commander@15.0.0: {}
+  commander@15.1.0: {}
 
   commander@2.20.3: {}
 
@@ -12850,7 +12842,7 @@ snapshots:
 
   events@3.3.0: {}
 
-  execa@10.1.1:
+  execa@10.2.1:
     dependencies:
       '@sindresorhus/merge-streams': 4.0.0
       figures: 6.1.0

@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -31,7 +32,12 @@ type Prompt struct {
 // NewPrompt creates a Prompt bound to the given command.
 func NewPrompt(cmd *cobra.Command) *Prompt {
 	return &Prompt{
-		cmd: cmd,
+		ServiceName:     "",
+		TaskName:        "",
+		DestinationName: "",
+		SnapshotName:    "",
+		cmd:             cmd,
+		answerState:     promptAnswerState{mu: sync.Mutex{}, skipLF: false},
 	}
 }
 

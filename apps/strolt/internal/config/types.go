@@ -91,6 +91,6 @@ type API struct {
 }
 
 var (
-	config   = Config{}
+	config   = Config{TimeZone: "", timeLocation: nil, Services: nil, Tags: nil, Secrets: nil, Extends: Extends{Secrets: nil, Configs: nil}, Definitions: Definitions{Destinations: nil, Notifications: nil}, API: API{Users: nil}}
 	fileList = []string{}
 )

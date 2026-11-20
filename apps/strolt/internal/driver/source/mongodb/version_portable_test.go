@@ -18,7 +18,7 @@ func TestPortableMongoMalformedProbeOutput(t *testing.T) {
 			root := t.TempDir()
 			first := installProbe(t, root, "mongodump", mode)
 			second := installProbe(t, root, "mongorestore", "forbidden")
-			versions, err := (&MongoDB{config: Config{BinPathMongoDump: first, BinPathMongoRestore: second}}).BinaryVersion(context.Background())
+			versions, err := (&MongoDB{logger: nil, env: nil, config: Config{URI: "", Host: "", Port: 0, Database: "", Username: "", Password: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathMongoDump: first, BinPathMongoRestore: second}}).BinaryVersion(context.Background())
 			require.Nil(t, versions)
 			require.Error(t, err)
 			require.NoFileExists(t, filepath.Join(root, "invoked"))
@@ -41,7 +41,7 @@ func TestPortableMongoProbeFailureOrdering(t *testing.T) {
 				}
 				paths[index] = installProbe(t, root, binary, mode)
 			}
-			driver := &MongoDB{config: Config{BinPathMongoDump: paths[0], BinPathMongoRestore: paths[1]}}
+			driver := &MongoDB{logger: nil, env: nil, config: Config{URI: "", Host: "", Port: 0, Database: "", Username: "", Password: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathMongoDump: paths[0], BinPathMongoRestore: paths[1]}}
 			versions, err := driver.BinaryVersion(context.Background())
 			require.Nil(t, versions)
 			var exitError *process.ExitError
@@ -57,7 +57,7 @@ func TestPortableMongoProbeCancellation(t *testing.T) {
 	root := t.TempDir()
 	first := installProbe(t, root, "mongodump", "gate")
 	second := installProbe(t, root, "mongorestore", "forbidden")
-	driver := &MongoDB{config: Config{BinPathMongoDump: first, BinPathMongoRestore: second}}
+	driver := &MongoDB{logger: nil, env: nil, config: Config{URI: "", Host: "", Port: 0, Database: "", Username: "", Password: "", BackupParams: "", RestoreParams: "", CommonParams: "", BinPathMongoDump: first, BinPathMongoRestore: second}}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	result := make(chan error, 1)

@@ -21,7 +21,7 @@ func TestNew(t *testing.T) {
 
 	t.Run("copyright", func(t *testing.T) {
 		t.Run("markdown", func(t *testing.T) {
-			tmpl := New("", context.Context{})
+			tmpl := New("", context.Context{Trigger: "", ServiceName: "", TaskName: "", OpertationType: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: ""})
 			assert.Equal(t, fmt.Sprintf("<%s|strolt>", constants.RepoURL), tmpl.CopyrightMarkdown)
 		})
 	})
@@ -29,6 +29,7 @@ func TestNew(t *testing.T) {
 	t.Run("trigger", func(t *testing.T) {
 		t.Run(string(sctxt.TApi), func(t *testing.T) {
 			tmpl := New("slack", context.Context{
+				ServiceName: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: "",
 				Trigger:        sctxt.TApi,
 				TaskName:       taskName,
 				OpertationType: sctxt.OpTypeBackup,
@@ -40,6 +41,7 @@ func TestNew(t *testing.T) {
 
 		t.Run(string(sctxt.TSchedule), func(t *testing.T) {
 			tmpl := New("slack", context.Context{
+				ServiceName: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: "",
 				Trigger:        sctxt.TSchedule,
 				TaskName:       taskName,
 				OpertationType: sctxt.OpTypeBackup,
@@ -51,6 +53,7 @@ func TestNew(t *testing.T) {
 
 		t.Run(string(sctxt.TManual), func(t *testing.T) {
 			tmpl := New("slack", context.Context{
+				ServiceName: "", Event: "", Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: "",
 				Trigger:        sctxt.TManual,
 				TaskName:       taskName,
 				OpertationType: sctxt.OpTypeBackup,
@@ -62,10 +65,12 @@ func TestNew(t *testing.T) {
 
 		t.Run(string(sctxt.TSchedule)+"/error", func(t *testing.T) {
 			tmpl := New("slack", context.Context{
+				ServiceName: "", Event: "", Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: "",
 				Trigger:        sctxt.TSchedule,
 				TaskName:       taskName,
 				OpertationType: sctxt.OpTypeBackup,
 				Operation: context.Operation{
+					Time:  context.Time{Start: time.Time{}, Stop: time.Time{}},
 					Error: errors.New("error").Error(),
 				},
 			})
@@ -77,11 +82,14 @@ func TestNew(t *testing.T) {
 
 	t.Run(string(sctxt.EvOperationStart), func(t *testing.T) {
 		tmpl := New("", context.Context{
+			Trigger: "", ServiceName: "", Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: "",
 			TaskName:       taskName,
 			OpertationType: sctxt.OpTypeBackup,
 			Event:          sctxt.EvOperationStart,
 			Operation: context.Operation{
+				Error: "",
 				Time: context.Time{
+					Stop:  time.Time{},
 					Start: startTime,
 				},
 			},
@@ -97,10 +105,12 @@ func TestNew(t *testing.T) {
 
 	t.Run(string(sctxt.EvOperationStop), func(t *testing.T) {
 		tmpl := New("", context.Context{
+			Trigger: "", ServiceName: "", Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: "",
 			TaskName:       taskName,
 			OpertationType: sctxt.OpTypeBackup,
 			Event:          sctxt.EvOperationStart,
 			Operation: context.Operation{
+				Error: "",
 				Time: context.Time{
 					Start: startTime,
 					Stop:  stopTime,
@@ -122,6 +132,7 @@ func TestNew(t *testing.T) {
 	t.Run(string(sctxt.EvOperationError), func(t *testing.T) {
 		err := errors.New("error")
 		tmpl := New("", context.Context{
+			Trigger: "", ServiceName: "", Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: "",
 			TaskName:       taskName,
 			OpertationType: sctxt.OpTypeBackup,
 			Event:          sctxt.EvOperationError,
@@ -150,10 +161,12 @@ func TestNew(t *testing.T) {
 		const streamedBytes = uint64(44040192)
 
 		tmpl := New("", context.Context{
+			Trigger: "", ServiceName: "", Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: "",
 			TaskName:       taskName,
 			OpertationType: sctxt.OpTypeBackup,
 			Event:          sctxt.EvOperationStop,
 			Operation: context.Operation{
+				Error: "",
 				Time: context.Time{
 					Start: startTime,
 					Stop:  stopTime,
@@ -161,7 +174,9 @@ func TestNew(t *testing.T) {
 			},
 			Destination: map[string]context.DestinationOperation{
 				"main": {
+					Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""},
 					BackupOutput: sctxt.BackupOutput{
+						FilesChanged: 0, FilesUnmodified: 0, DirsNew: 0, DirsChanged: 0, DirsUnmodified: 0,
 						FilesNew:            1,
 						TotalFilesProcessed: 1,
 						TotalBytesProcessed: streamedBytes,

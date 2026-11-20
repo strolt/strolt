@@ -90,6 +90,14 @@ func TestPromptTerminalChild(t *testing.T) {
 	err := runPromptPTYChildMode(ctx, mode)
 	_, markerErr := fmt.Fprintln(os.Stdout, promptPTYCompleted)
 	require.NoError(t, markerErr)
+	release := os.NewFile(3, "prompt child release")
+	if release == nil {
+		t.Fatal("prompt child release pipe is unavailable")
+	}
+	defer func() { require.NoError(t, release.Close()) }()
+	if _, readErr := io.Copy(io.Discard, release); readErr != nil {
+		t.Fatal(readErr)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +108,7 @@ func runPromptPTYChild(t *testing.T, mode string) {
 	master, slave, err := pty.Open()
 	require.NoError(t, err)
 	defer func() { _ = master.Close(); _ = slave.Close() }()
-	require.NoError(t, pty.Setsize(slave, &pty.Winsize{Rows: 24, Cols: 80}))
+	require.NoError(t, pty.Setsize(slave, &pty.Winsize{Rows: 24, Cols: 80, X: 0, Y: 0}))
 	before, err := term.GetState(slave.Fd())
 	require.NoError(t, err)
 	flags, err := unix.FcntlInt(slave.Fd(), unix.F_GETFL, 0)
@@ -109,16 +117,24 @@ func runPromptPTYChild(t *testing.T, mode string) {
 	require.NoError(t, err)
 	ctx, cancel := context.WithTimeout(t.Context(), 15*time.Second)
 	defer cancel()
+	releaseReader, releaseWriter, err := os.Pipe()
+	require.NoError(t, err)
+	defer func() { _ = releaseReader.Close(); _ = releaseWriter.Close() }()
 	command := exec.CommandContext(ctx, executable, "-test.run=^TestPromptTerminalChild$")
 	command.Env = append(os.Environ(), promptPTYChildEnv+"="+mode)
 	command.Stdin, command.Stdout, command.Stderr = slave, slave, slave
-	command.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Setctty: true, Ctty: 0}
+	command.ExtraFiles = []*os.File{releaseReader}
+	var attrs syscall.SysProcAttr
+	attrs.Setsid = true
+	attrs.Setctty = true
+	command.SysProcAttr = &attrs
 	require.NoError(t, command.Start())
+	require.NoError(t, releaseReader.Close())
 	recorder := newPTYOutputRecorder(master)
 	done := make(chan struct{})
 	var waitErr error
 	go func() { waitErr = command.Wait(); close(done) }()
-	t.Cleanup(func() { cancel(); <-done })
+	t.Cleanup(func() { cancel(); _ = releaseWriter.Close(); <-done })
 	label := "choose"
 	if mode == "cancel-partial-confirmation" || mode == "lf-confirm" || mode == "alt-confirm" || strings.HasPrefix(mode, "paste-confirm") {
 		label = "Are you sure?"
@@ -173,18 +189,22 @@ func runPromptPTYChild(t *testing.T, mode string) {
 	if strings.HasPrefix(mode, "cancel-") {
 		require.NoError(t, command.Process.Signal(syscall.SIGTERM))
 	}
-	select {
-	case <-done:
-		require.NoError(t, waitErr, "child failed: %s", recorder.output())
-	case <-time.After(8 * time.Second):
-		t.Fatalf("prompt child did not finish: %s", recorder.output())
-	}
+	require.Eventually(t, func() bool { return strings.Contains(recorder.output(), promptPTYCompleted) }, 8*time.Second, 5*time.Millisecond, "prompt child did not complete: %s", recorder.output())
+	// Inspect terminal state before the child releases its controlling session.
 	after, err := term.GetState(slave.Fd())
 	require.NoError(t, err)
 	require.Equal(t, before, after, "terminal state was not restored")
 	afterFlags, err := unix.FcntlInt(slave.Fd(), unix.F_GETFL, 0)
 	require.NoError(t, err)
-	require.Equal(t, flags, afterFlags, "shared descriptor flags were not restored")
+	// O_NONBLOCK is the only status bit this code changes; macOS adds private bits.
+	require.Equal(t, flags&unix.O_NONBLOCK, afterFlags&unix.O_NONBLOCK, "shared descriptor nonblocking flag was not restored")
+	require.NoError(t, releaseWriter.Close())
+	select {
+	case <-done:
+		require.NoError(t, waitErr, "child failed: %s", recorder.output())
+	case <-time.After(8 * time.Second):
+		t.Fatalf("prompt child did not exit: %s", recorder.output())
+	}
 	require.NoError(t, slave.Close())
 	select {
 	case <-recorder.done:
@@ -311,9 +331,9 @@ func runPromptRestorationFailure(ctx context.Context) (resultErr error) {
 }
 
 func runConfirmPromptForTest(ctx context.Context) (bool, error) {
-	command := &cobra.Command{}
+	var command cobra.Command
 	command.SetContext(ctx)
-	return NewPrompt(command).AskIsConfirm() //nolint:contextcheck // Prompt reads the context stored on its Cobra command.
+	return NewPrompt(&command).AskIsConfirm() //nolint:contextcheck // Prompt reads the context stored on its Cobra command.
 }
 
 type ptyOutputRecorder struct {
@@ -323,7 +343,7 @@ type ptyOutputRecorder struct {
 }
 
 func newPTYOutputRecorder(master *os.File) *ptyOutputRecorder {
-	recorder := &ptyOutputRecorder{done: make(chan struct{})}
+	recorder := &ptyOutputRecorder{mu: sync.Mutex{}, text: strings.Builder{}, done: make(chan struct{})}
 	go func() {
 		defer close(recorder.done)
 		buffer := make([]byte, 1024)

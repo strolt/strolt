@@ -82,6 +82,7 @@ func (t *Task) managerStop() {
 	managerVar.Lock()
 
 	item := ManagerTaskItem{
+		Opeation: "", StartedAt: time.Time{}, TriggerType: "",
 		ServiceName: t.Context.ServiceName,
 		TaskName:    t.Context.TaskName,
 		IsRunning:   false,
@@ -126,7 +127,7 @@ func GetLastChangedManager() time.Time {
 
 // GetManagerStatus returns a snapshot of all tasks tracked by the manager.
 func GetManagerStatus() ManagerStatus {
-	status := ManagerStatus{}
+	status := ManagerStatus{Tasks: nil, LastChangedAt: ""}
 
 	managerVar.RLock()
 	status.LastChangedAt = managerVar.LastChangedAt.Format(time.RFC3339)

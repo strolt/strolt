@@ -83,7 +83,7 @@ func commaUint(v uint) string {
 
 // New builds a notification Template for the given driver from the operation context.
 func New(driver string, ctx context.Context) Template { //nolint:revive // ctx is the package-local operation context, not a stdlib context.Context
-	t := Template{}
+	t := Template{Header: "", Body: "", CopyrightMarkdown: "", CopyrightHTML: ""}
 
 	t.CopyrightMarkdown = fmt.Sprintf("<%s|strolt>", constants.RepoURL)
 	t.CopyrightHTML = fmt.Sprintf("<a href=%q>strolt</a>", constants.RepoURL)

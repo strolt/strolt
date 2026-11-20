@@ -12,15 +12,19 @@ import (
 // tests mutate it to trigger specific validation errors.
 func validConfig() Config {
 	return Config{
+		TimeZone: "", timeLocation: nil, Tags: nil, Secrets: nil, Extends: Extends{Secrets: nil, Configs: nil}, Definitions: Definitions{Destinations: nil, Notifications: nil}, API: API{Users: nil},
 		Services: map[string]Service{
 			"svc": {
 				"task": {
+					OperationMode: "", Notifications: nil, Schedule: Schedule{Backup: "", Prune: ""}, Tags: nil,
 					Source: DriverSourceConfig{
+						Env:    nil,
 						Driver: dmanager.DriverSourceLocal,
 						Config: map[string]any{"path": "."},
 					},
 					Destinations: map[string]DriverDestinationConfig{
 						"dest": {
+							Extends: "", Env: nil,
 							Driver: dmanager.DriverDestinationLocal,
 							Config: map[string]any{"path": "."},
 						},
@@ -56,7 +60,7 @@ func TestValidateRejects(t *testing.T) {
 			name: "source driver missing",
 			mutate: func(c *Config) {
 				task := c.Services["svc"]["task"]
-				task.Source = DriverSourceConfig{}
+				task.Source = DriverSourceConfig{Driver: "", Config: nil, Env: nil}
 				c.Services["svc"]["task"] = task
 			},
 			wantErr: "source driver must be fill",
@@ -83,7 +87,7 @@ func TestValidateRejects(t *testing.T) {
 			name: "destination driver missing",
 			mutate: func(c *Config) {
 				task := c.Services["svc"]["task"]
-				task.Destinations["dest"] = DriverDestinationConfig{}
+				task.Destinations["dest"] = DriverDestinationConfig{Extends: "", Driver: "", Config: nil, Env: nil}
 				c.Services["svc"]["task"] = task
 			},
 			wantErr: "driver must be fill",
@@ -119,7 +123,7 @@ func TestValidateRejects(t *testing.T) {
 			name: "notification driver empty",
 			mutate: func(c *Config) {
 				c.Definitions.Notifications = map[string]DriverNotificationConfig{
-					"note": {Driver: "", Events: []sctxt.EventType{sctxt.EvOperationStop}},
+					"note": {Config: nil, Driver: "", Events: []sctxt.EventType{sctxt.EvOperationStop}},
 				}
 				task := c.Services["svc"]["task"]
 				task.Notifications = []string{"note"}
@@ -131,7 +135,7 @@ func TestValidateRejects(t *testing.T) {
 			name: "unknown notification driver",
 			mutate: func(c *Config) {
 				c.Definitions.Notifications = map[string]DriverNotificationConfig{
-					"note": {Driver: dmanager.Notification("sms")},
+					"note": {Config: nil, Events: nil, Driver: dmanager.Notification("sms")},
 				}
 				task := c.Services["svc"]["task"]
 				task.Notifications = []string{"note"}
@@ -144,6 +148,7 @@ func TestValidateRejects(t *testing.T) {
 			mutate: func(c *Config) {
 				c.Definitions.Notifications = map[string]DriverNotificationConfig{
 					"note": {
+						Config: nil,
 						Driver: dmanager.DriverNotificationConsole,
 						Events: []sctxt.EventType{sctxt.EventType("SOMETHING")},
 					},

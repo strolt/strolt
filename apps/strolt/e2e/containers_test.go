@@ -62,7 +62,15 @@ type ContainerManager struct {
 // NewContainerManager creates a new container manager.
 func NewContainerManager(ctx context.Context) (*ContainerManager, error) {
 	return &ContainerManager{
-		ctx: ctx,
+		ctx:                   ctx,
+		network:               nil,
+		postgresContainer:     nil,
+		mongoContainer:        nil,
+		mariadbContainer:      nil,
+		mysqlContainer:        nil,
+		garageContainer:       nil,
+		stroltContainer:       nil,
+		stroltDaemonContainer: nil,
 	}, nil
 }
 
@@ -101,14 +109,44 @@ func (cm *ContainerManager) StartStrolt() error {
 	}
 
 	req := testcontainers.ContainerRequest{
-		Image: stroltImage,
-		Files: []testcontainers.ContainerFile{
-			{
-				HostFilePath:      absConfigPath,
-				ContainerFilePath: "/strolt/config.yml",
-				FileMode:          0o644,
-			},
-		},
+		Image:                    stroltImage,
+		FromDockerfile:           testcontainers.FromDockerfile{Context: "", ContextArchive: nil, Dockerfile: "", Repo: "", Tag: "", BuildArgs: nil, PrintBuildLog: false, BuildLogWriter: nil, AuthConfigs: nil, KeepImage: false, BuildOptionsModifier: nil},
+		HostAccessPorts:          nil,
+		ImageSubstitutors:        nil,
+		Env:                      nil,
+		ExposedPorts:             nil,
+		Labels:                   nil,
+		Mounts:                   nil,
+		Tmpfs:                    nil,
+		RegistryCred:             "",
+		Name:                     "",
+		Hostname:                 "",
+		WorkingDir:               "",
+		ExtraHosts:               nil,
+		Privileged:               false,
+		NetworkMode:              "",
+		Resources:                container.Resources{CPUShares: 0, Memory: 0, NanoCPUs: 0, CgroupParent: "", BlkioWeight: 0, BlkioWeightDevice: nil, BlkioDeviceReadBps: nil, BlkioDeviceWriteBps: nil, BlkioDeviceReadIOps: nil, BlkioDeviceWriteIOps: nil, CPUPeriod: 0, CPUQuota: 0, CPURealtimePeriod: 0, CPURealtimeRuntime: 0, CpusetCpus: "", CpusetMems: "", Devices: nil, DeviceCgroupRules: nil, DeviceRequests: nil, MemoryReservation: 0, MemorySwap: 0, MemorySwappiness: nil, OomKillDisable: nil, PidsLimit: nil, Ulimits: nil, CPUCount: 0, CPUPercent: 0, IOMaximumIOps: 0, IOMaximumBandwidth: 0},
+		User:                     "",
+		SkipReaper:               false,
+		ReaperImage:              "",
+		ReaperOptions:            nil,
+		AutoRemove:               false,
+		AlwaysPullImage:          false,
+		ImagePlatform:            "",
+		Binds:                    nil,
+		ShmSize:                  0,
+		CapAdd:                   nil,
+		CapDrop:                  nil,
+		ConfigModifier:           nil,
+		EndpointSettingsModifier: nil,
+		LifecycleHooks:           nil,
+		LogConsumerCfg:           nil,
+		Files: []testcontainers.ContainerFile{{
+			HostFilePath:      absConfigPath,
+			ContainerFilePath: "/strolt/config.yml",
+			Reader:            nil,
+			FileMode:          0o644,
+		}},
 		HostConfigModifier: func(hostConfig *container.HostConfig) {
 			hostConfig.Binds = append(hostConfig.Binds,
 				absStroltPath+":/strolt/.strolt",
@@ -127,6 +165,9 @@ func (cm *ContainerManager) StartStrolt() error {
 	stroltContainer, err := testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
 		Started:          true,
+		ProviderType:     0,
+		Logger:           nil,
+		Reuse:            false,
 	})
 	if err != nil {
 		if stroltContainer != nil {
@@ -160,33 +201,49 @@ func (cm *ContainerManager) StartStroltDaemon() error {
 	}
 
 	req := testcontainers.ContainerRequest{
-		Image: stroltImage,
-		Files: []testcontainers.ContainerFile{
-			{
-				HostFilePath:      absConfigPath,
-				ContainerFilePath: "/strolt/config.yml",
-				FileMode:          0o644,
-			},
-		},
+		Image:                    stroltImage,
+		FromDockerfile:           testcontainers.FromDockerfile{Context: "", ContextArchive: nil, Dockerfile: "", Repo: "", Tag: "", BuildArgs: nil, PrintBuildLog: false, BuildLogWriter: nil, AuthConfigs: nil, KeepImage: false, BuildOptionsModifier: nil},
+		HostAccessPorts:          nil,
+		ImageSubstitutors:        nil,
+		Env:                      nil,
+		ExposedPorts:             []string{"8080/tcp"},
+		Labels:                   nil,
+		Mounts:                   nil,
+		Tmpfs:                    nil,
+		RegistryCred:             "",
+		Name:                     "",
+		Hostname:                 "",
+		WorkingDir:               "",
+		ExtraHosts:               nil,
+		Privileged:               false,
+		NetworkMode:              "",
+		Resources:                container.Resources{CPUShares: 0, Memory: 0, NanoCPUs: 0, CgroupParent: "", BlkioWeight: 0, BlkioWeightDevice: nil, BlkioDeviceReadBps: nil, BlkioDeviceWriteBps: nil, BlkioDeviceReadIOps: nil, BlkioDeviceWriteIOps: nil, CPUPeriod: 0, CPUQuota: 0, CPURealtimePeriod: 0, CPURealtimeRuntime: 0, CpusetCpus: "", CpusetMems: "", Devices: nil, DeviceCgroupRules: nil, DeviceRequests: nil, MemoryReservation: 0, MemorySwap: 0, MemorySwappiness: nil, OomKillDisable: nil, PidsLimit: nil, Ulimits: nil, CPUCount: 0, CPUPercent: 0, IOMaximumIOps: 0, IOMaximumBandwidth: 0},
+		User:                     "",
+		SkipReaper:               false,
+		ReaperImage:              "",
+		ReaperOptions:            nil,
+		AutoRemove:               false,
+		AlwaysPullImage:          false,
+		ImagePlatform:            "",
+		Binds:                    nil,
+		ShmSize:                  0,
+		CapAdd:                   nil,
+		CapDrop:                  nil,
+		ConfigModifier:           nil,
+		EndpointSettingsModifier: nil,
+		LifecycleHooks:           nil,
+		LogConsumerCfg:           nil,
+		Files:                    []testcontainers.ContainerFile{{HostFilePath: absConfigPath, ContainerFilePath: "/strolt/config.yml", Reader: nil, FileMode: 0o644}},
 		HostConfigModifier: func(hostConfig *container.HostConfig) {
-			hostConfig.Binds = append(hostConfig.Binds,
-				absStroltPath+":/strolt/.strolt",
-				absTempPath+":/e2e/input",
-			)
+			hostConfig.Binds = append(hostConfig.Binds, absStroltPath+":/strolt/.strolt", absTempPath+":/e2e/input")
 		},
 		Networks:       []string{cm.NetworkName()},
 		NetworkAliases: map[string][]string{cm.NetworkName(): {"strolt-daemon"}},
-		ExposedPorts:   []string{"8080/tcp"},
+		Entrypoint:     nil,
 		Cmd:            []string{"start", "--json"},
-		WaitingFor: wait.ForHTTP("/api/v1/ping").
-			WithPort("8080/tcp").
-			WithStartupTimeout(60 * time.Second),
+		WaitingFor:     wait.ForHTTP("/api/v1/ping").WithPort("8080/tcp").WithStartupTimeout(60 * time.Second),
 	}
-
-	daemonContainer, err := testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
+	daemonContainer, err := testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{ContainerRequest: req, Started: true, ProviderType: 0, Logger: nil, Reuse: false})
 	if err != nil {
 		if daemonContainer != nil {
 			_ = daemonContainer.Terminate(cm.ctx)
@@ -432,25 +489,49 @@ func (cm *ContainerManager) startMySQL() (testcontainers.Container, error) {
 // create buckets (every task provisions its own repository).
 func (cm *ContainerManager) startGarage() (testcontainers.Container, error) {
 	req := testcontainers.GenericContainerRequest{
-		Image:        garageImage,
-		Cmd:          []string{"/garage", "server"},
-		ExposedPorts: []string{"9000/tcp"},
-		// Attach explicitly by network name and register the "minio"
-		// alias in the same declaration: an aliases-only attach proved
-		// unreliable on CI runners (intermittent "lookup minio: no such
-		// host" mid-suite, which restic turns into minutes of retries).
-		Networks:       []string{cm.network.Name},
-		NetworkAliases: map[string][]string{cm.network.Name: {"minio"}},
-		Files: []testcontainers.ContainerFile{
-			{
-				HostFilePath:      "garage.toml",
-				ContainerFilePath: "/etc/garage.toml",
-			},
-		},
-		WaitingFor: wait.ForHTTP("/").
-			WithPort("9000/tcp").
-			WithStatusCodeMatcher(func(status int) bool { return status == 200 || status == 403 }),
-		Started: true,
+		Image:                    garageImage,
+		FromDockerfile:           testcontainers.FromDockerfile{Context: "", ContextArchive: nil, Dockerfile: "", Repo: "", Tag: "", BuildArgs: nil, PrintBuildLog: false, BuildLogWriter: nil, AuthConfigs: nil, KeepImage: false, BuildOptionsModifier: nil},
+		HostAccessPorts:          nil,
+		ImageSubstitutors:        nil,
+		Env:                      nil,
+		ExposedPorts:             []string{"9000/tcp"},
+		Labels:                   nil,
+		Mounts:                   nil,
+		Tmpfs:                    nil,
+		RegistryCred:             "",
+		Name:                     "",
+		Hostname:                 "",
+		WorkingDir:               "",
+		ExtraHosts:               nil,
+		Privileged:               false,
+		NetworkMode:              "",
+		Resources:                container.Resources{CPUShares: 0, Memory: 0, NanoCPUs: 0, CgroupParent: "", BlkioWeight: 0, BlkioWeightDevice: nil, BlkioDeviceReadBps: nil, BlkioDeviceWriteBps: nil, BlkioDeviceReadIOps: nil, BlkioDeviceWriteIOps: nil, CPUPeriod: 0, CPUQuota: 0, CPURealtimePeriod: 0, CPURealtimeRuntime: 0, CpusetCpus: "", CpusetMems: "", Devices: nil, DeviceCgroupRules: nil, DeviceRequests: nil, MemoryReservation: 0, MemorySwap: 0, MemorySwappiness: nil, OomKillDisable: nil, PidsLimit: nil, Ulimits: nil, CPUCount: 0, CPUPercent: 0, IOMaximumIOps: 0, IOMaximumBandwidth: 0},
+		User:                     "",
+		SkipReaper:               false,
+		ReaperImage:              "",
+		ReaperOptions:            nil,
+		AutoRemove:               false,
+		AlwaysPullImage:          false,
+		ImagePlatform:            "",
+		Binds:                    nil,
+		ShmSize:                  0,
+		CapAdd:                   nil,
+		CapDrop:                  nil,
+		ConfigModifier:           nil,
+		HostConfigModifier:       nil,
+		EndpointSettingsModifier: nil,
+		LifecycleHooks:           nil,
+		LogConsumerCfg:           nil,
+		Entrypoint:               nil,
+		Cmd:                      []string{"/garage", "server"},
+		Networks:                 []string{cm.network.Name},
+		NetworkAliases:           map[string][]string{cm.network.Name: {"minio"}},
+		Files:                    []testcontainers.ContainerFile{{HostFilePath: "garage.toml", ContainerFilePath: "/etc/garage.toml", Reader: nil, FileMode: 0}},
+		WaitingFor:               wait.ForHTTP("/").WithPort("9000/tcp").WithStatusCodeMatcher(func(status int) bool { return status == 200 || status == 403 }),
+		Started:                  true,
+		ProviderType:             0,
+		Logger:                   nil,
+		Reuse:                    false,
 	}
 
 	c, err := testcontainers.GenericContainer(cm.ctx, req)

@@ -63,7 +63,21 @@ func CommandContext(ctx context.Context, path string, args ...string) *Cmd {
 	if ctx == nil {
 		panic("process: nil context")
 	}
-	return &Cmd{Path: path, Args: args, ctx: ctx}
+	return &Cmd{
+		Path:        path,
+		Args:        args,
+		Dir:         "",
+		Env:         nil,
+		Stdin:       nil,
+		Stdout:      nil,
+		Stderr:      nil,
+		GracePeriod: 0,
+		ctx:         ctx,
+		child:       nil,
+		started:     false,
+		stdin:       commandPipe{parent: nil, child: nil},
+		stdout:      commandPipe{parent: nil, child: nil},
+	}
 }
 
 // String is a diagnostic command line, not shell-escaped executable input.
@@ -117,8 +131,19 @@ func (c *Cmd) Start() error {
 		return errors.New("process: pipe stream replaced before Start")
 	}
 	child, err := procguard.Start(c.ctx, procguard.Spec{
-		Path: c.Path, Args: c.Args, Dir: c.Dir, Env: c.Env,
-		Stdin: c.Stdin, Stdout: c.Stdout, Stderr: c.Stderr, GracePeriod: c.GracePeriod,
+		Path:            c.Path,
+		Args:            c.Args,
+		Dir:             c.Dir,
+		Env:             c.Env,
+		Stdin:           c.Stdin,
+		Stdout:          c.Stdout,
+		Stderr:          c.Stderr,
+		ExtraFiles:      nil,
+		GracePeriod:     c.GracePeriod,
+		KillImmediately: false,
+		Limits:          procguard.Limits{AddressSpace: 0, OOMScoreAdj: nil},
+		AfterStart:      nil,
+		Cgroup:          nil,
 	})
 	closeFiles(c.stdin.child, c.stdout.child)
 	if err != nil {

@@ -18,7 +18,7 @@ func TestPortableMySQLMalformedProbeOutput(t *testing.T) {
 			root := t.TempDir()
 			first := installProbe(t, root, "mysql", mode)
 			second := installProbe(t, root, "mysqldump", "forbidden")
-			versions, err := (&MySQL{config: Config{BinPathMySQL: first, BinPathMySQLDump: second}}).BinaryVersion(context.Background())
+			versions, err := (&MySQL{logger: nil, config: Config{Host: "", Port: 0, Database: "", Username: "", Password: "", TLS: "", BinPathMySQL: first, BinPathMySQLDump: second}}).BinaryVersion(context.Background())
 			require.Nil(t, versions)
 			require.Error(t, err)
 			require.NoFileExists(t, filepath.Join(root, "invoked"))
@@ -41,7 +41,7 @@ func TestPortableMySQLProbeFailureOrdering(t *testing.T) {
 				}
 				paths[index] = installProbe(t, root, binary, mode)
 			}
-			driver := &MySQL{config: Config{BinPathMySQL: paths[0], BinPathMySQLDump: paths[1]}}
+			driver := &MySQL{logger: nil, config: Config{Host: "", Port: 0, Database: "", Username: "", Password: "", TLS: "", BinPathMySQL: paths[0], BinPathMySQLDump: paths[1]}}
 			versions, err := driver.BinaryVersion(context.Background())
 			require.Nil(t, versions)
 			var exitError *process.ExitError
@@ -57,7 +57,7 @@ func TestPortableMySQLProbeCancellation(t *testing.T) {
 	root := t.TempDir()
 	first := installProbe(t, root, "mysql", "gate")
 	second := installProbe(t, root, "mysqldump", "forbidden")
-	driver := &MySQL{config: Config{BinPathMySQL: first, BinPathMySQLDump: second}}
+	driver := &MySQL{logger: nil, config: Config{Host: "", Port: 0, Database: "", Username: "", Password: "", TLS: "", BinPathMySQL: first, BinPathMySQLDump: second}}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	result := make(chan error, 1)

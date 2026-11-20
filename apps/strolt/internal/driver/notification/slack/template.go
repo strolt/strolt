@@ -45,16 +45,18 @@ func getTemplate(ctx context.Context) (*bytes.Buffer, error) {
 			slackMsgBlock{
 				Type: "section",
 				Text: slackMsgBlockText{
-					Type: "plain_text",
-					Text: t.Body,
+					Emoji: false,
+					Type:  "plain_text",
+					Text:  t.Body,
 				},
 			},
 			slackMsgBlockElements{
 				Type: "context",
 				Elements: []slackMsgBlockText{
 					{
-						Type: "mrkdwn",
-						Text: t.CopyrightMarkdown,
+						Emoji: false,
+						Type:  "mrkdwn",
+						Text:  t.CopyrightMarkdown,
 					},
 				},
 			},

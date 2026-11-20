@@ -16,7 +16,7 @@ type Console struct {
 
 // New creates a Console driver.
 func New() *Console {
-	return &Console{}
+	return &Console{logger: nil, config: nil}
 }
 
 // SetLogger sets the logger used by the driver.

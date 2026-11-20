@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	time "time"
 
 	"github.com/strolt/strolt/apps/strolt/internal/context"
 	"github.com/strolt/strolt/apps/strolt/internal/driver/notification/webhook"
@@ -14,6 +15,7 @@ import (
 
 func newTestContext() context.Context {
 	return context.Context{
+		Operation: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Source: context.Operation{Time: context.Time{Start: time.Time{}, Stop: time.Time{}}, Error: ""}, Destination: nil, WorkDir: "", IsWorkDirTmp: false, Tags: nil, SourceLocalPath: "",
 		Trigger:        sctxt.TManual,
 		ServiceName:    "svc",
 		TaskName:       "task",
