@@ -1,12 +1,12 @@
 # droast global ignore=DF020 reason="runs as root by design: data dir and dump tooling" expires=2026-12-31
-FROM alpine:3.23.7 AS fetch
+FROM alpine:3.23.7@sha256:ff7f0c727dd796aa36787bfcd9a64bf35a6ce72a73451b3359fde849b6703d63 AS fetch
 ARG TARGETARCH
 ARG RESTIC_VERSION=0.19.1
 
 RUN apk add --no-cache \
 		postgresql18-client=18.7-r0 \
 		mongodb-tools=100.13.0-r6 \
-		mariadb-client=11.4.13-r0 \
+		mariadb-client=11.4.14-r0 \
 		mariadb-connector-c=3.4.6-r0
 
 # restic is fetched from official releases: alpine still packages 0.18.x
@@ -38,7 +38,7 @@ RUN rm -f \
 
 RUN apk info -v > /apk-lock.txt
 
-FROM alpine:3.23.7 AS base
+FROM alpine:3.23.7@sha256:ff7f0c727dd796aa36787bfcd9a64bf35a6ce72a73451b3359fde849b6703d63 AS base
 ENV TZ=UTC
 WORKDIR /strolt
 
@@ -100,21 +100,51 @@ RUN \
 		ldd /usr/bin/mongorestore
 # restic is excluded from the ldd check: official release binaries are static
 
+FROM --platform=$BUILDPLATFORM node:26.13.1-trixie-slim AS swagger
+# Datamitsu needs git to identify the workspace and system CA roots for HTTPS downloads.
+# droast ignore=DF005 reason="ca-certificates and git are managed by the Debian repository" expires=2026-12-31
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git && rm -rf /var/lib/apt/lists/*
+WORKDIR /github.com/strolt/strolt
+COPY ./package.json ./pnpm-workspace.yaml ./pnpm-lock.yaml ./
+COPY ./apps/strolt/package.json ./apps/strolt/
+COPY ./apps/stroltm/package.json ./apps/stroltm/
+COPY ./apps/stroltm/ui/package.json ./apps/stroltm/ui/
+COPY ./apps/stroltp/package.json ./apps/stroltp/
+COPY ./shared/package.json ./shared/
+COPY ./.github/scripts/package.json ./.github/scripts/
+# droast ignore=DF031 reason="pnpm is exact-pinned by the workspace packageManager" expires=2026-12-31
+RUN npm install --global pnpm@12.19.0 && git init . && pnpm install --frozen-lockfile --filter strolt --ignore-scripts
+COPY ./datamitsu.config.js ./Taskfile.yaml ./lefthook.yaml ./
+COPY ./scripts/generate-go-sdk.sh ./scripts/
+COPY ./.go-swagger/templates ./.go-swagger/templates
+COPY ./apps/strolt ./apps/strolt
+COPY ./shared ./shared
+RUN pnpm dm init --skip-download --quiet && pnpm dm exec task -- codegen:go -- strolt && rm -rf .git
 
-FROM golang:1.27.3-alpine3.23 AS builder
-ARG version
+
+FROM golang:1.27.3-alpine3.23 AS builder-deps
 WORKDIR /go/src/github.com/strolt/strolt/apps/strolt
 COPY ./apps/strolt/go.mod .
 COPY ./apps/strolt/go.sum .
 COPY ./shared /go/src/github.com/strolt/strolt/shared
 RUN go mod download
+
+FROM builder-deps AS builder
+ARG version
 COPY ./apps/strolt/main.go .
 COPY ./apps/strolt/cmd ./cmd
 COPY ./apps/strolt/internal ./internal
+COPY --from=swagger /github.com/strolt/strolt/shared/sdk/strolt/generated /go/src/github.com/strolt/strolt/shared/sdk/strolt/generated
 RUN go build -o strolt -ldflags "-X github.com/strolt/strolt/apps/strolt/internal/ldflags.version=${version} -s -w"
 
 FROM base
 ARG GITHUB_SHA
+ARG RELEASE_VERSION=development
+ARG RELEASE_RUN_ID=0
+ARG RELEASE_ATTEMPT=0
+ARG RELEASE_WORKFLOW_SHA=development
+ARG RELEASE_CHANNEL=development
 ENV STROLT_PATH_DATA=/strolt
 
 LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
@@ -122,7 +152,13 @@ LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
 			org.opencontainers.image.licenses="MIT" \
 			org.opencontainers.image.source="https://github.com/strolt/strolt.git" \
 			org.opencontainers.image.title="Strolt" \
-			org.opencontainers.image.revision="${GITHUB_SHA}"
+            org.opencontainers.image.revision="${GITHUB_SHA}" \
+            org.opencontainers.image.version="${RELEASE_VERSION}" \
+            com.strolt.release.run="${RELEASE_RUN_ID}" \
+            com.strolt.release.attempt="${RELEASE_ATTEMPT}" \
+            com.strolt.release.workflow="${RELEASE_WORKFLOW_SHA}" \
+            com.strolt.release.channel="${RELEASE_CHANNEL}" \
+            com.strolt.release.product="strolt"
 
 COPY --from=builder /go/src/github.com/strolt/strolt/apps/strolt/strolt ./bin/strolt
 

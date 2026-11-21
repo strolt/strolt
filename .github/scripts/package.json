@@ -1,0 +1,9 @@
+{
+  "name": "@strolt/release-tests",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "python3 test_release.py",
+    "test:coverage": "pnpm test && echo 'Coverage unavailable for Python release tests'"
+  }
+}

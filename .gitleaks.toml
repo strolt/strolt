@@ -1,9 +1,10 @@
 title = "Custom Gitleaks configuration"
 
 [[allowlists]]
+targetRules = ["generic-api-key"]
 condition = "AND"
-description = "Public Algolia DocSearch key in generated website configuration"
-paths = ['(?:^|/)website/\.docusaurus/docusaurus\.config\.mjs$']
+description = "Public Algolia DocSearch key in generated website configuration and client bundle"
+paths = ['(?:^|/)website/\.docusaurus/docusaurus\.config\.mjs$', '(?:^|/)website/build/assets/js/main\.[0-9a-f]+\.js$']
 regexTarget = "secret"
 regexes = ["^643d73c08ff386e3da20a56e59319785$"]
 title = "Custom Gitleaks configuration"

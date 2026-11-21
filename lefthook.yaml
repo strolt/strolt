@@ -10,29 +10,29 @@ pre-commit:
     swagger:
       glob: apps/{strolt,stroltm}/internal/api/**/*.go
       priority: 5
-      run: "make swagger && git add -u -- shared/sdk apps/stroltm/ui/src/api/generated"
+      run: "pnpm generate && git add -u -- shared/sdk apps/stroltm/ui/src/api/generated"
     test-strolt:
       glob:
         - apps/strolt/**
         - shared/**
       priority: 6
-      run: make .test-strolt
+      run: pnpm turbo run test --filter=@strolt/strolt
     test-stroltm:
       glob:
         - apps/stroltm/**
         - shared/**
       priority: 7
-      run: make .test-stroltm
+      run: pnpm turbo run test --filter=@strolt/stroltm
     test-stroltp:
       glob:
         - apps/stroltp/**
         - shared/**
       priority: 8
-      run: make .test-stroltp
-    typecheck-stroltm-ui:
-      glob: apps/stroltm/ui/**
+      run: pnpm turbo run test --filter=@strolt/stroltp
+    test-shared:
+      glob: shared/**
       priority: 9
-      run: make .lint-stroltm-ui
+      run: pnpm turbo run test --filter=@strolt/shared
     datamitsu-init:
       priority: 10
       run: pnpm datamitsu init

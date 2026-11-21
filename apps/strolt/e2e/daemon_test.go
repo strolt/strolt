@@ -31,10 +31,10 @@ type DaemonSuite struct {
 }
 
 func (s *DaemonSuite) SetupSuite() {
-	port, err := containerManager.GetDaemonAPIPort()
+	address, err := containerManager.GetDaemonAPIAddress()
 	s.Require().NoError(err)
 
-	s.baseURL = "http://localhost:" + port
+	s.baseURL = "http://" + address
 	s.client = &http.Client{Transport: nil, CheckRedirect: nil, Jar: nil, Timeout: 10 * time.Second}
 
 	s.fs = fs()

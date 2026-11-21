@@ -9,10 +9,12 @@ export default defineConfig({
     "docusaurus-preset-redocusaurus",
   ],
   workspaces: {
+    ".github/scripts": { entry: ["eslint.config.mjs"] },
+    "apps/strolt": { ignoreDependencies: ["@strolt/shared"] },
+    "apps/stroltm": { ignoreDependencies: ["@strolt/shared", "stroltm-ui"] },
     "apps/stroltm/ui": {
       entry: ["src/main.tsx", "scripts/fix-generated-api.mjs"],
-      ignoreBinaries: ["openapi-generator-cli"],
-      ignoreDependencies: ["@openapitools/openapi-generator-cli"],
     },
+    "apps/stroltp": { ignoreDependencies: ["@strolt/shared"] },
   },
 });

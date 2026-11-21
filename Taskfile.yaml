@@ -1,0 +1,32 @@
+tasks:
+  clean:
+    cmds:
+      - rm -rf .swagger
+      - rm -rf shared/sdk/strolt/generated/strolt_client shared/sdk/strolt/generated/strolt_models
+      - rm -rf shared/sdk/stroltp/generated/stroltp_client shared/sdk/stroltp/generated/stroltp_models
+    desc: Remove disposable Swagger and SDK outputs
+  codegen:
+    deps:
+      - codegen:go
+    desc: Generate disposable Go schemas and SDKs
+  codegen:go:
+    cmds:
+      - sh scripts/generate-go-sdk.sh {{.CLI_ARGS}}
+    desc: Generate selected Go schemas and SDKs
+    env:
+      CGO_ENABLED: "0"
+      GOROOT: "{{.GOROOT}}"
+    vars:
+      GOROOT:
+        sh: pnpm dm exec go -- env GOROOT
+  generate:
+    cmds:
+      - pnpm turbo run generate --filter=stroltm-ui
+    deps:
+      - codegen
+    desc: Refresh committed UI client and disposable Go SDKs
+  test:e2e:
+    cmds:
+      - pnpm turbo run test:e2e --filter=@strolt/strolt
+    desc: Build the Strolt image and run its end-to-end suite
+version: "3"

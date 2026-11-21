@@ -7,10 +7,21 @@
   "author": "Alexander Svinarev <shibanet0@gmail.com> (shibanet0.com)",
   "type": "module",
   "scripts": {
-    "prepare": "datamitsu init --quiet"
+    "build": "turbo run build",
+    "build:docker": "turbo run build:docker --concurrency=1",
+    "clean": "pnpm dm exec task -- clean",
+    "codegen": "pnpm dm exec task -- codegen",
+    "dev": "turbo run dev",
+    "generate": "pnpm dm exec task -- generate",
+    "lint": "pnpm dm lint --fail-fast=false",
+    "prepare": "datamitsu init --quiet",
+    "test": "pnpm turbo run test",
+    "test:coverage": "pnpm turbo run test:coverage",
+    "test:e2e": "pnpm dm exec task -- test:e2e"
   },
   "devDependencies": {
-    "@shibanet0/datamitsu-config": "catalog:"
+    "@shibanet0/datamitsu-config": "catalog:",
+    "turbo": "2.11.11"
   },
   "packageManager": "pnpm@12.19.0",
   "engines": {
