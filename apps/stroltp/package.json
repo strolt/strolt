@@ -6,6 +6,18 @@
   "license": "MIT",
   "author": "Alexander Svinarev <shibanet0@gmail.com> (shibanet0.com)",
   "type": "module",
+  "scripts": {
+    "build": "pnpm dm exec task -- build",
+    "build:docker": "docker build -f ../../docker/stroltp/Dockerfile --build-arg version=development -t strolt/stroltp:development ../..",
+    "clean": "pnpm dm exec task -- clean",
+    "dev": "pnpm dm exec task -- run",
+    "dev:debug": "pnpm dm exec task -- run-debug",
+    "test": "pnpm dm exec go -- test ./...",
+    "test:coverage": "pnpm dm exec go -- test -cover ./..."
+  },
+  "dependencies": {
+    "@strolt/shared": "workspace:*"
+  },
   "devDependencies": {
     "@shibanet0/datamitsu-config": "catalog:"
   },

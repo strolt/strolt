@@ -16,10 +16,10 @@ type PostgresqlSuite struct {
 }
 
 func (s *PostgresqlSuite) SetupSuite() {
-	port, err := containerManager.GetPostgresPort()
+	address, err := containerManager.GetPostgresAddress()
 	s.Require().NoError(err)
 
-	connStr := fmt.Sprintf("user=strolt password=strolt host=localhost port=%s dbname=strolt sslmode=disable connect_timeout=60", port)
+	connStr := fmt.Sprintf("postgres://strolt:strolt@%s/strolt?sslmode=disable&connect_timeout=60", address)
 	c, err := sqlConnect("postgres", connStr)
 	s.Require().NoError(err)
 	s.c = c

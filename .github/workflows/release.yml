@@ -1,0 +1,303 @@
+concurrency:
+  cancel-in-progress: false
+  group: release-${{ github.ref }}
+jobs:
+  build:
+    name: Build ${{ matrix.product }} ${{ matrix.platform }}
+    needs:
+      - identity
+      - commit-inputs
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          persist-credentials: false
+          ref: ${{ needs.identity.outputs.source_sha }}
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        with:
+          cache-image: false
+          image: ${{ needs.identity.outputs.binfmt_image }}
+      - id: buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          cache-binary: false
+          driver-opts: image=${{ needs.identity.outputs.buildkit_image }}
+          version: ${{ needs.identity.outputs.buildx_version }}
+      - env:
+          BUILDX_BUILDER: ${{ steps.buildx.outputs.name }}
+          GH_TOKEN: ${{ github.token }}
+          PLATFORM: ${{ matrix.platform }}
+          PREPARATION: ${{ needs.identity.outputs.preparation }}
+          PRODUCT: ${{ matrix.product }}
+        id: build
+        name: Build and smoke-test OCI image
+        run: python3 .github/scripts/release.py build "$RUNNER_TEMP/release" "$PRODUCT" "$PLATFORM"
+      - if: steps.build.outputs.created == 'true'
+        name: Upload checked OCI image
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          if-no-files-found: error
+          name: ${{ steps.build.outputs.artifact }}
+          path: ${{ runner.temp }}/release/piece/
+          retention-days: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm/v7
+          - linux/arm64
+        product:
+          - strolt
+          - stroltm
+          - stroltp
+  commit-inputs:
+    needs:
+      - identity
+      - freeze
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          persist-credentials: false
+          ref: ${{ needs.identity.outputs.workflow_sha }}
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PREPARATION: ${{ needs.identity.outputs.preparation }}
+        id: commit
+        name: Verify frozen dependency graph
+        run: python3 .github/scripts/release.py commit-inputs "$RUNNER_TEMP/release"
+      - if: steps.commit.outputs.created == 'true'
+        name: Seal frozen inputs
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          if-no-files-found: error
+          name: ${{ needs.identity.outputs.preparation }}-inputs
+          path: ${{ runner.temp }}/release/inputs/
+          retention-days: 90
+  commit-preparation:
+    needs:
+      - identity
+      - build
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          persist-credentials: false
+          ref: ${{ needs.identity.outputs.workflow_sha }}
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PREPARATION: ${{ needs.identity.outputs.preparation }}
+        id: commit
+        name: Verify complete preparation and final indexes
+        run: python3 .github/scripts/release.py commit "$RUNNER_TEMP/release"
+      - if: steps.commit.outputs.created == 'true'
+        name: Seal release preparation
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          if-no-files-found: error
+          name: ${{ needs.identity.outputs.preparation }}-committed
+          path: ${{ runner.temp }}/release/committed/
+          retention-days: 90
+  freeze:
+    name: Freeze ${{ matrix.product }} ${{ matrix.platform }}
+    needs:
+      - identity
+      - validate
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          persist-credentials: false
+          ref: ${{ needs.identity.outputs.source_sha }}
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        with:
+          cache-image: false
+          image: ${{ needs.identity.outputs.binfmt_image }}
+      - id: buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          cache-binary: false
+          driver-opts: image=${{ needs.identity.outputs.buildkit_image }}
+          version: ${{ needs.identity.outputs.buildx_version }}
+      - env:
+          BUILDX_BUILDER: ${{ steps.buildx.outputs.name }}
+          GH_TOKEN: ${{ github.token }}
+          PLATFORM: ${{ matrix.platform }}
+          PREPARATION: ${{ needs.identity.outputs.preparation }}
+          PRODUCT: ${{ matrix.product }}
+        id: freeze
+        name: Freeze network-dependent build inputs
+        run: python3 .github/scripts/release.py freeze "$RUNNER_TEMP/release" "$PRODUCT" "$PLATFORM"
+      - if: steps.freeze.outputs.created == 'true'
+        name: Upload frozen build inputs
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          if-no-files-found: error
+          name: ${{ steps.freeze.outputs.artifact }}
+          path: ${{ runner.temp }}/release/snapshot/
+          retention-days: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm/v7
+          - linux/arm64
+        product:
+          - strolt
+          - stroltm
+          - stroltp
+  identity:
+    outputs:
+      binfmt_image: ${{ steps.identity.outputs.binfmt_image }}
+      buildkit_image: ${{ steps.identity.outputs.buildkit_image }}
+      buildx_version: ${{ steps.identity.outputs.buildx_version }}
+      channel: ${{ steps.identity.outputs.channel }}
+      crane_version: ${{ steps.tools.outputs.crane_version }}
+      preparation: ${{ steps.identity.outputs.preparation }}
+      source_sha: ${{ steps.identity.outputs.source_sha }}
+      workflow_sha: ${{ steps.identity.outputs.workflow_sha }}
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - id: tools
+        name: Read pinned toolchain
+        run: python3 .github/scripts/release.py tools "$RUNNER_TEMP/release"
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          cache: false
+          go-version: "1.27.3"
+      - env:
+          CRANE_VERSION: ${{ steps.tools.outputs.crane_version }}
+          GOBIN: ${{ runner.temp }}/bin
+        name: Install pinned transfer tool
+        run: |
+          CGO_ENABLED=0 go install -trimpath "github.com/google/go-containerregistry/cmd/crane@$CRANE_VERSION"
+          echo "$GOBIN" >> "$GITHUB_PATH"
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          cache-binary: false
+          driver: docker
+          version: ${{ steps.tools.outputs.buildx_version }}
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: ${{ inputs.mode }}
+        id: identity
+        name: Persist immutable preparation identity
+        run: python3 .github/scripts/release.py identity "$RUNNER_TEMP/release"
+      - if: steps.identity.outputs.created == 'true'
+        name: Upload preparation identity
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          if-no-files-found: error
+          name: ${{ steps.identity.outputs.preparation }}-identity
+          path: ${{ runner.temp }}/release/identity/identity.json
+          retention-days: 90
+  publish:
+    concurrency:
+      cancel-in-progress: false
+      group: registry-channels-${{ github.repository }}
+    environment: release
+    if: needs.identity.outputs.channel == 'stable' || needs.identity.outputs.channel == 'preview'
+    needs:
+      - identity
+      - commit-preparation
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          persist-credentials: false
+          ref: ${{ needs.identity.outputs.workflow_sha }}
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          cache: false
+          go-version: "1.27.3"
+      - env:
+          CRANE_VERSION: ${{ needs.identity.outputs.crane_version }}
+          GOBIN: ${{ runner.temp }}/bin
+        name: Install pinned transfer tool
+        run: |
+          CGO_ENABLED=0 go install -trimpath "github.com/google/go-containerregistry/cmd/crane@$CRANE_VERSION"
+          echo "$GOBIN" >> "$GITHUB_PATH"
+      - env:
+          DOCKER_CONFIG: ${{ runner.temp }}/registry-auth
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+          DOCKERHUB_USER: strolt
+          GH_TOKEN: ${{ github.token }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          PREPARATION: ${{ needs.identity.outputs.preparation }}
+          PRODUCT_SHA: ${{ needs.identity.outputs.source_sha }}
+        name: Publish committed OCI images
+        run: python3 .github/scripts/release.py publish "$RUNNER_TEMP/release"
+  validate:
+    name: Validate product source
+    needs: identity
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          persist-credentials: false
+          ref: ${{ needs.identity.outputs.source_sha }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 26.13.1
+          package-manager-cache: false
+      - run: npm install --global pnpm@12.19.0
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate SDKs
+        run: pnpm generate
+      - name: Check generated UI API client
+        run: git diff --exit-code -- apps/stroltm/ui/src/api/generated
+      - name: Lint workspace
+        run: pnpm dm lint --fail-fast=false
+      - name: Test workspace
+        run: pnpm test
+      - name: Build documentation
+        run: pnpm --filter website build
+      - name: Test end-to-end behavior
+        run: pnpm test:e2e
+name: Release
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      mode:
+        default: verify
+        description: Verify the selected ref or publish a preview
+        options:
+          - verify
+          - prerelease
+        required: true
+        type: choice
+permissions:
+  contents: read

@@ -4,12 +4,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
-          cache-dependency-path: apps/strolt/go.sum
-          go-version-file: apps/strolt/go.mod
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 26.13.1
+          package-manager-cache: false
+      - run: npm install --global pnpm@12.19.0
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
       - name: run e2e suite
-        run: make e2e
+        run: pnpm test:e2e
     timeout-minutes: 40
 name: e2e
 on:
@@ -19,7 +24,13 @@ on:
       - "apps/strolt/**"
       - "shared/**"
       - "docker/strolt/**"
-      - "Makefile"
+      - "**/Taskfile.*"
+      - "**/package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - "datamitsu.config.js"
+      - "scripts/**"
       - "!**.md"
   push:
     branches:

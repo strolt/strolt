@@ -14,11 +14,11 @@ type MySQLSuite struct {
 }
 
 func (s *MySQLSuite) SetupSuite() {
-	port, err := containerManager.GetMySQLPort()
+	address, err := containerManager.GetMySQLAddress()
 	s.Require().NoError(err)
 
 	// MySQL 8.4 enables TLS with an auto-generated self-signed certificate.
-	connStr := fmt.Sprintf("strolt:strolt@(localhost:%s)/strolt?timeout=60s&tls=skip-verify", port)
+	connStr := fmt.Sprintf("strolt:strolt@tcp(%s)/strolt?timeout=60s&tls=skip-verify", address)
 	c, err := sqlConnect("mysql", connStr)
 	s.Require().NoError(err)
 	s.c = c

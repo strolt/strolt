@@ -1,6 +1,5 @@
 allowBuilds:
   "@nestjs/core": false
-  "@openapitools/openapi-generator-cli": false
   "@swc/core": false
   core-js: false
   core-js-pure: false
@@ -25,10 +24,26 @@ minimumReleaseAgeExclude:
   - "@ovineko/*"
   - "@shibanet0/*"
 optimisticRepeatInstall: true
+overrides:
+  "@docusaurus/bundler@3.9.2>webpackbar@^6.0.1": 7.0.0
+packageExtensions:
+  "@redocly/openapi-core@1.16.0":
+    dependencies:
+      path-browserify: 1.0.1
+  docusaurus-plugin-redoc@2.5.0:
+    dependencies:
+      "@docusaurus/utils-validation": 3.9.2
+  redoc@2.4.0:
+    dependencies:
+      call-me-maybe: 1.0.2
+      fast-safe-stringify: 2.1.1
+      yaml: 1.10.3
 packages:
   - apps/*
-  - website
   - apps/stroltm/ui
+  - shared
+  - website
+  - .github/scripts
 preferFrozenLockfile: true
 resolutionMode: lowest-direct
 savePrefix: ""

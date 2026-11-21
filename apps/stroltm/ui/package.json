@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc && vite build",
-    "codegen": "pnpm dm exec task -- codegen",
-    "dev": "vite"
+    "dev": "vite",
+    "generate": "pnpm dm exec task -- generate"
   },
   "dependencies": {
     "@ant-design/icons": "6.3.4",
@@ -24,7 +24,6 @@
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
-    "@openapitools/openapi-generator-cli": "2.41.0",
     "@rolldown/plugin-babel": "0.2.4",
     "@shibanet0/datamitsu-config": "catalog:",
     "@types/babel__core": "7.20.5",

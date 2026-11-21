@@ -116,7 +116,8 @@ func TestBinaryVersionCancelsRunningPostgresProbe(t *testing.T) {
 	cancel()
 	err := <-result
 	require.ErrorIs(t, err, context.Canceled)
-	var exitError *process.ExitError
+	var exitError interface{ ExitCode() int }
 	require.ErrorAs(t, err, &exitError)
+	require.Equal(t, -1, exitError.ExitCode())
 	require.NoFileExists(t, marker)
 }

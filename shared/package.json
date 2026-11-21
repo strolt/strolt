@@ -6,6 +6,11 @@
   "license": "MIT",
   "author": "Alexander Svinarev <shibanet0@gmail.com> (shibanet0.com)",
   "type": "module",
+  "scripts": {
+    "build": "pnpm dm exec go -- build ./...",
+    "test": "pnpm dm exec go -- test ./...",
+    "test:coverage": "pnpm dm exec go -- test -cover ./..."
+  },
   "devDependencies": {
     "@shibanet0/datamitsu-config": "catalog:"
   },

@@ -1,0 +1,50 @@
+tasks:
+  test:
+    cmds:
+      - pnpm dm exec go -- test {{.NON_E2E_PACKAGES}}
+    desc: Run Strolt tests, excluding E2E
+  test:coverage:
+    cmds:
+      - sh -c 'trap "rm -f coverage.strolt.out" EXIT; pnpm dm exec go -- test -coverprofile=coverage.strolt.out {{.NON_E2E_PACKAGES}} && pnpm dm exec go -- tool cover -func=coverage.strolt.out'
+    desc: Run all Strolt tests and report coverage
+  test:e2e:
+    cmds:
+      - DOCKER_BIN="{{.DOCKER_BIN}}" pnpm run build:docker
+      - GOFLAGS="-count=1" pnpm dm exec go -- test ./e2e -v -timeout 30m
+    desc: Build the Strolt image and run all end-to-end tests
+    vars:
+      DOCKER_BIN:
+        sh: |
+          for candidate in /usr/bin/docker /usr/local/bin/docker /opt/homebrew/bin/docker; do
+            if [ -x "$candidate" ]; then
+              printf '%s\n' "$candidate"
+              exit 0
+            fi
+          done
+          command -v docker
+vars:
+  NON_E2E_PACKAGES:
+    sh: |
+      if ! packages=$(pnpm dm exec go -- list ./...); then
+        echo "failed to discover Strolt Go packages" >&2
+        exit 1
+      fi
+      if [ -z "$packages" ]; then
+        echo "go list ./... returned no packages" >&2
+        exit 1
+      fi
+      set --
+      while IFS= read -r package; do
+        case "$package" in
+          */e2e | */e2e/*) continue ;;
+        esac
+        set -- "$@" "$package"
+      done << EOF
+      $packages
+      EOF
+      if [ "$#" -eq 0 ]; then
+        echo "go list ./... returned no non-E2E packages" >&2
+        exit 1
+      fi
+      printf '%s ' "$@"
+version: "3"
