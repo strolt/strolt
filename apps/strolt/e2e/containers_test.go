@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"path/filepath"
 	"strings"
 	"time"
@@ -257,74 +258,29 @@ func (cm *ContainerManager) StartStroltDaemon() error {
 	return nil
 }
 
-// GetDaemonAPIPort returns the mapped port of the strolt daemon HTTP API.
-func (cm *ContainerManager) GetDaemonAPIPort() (string, error) {
-	if cm.stroltDaemonContainer == nil {
-		return "", errors.New("strolt daemon container not started")
-	}
-
-	mappedPort, err := cm.stroltDaemonContainer.MappedPort(cm.ctx, "8080")
-	if err != nil {
-		return "", err
-	}
-
-	return mappedPort.Port(), nil
+// GetDaemonAPIAddress returns the host-mapped address of the strolt daemon HTTP API.
+func (cm *ContainerManager) GetDaemonAPIAddress() (string, error) {
+	return cm.containerAddress(cm.stroltDaemonContainer, "8080", "strolt daemon")
 }
 
-// GetPostgresPort returns the mapped port for PostgreSQL.
-func (cm *ContainerManager) GetPostgresPort() (string, error) {
-	if cm.postgresContainer == nil {
-		return "", errors.New("postgres container not started")
-	}
-
-	mappedPort, err := cm.postgresContainer.MappedPort(cm.ctx, "5432")
-	if err != nil {
-		return "", err
-	}
-
-	return mappedPort.Port(), nil
+// GetPostgresAddress returns the host-mapped address for PostgreSQL.
+func (cm *ContainerManager) GetPostgresAddress() (string, error) {
+	return cm.containerAddress(cm.postgresContainer, "5432", "postgres")
 }
 
-// GetMongoPort returns the mapped port for MongoDB.
-func (cm *ContainerManager) GetMongoPort() (string, error) {
-	if cm.mongoContainer == nil {
-		return "", errors.New("mongo container not started")
-	}
-
-	mappedPort, err := cm.mongoContainer.MappedPort(cm.ctx, "27017")
-	if err != nil {
-		return "", err
-	}
-
-	return mappedPort.Port(), nil
+// GetMongoAddress returns the host-mapped address for MongoDB.
+func (cm *ContainerManager) GetMongoAddress() (string, error) {
+	return cm.containerAddress(cm.mongoContainer, "27017", "mongo")
 }
 
-// GetMariaDBPort returns the mapped port for MariaDB.
-func (cm *ContainerManager) GetMariaDBPort() (string, error) {
-	if cm.mariadbContainer == nil {
-		return "", errors.New("mariadb container not started")
-	}
-
-	mappedPort, err := cm.mariadbContainer.MappedPort(cm.ctx, "3306")
-	if err != nil {
-		return "", err
-	}
-
-	return mappedPort.Port(), nil
+// GetMariaDBAddress returns the host-mapped address for MariaDB.
+func (cm *ContainerManager) GetMariaDBAddress() (string, error) {
+	return cm.containerAddress(cm.mariadbContainer, "3306", "mariadb")
 }
 
-// GetMySQLPort returns the mapped port for MySQL.
-func (cm *ContainerManager) GetMySQLPort() (string, error) {
-	if cm.mysqlContainer == nil {
-		return "", errors.New("mysql container not started")
-	}
-
-	mappedPort, err := cm.mysqlContainer.MappedPort(cm.ctx, "3306")
-	if err != nil {
-		return "", err
-	}
-
-	return mappedPort.Port(), nil
+// GetMySQLAddress returns the host-mapped address for MySQL.
+func (cm *ContainerManager) GetMySQLAddress() (string, error) {
+	return cm.containerAddress(cm.mysqlContainer, "3306", "mysql")
 }
 
 // GetStroltContainer returns the Strolt container.
@@ -403,6 +359,24 @@ func (cm *ContainerManager) StartAllContainers() error {
 	})
 
 	return g.Wait()
+}
+
+func (cm *ContainerManager) containerAddress(c testcontainers.Container, containerPort, name string) (string, error) {
+	if c == nil {
+		return "", fmt.Errorf("%s container not started", name)
+	}
+
+	host, err := c.Host(cm.ctx)
+	if err != nil {
+		return "", err
+	}
+
+	mappedPort, err := c.MappedPort(cm.ctx, containerPort)
+	if err != nil {
+		return "", err
+	}
+
+	return net.JoinHostPort(host, mappedPort.Port()), nil
 }
 
 // startPostgres starts PostgreSQL via the official testcontainers module.

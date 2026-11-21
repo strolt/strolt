@@ -14,10 +14,10 @@ type MariaDBSuite struct {
 }
 
 func (s *MariaDBSuite) SetupSuite() {
-	port, err := containerManager.GetMariaDBPort()
+	address, err := containerManager.GetMariaDBAddress()
 	s.Require().NoError(err)
 
-	connStr := fmt.Sprintf("strolt:strolt@(localhost:%s)/strolt?timeout=60s", port)
+	connStr := fmt.Sprintf("strolt:strolt@tcp(%s)/strolt?timeout=60s", address)
 	c, err := sqlConnect("mysql", connStr)
 	s.Require().NoError(err)
 	s.c = c

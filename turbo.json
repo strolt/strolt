@@ -1,0 +1,70 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "//#codegen": {
+      "cache": false
+    },
+    "@strolt/stroltm#build": {
+      "dependsOn": [
+        "^build",
+        "@strolt/stroltm#build:lib"
+      ],
+      "outputs": [
+        "stroltm",
+        "internal/ui/build/dist/**"
+      ]
+    },
+    "@strolt/stroltm#build:lib": {
+      "dependsOn": [
+        "//#codegen",
+        "^build"
+      ],
+      "outputs": [
+        "internal/ui/build/dist/**"
+      ]
+    },
+    "build": {
+      "dependsOn": [
+        "//#codegen",
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        "build/**",
+        "strolt",
+        "stroltm",
+        "stroltp"
+      ]
+    },
+    "build:docker": {
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "dependsOn": [
+        "//#codegen"
+      ],
+      "persistent": true
+    },
+    "generate": {
+      "cache": false
+    },
+    "test": {
+      "dependsOn": [
+        "//#codegen"
+      ]
+    },
+    "test:coverage": {
+      "cache": false,
+      "dependsOn": [
+        "//#codegen"
+      ]
+    },
+    "test:e2e": {
+      "cache": false,
+      "dependsOn": [
+        "//#codegen"
+      ]
+    }
+  }
+}

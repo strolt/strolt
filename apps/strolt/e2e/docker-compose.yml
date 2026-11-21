@@ -49,7 +49,7 @@ services:
     networks:
       - strolt
   strolt:
-    image: strolt/strolt:development # dclint disable-line service-image-require-explicit-tag — locally built via `make docker-strolt`, never pulled from a registry
+    image: strolt/strolt:development # dclint disable-line service-image-require-explicit-tag — locally built via `pnpm build:docker`, never pulled from a registry
     volumes:
       - ./strolt.yml:/strolt/config.yml:ro
       - ./.strolt:/strolt/.strolt:ro

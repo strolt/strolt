@@ -65,6 +65,12 @@
 **/go.work
 **/go.work.sum
 
+# Generated Swagger schemas and Go clients are rebuilt in the Docker codegen stages.
+.swagger/
+shared/sdk/strolt/generated/strolt_client/
+shared/sdk/strolt/generated/strolt_models/
+shared/sdk/stroltp/generated/stroltp_client/
+shared/sdk/stroltp/generated/stroltp_models/
 # IDE & OS
 **/.DS_Store
 **/Thumbs.db

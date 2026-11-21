@@ -1,0 +1,26 @@
+tasks:
+  build:
+    cmds:
+      - pnpm dm exec go -- build
+    desc: Build the manager binary
+  build:lib:
+    cmds:
+      - rm -rf internal/ui/build/dist
+      - cp -R ui/dist internal/ui/build/dist
+    desc: Copy the Turbo-built UI into the manager embedding path
+  clean:
+    cmds:
+      - rm -f stroltm
+      - rm -rf internal/ui/build/dist ui/dist
+    desc: Remove manager build outputs
+  run:
+    cmds:
+      - pnpm dm exec go -- build -ldflags "-X github.com/strolt/strolt/apps/stroltm/internal/ui.mode=proxy"
+      - STROLTM_PORT=8090 ./stroltm --config=./testdata/stroltm.yml
+    desc: Run the manager with its local config
+  run-debug:
+    cmds:
+      - pnpm dm exec go -- build -ldflags "-X github.com/strolt/strolt/apps/stroltm/internal/ui.mode=proxy"
+      - STROLTM_LOG_LEVEL=DEBUG STROLTM_PORT=8090 ./stroltm --config=./testdata/stroltm.yml
+    desc: Run the manager with debug logging
+version: "3"

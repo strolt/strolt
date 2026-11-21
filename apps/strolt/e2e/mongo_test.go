@@ -106,7 +106,7 @@ func MongoSuiteTest(t *testing.T) {
 }
 
 func mongoConnect() (*MongoConn, error) {
-	port, err := containerManager.GetMongoPort()
+	address, err := containerManager.GetMongoAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func mongoConnect() (*MongoConn, error) {
 	connectCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(connectCtx, options.Client().ApplyURI("mongodb://localhost:"+port))
+	client, err := mongo.Connect(connectCtx, options.Client().ApplyURI("mongodb://"+address))
 	if err != nil {
 		return nil, err
 	}
