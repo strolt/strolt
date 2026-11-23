@@ -1,0 +1,9 @@
+# GitHub added concurrency.queue after the managed actionlint 1.7.12 schema.
+# The official release workflow docs define queue: max; ignore only this schema mismatch here.
+paths:
+  .github/workflows/release.yml:
+    ignore:
+      - "unexpected key \"queue\" for \"concurrency\" section"
+  release.yml:
+    ignore:
+      - "unexpected key \"queue\" for \"concurrency\" section"

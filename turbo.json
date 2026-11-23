@@ -37,7 +37,13 @@
       ]
     },
     "build:docker": {
-      "cache": false
+      "cache": false,
+      "dependsOn": [
+        "//#codegen"
+      ],
+      "env": [
+        "STROLT_BINARY_ARTIFACT"
+      ]
     },
     "dev": {
       "cache": false,
@@ -64,6 +70,10 @@
       "cache": false,
       "dependsOn": [
         "//#codegen"
+      ],
+      "env": [
+        "STROLT_BINARY_ARTIFACT",
+        "STROLT_TEST_IMAGE"
       ]
     }
   }

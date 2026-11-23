@@ -14,7 +14,7 @@ Run `pnpm generate` from the repository root to generate the Go schemas, Go SDKs
 
 ### Test and build
 
-Run `pnpm test` from the repository root for Go module tests and release lifecycle regression tests. End-to-end tests run separately. Run `pnpm build:docker` to build the three local development images.
+Run `pnpm test` from the repository root for Go module tests and release lifecycle regression tests. End-to-end tests run separately. `pnpm build:docker` and `pnpm test:e2e` use GoReleaser `v2.20.3`; install it with `go install github.com/goreleaser/goreleaser/v2@v2.20.3` and add its install directory to `PATH`. Docker builds also build the manager UI.
 
 ### Run end-to-end tests
 

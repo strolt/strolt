@@ -3,6 +3,28 @@ tasks:
     cmds:
       - pnpm dm exec go -- build
     desc: Build the proxy binary
+  build:docker:
+    cmds:
+      - |
+        set -eu
+        cd ../..
+        if [ "${STROLT_BINARY_ARTIFACT+x}" = x ]; then
+          if [ -z "$STROLT_BINARY_ARTIFACT" ]; then
+            echo "STROLT_BINARY_ARTIFACT must not be empty" >&2
+            exit 1
+          fi
+          python3 .github/scripts/release.py stage-binaries \
+            "$STROLT_BINARY_ARTIFACT" stroltp linux/amd64
+          set -- --platform linux/amd64
+        else
+          RELEASE_VERSION=development python3 .github/scripts/release.py local-binaries - stroltp
+          set --
+        fi
+        "${DOCKER_BIN:-docker}" build "$@" \
+          -f docker/stroltp/Dockerfile \
+          --build-arg RELEASE_VERSION=development \
+          -t strolt/stroltp:development .
+    desc: Build the local proxy image from source or a GoReleaser bundle
   clean:
     cmds:
       - rm -f stroltp

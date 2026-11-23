@@ -1,62 +1,165 @@
 concurrency:
   cancel-in-progress: false
   group: release-${{ github.ref }}
+  queue: max
 jobs:
-  build:
-    name: Build ${{ matrix.product }} ${{ matrix.platform }}
+  build_strolt_linux_amd64:
+    name: Build strolt linux/amd64
     needs:
       - identity
       - commit-inputs
     permissions:
       actions: read
       contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
-        with:
-          persist-credentials: false
-          ref: ${{ needs.identity.outputs.source_sha }}
-      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
-        with:
-          cache-image: false
-          image: ${{ needs.identity.outputs.binfmt_image }}
-      - id: buildx
-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-        with:
-          cache-binary: false
-          driver-opts: image=${{ needs.identity.outputs.buildkit_image }}
-          version: ${{ needs.identity.outputs.buildx_version }}
-      - env:
-          BUILDX_BUILDER: ${{ steps.buildx.outputs.name }}
-          GH_TOKEN: ${{ github.token }}
-          PLATFORM: ${{ matrix.platform }}
-          PREPARATION: ${{ needs.identity.outputs.preparation }}
-          PRODUCT: ${{ matrix.product }}
-        id: build
-        name: Build and smoke-test OCI image
-        run: python3 .github/scripts/release.py build "$RUNNER_TEMP/release" "$PRODUCT" "$PLATFORM"
-      - if: steps.build.outputs.created == 'true'
-        name: Upload checked OCI image
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          if-no-files-found: error
-          name: ${{ steps.build.outputs.artifact }}
-          path: ${{ runner.temp }}/release/piece/
-          retention-days: 90
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - linux/amd64
-          - linux/arm/v7
-          - linux/arm64
-        product:
-          - strolt
-          - stroltm
-          - stroltp
+    uses: ./.github/workflows/release-build.yml
+    with:
+      binfmt_image: ${{ needs.identity.outputs.binfmt_image }}
+      buildkit_image: ${{ needs.identity.outputs.buildkit_image }}
+      buildx_version: ${{ needs.identity.outputs.buildx_version }}
+      platform: linux/amd64
+      preparation: ${{ needs.identity.outputs.preparation }}
+      product: strolt
+      source_sha: ${{ needs.identity.outputs.source_sha }}
+  build_strolt_linux_arm_v7:
+    name: Build strolt linux/arm/v7
+    needs:
+      - identity
+      - commit-inputs
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/release-build.yml
+    with:
+      binfmt_image: ${{ needs.identity.outputs.binfmt_image }}
+      buildkit_image: ${{ needs.identity.outputs.buildkit_image }}
+      buildx_version: ${{ needs.identity.outputs.buildx_version }}
+      platform: linux/arm/v7
+      preparation: ${{ needs.identity.outputs.preparation }}
+      product: strolt
+      source_sha: ${{ needs.identity.outputs.source_sha }}
+  build_strolt_linux_arm64:
+    name: Build strolt linux/arm64
+    needs:
+      - identity
+      - commit-inputs
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/release-build.yml
+    with:
+      binfmt_image: ${{ needs.identity.outputs.binfmt_image }}
+      buildkit_image: ${{ needs.identity.outputs.buildkit_image }}
+      buildx_version: ${{ needs.identity.outputs.buildx_version }}
+      platform: linux/arm64
+      preparation: ${{ needs.identity.outputs.preparation }}
+      product: strolt
+      source_sha: ${{ needs.identity.outputs.source_sha }}
+  build_stroltm_linux_amd64:
+    name: Build stroltm linux/amd64
+    needs:
+      - identity
+      - commit-inputs
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/release-build.yml
+    with:
+      binfmt_image: ${{ needs.identity.outputs.binfmt_image }}
+      buildkit_image: ${{ needs.identity.outputs.buildkit_image }}
+      buildx_version: ${{ needs.identity.outputs.buildx_version }}
+      platform: linux/amd64
+      preparation: ${{ needs.identity.outputs.preparation }}
+      product: stroltm
+      source_sha: ${{ needs.identity.outputs.source_sha }}
+  build_stroltm_linux_arm_v7:
+    name: Build stroltm linux/arm/v7
+    needs:
+      - identity
+      - commit-inputs
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/release-build.yml
+    with:
+      binfmt_image: ${{ needs.identity.outputs.binfmt_image }}
+      buildkit_image: ${{ needs.identity.outputs.buildkit_image }}
+      buildx_version: ${{ needs.identity.outputs.buildx_version }}
+      platform: linux/arm/v7
+      preparation: ${{ needs.identity.outputs.preparation }}
+      product: stroltm
+      source_sha: ${{ needs.identity.outputs.source_sha }}
+  build_stroltm_linux_arm64:
+    name: Build stroltm linux/arm64
+    needs:
+      - identity
+      - commit-inputs
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/release-build.yml
+    with:
+      binfmt_image: ${{ needs.identity.outputs.binfmt_image }}
+      buildkit_image: ${{ needs.identity.outputs.buildkit_image }}
+      buildx_version: ${{ needs.identity.outputs.buildx_version }}
+      platform: linux/arm64
+      preparation: ${{ needs.identity.outputs.preparation }}
+      product: stroltm
+      source_sha: ${{ needs.identity.outputs.source_sha }}
+  build_stroltp_linux_amd64:
+    name: Build stroltp linux/amd64
+    needs:
+      - identity
+      - commit-inputs
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/release-build.yml
+    with:
+      binfmt_image: ${{ needs.identity.outputs.binfmt_image }}
+      buildkit_image: ${{ needs.identity.outputs.buildkit_image }}
+      buildx_version: ${{ needs.identity.outputs.buildx_version }}
+      platform: linux/amd64
+      preparation: ${{ needs.identity.outputs.preparation }}
+      product: stroltp
+      source_sha: ${{ needs.identity.outputs.source_sha }}
+  build_stroltp_linux_arm_v7:
+    name: Build stroltp linux/arm/v7
+    needs:
+      - identity
+      - commit-inputs
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/release-build.yml
+    with:
+      binfmt_image: ${{ needs.identity.outputs.binfmt_image }}
+      buildkit_image: ${{ needs.identity.outputs.buildkit_image }}
+      buildx_version: ${{ needs.identity.outputs.buildx_version }}
+      platform: linux/arm/v7
+      preparation: ${{ needs.identity.outputs.preparation }}
+      product: stroltp
+      source_sha: ${{ needs.identity.outputs.source_sha }}
+  build_stroltp_linux_arm64:
+    name: Build stroltp linux/arm64
+    needs:
+      - identity
+      - commit-inputs
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/release-build.yml
+    with:
+      binfmt_image: ${{ needs.identity.outputs.binfmt_image }}
+      buildkit_image: ${{ needs.identity.outputs.buildkit_image }}
+      buildx_version: ${{ needs.identity.outputs.buildx_version }}
+      platform: linux/arm64
+      preparation: ${{ needs.identity.outputs.preparation }}
+      product: stroltp
+      source_sha: ${{ needs.identity.outputs.source_sha }}
   commit-inputs:
     needs:
       - identity
+      - validate
       - freeze
     permissions:
       actions: read
@@ -66,10 +169,13 @@ jobs:
       - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
         with:
           persist-credentials: false
-          ref: ${{ needs.identity.outputs.workflow_sha }}
+          ref: ${{ github.workflow_sha }}
       - env:
           GH_TOKEN: ${{ github.token }}
           PREPARATION: ${{ needs.identity.outputs.preparation }}
+          VALIDATED_BINARY_ARTIFACT_DIGEST: ${{ needs.validate.outputs.binary_artifact_digest }}
+          VALIDATED_BINARY_ARTIFACT_ID: ${{ needs.validate.outputs.binary_artifact_id }}
+          VALIDATED_BINARY_MANIFEST_SHA256: ${{ needs.validate.outputs.binary_manifest_sha256 }}
         id: commit
         name: Verify frozen dependency graph
         run: python3 .github/scripts/release.py commit-inputs "$RUNNER_TEMP/release"
@@ -84,7 +190,15 @@ jobs:
   commit-preparation:
     needs:
       - identity
-      - build
+      - build_strolt_linux_amd64
+      - build_strolt_linux_arm_v7
+      - build_strolt_linux_arm64
+      - build_stroltm_linux_amd64
+      - build_stroltm_linux_arm_v7
+      - build_stroltm_linux_arm64
+      - build_stroltp_linux_amd64
+      - build_stroltp_linux_arm_v7
+      - build_stroltp_linux_arm64
     permissions:
       actions: read
       contents: read
@@ -93,9 +207,83 @@ jobs:
       - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
         with:
           persist-credentials: false
-          ref: ${{ needs.identity.outputs.workflow_sha }}
+          ref: ${{ github.workflow_sha }}
       - env:
           GH_TOKEN: ${{ github.token }}
+          MATRIX_PRODUCER_RECEIPTS: |-
+            {"strolt/linux/amd64": {
+                "piece_artifact_id": "${{ needs.build_strolt_linux_amd64.outputs.piece_artifact_id }}",
+                "piece_artifact_digest": "${{ needs.build_strolt_linux_amd64.outputs.piece_artifact_digest }}",
+                "piece_artifact_name": "${{ needs.build_strolt_linux_amd64.outputs.piece_artifact_name }}",
+                "receipt_artifact_id": "${{ needs.build_strolt_linux_amd64.outputs.receipt_artifact_id }}",
+                "receipt_artifact_name": "${{ needs.build_strolt_linux_amd64.outputs.receipt_artifact_name }}",
+                "receipt_artifact_digest": "${{ needs.build_strolt_linux_amd64.outputs.receipt_artifact_digest }}"
+              },
+              "strolt/linux/arm/v7": {
+                "piece_artifact_id": "${{ needs.build_strolt_linux_arm_v7.outputs.piece_artifact_id }}",
+                "piece_artifact_digest": "${{ needs.build_strolt_linux_arm_v7.outputs.piece_artifact_digest }}",
+                "piece_artifact_name": "${{ needs.build_strolt_linux_arm_v7.outputs.piece_artifact_name }}",
+                "receipt_artifact_id": "${{ needs.build_strolt_linux_arm_v7.outputs.receipt_artifact_id }}",
+                "receipt_artifact_name": "${{ needs.build_strolt_linux_arm_v7.outputs.receipt_artifact_name }}",
+                "receipt_artifact_digest": "${{ needs.build_strolt_linux_arm_v7.outputs.receipt_artifact_digest }}"
+              },
+              "strolt/linux/arm64": {
+                "piece_artifact_id": "${{ needs.build_strolt_linux_arm64.outputs.piece_artifact_id }}",
+                "piece_artifact_digest": "${{ needs.build_strolt_linux_arm64.outputs.piece_artifact_digest }}",
+                "piece_artifact_name": "${{ needs.build_strolt_linux_arm64.outputs.piece_artifact_name }}",
+                "receipt_artifact_id": "${{ needs.build_strolt_linux_arm64.outputs.receipt_artifact_id }}",
+                "receipt_artifact_name": "${{ needs.build_strolt_linux_arm64.outputs.receipt_artifact_name }}",
+                "receipt_artifact_digest": "${{ needs.build_strolt_linux_arm64.outputs.receipt_artifact_digest }}"
+              },
+              "stroltm/linux/amd64": {
+                "piece_artifact_id": "${{ needs.build_stroltm_linux_amd64.outputs.piece_artifact_id }}",
+                "piece_artifact_digest": "${{ needs.build_stroltm_linux_amd64.outputs.piece_artifact_digest }}",
+                "piece_artifact_name": "${{ needs.build_stroltm_linux_amd64.outputs.piece_artifact_name }}",
+                "receipt_artifact_id": "${{ needs.build_stroltm_linux_amd64.outputs.receipt_artifact_id }}",
+                "receipt_artifact_name": "${{ needs.build_stroltm_linux_amd64.outputs.receipt_artifact_name }}",
+                "receipt_artifact_digest": "${{ needs.build_stroltm_linux_amd64.outputs.receipt_artifact_digest }}"
+              },
+              "stroltm/linux/arm/v7": {
+                "piece_artifact_id": "${{ needs.build_stroltm_linux_arm_v7.outputs.piece_artifact_id }}",
+                "piece_artifact_digest": "${{ needs.build_stroltm_linux_arm_v7.outputs.piece_artifact_digest }}",
+                "piece_artifact_name": "${{ needs.build_stroltm_linux_arm_v7.outputs.piece_artifact_name }}",
+                "receipt_artifact_id": "${{ needs.build_stroltm_linux_arm_v7.outputs.receipt_artifact_id }}",
+                "receipt_artifact_name": "${{ needs.build_stroltm_linux_arm_v7.outputs.receipt_artifact_name }}",
+                "receipt_artifact_digest": "${{ needs.build_stroltm_linux_arm_v7.outputs.receipt_artifact_digest }}"
+              },
+              "stroltm/linux/arm64": {
+                "piece_artifact_id": "${{ needs.build_stroltm_linux_arm64.outputs.piece_artifact_id }}",
+                "piece_artifact_digest": "${{ needs.build_stroltm_linux_arm64.outputs.piece_artifact_digest }}",
+                "piece_artifact_name": "${{ needs.build_stroltm_linux_arm64.outputs.piece_artifact_name }}",
+                "receipt_artifact_id": "${{ needs.build_stroltm_linux_arm64.outputs.receipt_artifact_id }}",
+                "receipt_artifact_name": "${{ needs.build_stroltm_linux_arm64.outputs.receipt_artifact_name }}",
+                "receipt_artifact_digest": "${{ needs.build_stroltm_linux_arm64.outputs.receipt_artifact_digest }}"
+              },
+              "stroltp/linux/amd64": {
+                "piece_artifact_id": "${{ needs.build_stroltp_linux_amd64.outputs.piece_artifact_id }}",
+                "piece_artifact_digest": "${{ needs.build_stroltp_linux_amd64.outputs.piece_artifact_digest }}",
+                "piece_artifact_name": "${{ needs.build_stroltp_linux_amd64.outputs.piece_artifact_name }}",
+                "receipt_artifact_id": "${{ needs.build_stroltp_linux_amd64.outputs.receipt_artifact_id }}",
+                "receipt_artifact_name": "${{ needs.build_stroltp_linux_amd64.outputs.receipt_artifact_name }}",
+                "receipt_artifact_digest": "${{ needs.build_stroltp_linux_amd64.outputs.receipt_artifact_digest }}"
+              },
+              "stroltp/linux/arm/v7": {
+                "piece_artifact_id": "${{ needs.build_stroltp_linux_arm_v7.outputs.piece_artifact_id }}",
+                "piece_artifact_digest": "${{ needs.build_stroltp_linux_arm_v7.outputs.piece_artifact_digest }}",
+                "piece_artifact_name": "${{ needs.build_stroltp_linux_arm_v7.outputs.piece_artifact_name }}",
+                "receipt_artifact_id": "${{ needs.build_stroltp_linux_arm_v7.outputs.receipt_artifact_id }}",
+                "receipt_artifact_name": "${{ needs.build_stroltp_linux_arm_v7.outputs.receipt_artifact_name }}",
+                "receipt_artifact_digest": "${{ needs.build_stroltp_linux_arm_v7.outputs.receipt_artifact_digest }}"
+              },
+              "stroltp/linux/arm64": {
+                "piece_artifact_id": "${{ needs.build_stroltp_linux_arm64.outputs.piece_artifact_id }}",
+                "piece_artifact_digest": "${{ needs.build_stroltp_linux_arm64.outputs.piece_artifact_digest }}",
+                "piece_artifact_name": "${{ needs.build_stroltp_linux_arm64.outputs.piece_artifact_name }}",
+                "receipt_artifact_id": "${{ needs.build_stroltp_linux_arm64.outputs.receipt_artifact_id }}",
+                "receipt_artifact_name": "${{ needs.build_stroltp_linux_arm64.outputs.receipt_artifact_name }}",
+                "receipt_artifact_digest": "${{ needs.build_stroltp_linux_arm64.outputs.receipt_artifact_digest }}"
+              }
+            }
           PREPARATION: ${{ needs.identity.outputs.preparation }}
         id: commit
         name: Verify complete preparation and final indexes
@@ -122,6 +310,11 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ needs.identity.outputs.source_sha }}
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          path: trusted-workflow
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
       - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
         with:
           cache-image: false
@@ -140,7 +333,7 @@ jobs:
           PRODUCT: ${{ matrix.product }}
         id: freeze
         name: Freeze network-dependent build inputs
-        run: python3 .github/scripts/release.py freeze "$RUNNER_TEMP/release" "$PRODUCT" "$PLATFORM"
+        run: python3 trusted-workflow/.github/scripts/release.py freeze "$RUNNER_TEMP/release" "$PRODUCT" "$PLATFORM"
       - if: steps.freeze.outputs.created == 'true'
         name: Upload frozen build inputs
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -167,6 +360,7 @@ jobs:
       buildx_version: ${{ steps.identity.outputs.buildx_version }}
       channel: ${{ steps.identity.outputs.channel }}
       crane_version: ${{ steps.tools.outputs.crane_version }}
+      goreleaser_version: ${{ steps.tools.outputs.goreleaser_version }}
       preparation: ${{ steps.identity.outputs.preparation }}
       source_sha: ${{ steps.identity.outputs.source_sha }}
       workflow_sha: ${{ steps.identity.outputs.workflow_sha }}
@@ -180,9 +374,21 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
           ref: ${{ github.sha }}
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          path: trusted-workflow
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
+      - if: inputs.mode == 'unstable'
+        uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          fetch-depth: 1
+          path: product-source
+          persist-credentials: false
+          ref: ${{ inputs.product_ref }}
       - id: tools
         name: Read pinned toolchain
-        run: python3 .github/scripts/release.py tools "$RUNNER_TEMP/release"
+        run: python3 trusted-workflow/.github/scripts/release.py tools "$RUNNER_TEMP/release"
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           cache: false
@@ -202,9 +408,10 @@ jobs:
       - env:
           GH_TOKEN: ${{ github.token }}
           MODE: ${{ inputs.mode }}
+          PRODUCT_REF: ${{ inputs.product_ref }}
         id: identity
         name: Persist immutable preparation identity
-        run: python3 .github/scripts/release.py identity "$RUNNER_TEMP/release"
+        run: python3 trusted-workflow/.github/scripts/release.py identity "$RUNNER_TEMP/release"
       - if: steps.identity.outputs.created == 'true'
         name: Upload preparation identity
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -217,8 +424,10 @@ jobs:
     concurrency:
       cancel-in-progress: false
       group: registry-channels-${{ github.repository }}
+      queue: max
     environment: release
-    if: needs.identity.outputs.channel == 'stable' || needs.identity.outputs.channel == 'preview'
+    if: >-
+      ${{ (github.event_name == 'push' && (needs.identity.outputs.channel == 'stable' || needs.identity.outputs.channel == 'preview')) || (github.event_name == 'workflow_dispatch' && (inputs.mode == 'prerelease' || inputs.mode == 'unstable')) }}
     needs:
       - identity
       - commit-preparation
@@ -231,7 +440,7 @@ jobs:
       - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
         with:
           persist-credentials: false
-          ref: ${{ needs.identity.outputs.workflow_sha }}
+          ref: ${{ github.workflow_sha }}
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           cache: false
@@ -250,6 +459,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_USER: ${{ github.actor }}
+          MODE: ${{ inputs.mode }}
           PREPARATION: ${{ needs.identity.outputs.preparation }}
           PRODUCT_SHA: ${{ needs.identity.outputs.source_sha }}
         name: Publish committed OCI images
@@ -257,14 +467,25 @@ jobs:
   validate:
     name: Validate product source
     needs: identity
+    outputs:
+      binary_artifact_digest: ${{ steps.binaries.outputs.artifact_digest || steps.upload_binaries.outputs.artifact-digest }}
+      binary_artifact_id: ${{ steps.binaries.outputs.artifact_id || steps.upload_binaries.outputs.artifact-id }}
+      binary_manifest_sha256: ${{ steps.binaries.outputs.manifest_sha256 }}
     permissions:
+      actions: read
       contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
         with:
+          fetch-depth: 0
           persist-credentials: false
           ref: ${{ needs.identity.outputs.source_sha }}
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          path: trusted-workflow
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 26.13.1
@@ -275,15 +496,62 @@ jobs:
       - name: Generate SDKs
         run: pnpm generate
       - name: Check generated UI API client
-        run: git diff --exit-code -- apps/stroltm/ui/src/api/generated
+        run: |
+          git diff --exit-code -- apps/stroltm/ui/src/api/generated
+          untracked="$(git ls-files --others --exclude-standard -- apps/stroltm/ui/src/api/generated)"
+          if [ -n "$untracked" ]; then
+            echo "Generated UI API client contains untracked files" >&2
+            printf '%s\n' "$untracked" >&2
+            exit 1
+          fi
       - name: Lint workspace
         run: pnpm dm lint --fail-fast=false
       - name: Test workspace
         run: pnpm test
       - name: Build documentation
         run: pnpm --filter website build
-      - name: Test end-to-end behavior
-        run: pnpm test:e2e
+      - name: Build manager UI for GoReleaser
+        run: >-
+          pnpm --filter stroltm-ui build && pnpm --filter @strolt/stroltm build:lib
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        with:
+          cache-image: false
+          image: ${{ needs.identity.outputs.binfmt_image }}
+      - name: Set up Go 1.27.4 for pinned GoReleaser
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          cache: false
+          go-version: "1.27.4"
+      - env:
+          GOBIN: ${{ runner.temp }}/bin
+          GORELEASER_VERSION: ${{ needs.identity.outputs.goreleaser_version }}
+          GOTOOLCHAIN: local
+        name: Install pinned GoReleaser
+        run: |
+          CGO_ENABLED=0 go install -trimpath \
+            "github.com/goreleaser/goreleaser/v2@$GORELEASER_VERSION"
+          echo "$GOBIN" >> "$GITHUB_PATH"
+      - name: Restore product Go toolchain
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          cache: false
+          go-version: "1.27.3"
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GOTOOLCHAIN: local
+          PREPARATION: ${{ needs.identity.outputs.preparation }}
+        id: binaries
+        name: Build and smoke-test GoReleaser binaries
+        run: python3 trusted-workflow/.github/scripts/release.py binaries "$RUNNER_TEMP/release"
+      - id: upload_binaries
+        if: steps.binaries.outputs.created == 'true'
+        name: Seal GoReleaser assets
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          if-no-files-found: error
+          name: ${{ steps.binaries.outputs.artifact }}
+          path: ${{ runner.temp }}/release/binaries/
+          retention-days: 90
 name: Release
 on:
   push:
@@ -293,11 +561,17 @@ on:
     inputs:
       mode:
         default: verify
-        description: Verify the selected ref or publish a preview
+        description: Verify, publish a preview, or publish an unstable product ref
         options:
           - verify
           - prerelease
+          - unstable
         required: true
         type: choice
+      product_ref:
+        default: main
+        description: Product branch, tag, or commit to build in unstable mode
+        required: true
+        type: string
 permissions:
   contents: read

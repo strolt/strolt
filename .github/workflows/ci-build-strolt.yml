@@ -6,9 +6,51 @@ jobs:
       - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
         with:
           persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 26.13.1
+          package-manager-cache: false
+      - run: npm install --global pnpm@12.19.0
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate Go SDKs and UI client
+        run: pnpm generate
+      - if: matrix.product == 'stroltm'
+        name: Build manager UI for GoReleaser
+        run: >-
+          pnpm --filter stroltm-ui build && pnpm --filter @strolt/stroltm build:lib
+      - name: Set up Go 1.27.4 for pinned GoReleaser
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          cache: false
+          go-version: "1.27.4"
+      - id: tools
+        name: Read pinned GoReleaser version
+        run: python3 .github/scripts/release.py tools "$RUNNER_TEMP/release"
+      - env:
+          GOBIN: ${{ runner.temp }}/bin
+          GORELEASER_VERSION: ${{ steps.tools.outputs.goreleaser_version }}
+          GOTOOLCHAIN: local
+        name: Install pinned GoReleaser
+        run: |
+          CGO_ENABLED=0 go install -trimpath \
+            "github.com/goreleaser/goreleaser/v2@$GORELEASER_VERSION"
+          echo "$GOBIN" >> "$GITHUB_PATH"
+      - name: Restore product Go toolchain
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          cache: false
+          go-version: "1.27.3"
+      - env:
+          GOTOOLCHAIN: local
+          PRODUCT: ${{ matrix.product }}
+          RELEASE_VERSION: development
+        name: Build product binaries with GoReleaser
+        run: python3 .github/scripts/release.py local-binaries - "$PRODUCT"
       - uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55 # v2.10.0
       - name: Build without registry writes
-        run: docker buildx build --platform linux/amd64 --build-arg version=development --file "docker/${{ matrix.product }}/Dockerfile" .
+        run: >-
+          docker buildx build --platform linux/amd64 --build-arg RELEASE_VERSION=development --file "docker/${{ matrix.product }}/Dockerfile" .
     strategy:
       fail-fast: false
       matrix:

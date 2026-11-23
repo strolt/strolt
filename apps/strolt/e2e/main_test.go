@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -14,10 +15,24 @@ const initRetries = 3
 var (
 	containerManager *ContainerManager
 	ctx              context.Context
+	stroltImage      = "strolt/strolt:development"
 )
 
 // It sets up containers once and reuses them across all tests.
 func TestMain(m *testing.M) {
+	if artifact, artifactBacked := os.LookupEnv("STROLT_BINARY_ARTIFACT"); artifactBacked {
+		image := os.Getenv("STROLT_TEST_IMAGE")
+		if artifact == "" || image == "" {
+			log.Fatal("STROLT_BINARY_ARTIFACT and STROLT_TEST_IMAGE must be set for release e2e")
+		}
+		evidencePath := filepath.Join(filepath.Dir(artifact), "strolt-e2e-image-ids")
+		if err := os.Remove(evidencePath); err != nil && !os.IsNotExist(err) {
+			log.Fatalf("Failed to remove stale image evidence: %v", err)
+		}
+		stroltImage = image
+	} else if image := os.Getenv("STROLT_TEST_IMAGE"); image != "" {
+		stroltImage = image
+	}
 	if err := setupContainers(); err != nil {
 		if cleanupErr := cleanupContainers(); cleanupErr != nil {
 			log.Printf("Failed to cleanup containers after setup failure: %v", cleanupErr)
@@ -27,12 +42,47 @@ func TestMain(m *testing.M) {
 	}
 
 	exitCode := m.Run()
+	if artifact, artifactBacked := os.LookupEnv("STROLT_BINARY_ARTIFACT"); artifactBacked {
+		if err := recordStroltImageIDs(artifact, os.Getenv("STROLT_TEST_IMAGE")); err != nil {
+			log.Printf("Failed to verify E2E container image IDs: %v", err)
+			exitCode = 1
+		}
+	}
 
 	if err := cleanupContainers(); err != nil {
 		log.Printf("Failed to cleanup containers: %v", err)
 	}
 
 	os.Exit(exitCode)
+}
+
+func recordStroltImageIDs(artifactDirectory, expectedImage string) error {
+	strolt, err := containerManager.stroltContainer.Inspect(ctx)
+	if err != nil {
+		return fmt.Errorf("inspect Strolt container image: %w", err)
+	}
+
+	daemon, err := containerManager.stroltDaemonContainer.Inspect(ctx)
+	if err != nil {
+		return fmt.Errorf("inspect Strolt daemon image: %w", err)
+	}
+
+	for _, item := range []struct {
+		name  string
+		image string
+	}{{"strolt", strolt.Image}, {"strolt-daemon", daemon.Image}} {
+		if item.image != expectedImage {
+			return fmt.Errorf("%s container used image %q, expected %q", item.name, item.image, expectedImage)
+		}
+	}
+
+	evidence := fmt.Sprintf("strolt=%s\nstrolt-daemon=%s\n", strolt.Image, daemon.Image)
+	evidencePath := filepath.Join(filepath.Dir(artifactDirectory), "strolt-e2e-image-ids")
+	if err := os.WriteFile(evidencePath, []byte(evidence), 0o600); err != nil {
+		return fmt.Errorf("write E2E image identity evidence: %w", err)
+	}
+
+	return nil
 }
 
 func setupContainers() error {

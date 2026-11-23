@@ -1,4 +1,27 @@
 tasks:
+  build:docker:
+    cmds:
+      - |
+        set -eu
+        cd ../..
+        set --
+        if [ "${STROLT_BINARY_ARTIFACT+x}" = x ]; then
+          if [ -z "$STROLT_BINARY_ARTIFACT" ]; then
+            echo "STROLT_BINARY_ARTIFACT must not be empty" >&2
+            exit 1
+          fi
+          python3 .github/scripts/release.py stage-binaries \
+            "$STROLT_BINARY_ARTIFACT" strolt linux/amd64
+          set -- --platform linux/amd64
+        else
+          RELEASE_VERSION=development \
+            python3 .github/scripts/release.py local-binaries - strolt
+        fi
+        "${DOCKER_BIN:-docker}" build "$@" \
+          -f docker/strolt/Dockerfile \
+          --build-arg RELEASE_VERSION=development \
+          -t strolt/strolt:development .
+    desc: Stage or build the GoReleaser binary and local Strolt image
   test:
     cmds:
       - pnpm dm exec go -- test {{.NON_E2E_PACKAGES}}
@@ -9,8 +32,33 @@ tasks:
     desc: Run all Strolt tests and report coverage
   test:e2e:
     cmds:
-      - DOCKER_BIN="{{.DOCKER_BIN}}" pnpm run build:docker
-      - GOFLAGS="-count=1" pnpm dm exec go -- test ./e2e -v -timeout 30m
+      - |
+        set -eu
+        if [ "${STROLT_TEST_IMAGE+x}" = x ]; then
+          if [ -z "$STROLT_TEST_IMAGE" ]; then
+            echo "STROLT_TEST_IMAGE must not be empty" >&2
+            exit 1
+          fi
+        elif [ "${STROLT_BINARY_ARTIFACT+x}" = x ]; then
+          echo "STROLT_TEST_IMAGE is required with STROLT_BINARY_ARTIFACT" >&2
+          exit 1
+        else
+          DOCKER_BIN="{{.DOCKER_BIN}}" pnpm run build:docker
+        fi
+      - |
+        set -eu
+        DOCKER_BIN="{{.DOCKER_BIN}}"
+        if [ "${STROLT_TEST_IMAGE+x}" = x ]; then
+          image_id="$STROLT_TEST_IMAGE"
+        else
+          image_id="$($DOCKER_BIN image ls --no-trunc --quiet strolt/strolt:development)"
+        fi
+        if [ -z "$image_id" ]; then
+          echo "failed to resolve built Strolt image ID" >&2
+          exit 1
+        fi
+        STROLT_TEST_IMAGE="$image_id" GOFLAGS="-count=1" \
+          pnpm dm exec go -- test ./e2e -v -timeout 30m
     desc: Build the Strolt image and run all end-to-end tests
     vars:
       DOCKER_BIN:

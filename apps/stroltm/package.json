@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm dm exec task -- build",
-    "build:docker": "docker build -f ../../docker/stroltm/Dockerfile --build-arg version=development -t strolt/stroltm:development ../..",
+    "build:docker": "pnpm dm exec task -- build:docker",
     "build:lib": "pnpm dm exec task -- build:lib",
     "clean": "pnpm dm exec task -- clean",
     "dev": "pnpm dm exec task -- run",

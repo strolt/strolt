@@ -82,6 +82,20 @@ function getConfig(config) {
     },
     ejectConfigs: [...(config.ejectConfigs ?? []), "gitleaks"],
     tools: {
+      actionlint: {
+        operations: {
+          lint: {
+            args: [
+              "-config-file",
+              "../actionlint.yaml",
+              "-no-color",
+              "-format",
+              "{{json .}}",
+              "{file}",
+            ],
+          },
+        },
+      },
       "golangci-lint": {
         operations: {
           fix: { env: { GOTOOLCHAIN: goToolchain } },

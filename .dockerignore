@@ -7,6 +7,14 @@
 **/.vercel/
 **/.output/
 **/public/build/
+!dist/
+dist/*
+!dist/strolt-linux-*/
+!dist/strolt-linux-*/**
+!dist/stroltm-linux-*/
+!dist/stroltm-linux-*/**
+!dist/stroltp-linux-*/
+!dist/stroltp-linux-*/**
 
 # Cache & temporary files
 .datamitsu/

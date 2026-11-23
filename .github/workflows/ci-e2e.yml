@@ -13,7 +13,31 @@ jobs:
       - run: npm install --global pnpm@12.19.0
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
-      - name: run e2e suite
+      - name: Set up Go 1.27.4 for pinned GoReleaser
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          cache: false
+          go-version: "1.27.4"
+      - id: tools
+        name: Read pinned GoReleaser version
+        run: python3 .github/scripts/release.py tools "$RUNNER_TEMP/release"
+      - env:
+          GOBIN: ${{ runner.temp }}/bin
+          GORELEASER_VERSION: ${{ steps.tools.outputs.goreleaser_version }}
+          GOTOOLCHAIN: local
+        name: Install pinned GoReleaser
+        run: |
+          CGO_ENABLED=0 go install -trimpath \
+            "github.com/goreleaser/goreleaser/v2@$GORELEASER_VERSION"
+          echo "$GOBIN" >> "$GITHUB_PATH"
+      - name: Restore product Go toolchain
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          cache: false
+          go-version: "1.27.3"
+      - env:
+          GOTOOLCHAIN: local
+        name: run e2e suite
         run: pnpm test:e2e
     timeout-minutes: 40
 name: e2e
@@ -21,6 +45,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/ci-e2e.yml"
+      - ".github/scripts/**"
       - "apps/strolt/**"
       - "shared/**"
       - "docker/strolt/**"

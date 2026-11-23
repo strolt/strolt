@@ -16,9 +16,9 @@ BUILDX_VERSION = "v0.38.1"
 BUILDKIT_VERSION = "v0.28.0"
 BUILDKIT_IMAGE = "moby/buildkit:" + BUILDKIT_VERSION
 CRANE_VERSION = "v0.22.1"
+GORELEASER_VERSION = "v2.20.3"
 BINFMT_IMAGE = "tonistiigi/binfmt:latest"
 TOOL_FIELDS = ("buildx_version", "buildx_sha256", "buildkit_image", "buildkit_version", "binfmt_image")
-BUILD_PLATFORM = "linux/amd64"
 FROM = re.compile(r"^(FROM\s+(?:--platform=\S+\s+)?)(\S+)(.*)$", re.IGNORECASE | re.MULTILINE)
 
 
@@ -86,7 +86,6 @@ def resolve_environment(repository):
         "crane_version": CRANE_VERSION,
         "crane_sha256": transfer_checksum(),
         "binfmt_image": images.pop(BINFMT_IMAGE),
-        "build_platform": BUILD_PLATFORM,
         "images": images,
         "dockerfiles": {},
     }
@@ -100,8 +99,8 @@ def resolve_environment(repository):
 def validate_environment(environment):
     if environment.get("buildx_version") != BUILDX_VERSION or environment.get("buildkit_version") != BUILDKIT_VERSION:
         fail("preparation uses an unsupported build toolchain")
-    if environment.get("crane_version") != CRANE_VERSION or environment.get("build_platform") != BUILD_PLATFORM:
-        fail("preparation uses an unsupported transfer tool or build platform")
+    if environment.get("crane_version") != CRANE_VERSION:
+        fail("preparation uses an unsupported transfer tool")
     if not environment.get("buildkit_image", "").startswith(BUILDKIT_IMAGE + "@") or not DIGEST.fullmatch(environment["buildkit_image"].rsplit("@", 1)[-1]):
         fail("BuildKit worker image is not digest-pinned")
     if not environment.get("binfmt_image", "").startswith(BINFMT_IMAGE + "@") or not DIGEST.fullmatch(environment["binfmt_image"].rsplit("@", 1)[-1]):
@@ -121,6 +120,7 @@ def validate_environment(environment):
     for original, pinned in environment["images"].items():
         if not pinned.startswith(original.split("@", 1)[0] + "@") or not DIGEST.fullmatch(pinned.rsplit("@", 1)[-1]):
             fail("dependency image is not digest-pinned")
+
 
 
 def verify_tools(environment):
@@ -146,8 +146,8 @@ def verify_tools(environment):
 
 
 def stage_platform(product, stage, platform):
-    if stage == "swagger" or (product == "stroltm" and stage == "ui-builder"):
-        return BUILD_PLATFORM
+    if product not in PRODUCTS or stage not in DEPENDENCY_STAGES[product]:
+        fail("unsupported dependency snapshot stage")
     return platform
 
 
@@ -172,14 +172,13 @@ def freeze_inputs(directory, identity, product, platform, attempt, repository):
         metadata = directory / (stage + ".build.json")
         subprocess.run([
             "docker", "buildx", "build", "--platform", stage_platform(product, stage, platform),
-            "--build-arg", "BUILDPLATFORM=" + environment["build_platform"],
             "--provenance=false", "--sbom=false", "--target", stage,
             "--metadata-file", str(metadata), "--output", "type=oci,dest=" + str(archive),
             "--file", str(recipe), str(repository),
         ], check=True)
         with tempfile.TemporaryDirectory() as temporary:
             extract_oci(archive, temporary)
-            descriptor, _ = inspect_image(Path(temporary), stage_platform(product, stage, platform))
+            descriptor, _, _ = inspect_image(Path(temporary), stage_platform(product, stage, platform))
         stages[stage] = {"sha256": sha256(archive), "descriptor": descriptor, "platform": stage_platform(product, stage, platform)}
         metadata.unlink()
     recipe.unlink()
@@ -209,13 +208,18 @@ def verify_inputs(directory, identity, product, platform, current_attempt):
             fail("dependency snapshot archive changed")
         with tempfile.TemporaryDirectory() as temporary:
             extract_oci(archive, temporary)
-            descriptor, _ = inspect_image(Path(temporary), entry["platform"])
+            descriptor, _, _ = inspect_image(Path(temporary), entry["platform"])
         if descriptor != entry["descriptor"]:
             fail("dependency snapshot OCI descriptor changed")
     return record
 
 
-def build_piece(directory, snapshot, input_record, identity, product, platform, attempt, repository):
+def verify_docker_image_config(image, expected_config_digest):
+    if image.get("Id") != expected_config_digest:
+        fail("smoke image config differs from checked OCI artifact")
+
+
+def build_piece(directory, snapshot, input_record, identity, product, platform, attempt, repository, binary_path):
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     environment = identity["build"]
@@ -233,7 +237,6 @@ def build_piece(directory, snapshot, input_record, identity, product, platform, 
             top_digest = load(layout / "index.json")["manifests"][0]["digest"]
             arguments.extend(["--build-context", f"{stage}=oci-layout://{layout}@{top_digest}"])
         build_args = {
-            "BUILDPLATFORM": environment["build_platform"], "version": identity["version"],
             "GITHUB_SHA": identity["source_sha"], "RELEASE_VERSION": identity["version"],
             "RELEASE_RUN_ID": str(identity["run_id"]), "RELEASE_ATTEMPT": str(identity["attempt"]),
             "RELEASE_WORKFLOW_SHA": identity["workflow_sha"], "RELEASE_CHANNEL": identity["channel"],
@@ -250,12 +253,13 @@ def build_piece(directory, snapshot, input_record, identity, product, platform, 
         layout = temporary / "image"
         layout.mkdir()
         extract_oci(directory / "image.tar", layout)
-        descriptor, config = inspect_layout(layout, identity, product, platform)
+        descriptor, config, config_digest = inspect_layout(layout, identity, product, platform)
         subprocess.run(["docker", "load", "--input", str(temporary / "smoke.tar")], check=True)
         try:
             loaded = json.loads(run("docker", "image", "inspect", image))[0]
             if loaded["RootFS"]["Layers"] != config["rootfs"]["diff_ids"]:
                 fail("smoke image filesystem differs from checked OCI artifact")
+            verify_docker_image_config(loaded, config_digest)
             subprocess.run(["docker", "run", "--rm", "--platform", platform, "--entrypoint", f"/{product}/bin/{product}", image, "--help"], check=True)
             if product == "strolt":
                 actual = run("docker", "run", "--rm", "--platform", platform, "--entrypoint", "/strolt/bin/strolt", image, "version")
@@ -267,19 +271,20 @@ def build_piece(directory, snapshot, input_record, identity, product, platform, 
                 subprocess.run(["docker", "cp", f"{container}:/{product}/bin/{product}", str(binary)], check=True)
             finally:
                 subprocess.run(["docker", "rm", container], check=True)
-            compiler = temporary / "builder-deps"
-            compiler_tag = image + "-compiler"
-            subprocess.run(["docker", "buildx", "build", "--platform", platform, "--network=none", "--build-context", "frozen=oci-layout://" + str(compiler) + "@" + load(compiler / "index.json")["manifests"][0]["digest"], "--file", "-", "--load", "--tag", compiler_tag, str(repository)], input="FROM frozen\n", text=True, check=True)
-            try:
-                build_info = run("docker", "run", "--rm", "--platform", platform, "--entrypoint", "go", "--mount", f"type=bind,src={binary},dst=/release-binary,readonly", compiler_tag, "version", "-m", "/release-binary")
-            finally:
-                subprocess.run(["docker", "image", "rm", compiler_tag], check=True)
-            if f"internal/ldflags.version={identity['version']}" not in build_info:
-                fail("binary build info does not carry the preparation version")
-            return {
+            if sha256(binary) != sha256(binary_path):
+                fail("container image binary differs from the sealed GoReleaser artifact")
+            e2e_image_sha256 = None
+            if product == "strolt" and platform == "linux/amd64":
+                e2e_image = directory / "e2e-image.tar"
+                shutil.copyfile(temporary / "smoke.tar", e2e_image)
+                e2e_image_sha256 = sha256(e2e_image)
+            result = {
                 "schema": 2, "identity": identity, "product": product, "platform": platform,
                 "descriptor": descriptor, "sha256": sha256(directory / "image.tar"),
                 "produced_attempt": str(attempt), "tools": tools, "binary_sha256": sha256(binary),
             }
+            if e2e_image_sha256 is not None:
+                result["e2e_image_sha256"] = e2e_image_sha256
+            return result
         finally:
             subprocess.run(["docker", "image", "rm", image], check=True)

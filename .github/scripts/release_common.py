@@ -10,9 +10,9 @@ from typing import NoReturn
 PRODUCTS = ("strolt", "stroltm", "stroltp")
 PLATFORMS = ("linux/amd64", "linux/arm/v7", "linux/arm64")
 DEPENDENCY_STAGES = {
-    "strolt": ("base", "builder-deps", "swagger"),
-    "stroltm": ("base", "builder-deps", "swagger", "ui-builder"),
-    "stroltp": ("base", "builder-deps", "swagger"),
+    "strolt": ("base",),
+    "stroltm": ("base",),
+    "stroltp": ("base",),
 }
 SHA = re.compile(r"[0-9a-f]{40}")
 DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
@@ -108,7 +108,11 @@ def inspect_image(layout, platform):
         manifest = load(blob(layout, descriptor))
     if manifest.get("schemaVersion") != 2 or "config" not in manifest:
         fail("invalid OCI image manifest")
-    config = load(blob(layout, manifest["config"]))
+    config_descriptor = manifest["config"]
+    config = load(blob(layout, config_descriptor))
+    config_digest = config_descriptor.get("digest")
+    if not isinstance(config_digest, str) or not DIGEST.fullmatch(config_digest):
+        fail("invalid OCI image config digest")
     actual = canonical_platform(config)
     if actual != platform:
         fail(f"wrong platform: expected {platform}, got {actual}")
@@ -118,15 +122,15 @@ def inspect_image(layout, platform):
     descriptor["platform"] = {"os": config["os"], "architecture": config["architecture"]}
     if config.get("variant"):
         descriptor["platform"]["variant"] = config["variant"]
-    return descriptor, config
+    return descriptor, config, config_digest
 
 
 def inspect_layout(layout, identity, product, platform):
-    descriptor, config = inspect_image(layout, platform)
+    descriptor, config, config_digest = inspect_image(layout, platform)
     for key, value in labels(identity, product).items():
         if config.get("config", {}).get("Labels", {}).get(key) != value:
             fail(f"wrong image metadata: {key}")
-    return descriptor, config
+    return descriptor, config, config_digest
 
 
 def extract_oci(archive, directory):
