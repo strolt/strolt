@@ -690,7 +690,7 @@ class BinaryAssetTests(ReleaseFixture):
         with self.assertRaisesRegex(RuntimeError, "differs from its sealed GoReleaser artifact"):
             release.verify_binary_file(changed, entry)
 
-    def test_docker_export_config_mismatch_is_rejected_with_identical_layers(self):
+    def test_docker_export_config_metadata_difference_keeps_runtime_config_binding(self):
         layout = self.root / "runtime-config"
         layout.mkdir()
         config: dict[str, Any] = {
@@ -699,14 +699,21 @@ class BinaryAssetTests(ReleaseFixture):
             "rootfs": {"type": "layers", "diff_ids": ["sha256:" + "c" * 64]},
         }
         published = write_blob(layout, config, "application/vnd.oci.image.config.v1+json")
-        docker_export_config = copy.deepcopy(config)
-        docker_export_config["config"]["Cmd"] = ["different"]
+        docker_export_config = {**config, "created": "2026-11-24T00:00:00Z"}
         docker_exported = write_blob(layout, docker_export_config, "application/vnd.oci.image.config.v1+json")
         self.assertEqual(config["rootfs"], docker_export_config["rootfs"])
         self.assertNotEqual(published["digest"], docker_exported["digest"])
-        release_build.verify_docker_image_config({"Id": published["digest"]}, published["digest"])
-        with self.assertRaisesRegex(RuntimeError, "smoke image config differs from checked OCI artifact"):
-            release_build.verify_docker_image_config({"Id": docker_exported["digest"]}, published["digest"])
+
+        image = {
+            "Id": docker_exported["digest"],
+            "Architecture": "amd64",
+            "Os": "linux",
+            "Config": copy.deepcopy(config["config"]),
+        }
+        release_build.verify_docker_image_config(image, config)
+        image["Config"]["Cmd"] = ["different"]
+        with self.assertRaisesRegex(RuntimeError, "runtime config differs"):
+            release_build.verify_docker_image_config(image, config)
 
     def test_strolt_amd64_checked_image_requires_e2e_archive(self):
         product, platform = "strolt", "linux/amd64"

@@ -214,9 +214,20 @@ def verify_inputs(directory, identity, product, platform, current_attempt):
     return record
 
 
-def verify_docker_image_config(image, expected_config_digest):
-    if image.get("Id") != expected_config_digest:
+def verify_docker_image_config(image, expected_config):
+    actual_config = image.get("Config")
+    oci_config = expected_config.get("config")
+    if not isinstance(actual_config, dict) or not isinstance(oci_config, dict):
         fail("smoke image config differs from checked OCI artifact")
+    if image.get("Os") != expected_config.get("os") or image.get("Architecture") != expected_config.get("architecture"):
+        fail("smoke image platform differs from checked OCI artifact")
+
+    def normalized(value):
+        return None if value is None or value == "" or value == [] or value == {} else value
+
+    for field in ("User", "ExposedPorts", "Env", "Entrypoint", "Cmd", "Volumes", "WorkingDir", "Labels", "StopSignal", "Healthcheck", "OnBuild", "Shell"):
+        if normalized(actual_config.get(field)) != normalized(oci_config.get(field)):
+            fail(f"smoke image runtime config differs from checked OCI artifact: {field}")
 
 
 def build_piece(directory, snapshot, input_record, identity, product, platform, attempt, repository, binary_path):
@@ -253,13 +264,13 @@ def build_piece(directory, snapshot, input_record, identity, product, platform, 
         layout = temporary / "image"
         layout.mkdir()
         extract_oci(directory / "image.tar", layout)
-        descriptor, config, config_digest = inspect_layout(layout, identity, product, platform)
+        descriptor, config, _ = inspect_layout(layout, identity, product, platform)
         subprocess.run(["docker", "load", "--input", str(temporary / "smoke.tar")], check=True)
         try:
             loaded = json.loads(run("docker", "image", "inspect", image))[0]
             if loaded["RootFS"]["Layers"] != config["rootfs"]["diff_ids"]:
                 fail("smoke image filesystem differs from checked OCI artifact")
-            verify_docker_image_config(loaded, config_digest)
+            verify_docker_image_config(loaded, config)
             subprocess.run(["docker", "run", "--rm", "--platform", platform, "--entrypoint", f"/{product}/bin/{product}", image, "--help"], check=True)
             if product == "strolt":
                 actual = run("docker", "run", "--rm", "--platform", platform, "--entrypoint", "/strolt/bin/strolt", image, "version")
