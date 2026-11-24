@@ -767,6 +767,48 @@ def verify_binary_image(directory, product, platform, image, expected_manifest_s
 
 
 
+
+def prepare_e2e_inputs(root, preparation):
+    root = Path(root)
+    identity, identity_evidence = restore_identity(root, preparation)
+    if run("git", "rev-parse", "HEAD") != identity["source_sha"]:
+        fail("E2E checkout differs from resolved product source")
+
+    inputs, _ = verify_input_manifest(root, preparation, identity, identity_evidence)
+    binary_directory = root / "binaries"
+    binary_evidence = restore(preparation + "-binaries", binary_directory)
+    binary_manifest = verify_binary_bundle(binary_directory, identity)
+    binary_manifest_sha256 = sha256(binary_directory / "manifest.json")
+    verify_binary_producer_evidence(binary_evidence, binary_manifest_sha256)
+    if binary_evidence != inputs["binary_artifact"] or binary_manifest_sha256 != inputs["binary_manifest_sha256"]:
+        fail("E2E GoReleaser bundle differs from the frozen input manifest")
+
+    product, platform = "strolt", "linux/amd64"
+    artifact_name = os.environ.get("PIECE_ARTIFACT_NAME", "")
+    artifact_id = os.environ.get("PIECE_ARTIFACT_ID", "")
+    artifact_digest = os.environ.get("PIECE_ARTIFACT_DIGEST", "")
+    prefix = piece_name(preparation, product, platform) + "-attempt-"
+    if not artifact_name.startswith(prefix) or not re.fullmatch(r"[1-9][0-9]*", artifact_name[len(prefix):]):
+        fail("E2E job did not receive an attempt-qualified OCI artifact name")
+    producing_attempt(artifact_name[len(prefix):], identity, current_attempt(identity))
+    if not re.fullmatch(r"[1-9][0-9]*", artifact_id) or not re.fullmatch(r"[0-9a-f]{64}", artifact_digest):
+        fail("E2E job did not receive immutable OCI artifact evidence")
+    expected_piece = {"id": int(artifact_id), "digest": "sha256:" + artifact_digest, "name": artifact_name}
+    piece_directory = root / "piece"
+    piece_evidence = restore(artifact_name, piece_directory)
+    if piece_evidence != expected_piece:
+        fail("E2E OCI artifact differs from the producer's pinned ID/digest")
+
+    snapshot = next((item for item in inputs["snapshots"] if (item["product"], item["platform"]) == (product, platform)), None)
+    if snapshot is None:
+        fail("E2E frozen build input is unavailable")
+    record = verify_piece(piece_directory, identity, product, platform, snapshot, current_attempt(identity))
+    binary_entry = next((item for item in binary_manifest["binaries"] if (item["product"], item["platform"]) == (product, platform)), None)
+    if binary_entry is None or record["binary_sha256"] != binary_entry["sha256"]:
+        fail("E2E OCI image differs from the pinned GoReleaser binary")
+    output(e2e_image=str(piece_directory / "e2e-image.tar"), binary_directory=str(binary_directory), binary_manifest_sha256=binary_manifest_sha256)
+
+
 def input_reference(entry):
     return {"artifact": entry["artifact"], "record_sha256": entry["record_sha256"]}
 
@@ -1169,11 +1211,27 @@ def publish_release(root, preparation):
         indexes[product] = "sha256:" + manifest["indexes"][product]["sha256"]
         if "sha256:" + sha256(layout / "index.json") != indexes[product]:
             fail("publisher changed the checked distribution index")
-    for registry, username_key, token_key in (("ghcr.io", "GHCR_USER", "GHCR_TOKEN"), ("index.docker.io", "DOCKERHUB_USER", "DOCKERHUB_TOKEN")):
-        subprocess.run(["crane", "auth", "login", registry, "--username", os.environ[username_key], "--password-stdin"], input=os.environ[token_key], text=True, check=True)
-    repositories = [f"{registry}/strolt/{product}" for registry in ("ghcr.io", "docker.io") for product in PRODUCTS]
-    for repository in repositories:
-        product = repository.rsplit("/", 1)[1]
+    if identity["channel"] == "unstable":
+        registry_credentials = (("ghcr.io", "GHCR_USER", "GHCR_TOKEN"),)
+        repositories = [(f"ghcr.io/strolt/{product}-unstable", product) for product in PRODUCTS]
+    else:
+        registry_credentials = (
+            ("ghcr.io", "GHCR_USER", "GHCR_TOKEN"),
+            ("index.docker.io", "DOCKERHUB_USER", "DOCKERHUB_TOKEN"),
+        )
+        repositories = [
+            (f"{registry}/strolt/{product}", product)
+            for registry in ("ghcr.io", "docker.io")
+            for product in PRODUCTS
+        ]
+    for registry, username_key, token_key in registry_credentials:
+        subprocess.run(
+            ["crane", "auth", "login", registry, "--username", os.environ[username_key], "--password-stdin"],
+            input=os.environ[token_key],
+            text=True,
+            check=True,
+        )
+    for repository, product in repositories:
         reference = f"{repository}:{identity['tag']}"
         existing = remote_digest(reference)
         if existing is not None and existing != indexes[product]:
@@ -1185,8 +1243,7 @@ def publish_release(root, preparation):
         outcome = f"{'Published' if existing is None else 'Verified existing'} `{reference}@{indexes[product]}`"
         summary(identity, outcome)
     alias = {"stable": "latest", "preview": "preview", "unstable": "unstable"}[identity["channel"]]
-    for repository in repositories:
-        product = repository.rsplit("/", 1)[1]
+    for repository, product in repositories:
         pointer = remote_digest(repository + ":" + alias)
         metadata = {}
         if pointer:
@@ -1281,6 +1338,9 @@ def main():
         if product not in PRODUCTS or platform not in PLATFORMS:
             fail("unsupported product/platform")
         verify_binary_image(root, product, platform, image, manifest_sha256)
+        return
+    if command == "e2e-inputs":
+        prepare_e2e_inputs(root, os.environ["PREPARATION"])
         return
     preparation = os.environ["PREPARATION"]
     if command == "binaries":

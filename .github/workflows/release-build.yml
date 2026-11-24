@@ -41,56 +41,6 @@ jobs:
         id: build
         name: Build and smoke-test OCI image
         run: python3 trusted-workflow/.github/scripts/release.py build "$RUNNER_TEMP/release" "$PRODUCT" "$PLATFORM"
-      - if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 26.13.1
-          package-manager-cache: false
-      - if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
-        run: npm install --global pnpm@12.19.0
-      - if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
-        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
-        with:
-          cache: false
-          go-version: "1.27.3"
-      - if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
-        name: Install workspace dependencies for final-image E2E
-        run: pnpm install --frozen-lockfile
-      - if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
-        name: Load final Strolt image for E2E
-        run: docker load --input "$RUNNER_TEMP/release/piece/e2e-image.tar"
-      - id: final-image
-        if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
-        name: Capture immutable final image ID
-        run: |
-          image="strolt-release-smoke:strolt-linux-amd64-$GITHUB_RUN_ID"
-          image_id="$(docker image ls --no-trunc --quiet "$image")"
-          if [ -z "$image_id" ]; then
-            echo "failed to resolve final Strolt image ID" >&2
-            exit 1
-          fi
-          echo "image_id=$image_id" >> "$GITHUB_OUTPUT"
-      - env:
-          STROLT_BINARY_ARTIFACT: ${{ runner.temp }}/release/binaries
-          STROLT_TEST_IMAGE: ${{ steps.final-image.outputs.image_id }}
-        if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
-        name: Run E2E against final release image
-        run: pnpm test:e2e
-      - env:
-          STROLT_BINARY_MANIFEST_SHA256: ${{ steps.build.outputs.manifest_sha256 }}
-          STROLT_TEST_IMAGE: ${{ steps.final-image.outputs.image_id }}
-        if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
-        name: Verify final image is the one tested and matches the sealed bundle
-        run: |
-          expected_image_ids="$(printf 'strolt=%s\nstrolt-daemon=%s' "$STROLT_TEST_IMAGE" "$STROLT_TEST_IMAGE")"
-          actual_image_ids="$(cat "$RUNNER_TEMP/release/strolt-e2e-image-ids")"
-          if [ "$actual_image_ids" != "$expected_image_ids" ]; then
-            echo "E2E containers used a different Strolt image" >&2
-            exit 1
-          fi
-          python3 trusted-workflow/.github/scripts/release.py verify-binary-image \
-            "$RUNNER_TEMP/release/binaries" strolt linux/amd64 \
-            "$STROLT_TEST_IMAGE" "$STROLT_BINARY_MANIFEST_SHA256"
       - id: upload_piece
         if: steps.build.outputs.created == 'true'
         name: Upload checked OCI image ${{ inputs.product }} ${{ inputs.platform }}

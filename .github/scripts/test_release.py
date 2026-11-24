@@ -379,6 +379,33 @@ class ReleaseFixture(unittest.TestCase):
             release.main()
 
 
+class E2EArtifactConsumerTests(ReleaseFixture):
+    def e2e_artifact_env(self):
+        evidence = self.pieces["strolt", "linux/amd64"][1]
+        return {
+            "PIECE_ARTIFACT_NAME": evidence["name"],
+            "PIECE_ARTIFACT_ID": str(evidence["id"]),
+            "PIECE_ARTIFACT_DIGEST": evidence["digest"].split(":", 1)[1],
+        }
+
+    def test_e2e_inputs_restore_exact_sealed_binary_and_piece_artifacts(self):
+        workspace = self.workspace()
+        with patch.dict(os.environ, self.e2e_artifact_env()), patch.object(release, "run", return_value=self.preparation["source_sha"]):
+            self.cli("e2e-inputs", workspace)
+
+        outputs = Path(self.env["GITHUB_OUTPUT"]).read_text()
+        self.assertIn(f"e2e_image={workspace.resolve() / 'piece/e2e-image.tar'}", outputs)
+        self.assertIn(f"binary_directory={workspace.resolve() / 'binaries'}", outputs)
+        self.assertIn("binary_manifest_sha256=" + self.binary_manifest_sha256, outputs)
+
+    def test_e2e_consumer_rejects_piece_id_not_from_matrix_output(self):
+        workspace = self.workspace()
+        evidence = self.e2e_artifact_env()
+        evidence["PIECE_ARTIFACT_ID"] = str(int(evidence["PIECE_ARTIFACT_ID"]) + 1)
+        with patch.dict(os.environ, evidence), patch.object(release, "run", return_value=self.preparation["source_sha"]), self.assertRaisesRegex(RuntimeError, "pinned ID/digest"):
+            self.cli("e2e-inputs", workspace)
+
+
 class BinaryAssetTests(ReleaseFixture):
     def test_bundle_verifies_all_products_and_platforms(self):
         manifest = release.verify_binary_bundle(self.binary_dir, self.preparation)
@@ -1290,7 +1317,7 @@ class PublisherFixture(ReleaseFixture):
         if args == ("crane", "version"):
             return self.preparation["build"]["crane_version"]
         if args[:2] == ("crane", "config"):
-            product = args[-1].split("@", 1)[0].rsplit("/", 1)[1]
+            product = args[-1].split("@", 1)[0].rsplit("/", 1)[1].removesuffix("-unstable")
             return json.dumps({"config": {"Labels": release.labels(self.preparation, product)}})
         raise AssertionError(args)
 
@@ -1358,7 +1385,12 @@ class StablePublisherTests(PublisherFixture):
 
     def test_stable_tag_only_promotes_latest(self):
         self.publish()
-        self.assertEqual(len(self.published), 6)
+        expected_repositories = {
+            f"{registry}/strolt/{product}"
+            for registry in ("ghcr.io", "docker.io")
+            for product in release.PRODUCTS
+        }
+        self.assertEqual({reference.rsplit(":", 1)[0] for reference, _ in self.published}, expected_repositories)
         self.assertEqual(len(self.promoted), 6)
         self.assertTrue(all(reference.endswith(":v1.2.3") for reference, _ in self.published))
         self.assertTrue(all(reference.endswith(":latest") for reference in self.promoted))
@@ -1367,12 +1399,17 @@ class StablePublisherTests(PublisherFixture):
 class UnstablePublisherTests(PublisherFixture):
     MODE = "unstable"
 
-    def test_unstable_publishes_to_its_own_immutable_and_floating_tags(self):
-        self.publish()
-        self.assertEqual(len(self.published), 6)
-        self.assertEqual(len(self.promoted), 6)
+    def test_unstable_publishes_only_to_separate_ghcr_packages(self):
+        expected_repositories = {f"ghcr.io/strolt/{product}-unstable" for product in release.PRODUCTS}
+        with patch.dict(os.environ):
+            os.environ.pop("DOCKERHUB_TOKEN")
+            self.publish()
+
+        self.assertEqual(self.authenticated, ["ghcr.io"])
+        self.assertEqual({reference.rsplit(":", 1)[0] for reference, _ in self.published}, expected_repositories)
+        self.assertEqual(set(self.promoted), {repository + ":unstable" for repository in expected_repositories})
         self.assertTrue(all(reference.endswith(":0.0.0-unstable.123.2") for reference, _ in self.published))
-        self.assertTrue(all(reference.endswith(":unstable") for reference in self.promoted))
+
 
     def test_dispatch_sha_remains_bound_when_product_source_is_unmerged(self):
         with patch.dict(os.environ, {"GITHUB_SHA": "d" * 40}), self.assertRaisesRegex(RuntimeError, "GitHub run context"):
