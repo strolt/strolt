@@ -199,6 +199,7 @@ jobs:
       - build_stroltp_linux_amd64
       - build_stroltp_linux_arm_v7
       - build_stroltp_linux_arm64
+      - e2e
     permissions:
       actions: read
       contents: read
@@ -296,6 +297,87 @@ jobs:
           name: ${{ needs.identity.outputs.preparation }}-committed
           path: ${{ runner.temp }}/release/committed/
           retention-days: 90
+  e2e:
+    name: E2E against sealed Strolt image
+    needs:
+      - identity
+      - validate
+      - commit-inputs
+      - build_strolt_linux_amd64
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ needs.identity.outputs.source_sha }}
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          path: trusted-workflow
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: ${{ inputs.mode }}
+          PIECE_ARTIFACT_DIGEST: ${{ needs.build_strolt_linux_amd64.outputs.piece_artifact_digest }}
+          PIECE_ARTIFACT_ID: ${{ needs.build_strolt_linux_amd64.outputs.piece_artifact_id }}
+          PIECE_ARTIFACT_NAME: ${{ needs.build_strolt_linux_amd64.outputs.piece_artifact_name }}
+          PREPARATION: ${{ needs.identity.outputs.preparation }}
+          VALIDATED_BINARY_ARTIFACT_DIGEST: ${{ needs.validate.outputs.binary_artifact_digest }}
+          VALIDATED_BINARY_ARTIFACT_ID: ${{ needs.validate.outputs.binary_artifact_id }}
+          VALIDATED_BINARY_MANIFEST_SHA256: ${{ needs.validate.outputs.binary_manifest_sha256 }}
+        id: inputs
+        name: Restore and verify pinned E2E artifacts
+        run: python3 trusted-workflow/.github/scripts/release.py e2e-inputs "$RUNNER_TEMP/release"
+      - env:
+          E2E_IMAGE: ${{ steps.inputs.outputs.e2e_image }}
+        name: Load sealed Strolt image for E2E
+        run: docker load --input "$E2E_IMAGE"
+      - id: final-image
+        name: Capture immutable E2E image ID
+        run: |
+          image="strolt-release-smoke:strolt-linux-amd64-$GITHUB_RUN_ID"
+          image_id="$(docker image ls --no-trunc --quiet "$image")"
+          if [ -z "$image_id" ]; then
+            echo "failed to resolve sealed Strolt image ID" >&2
+            exit 1
+          fi
+          echo "image_id=$image_id" >> "$GITHUB_OUTPUT"
+      - env:
+          STROLT_BINARY_MANIFEST_SHA256: ${{ steps.inputs.outputs.binary_manifest_sha256 }}
+          STROLT_TEST_IMAGE: ${{ steps.final-image.outputs.image_id }}
+        name: Verify sealed Strolt image binary
+        run: python3 trusted-workflow/.github/scripts/release.py verify-binary-image "$RUNNER_TEMP/release/binaries" strolt linux/amd64 "$STROLT_TEST_IMAGE" "$STROLT_BINARY_MANIFEST_SHA256"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 26.13.1
+          package-manager-cache: false
+      - run: npm install --global pnpm@12.19.0
+      - name: Install workspace dependencies for E2E
+        run: pnpm install --frozen-lockfile
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          cache: false
+          go-version: "1.27.3"
+      - env:
+          STROLT_BINARY_ARTIFACT: ${{ steps.inputs.outputs.binary_directory }}
+          STROLT_TEST_IMAGE: ${{ steps.final-image.outputs.image_id }}
+        name: Run E2E against pinned artifact
+        run: pnpm test:e2e
+      - env:
+          EXPECTED_STROLT_IMAGE: ${{ steps.final-image.outputs.image_id }}
+        name: Verify E2E containers used pinned image
+        run: |
+          expected_image_ids="$(printf 'strolt=%s\nstrolt-daemon=%s' "$EXPECTED_STROLT_IMAGE" "$EXPECTED_STROLT_IMAGE")"
+          actual_image_ids="$(cat "$RUNNER_TEMP/release/strolt-e2e-image-ids")"
+          if [ "$actual_image_ids" != "$expected_image_ids" ]; then
+            echo "E2E containers used a different Strolt image" >&2
+            exit 1
+          fi
+    timeout-minutes: 40
   freeze:
     name: Freeze ${{ matrix.product }} ${{ matrix.platform }}
     needs:
@@ -454,6 +536,17 @@ jobs:
           echo "$GOBIN" >> "$GITHUB_PATH"
       - env:
           DOCKER_CONFIG: ${{ runner.temp }}/registry-auth
+          GH_TOKEN: ${{ github.token }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          MODE: ${{ inputs.mode }}
+          PREPARATION: ${{ needs.identity.outputs.preparation }}
+          PRODUCT_SHA: ${{ needs.identity.outputs.source_sha }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'unstable' }}
+        name: Publish unstable images to GHCR-only packages
+        run: python3 .github/scripts/release.py publish "$RUNNER_TEMP/release"
+      - env:
+          DOCKER_CONFIG: ${{ runner.temp }}/registry-auth
           DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
           DOCKERHUB_USER: strolt
           GH_TOKEN: ${{ github.token }}
@@ -462,7 +555,8 @@ jobs:
           MODE: ${{ inputs.mode }}
           PREPARATION: ${{ needs.identity.outputs.preparation }}
           PRODUCT_SHA: ${{ needs.identity.outputs.source_sha }}
-        name: Publish committed OCI images
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode != 'unstable' }}
+        name: Publish stable and preview images
         run: python3 .github/scripts/release.py publish "$RUNNER_TEMP/release"
   validate:
     name: Validate product source
