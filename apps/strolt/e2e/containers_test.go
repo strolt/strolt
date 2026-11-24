@@ -35,7 +35,6 @@ const (
 	// The container is aliased "minio" so task configs keep their
 	// s3:http://minio:9000 endpoints.
 	garageImage = "dxflrs/garage:v2.5.0"
-	stroltImage = "strolt/strolt:development"
 
 	dbName     = "strolt"
 	dbUser     = "strolt"
@@ -183,8 +182,8 @@ func (cm *ContainerManager) StartStrolt() error {
 	return nil
 }
 
-// StartStroltDaemon starts strolt in daemon mode (`start --json`) with the
-// HTTP API exposed, mirroring how the image runs in production.
+// StartStroltDaemon uses the image's default command and waits for both its
+// HTTP API and Docker healthcheck.
 func (cm *ContainerManager) StartStroltDaemon() error {
 	absConfigPath, err := filepath.Abs("./strolt.yml")
 	if err != nil {
@@ -240,9 +239,12 @@ func (cm *ContainerManager) StartStroltDaemon() error {
 		},
 		Networks:       []string{cm.NetworkName()},
 		NetworkAliases: map[string][]string{cm.NetworkName(): {"strolt-daemon"}},
+		Cmd:            nil,
 		Entrypoint:     nil,
-		Cmd:            []string{"start", "--json"},
-		WaitingFor:     wait.ForHTTP("/api/v1/ping").WithPort("8080/tcp").WithStartupTimeout(60 * time.Second),
+		WaitingFor: wait.ForAll(
+			wait.ForHTTP("/api/v1/ping").WithPort("8080/tcp").WithStartupTimeout(60*time.Second),
+			wait.ForHealthCheck().WithStartupTimeout(90*time.Second),
+		).WithDeadline(2 * time.Minute),
 	}
 	daemonContainer, err := testcontainers.GenericContainer(cm.ctx, testcontainers.GenericContainerRequest{ContainerRequest: req, Started: true, ProviderType: 0, Logger: nil, Reuse: false})
 	if err != nil {

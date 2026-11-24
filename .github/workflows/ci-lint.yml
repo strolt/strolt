@@ -16,7 +16,14 @@ jobs:
       - name: Generate Swagger and SDK code
         run: pnpm generate
       - name: Check generated UI API client
-        run: git diff --exit-code -- apps/stroltm/ui/src/api/generated
+        run: |
+          git diff --exit-code -- apps/stroltm/ui/src/api/generated
+          untracked="$(git ls-files --others --exclude-standard -- apps/stroltm/ui/src/api/generated)"
+          if [ -n "$untracked" ]; then
+            echo "Generated UI API client contains untracked files" >&2
+            printf '%s\n' "$untracked" >&2
+            exit 1
+          fi
       - name: Test workspace
         run: pnpm test
       - name: Lint workspace

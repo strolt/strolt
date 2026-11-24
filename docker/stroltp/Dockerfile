@@ -6,43 +6,9 @@ WORKDIR /stroltp
 RUN apk --update add --no-cache curl tzdata
 ENV TZ=UTC
 
-FROM --platform=$BUILDPLATFORM node:26.13.1-trixie-slim AS swagger
-# Datamitsu needs git to identify the workspace and system CA roots for HTTPS downloads.
-# droast ignore=DF005 reason="ca-certificates and git are managed by the Debian repository" expires=2026-12-31
-# hadolint ignore=DL3008
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git && rm -rf /var/lib/apt/lists/*
-WORKDIR /github.com/strolt/strolt
-COPY ./package.json ./pnpm-workspace.yaml ./pnpm-lock.yaml ./
-COPY ./apps/strolt/package.json ./apps/strolt/
-COPY ./apps/stroltm/package.json ./apps/stroltm/
-COPY ./apps/stroltm/ui/package.json ./apps/stroltm/ui/
-COPY ./apps/stroltp/package.json ./apps/stroltp/
-COPY ./shared/package.json ./shared/
-COPY ./.github/scripts/package.json ./.github/scripts/
-# droast ignore=DF031 reason="pnpm is exact-pinned by the workspace packageManager" expires=2026-12-31
-RUN npm install --global pnpm@12.19.0 && git init . && pnpm install --frozen-lockfile --filter strolt --ignore-scripts
-COPY ./datamitsu.config.js ./Taskfile.yaml ./lefthook.yaml ./
-COPY ./scripts/generate-go-sdk.sh ./scripts/
-COPY ./.go-swagger/templates ./.go-swagger/templates
-COPY ./apps/strolt ./apps/strolt
-COPY ./apps/stroltp ./apps/stroltp
-COPY ./shared ./shared
-RUN pnpm dm init --skip-download --quiet && pnpm dm exec task -- codegen:go -- strolt stroltp && rm -rf .git
-
-FROM golang:1.27.3-alpine3.23 AS builder-deps
-WORKDIR /go/src/github.com/strolt/strolt/apps/stroltp
-COPY ./apps/stroltp/go.mod .
-COPY ./apps/stroltp/go.sum .
-COPY ./shared /go/src/github.com/strolt/strolt/shared
-RUN go mod download
-
-FROM builder-deps AS builder
-ARG version
-COPY ./apps/stroltp/main.go .
-COPY ./apps/stroltp/cmd ./cmd
-COPY ./apps/stroltp/internal ./internal
-COPY --from=swagger /github.com/strolt/strolt/shared/sdk/strolt/generated /go/src/github.com/strolt/strolt/shared/sdk/strolt/generated
-RUN go build -o stroltp -ldflags "-X github.com/strolt/strolt/apps/stroltp/internal/ldflags.version=${version} -s -w"
+FROM scratch AS binary
+ARG TARGETARCH
+COPY dist/stroltp-linux-${TARGETARCH}/stroltp /stroltp
 
 FROM base
 ARG GITHUB_SHA
@@ -66,7 +32,7 @@ LABEL org.opencontainers.image.authors="shibanet0 <shibanet0@gmail.com>" \
             com.strolt.release.channel="${RELEASE_CHANNEL}" \
             com.strolt.release.product="stroltp"
 
-COPY --from=builder /go/src/github.com/strolt/strolt/apps/stroltp/stroltp ./bin/stroltp
+COPY --from=binary /stroltp ./bin/stroltp
 
 EXPOSE 8080
 

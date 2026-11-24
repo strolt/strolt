@@ -1,0 +1,186 @@
+jobs:
+  build:
+    name: Build ${{ inputs.product }} ${{ inputs.platform }}
+    outputs:
+      piece_artifact_digest: ${{ steps.build.outputs.artifact_digest || steps.upload_piece.outputs.artifact-digest }}
+      piece_artifact_id: ${{ steps.build.outputs.artifact_id || steps.upload_piece.outputs.artifact-id }}
+      piece_artifact_name: ${{ steps.build.outputs.artifact }}
+      receipt_artifact_digest: ${{ steps.receipt.outputs.artifact_digest || steps.upload_receipt.outputs.artifact-digest }}
+      receipt_artifact_id: ${{ steps.receipt.outputs.artifact_id || steps.upload_receipt.outputs.artifact-id }}
+      receipt_artifact_name: ${{ steps.receipt.outputs.artifact }}
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.source_sha }}
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          path: trusted-workflow
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        with:
+          cache-image: false
+          image: ${{ inputs.binfmt_image }}
+      - id: buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          cache-binary: false
+          driver-opts: image=${{ inputs.buildkit_image }}
+          version: ${{ inputs.buildx_version }}
+      - env:
+          BUILDX_BUILDER: ${{ steps.buildx.outputs.name }}
+          GH_TOKEN: ${{ github.token }}
+          PLATFORM: ${{ inputs.platform }}
+          PREPARATION: ${{ inputs.preparation }}
+          PRODUCT: ${{ inputs.product }}
+        id: build
+        name: Build and smoke-test OCI image
+        run: python3 trusted-workflow/.github/scripts/release.py build "$RUNNER_TEMP/release" "$PRODUCT" "$PLATFORM"
+      - if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 26.13.1
+          package-manager-cache: false
+      - if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
+        run: npm install --global pnpm@12.19.0
+      - if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          cache: false
+          go-version: "1.27.3"
+      - if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
+        name: Install workspace dependencies for final-image E2E
+        run: pnpm install --frozen-lockfile
+      - if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
+        name: Load final Strolt image for E2E
+        run: docker load --input "$RUNNER_TEMP/release/piece/e2e-image.tar"
+      - id: final-image
+        if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
+        name: Capture immutable final image ID
+        run: |
+          image="strolt-release-smoke:strolt-linux-amd64-$GITHUB_RUN_ID"
+          image_id="$(docker image ls --no-trunc --quiet "$image")"
+          if [ -z "$image_id" ]; then
+            echo "failed to resolve final Strolt image ID" >&2
+            exit 1
+          fi
+          echo "image_id=$image_id" >> "$GITHUB_OUTPUT"
+      - env:
+          STROLT_BINARY_ARTIFACT: ${{ runner.temp }}/release/binaries
+          STROLT_TEST_IMAGE: ${{ steps.final-image.outputs.image_id }}
+        if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
+        name: Run E2E against final release image
+        run: pnpm test:e2e
+      - env:
+          STROLT_BINARY_MANIFEST_SHA256: ${{ steps.build.outputs.manifest_sha256 }}
+          STROLT_TEST_IMAGE: ${{ steps.final-image.outputs.image_id }}
+        if: inputs.product == 'strolt' && inputs.platform == 'linux/amd64'
+        name: Verify final image is the one tested and matches the sealed bundle
+        run: |
+          expected_image_ids="$(printf 'strolt=%s\nstrolt-daemon=%s' "$STROLT_TEST_IMAGE" "$STROLT_TEST_IMAGE")"
+          actual_image_ids="$(cat "$RUNNER_TEMP/release/strolt-e2e-image-ids")"
+          if [ "$actual_image_ids" != "$expected_image_ids" ]; then
+            echo "E2E containers used a different Strolt image" >&2
+            exit 1
+          fi
+          python3 trusted-workflow/.github/scripts/release.py verify-binary-image \
+            "$RUNNER_TEMP/release/binaries" strolt linux/amd64 \
+            "$STROLT_TEST_IMAGE" "$STROLT_BINARY_MANIFEST_SHA256"
+      - id: upload_piece
+        if: steps.build.outputs.created == 'true'
+        name: Upload checked OCI image ${{ inputs.product }} ${{ inputs.platform }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          if-no-files-found: error
+          name: ${{ steps.build.outputs.artifact }}
+          path: ${{ runner.temp }}/release/piece/
+          retention-days: 90
+      - env:
+          ARTIFACT_DIGEST: ${{ steps.build.outputs.artifact_digest || steps.upload_piece.outputs.artifact-digest }}
+          ARTIFACT_ID: ${{ steps.build.outputs.artifact_id || steps.upload_piece.outputs.artifact-id }}
+          ARTIFACT_NAME: ${{ steps.build.outputs.artifact }}
+          GH_TOKEN: ${{ github.token }}
+          PLATFORM: ${{ inputs.platform }}
+          PREPARATION: ${{ inputs.preparation }}
+          PRODUCT: ${{ inputs.product }}
+        name: Anchor checked OCI image identity ${{ inputs.product }} ${{ inputs.platform }}
+        run: python3 trusted-workflow/.github/scripts/release.py producer-anchor "$RUNNER_TEMP/release" piece "$PRODUCT" "$PLATFORM"
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PIECE_ARTIFACT_DIGEST: ${{ steps.build.outputs.artifact_digest || steps.upload_piece.outputs.artifact-digest }}
+          PIECE_ARTIFACT_ID: ${{ steps.build.outputs.artifact_id || steps.upload_piece.outputs.artifact-id }}
+          PIECE_ARTIFACT_NAME: ${{ steps.build.outputs.artifact }}
+          PLATFORM: ${{ inputs.platform }}
+          PREPARATION: ${{ inputs.preparation }}
+          PRODUCT: ${{ inputs.product }}
+        id: receipt
+        name: Create checked OCI producer receipt
+        run: python3 trusted-workflow/.github/scripts/release.py output-receipt "$RUNNER_TEMP/release" "$PRODUCT" "$PLATFORM"
+      - id: upload_receipt
+        if: steps.receipt.outputs.created == 'true'
+        name: Seal checked OCI producer receipt ${{ inputs.product }} ${{ inputs.platform }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          if-no-files-found: error
+          name: ${{ steps.receipt.outputs.artifact }}
+          path: ${{ runner.temp }}/release/receipt/receipt.json
+          retention-days: 90
+      - env:
+          ARTIFACT_DIGEST: ${{ steps.receipt.outputs.artifact_digest || steps.upload_receipt.outputs.artifact-digest }}
+          ARTIFACT_ID: ${{ steps.receipt.outputs.artifact_id || steps.upload_receipt.outputs.artifact-id }}
+          ARTIFACT_NAME: ${{ steps.receipt.outputs.artifact }}
+          GH_TOKEN: ${{ github.token }}
+          PLATFORM: ${{ inputs.platform }}
+          PREPARATION: ${{ inputs.preparation }}
+          PRODUCT: ${{ inputs.product }}
+        name: Anchor checked OCI producer receipt identity ${{ inputs.product }} ${{ inputs.platform }}
+        run: python3 trusted-workflow/.github/scripts/release.py producer-anchor "$RUNNER_TEMP/release" receipt "$PRODUCT" "$PLATFORM"
+name: Release image build
+on:
+  workflow_call:
+    inputs:
+      binfmt_image:
+        required: true
+        type: string
+      buildkit_image:
+        required: true
+        type: string
+      buildx_version:
+        required: true
+        type: string
+      platform:
+        required: true
+        type: string
+      preparation:
+        required: true
+        type: string
+      product:
+        required: true
+        type: string
+      source_sha:
+        required: true
+        type: string
+    outputs:
+      piece_artifact_digest:
+        description: Archive digest of the checked OCI image artifact
+        value: ${{ jobs.build.outputs.piece_artifact_digest }}
+      piece_artifact_id:
+        description: Immutable ID of the checked OCI image artifact
+        value: ${{ jobs.build.outputs.piece_artifact_id }}
+      piece_artifact_name:
+        description: Attempt-qualified name of the checked OCI image artifact
+        value: ${{ jobs.build.outputs.piece_artifact_name }}
+      receipt_artifact_digest:
+        description: Archive digest of the matrix producer receipt artifact
+        value: ${{ jobs.build.outputs.receipt_artifact_digest }}
+      receipt_artifact_id:
+        description: Immutable ID of the matrix producer receipt artifact
+        value: ${{ jobs.build.outputs.receipt_artifact_id }}
+      receipt_artifact_name:
+        description: Attempt-qualified name of the producer receipt artifact
+        value: ${{ jobs.build.outputs.receipt_artifact_name }}

@@ -1,0 +1,20 @@
+builds:
+  - binary: strolt
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+      - -buildvcs=false
+    id: strolt
+    ldflags:
+      - >-
+        -s -w -X github.com/strolt/strolt/apps/strolt/internal/ldflags.version={{ .Env.RELEASE_VERSION }}
+    main: .
+    targets:
+      - linux_amd64
+      - linux_arm_7
+      - linux_arm64
+project_name: strolt
+snapshot:
+  version_template: "{{ .Env.RELEASE_VERSION }}"
+version: 2
