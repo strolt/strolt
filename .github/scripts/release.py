@@ -749,7 +749,7 @@ def goreleaser_environment(identity, base_environment=None):
 
 def goreleaser_release_arguments(identity):
     arguments = ["goreleaser", "release", "--config", ".goreleaser.yaml"]
-    if identity["trigger"] == "push":
+    if identity.get("trigger") == "push":
         arguments.append("--skip=publish")
     else:
         arguments.append("--snapshot")

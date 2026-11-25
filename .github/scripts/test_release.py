@@ -462,6 +462,10 @@ class LocalGoReleaserTests(unittest.TestCase):
             observed.update(identity)
             environment = release.goreleaser_environment(identity, {})
             self.assertEqual(environment["GORELEASER_CURRENT_TAG"], "development")
+            self.assertEqual(
+                release.goreleaser_release_arguments(identity),
+                ["goreleaser", "release", "--config", ".goreleaser.yaml", "--snapshot", "--clean"],
+            )
             return {"binaries": []}
 
         with tempfile.TemporaryDirectory() as temporary:
