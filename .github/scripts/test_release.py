@@ -242,7 +242,10 @@ class ReleaseFixture(unittest.TestCase):
     def make_binary_bundle(self, directory):
         dist = directory / "dist"
         dist.mkdir()
+        release_assets_dir = directory / "release-assets"
+        release_assets_dir.mkdir()
         binaries = []
+        release_assets = []
         hashes = {}
         for product in release.PRODUCTS:
             for platform in release.PLATFORMS:
@@ -255,10 +258,31 @@ class ReleaseFixture(unittest.TestCase):
                 digest = hashlib.sha256(data).hexdigest()
                 hashes[product, platform] = digest
                 binaries.append({"product": product, "platform": platform, "path": relative.as_posix(), "sha256": digest, "size": len(data)})
+                archive_name = release.release_archive_filename(product, self.preparation["version"], platform)
+                archive_path = release_assets_dir / archive_name
+                with tarfile.open(archive_path, "w:gz") as archive:
+                    info = tarfile.TarInfo(product)
+                    info.size = len(data)
+                    info.mode = 0o755
+                    info.mtime = 0
+                    archive.addfile(info, io.BytesIO(data))
+                release.verify_release_archive(archive_path, binaries[-1])
+                release_assets.append({
+                    "product": product,
+                    "platform": platform,
+                    "path": f"release-assets/{archive_name}",
+                    "sha256": release.sha256(archive_path),
+                    "size": archive_path.stat().st_size,
+                })
         checksums_path = directory / "checksums.txt"
         checksums_path.write_text("".join(f"{item['sha256']}  {item['path']}\n" for item in binaries))
+        release_checksums_path = release_assets_dir / "checksums.txt"
+        release_checksums_path.write_text("".join(
+            f"{item['sha256']}  {Path(item['path']).name}\n"
+            for item in sorted(release_assets, key=lambda item: item["path"])
+        ))
         release.save(directory / "manifest.json", {
-            "schema": 1,
+            "schema": 2,
             "identity": self.preparation,
             "products": list(release.PRODUCTS),
             "tool": {"version": release.GORELEASER_VERSION, "sha256": "a" * 64},
@@ -266,6 +290,8 @@ class ReleaseFixture(unittest.TestCase):
             "metadata_sha256": {product: "c" * 64 for product in release.PRODUCTS},
             "binaries": binaries,
             "checksums_sha256": release.sha256(checksums_path),
+            "release_assets": release_assets,
+            "release_checksums_sha256": release.sha256(release_checksums_path),
         })
         return hashes
 
@@ -406,6 +432,28 @@ class E2EArtifactConsumerTests(ReleaseFixture):
             self.cli("e2e-inputs", workspace)
 
 
+
+class GoReleaserReleaseModeTests(unittest.TestCase):
+    def test_tagged_release_builds_but_skips_publication(self):
+        stable = identity(event="push", tag="v1.2.3")
+        self.assertEqual(
+            release.goreleaser_release_arguments(stable),
+            ["goreleaser", "release", "--config", ".goreleaser.yaml", "--skip=publish", "--clean"],
+        )
+        environment = release.goreleaser_environment(stable, {"GH_TOKEN": "secret", "GITHUB_TOKEN": "secret"})
+        self.assertEqual(environment["GORELEASER_CURRENT_TAG"], stable["tag"])
+        self.assertNotIn("GH_TOKEN", environment)
+        self.assertNotIn("GITHUB_TOKEN", environment)
+        self.assertNotIn("ACTIONS_ID_TOKEN_REQUEST_TOKEN", environment)
+
+    def test_manual_build_remains_a_snapshot(self):
+        snapshot = identity(mode="unstable")
+        self.assertEqual(
+            release.goreleaser_release_arguments(snapshot),
+            ["goreleaser", "release", "--config", ".goreleaser.yaml", "--snapshot", "--clean"],
+        )
+
+
 class BinaryAssetTests(ReleaseFixture):
     def test_bundle_verifies_all_products_and_platforms(self):
         manifest = release.verify_binary_bundle(self.binary_dir, self.preparation)
@@ -413,6 +461,38 @@ class BinaryAssetTests(ReleaseFixture):
         expected = {(product, platform) for product in release.PRODUCTS for platform in release.PLATFORMS}
         self.assertEqual(observed, expected)
         self.assertEqual(len(manifest["binaries"]), 9)
+
+    def test_release_tarballs_preserve_executable_mode_and_verified_bytes(self):
+        manifest = release.verify_binary_bundle(self.binary_dir, self.preparation)
+        self.assertEqual(len(manifest["release_assets"]), 9)
+        for asset in manifest["release_assets"]:
+            binary = next(item for item in manifest["binaries"] if (item["product"], item["platform"]) == (asset["product"], asset["platform"]))
+            with tarfile.open(self.binary_dir / asset["path"], "r:gz") as archive:
+                member = next(item for item in archive.getmembers() if item.isfile() and Path(item.name).name == asset["product"])
+                self.assertEqual(member.mode & 0o777, 0o755)
+                extracted = archive.extractfile(member)
+                if extracted is None:
+                    raise AssertionError("release archive payload is missing")
+                with extracted:
+                    self.assertEqual(hashlib.sha256(extracted.read()).hexdigest(), binary["sha256"])
+
+        release_checksums = self.binary_dir / "release-assets/checksums.txt"
+        self.assertEqual(release.sha256(release_checksums), manifest["release_checksums_sha256"])
+
+    def test_release_tarball_with_non_executable_binary_is_rejected(self):
+        product, platform = "strolt", "linux/amd64"
+        manifest = release.verify_binary_bundle(self.binary_dir, self.preparation)
+        binary = next(item for item in manifest["binaries"] if (item["product"], item["platform"]) == (product, platform))
+        data = b"non-executable fixture"
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "non-executable.tar.gz"
+            with tarfile.open(path, "w:gz") as archive:
+                member = tarfile.TarInfo(product)
+                member.size = len(data)
+                member.mode = 0o644
+                archive.addfile(member, io.BytesIO(data))
+            with self.assertRaisesRegex(RuntimeError, "binary mode or size"):
+                release.verify_release_archive(path, binary)
 
     def test_producer_anchor_command_records_uploaded_identity(self):
         product, platform = "strolt", "linux/amd64"
@@ -1324,6 +1404,160 @@ class PublisherFixture(ReleaseFixture):
     def publish(self):
         with patch.object(release, "remote_digest", side_effect=lambda name: self.remote.get(name)), patch.object(release, "run", side_effect=self.tool_output), patch.object(release, "transfer_checksum", return_value=self.transfer_sha), patch.object(release.subprocess, "run", side_effect=self.subprocess):
             release.publish_release(self.workspace(), self.name)
+
+
+class GitHubReleaseTests(PublisherFixture):
+    EVENT = "push"
+
+    def github_api(self, path):
+        if path == f"git/ref/tags/{self.preparation['tag']}":
+            return {"object": {"type": "commit", "sha": self.preparation["source_sha"]}}
+        if path.startswith("releases?per_page=100&page="):
+            return []
+        return self.store.api(path)
+
+    def test_publishes_archives_checksums_and_signature_from_the_sealed_bundle(self):
+        uploaded: list[tuple[str, bytes]] = []
+        assets: list[dict[str, Any]] = []
+        release_record: dict[str, Any] = {
+            "id": 17,
+            "tag_name": self.preparation["tag"],
+            "draft": True,
+            "prerelease": False,
+            "upload_url": "https://uploads.github.com/repos/strolt/strolt/releases/17/assets{?name,label}",
+            "html_url": "https://github.com/strolt/strolt/releases/tag/v1.2.3",
+        }
+
+        def api_request(path: str, method: str = "GET", body: dict[str, Any] | None = None) -> dict[str, Any]:
+            if path == "releases" and method == "POST":
+                assert body is not None
+                self.assertEqual(body["tag_name"], self.preparation["tag"])
+                self.assertTrue(body["draft"])
+                return dict(release_record)
+            if path == "releases/17" and method == "GET":
+                return {**release_record, "assets": list(assets)}
+            if path == "releases/17" and method == "PATCH":
+                assert body is not None
+                self.assertEqual(body["make_latest"], "legacy")
+                return {**release_record, "draft": False, "assets": list(assets)}
+            raise AssertionError((path, method, body))
+
+        def upload_asset(release_record: dict[str, Any], path: Path) -> dict[str, Any]:
+            data = path.read_bytes()
+            asset = {"name": path.name, "size": len(data), "digest": "sha256:" + hashlib.sha256(data).hexdigest()}
+            assets.append(asset)
+            uploaded.append((path.name, data))
+            return asset
+
+        def sign_blob(arguments: list[str]) -> None:
+            bundle = Path(arguments[arguments.index("--bundle") + 1])
+            bundle.write_text("signed-checksum-fixture")
+
+        root = self.workspace()
+        with (
+            patch.dict(os.environ, {"GITHUB_REPOSITORY": "strolt/strolt"}),
+            patch.object(release, "api", side_effect=self.github_api),
+            patch.object(release, "api_optional", return_value=None),
+            patch.object(release, "api_request", side_effect=api_request),
+            patch.object(release, "upload_release_asset", side_effect=upload_asset),
+            patch.object(release, "cosign_blob", side_effect=sign_blob),
+        ):
+            release.publish_github_release(root, self.name)
+
+        names = {name for name, _ in uploaded}
+        archives = {asset["path"].split("/")[-1] for asset in release.verify_binary_bundle(self.binary_dir, self.preparation)["release_assets"]}
+        self.assertEqual(names, archives | {"binary-manifest.json", "preparation.json", "checksums.txt", "checksums.txt.sigstore.json"})
+        checksum_text = dict(uploaded)["checksums.txt"].decode()
+        self.assertEqual(len(checksum_text.splitlines()), 11)
+        self.assertIn("checksums.txt.sigstore.json", names)
+
+    def test_draft_release_retry_resumes_missing_assets_without_reuploading(self):
+        state: dict[str, Any] = {"release": None, "assets": [], "posts": 0, "fail_once": True, "uploads": [], "tag_lookups": 0, "draft_page_lookups": 0}
+        release_record: dict[str, Any] = {
+            "id": 17,
+            "tag_name": self.preparation["tag"],
+            "draft": True,
+            "prerelease": False,
+            "upload_url": "https://uploads.github.com/repos/strolt/strolt/releases/17/assets{?name,label}",
+            "html_url": "https://github.com/strolt/strolt/releases/tag/v1.2.3",
+        }
+
+        def api_request(path: str, method: str = "GET", body: dict[str, Any] | None = None) -> dict[str, Any]:
+            if path == "releases" and method == "POST":
+                state["posts"] += 1
+                state["release"] = dict(release_record)
+                return dict(state["release"])
+            if path == "releases/17" and method == "GET":
+                return {**state["release"], "assets": list(state["assets"])}
+            if path == "releases/17" and method == "PATCH":
+                return {**state["release"], "draft": False, "assets": list(state["assets"])}
+            raise AssertionError((path, method, body))
+
+        def upload_asset(release_record: dict[str, Any], path: Path) -> dict[str, Any]:
+            if state["fail_once"] and len(state["assets"]) == 1:
+                state["fail_once"] = False
+                raise RuntimeError("simulated upload interruption")
+            data = path.read_bytes()
+            asset = {"name": path.name, "size": len(data), "digest": "sha256:" + hashlib.sha256(data).hexdigest()}
+            state["assets"].append(asset)
+            state["uploads"].append(path.name)
+            return asset
+
+        def api(path: str) -> Any:
+            if path == f"git/ref/tags/{self.preparation['tag']}":
+                return {"object": {"type": "commit", "sha": self.preparation["source_sha"]}}
+            if path == f"releases/tags/{self.preparation['tag']}":
+                state["tag_lookups"] += 1
+                raise urllib.error.HTTPError(path, 404, "Not Found", Message(), None)
+            if path == "releases?per_page=100&page=1":
+                return [{"tag_name": f"v0.0.{index}"} for index in range(100)]
+            if path == "releases?per_page=100&page=2":
+                state["draft_page_lookups"] += 1
+                if state["release"] is None:
+                    return []
+                return [{**state["release"], "assets": list(state["assets"])}]
+            return self.store.api(path)
+
+        def sign_blob(arguments: list[str]) -> None:
+            bundle = Path(arguments[arguments.index("--bundle") + 1])
+            bundle.write_text("signed-checksum-fixture")
+
+        with (
+            patch.dict(os.environ, {"GITHUB_REPOSITORY": "strolt/strolt"}),
+            patch.object(release, "api", side_effect=api),
+            patch.object(release, "api_request", side_effect=api_request),
+            patch.object(release, "upload_release_asset", side_effect=upload_asset),
+            patch.object(release, "cosign_blob", side_effect=sign_blob),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "simulated upload interruption"):
+                release.publish_github_release(self.workspace(), self.name)
+            release.publish_github_release(self.workspace(), self.name)
+
+        self.assertEqual(state["tag_lookups"], 2)
+        self.assertEqual(state["draft_page_lookups"], 2)
+        self.assertEqual(state["posts"], 1)
+        self.assertEqual(len(state["assets"]), 13)
+        self.assertEqual(len(state["uploads"]), len(set(state["uploads"])))
+
+    def test_moved_tag_blocks_release_creation(self):
+        def moved_tag(path: str) -> Any:
+            if path == f"git/ref/tags/{self.preparation['tag']}":
+                return {"object": {"type": "commit", "sha": "f" * 40}}
+            return self.store.api(path)
+
+        with (
+            patch.dict(os.environ, {"GITHUB_REPOSITORY": "strolt/strolt"}),
+            patch.object(release, "api", side_effect=moved_tag),
+            patch.object(release, "api_optional") as lookup,
+            patch.object(release, "api_request") as create_release,
+            patch.object(release, "cosign_blob") as sign_blob,
+        ):
+            with self.assertRaisesRegex(RuntimeError, "tag no longer resolves"):
+                release.publish_github_release(self.workspace(), self.name)
+        lookup.assert_not_called()
+        create_release.assert_not_called()
+        sign_blob.assert_not_called()
+
 
 
 class PublisherTests(PublisherFixture):
