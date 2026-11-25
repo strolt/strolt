@@ -1,6 +1,7 @@
 import type * as Preset from "@docusaurus/preset-classic";
 import type { Config } from "@docusaurus/types";
 
+import { fileURLToPath } from "node:url";
 import { themes as prismThemes } from "prism-react-renderer";
 
 import { baseURL } from "./config";
@@ -66,15 +67,15 @@ const config: Config = {
         specs: [
           {
             route: "/docs/api/strolt",
-            spec: "../.swagger/strolt/swagger.yaml",
+            spec: fileURLToPath(new URL("../.swagger/strolt/swagger.yaml", import.meta.url)),
           },
           {
             route: "/docs/api/stroltm",
-            spec: "../.swagger/stroltm/swagger.yaml",
+            spec: fileURLToPath(new URL("../.swagger/stroltm/swagger.yaml", import.meta.url)),
           },
           {
             route: "/docs/api/stroltp",
-            spec: "../.swagger/stroltp/swagger.yaml",
+            spec: fileURLToPath(new URL("../.swagger/stroltp/swagger.yaml", import.meta.url)),
           },
         ],
         // Theme Options for modifying how redoc renders them
