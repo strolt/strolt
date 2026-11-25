@@ -9,6 +9,12 @@
     "//#codegen": {
       "cache": false
     },
+    "@strolt/shared#build": {
+      "dependsOn": [
+        "//#codegen",
+        "^build"
+      ]
+    },
     "@strolt/stroltm#build": {
       "dependsOn": [
         "^build",
