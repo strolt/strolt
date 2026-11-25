@@ -15,6 +15,15 @@
         "^build"
       ]
     },
+    "@strolt/strolt#build": {
+      "dependsOn": [
+        "build:lib",
+        "^build"
+      ],
+      "outputs": [
+        "strolt"
+      ]
+    },
     "@strolt/stroltm#build": {
       "dependsOn": [
         "^build",
@@ -32,6 +41,15 @@
       ],
       "outputs": [
         "internal/ui/build/dist/**"
+      ]
+    },
+    "@strolt/stroltp#build": {
+      "dependsOn": [
+        "build:lib",
+        "^build"
+      ],
+      "outputs": [
+        "stroltp"
       ]
     },
     "build": {
@@ -93,6 +111,16 @@
       "env": [
         "STROLT_BINARY_ARTIFACT",
         "STROLT_TEST_IMAGE"
+      ]
+    },
+    "website#build": {
+      "dependsOn": [
+        "//#codegen",
+        "build:lib",
+        "^build"
+      ],
+      "outputs": [
+        "build/**"
       ]
     }
   }
