@@ -745,13 +745,6 @@ def goreleaser_environment(identity, base_environment=None):
     return environment
 
 
-def goreleaser_environment(identity, base_environment=None):
-    environment = dict(os.environ if base_environment is None else base_environment)
-    for key in ("GH_TOKEN", "GITHUB_TOKEN", "ACTIONS_ID_TOKEN_REQUEST_URL", "ACTIONS_ID_TOKEN_REQUEST_TOKEN"):
-        environment.pop(key, None)
-    environment["RELEASE_VERSION"] = identity["version"]
-    environment["GORELEASER_CURRENT_TAG"] = identity["tag"]
-    return environment
 
 
 def goreleaser_release_arguments(identity):
@@ -892,9 +885,11 @@ def prepare_binary_assets(root, preparation, repository=None):
 def build_local_binaries(repository, artifact_directory=None, products=PRODUCTS):
     repository = Path(repository).resolve()
     products = tuple(products)
+    version = os.environ.get("RELEASE_VERSION", "development")
     identity = {
         "source_sha": run("git", "rev-parse", "HEAD", cwd=repository),
-        "version": os.environ.get("RELEASE_VERSION", "development"),
+        "version": version,
+        "tag": version,
         "channel": "local",
     }
     with tempfile.TemporaryDirectory() as temporary:

@@ -454,6 +454,29 @@ class GoReleaserReleaseModeTests(unittest.TestCase):
         )
 
 
+class LocalGoReleaserTests(unittest.TestCase):
+    def test_local_binary_build_provides_a_current_tag(self):
+        observed: dict[str, Any] = {}
+
+        def build_binaries(directory: Path, repository: Path, identity: dict[str, Any], products: tuple[str, ...]) -> dict[str, Any]:
+            observed.update(identity)
+            environment = release.goreleaser_environment(identity, {})
+            self.assertEqual(environment["GORELEASER_CURRENT_TAG"], "development")
+            return {"binaries": []}
+
+        with tempfile.TemporaryDirectory() as temporary:
+            with (
+                patch.dict(os.environ, {"RELEASE_VERSION": "development"}),
+                patch.object(release, "run", return_value="a" * 40),
+                patch.object(release, "build_goreleaser_binaries", side_effect=build_binaries),
+                patch.object(release, "stage_binary_context"),
+                contextlib.redirect_stdout(io.StringIO()),
+            ):
+                release.build_local_binaries(Path(temporary), products=("strolt",))
+
+        self.assertEqual(observed["tag"], "development")
+
+
 class BinaryAssetTests(ReleaseFixture):
     def test_bundle_verifies_all_products_and_platforms(self):
         manifest = release.verify_binary_bundle(self.binary_dir, self.preparation)
