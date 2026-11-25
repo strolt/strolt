@@ -39,6 +39,7 @@ pre-commit:
     datamitsu-ensure-configs:
       priority: 15
       run: pnpm datamitsu config reconcile --create-missing --no-verify-hash
+      stage_fixed: true
     datamitsu-check:
       priority: 40
       run: pnpm datamitsu check --file-scoped
@@ -56,7 +57,4 @@ post-checkout:
     init datamitsu:
       priority: 2
       run: pnpm datamitsu init
-    datamitsu-ensure-configs:
-      priority: 3
-      run: pnpm datamitsu config reconcile --create-missing --no-verify-hash
   parallel: false

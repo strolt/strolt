@@ -13,7 +13,6 @@
     "codegen": "pnpm dm exec task -- codegen",
     "dev": "turbo run dev",
     "generate": "pnpm dm exec task -- generate",
-    "lint": "pnpm dm lint --fail-fast=false",
     "prepare": "datamitsu init --quiet",
     "test": "pnpm turbo run test",
     "test:coverage": "pnpm turbo run test:coverage",

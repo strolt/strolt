@@ -1,5 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "TZ",
+    "PORT",
+    "CI"
+  ],
   "tasks": {
     "//#codegen": {
       "cache": false
@@ -25,15 +30,13 @@
     },
     "build": {
       "dependsOn": [
-        "//#codegen",
+        "build:lib",
         "^build"
       ],
       "outputs": [
         "dist/**",
-        "build/**",
-        "strolt",
-        "stroltm",
-        "stroltp"
+        ".next/**",
+        "!.next/cache/**"
       ]
     },
     "build:docker": {
@@ -43,6 +46,16 @@
       ],
       "env": [
         "STROLT_BINARY_ARTIFACT"
+      ]
+    },
+    "build:lib": {
+      "dependsOn": [
+        "^build:lib"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**"
       ]
     },
     "dev": {
